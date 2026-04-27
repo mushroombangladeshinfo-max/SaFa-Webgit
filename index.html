@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- ── Open Graph ── -->
+  <meta property="og:title"       content="SaFa Naturals — ১০০% বিষমুক্ত মাশরুম | Premium Organic Mushrooms">
+  <meta property="og:description" content="ফার্ম থেকে দরজায় ২৪ ঘণ্টায়। কীটনাশকমুক্ত, প্রিজারভেটিভমুক্ত। ক্যাশ অন ডেলিভারি।">
+  <meta property="og:image"       content="https://www.safanaturals.org/SaFa Fresh Oyester Mushroom.png">
+  <meta property="og:url"         content="https://www.safanaturals.org">
+  <meta property="og:type"        content="website">
+
+  <!-- ── Twitter Card ── -->
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       content="SaFa Naturals — Premium Organic Mushrooms">
+  <meta name="twitter:description" content="Farm-fresh, pesticide-free mushrooms delivered to your doorstep in 24 hours.">
+  <meta name="twitter:image"       content="https://www.safanaturals.org/SaFa Fresh Oyester Mushroom.png">
+
+  <title>SaFa Naturals — ১০০% বিষমুক্ত মাশরুম | Premium Organic Mushrooms Bangladesh</title>
+
+  <!-- ── Fonts ── -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,200;0,300;0,400;0,600;1,200;1,300;1,400;1,600&family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@200;300;400;500&family=Hind+Siliguri:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <!-- ── Global styles ── -->
+  <link rel="stylesheet" href="style.css">
+
+  <!-- ── Supabase SDK ──
+       Must load before the inline auth script below.
+       window.supabase is the CDN global — we name our
+       client 'db' to avoid self-reference crash.
+  ── -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- ── Structured data ── -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "SaFa Naturals Agrotech Farm",
+    "url": "https://www.safanaturals.org",
+    "logo": "https://www.safanaturals.org/SaFa Fresh Oyester Mushroom.png",
+    "description": "Premium organic mushrooms grown in controlled environment farming. Pesticide-free, preservative-free, delivered fresh from farm to doorstep.",
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": "Sirajganj",
+      "addressCountry": "BD"
+    },
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "telephone": "+8801970099378",
+      "contactType": "customer service",
+      "availableLanguage": ["Bengali", "English"]
+    },
+    "sameAs": [
+      "https://www.facebook.com/safanaturals",
+      "https://www.instagram.com/safanaturals"
+    ],
+    "foundingDate": "2020",
+    "knowsAbout": ["Organic Mushrooms", "Controlled Environment Agriculture", "Sustainable Farming"]
+  }
+  </script>
+</head>
+<body>
+
+  <!-- ════════════════════════════════════════════════════
+       NAV
+       Cart icon wired to window.toggleCart() (set by main.js).
+       Hamburger and mobile menu wired by initHamburger().
+       closeMenu() called from mobile link onclicks.
+  ════════════════════════════════════════════════════ -->
+  <nav class="nav" id="nav">
+    <a href="index.html" class="nav-logo">
+      <span class="logo-main">SaFa</span>
+      <span class="logo-sub">Naturals</span>
+    </a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#products">Shop</a></li>
+      <li><a href="#benefits">কেন মাশরুম</a></li>
+      <li><a href="#story">Our Story</a></li>
+      <li><a href="recipes.html">Recipes</a></li>
+    </ul>
+    <div class="nav-right">
+      <!-- Cart icon — toggleCart() exposed on window by main.js -->
+      <button class="nav-icon"
+              onclick="window.toggleCart()"
+              aria-label="Open cart">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="1.6"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <path d="M16 10a4 4 0 01-8 0"/>
+        </svg>
+        <span class="nav-dot"></span>
+      </button>
+      <a href="#products" class="nav-cta">অর্ডার করুন</a>
+      <button class="hamburger" id="hamburger" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Mobile slide-in menu -->
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="#products" onclick="window.closeMenu()">Shop</a>
+    <a href="#benefits" onclick="window.closeMenu()">কেন মাশরুম</a>
+    <a href="#story"    onclick="window.closeMenu()">Our Story</a>
+    <a href="recipes.html" onclick="window.closeMenu()">Recipes</a>
+    <a href="about.html"   onclick="window.closeMenu()">About</a>
+    <a href="#products" class="mobile-cta" onclick="window.closeMenu()">এখনই অর্ডার করুন →</a>
+  </div>
+
+
+  <!-- ════════════════════════════════════════════════════
+       HERO
+       Fetched from public/hero.html at runtime.
+       hero.html must be in the public/ folder in Vite
+       so it is served as a static asset.
+  ════════════════════════════════════════════════════ -->
+  <div id="hero-placeholder">
+    <div class="hero-loading">
+      <div class="loading-spinner"></div>
+      <span>Loading...</span>
+    </div>
+  </div>
+
+  <script>
+    /* Fetch hero fragment — non-module script so it runs immediately.
+       hero.html lives in public/ and is served at /hero.html by Vite. */
+    fetch('/hero.html')
+      .then(r => r.text())
+      .then(html => {
+        document.getElementById('hero-placeholder').innerHTML = html;
+      })
+      .catch(() => {
+        document.getElementById('hero-placeholder').innerHTML =
+          '<div class="hero-error">Failed to load hero section</div>';
+      });
+  </script>
+
+
+  <!-- ════════════════════════════════════════════════════
+       SUPABASE AUTH — user status check
+       Checks if a customer is logged in and updates the nav.
+       Uses 'db' not 'supabase' to avoid self-reference crash.
+  ════════════════════════════════════════════════════ -->
+  <script>
+    /* ✅ Fixed: window.supabase.createClient (CDN global),
+       NOT supabase.createClient (would be a self-reference crash). */
+    const SUPABASE_URL  = 'https://uiwmerejtrdrykqpumdu.supabase.co';
+    const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVpd21lcmVqdHJkcnlrcXB1bWR1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3NzQ1MjIsImV4cCI6MjA5MTM1MDUyMn0.bF1GPeGFhAphNFG-E6MfZCrZihT3iTeCFIDi6g3w0n0';
+    const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+    /** Checks auth state and swaps nav CTA for a user avatar pill if logged in. */
+    async function checkUserStatus() {
+      try {
+        const { data: { user } } = await db.auth.getUser();
+        if (!user) return;
+
+        const firstName = user.user_metadata?.first_name
+          || user.email.split('@')[0];
+        const navRight = document.querySelector('.nav-right');
+        const orderBtn = navRight?.querySelector('.nav-cta');
+
+        if (orderBtn) {
+          orderBtn.outerHTML = `
+            <a href="account.html" class="nav-user-pill">
+              <div class="nav-avatar">${firstName[0].toUpperCase()}</div>
+              <span class="nav-user-name">${firstName}</span>
+            </a>`;
+        }
+      } catch (err) {
+        console.error('[SaFa] Auth check failed:', err);
+      }
+    }
+
+    /* React to login/logout events */
+    db.auth.onAuthStateChange((event) => {
+      if (event === 'SIGNED_IN')  checkUserStatus();
+      if (event === 'SIGNED_OUT') location.reload();
+    });
+
+    document.addEventListener('DOMContentLoaded', checkUserStatus);
+  </script>
+
+  <!-- ════════════════════════════════════════════════════
+       PRODUCTS SECTION
+       ─────────────────────────────────────────────────
+       Add-to-cart buttons use class="btn-gold add-to-cart-btn"
+       with data-* attributes. main.js → initAddToCartButtons()
+       wires them automatically — no onclick needed in HTML.
+
+       data-image paths must match filenames in public/ folder.
+  ════════════════════════════════════════════════════ -->
+  <section class="products-section" id="products">
+    <div class="products-header">
+      <div>
+        <span class="section-eyebrow">আমাদের পণ্য</span>
+        <h2 class="section-title">ফার্ম থেকে <em>আপনার রান্নাঘরে</em></h2>
+        <p class="section-desc">সিরাজগঞ্জের নিজস্ব ফার্ম থেকে তাজা হারভেস্ট করা মাশরুম — কোনো কীটনাশক, কোনো প্রিজারভেটিভ ছাড়াই।</p>
+      </div>
+    </div>
+
+    <div class="pl-grid">
+
+      <!-- ── Card 1: Fresh Oyster ── -->
+      <div class="pl-card fi" data-category="fresh">
+        <div class="pl-img-box">
+          <div class="pl-img-badges">
+            <span class="pl-badge gold">FARM FRESH</span>
+            <span class="pl-badge red">SELLING FAST</span>
+          </div>
+          <img src="SaFa Fresh Oyester Mushroom.png"
+               alt="Fresh Oyster Mushrooms">
+        </div>
+        <div class="pl-info">
+          <div class="pl-tags">
+            <span class="pl-tag">HARVESTED DAILY</span>
+            <span class="pl-tag">ZERO PRESERVATIVES</span>
+          </div>
+          <h3 class="pl-name">Fresh Oyster Mushrooms</h3>
+          <p class="pl-body">Experience the rich, meaty texture of mushrooms harvested at peak freshness from our Sirajganj farm. Perfect for stir-fries and your daily family meals.</p>
+          <div class="pl-price">350 ৳</div>
+          <div class="pl-meta">
+            <div class="pl-reviews">
+              <span class="pl-star">★</span> 4.9
+              <span class="pl-rev-count">(120 reviews)</span>
+            </div>
+            <div class="pl-stock">Limited Stock</div>
+          </div>
+          <div class="pl-unit">1 KG Pack</div>
+
+          <!-- ✅ Wired via data-* — initAddToCartButtons() handles onclick -->
+          <button class="btn-gold add-to-cart-btn"
+                  data-name="Fresh Oyster Mushrooms"
+                  data-price="350"
+                  data-id="fresh_oyster"
+                  data-unit="1kg"
+                  data-image="SaFa Fresh Oyester Mushroom.png">
+            ADD TO CART →
+          </button>
+        </div>
+      </div>
+
+      <!-- ── Card 2: Dried Oyster ── -->
+      <div class="pl-card fi" data-category="dry">
+        <div class="pl-img-box">
+          <div class="pl-img-badges">
+            <span class="pl-badge gold">LONG SHELF LIFE</span>
+          </div>
+          <img src="SaFa Dried Oyester Mushroom.png"
+               alt="Dried Oyster Mushroom">
+        </div>
+        <div class="pl-info">
+          <div class="pl-tags">
+            <span class="pl-tag">PLANT PROTEIN</span>
+            <span class="pl-tag">EASY PREP</span>
+          </div>
+          <h3 class="pl-name">Dried Oyster Mushroom</h3>
+          <p class="pl-body">Sun-dried to lock in nutrients and flavor. Pure mushroom goodness, ready to rehydrate and cook in minutes. Maximum convenience with zero additives.</p>
+          <div class="pl-price">280 ৳</div>
+          <div class="pl-meta">
+            <div class="pl-reviews">
+              <span class="pl-star">★</span> 4.8
+              <span class="pl-rev-count">(85 reviews)</span>
+            </div>
+            <div class="pl-stock orange">In Stock</div>
+          </div>
+          <div class="pl-unit">100g Pack</div>
+
+          <!-- ✅ Wired via data-* -->
+          <button class="btn-gold add-to-cart-btn"
+                  data-name="Dried Oyster Mushroom"
+                  data-price="280"
+                  data-id="dried_oyster"
+                  data-unit="100g"
+                  data-image="SaFa Dried Oyester Mushroom.png">
+            ADD TO CART →
+          </button>
+        </div>
+      </div>
+
+      <!-- ── Card 3: Mushroom Powder ── -->
+      <div class="pl-card fi" data-category="dry">
+        <div class="pl-img-box">
+          <div class="pl-img-badges">
+            <span class="pl-badge gold">SUPERFOOD</span>
+          </div>
+          <img src="SaFa Oyester Mushroom Powder.png"
+               alt="Oyster Mushroom Powder">
+        </div>
+        <div class="pl-info">
+          <div class="pl-tags">
+            <span class="pl-tag">IMMUNITY BOOST</span>
+            <span class="pl-tag">VERSATILE</span>
+          </div>
+          <h3 class="pl-name">Oyster Mushroom Powder</h3>
+          <p class="pl-body">Super-fine, nutrient-dense powder. Secretly boost your family's soups, smoothies, and everyday curries without changing the texture of the dish.</p>
+          <div class="pl-price">350 ৳</div>
+          <div class="pl-meta">
+            <div class="pl-reviews">
+              <span class="pl-star">★</span> 4.9
+              <span class="pl-rev-count">(92 reviews)</span>
+            </div>
+            <div class="pl-stock orange">In Stock</div>
+          </div>
+          <div class="pl-unit">100g Jar</div>
+
+          <!-- ✅ Wired via data-* -->
+          <button class="btn-gold add-to-cart-btn"
+                  data-name="Oyster Mushroom Powder"
+                  data-price="350"
+                  data-id="mushroom_powder"
+                  data-unit="100g"
+                  data-image="SaFa Oyester Mushroom Powder.png">
+            ADD TO CART →
+          </button>
+        </div>
+      </div>
+
+      <!-- ── Card 4: Button Mushroom (Coming Soon) ── -->
+      <div class="pl-card fi pl-card-coming" data-category="coming">
+        <div class="pl-img-box">
+          <div class="pl-img-badges">
+            <span class="pl-badge gold">MYSTERY</span>
+            <span class="pl-badge red pl-badge-coming-soon">COMING SOON</span>
+          </div>
+          <img src="SaFa Fresh Button Mushroom.png"
+               alt="Premium Button Mushroom Coming Soon"
+               class="pl-img-dimmed">
+        </div>
+        <div class="pl-info">
+          <div class="pl-tags">
+            <span class="pl-tag">ORGANIC</span>
+            <span class="pl-tag">PREMIUM</span>
+          </div>
+          <h3 class="pl-name">Premium Button Mushroom</h3>
+          <p class="pl-body">A hidden gem of pure taste. Firm texture and earthy flavor, grown with zero pesticides in our climate-controlled chambers. Expected to launch soon.</p>
+          <div class="pl-price pl-price-coming">TBA</div>
+          <div class="pl-meta">
+            <div class="pl-reviews">
+              <span class="pl-star pl-star-coming">★</span>
+              <span class="pl-unreleased">Unreleased</span>
+            </div>
+            <div class="pl-stock pl-stock-coming">Expected Q4</div>
+          </div>
+          <div class="pl-unit">250g Pack</div>
+
+          <!-- No add-to-cart — links to footer newsletter signup -->
+          <a href="#footer" class="btn-gold btn-notify">NOTIFY ME</a>
+        </div>
+      </div>
+
+    </div><!-- /pl-grid -->
+  </section>
+
+  <!-- ════════════════════════════════════════════════════
+       BENEFITS
+  ════════════════════════════════════════════════════ -->
+  <section class="benefits-editorial" id="benefits">
+    <div class="be-top fi">
+      <div>
+        <span class="section-eyebrow eyebrow-block">আপনার জন্যই এই কথা</span>
+        <h2 class="section-title title-spacing">মাশরুম কেন<br><em>আলাদা?</em></h2>
+        <p class="ben-left-body">বাজারের সবজিতে কী আছে জানি না। ডাক্তার বলছেন খাওয়া-দাওয়া ঠিক করতে। পরিবারের কথা ভাবছেন। এই সব চিন্তার মাঝে একটাই উত্তর — <strong>প্রকৃতির নিজের খাবার, কোনো আপোষ ছাড়া।</strong></p>
+      </div>
+      <div class="be-stat-box">
+        <div class="be-stat-num">5<em>×</em></div>
+        <div>
+          <div class="be-stat-label">more protein than most vegetables</div>
+          <div class="be-stat-bn">সাধারণ সবজির চেয়ে ৫ গুণ বেশি প্রোটিন</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="be-grid fi">
+
+      <div class="be-card">
+        <div class="be-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </div>
+        <div class="be-content">
+          <h3 class="be-quote">"ডাক্তার বললেন সুগার বেড়ে গেছে, এখন কী খাব?"</h3>
+          <p class="be-answer">আমাদের ভাত-ভর্তি রুটিনে সুগারের মান নিয়ন্ত্রণ করা কঠিন, আমি জানি। আমাদের মাশরুম কম গ্লাইসেমিক, ভরপেট রাখে আর খাবারের স্বাদ ধরে রাখে — চিকিৎসকের পরামর্শ মেনে নিরাপদ সেলেকশন।</p>
+        </div>
+      </div>
+
+      <div class="be-card">
+        <div class="be-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        </div>
+        <div class="be-content">
+          <h3 class="be-quote">"ওজন কমাতে হবে কিন্তু খিদে লাগে না?"</h3>
+          <p class="be-answer">শরীরের যত্ন নেয়া মানেই ক্ষুধার সাথে লড়াই নয়। আমাদের মাশরুম ফাইবারে ভরপুর, হালকা ও সাভারি — যাতে দেহ মজবুত থাকে কিন্তু মন ভরে যায়।</p>
+        </div>
+      </div>
+
+      <div class="be-card">
+        <div class="be-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        </div>
+        <div class="be-content">
+          <h3 class="be-quote">"হার্টের যত্ন নেব কীভাবে?"</h3>
+          <p class="be-answer">হার্ট ঠিক থাকলে প্রতিদিনের ক্লান্তি কমে আর খেলাধুলা চালিয়ে যাওয়া সহজ হয়। আমাদের মাশরুমে কোলেস্টেরল নেই, প্রাকৃতিক পটাশিয়াম আছে — খেতে দিনেই শরীর শান্ত থাকে।</p>
+        </div>
+      </div>
+
+      <div class="be-card">
+        <div class="be-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <div class="be-content">
+          <h3 class="be-quote">"শীতকালে ঠান্ডা লেগে যায়, কী করব?"</h3>
+          <p class="be-answer">শরীরের রোগ-প্রতিরোধ ক্ষমতা বাড়াতে থাকা জরুরি, বিশেষ করে ঠান্ডার মৌসুমে। আমাদের অর্গানিক মাশরুম নিয়মিত খেলে স্বাস্থ্যের প্রাকৃতিক সুরক্ষা গড়ে ওঠে, ঠান্ডা-জ্বরের হাত থেকে বাঁচায়।</p>
+        </div>
+      </div>
+
+      <div class="be-card">
+        <div class="be-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+        </div>
+        <div class="be-content">
+          <h3 class="be-quote">"পরিবারের জন্য প্রোটিন কোথায় পাব?"</h3>
+          <p class="be-answer">যে প্রোটিন হাতে পেলে আমরা সবাই শান্তি পাই — সেইটা দিয়েই তৈরি আমাদের মাশরুম। শিশু, বয়স্ক, কর্মজীবী সবার জন্য পর্যাপ্ত আমিনো অ্যাসিড, আয়রন ও ভিটামিন।</p>
+        </div>
+      </div>
+
+    </div><!-- /be-grid -->
+
+    <div class="be-guarantee fi">
+      <h2 class="guarantee-title">কিন্তু বাজারের মাশরুমে কি <em>কীটনাশক নেই?</em></h2>
+      <p class="guarantee-body">এই প্রশ্ন আমাদেরও প্রতিদিন আসে। আমাদের সিরাজগঞ্জের ফার্মে প্রতিটি মাশরুম ১০০% নিয়ন্ত্রিত পরিবেশে, নিয়মিত পরীক্ষা ও ক্যামেরা নজরদারিতে তৈরি। কোনো আপস নেই। নিশ্চিত করুন আপনার পরিবার যা খাচ্ছে তা সত্যিই নিরাপদ ও পরিষ্কার।</p>
+      <div class="guarantee-tags">
+        <span>বিষমুক্ত</span>
+        <span class="dot">·</span>
+        <span>ZERO PESTICIDE</span>
+        <span class="dot">·</span>
+        <span>NO PRESERVATIVES</span>
+      </div>
+    </div>
+
+    <div class="benefits-foot">
+      <p class="ben-source">তথ্যসূত্র: USDA Nutrient Database, Bangladesh Endocrine Society, WHO. মাশরুম কোনো ওষুধ নয় — কিন্তু সঠিক খাদ্যাভ্যাসের একটি শক্তিশালী অংশ।</p>
+      <a href="#products" class="btn-primary">
+        মাশরুম অর্ডার করুন
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+    </div>
+  </section>
+
+
+  <!-- ════════════════════════════════════════════════════
+       FARM STORY
+  ════════════════════════════════════════════════════ -->
+  <section class="story" id="story">
+    <div>
+      <span class="section-eyebrow eyebrow-block">আমাদের গল্প</span>
+      <h2 class="story-headline">বিদেশে যদি শতভাগ নিরাপদ খাবার মেলে, <em>আমাদের দেশে নয় কেন?</em></h2>
+      <p class="story-body">এই প্রশ্ন থেকেই শুরু আমাদের যাত্রা। নরওয়েতে থাকার অভিজ্ঞতা থেকে বুঝেছি নিরাপদ খাবার কোনো লাক্সারি নয়, এটা মৌলিক অধিকার। দেশে ফিরে দেখলাম ভেজাল আর কেমিক্যালের ছড়াছড়ি।</p>
+      <p class="story-body">আমরা দুই ইঞ্জিনিয়ার বিশ্বাস করি সঠিক টেকনোলজি দিয়ে যেকোনো সমস্যার সমাধান সম্ভব। সিরাজগঞ্জে গড়ে তুললাম আধুনিক প্রোটেক্টেড ফার্ম — যেখানে কোনো কেমিক্যাল ছাড়াই উৎপাদিত হয় আপনাদের প্রিয় মাশরুম।</p>
+      <blockquote class="story-quote">"নিজেরা না খেলে বিক্রি করব না।"</blockquote>
+    </div>
+    <div>
+      <div class="story-stats fi">
+        <div class="story-stat"><div class="sn">100<em>%</em></div><div class="sl">Pesticide Free</div></div>
+        <div class="story-stat"><div class="sn">0<em>g</em></div><div class="sl">Preservatives</div></div>
+        <div class="story-stat"><div class="sn">24<em>h</em></div><div class="sl">Farm to Doorstep</div></div>
+        <div class="story-stat"><div class="sn">4<em>+</em></div><div class="sl">Product Lines</div></div>
+      </div>
+      <div class="fi">
+        <div class="process-item">
+          <div class="proc-num">01</div>
+          <div><div class="proc-h">নিয়ন্ত্রিত পরিবেশে চাষ</div><p class="proc-p">Climate-optimised chambers. No pesticides, no pollutants — protected from all external contamination.</p></div>
+        </div>
+        <div class="process-item">
+          <div class="proc-num">02</div>
+          <div><div class="proc-h">হাতে তোলা, সঠিক সময়ে</div><p class="proc-p">Every mushroom harvested by hand at peak freshness — maximum nutrition, perfect texture.</p></div>
+        </div>
+        <div class="process-item">
+          <div class="proc-num">03</div>
+          <div><div class="proc-h">প্রাকৃতিকভাবে সংরক্ষণ</div><p class="proc-p">Low-temperature drying and grinding. No chemicals used — ever.</p></div>
+        </div>
+        <div class="process-item">
+          <div class="proc-num">04</div>
+          <div><div class="proc-h">আপনার দরজায়, ২৪ ঘণ্টায়</div><p class="proc-p">Packed securely, dispatched same day. Cash on delivery — zero risk to you.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ════════════════════════════════════════════════════
+       RECIPE VIDEO
+       playRV() is exposed on window by main.js.
+  ════════════════════════════════════════════════════ -->
+  <div class="recipe-vid-section">
+    <div class="rv-left fi">
+      <span class="section-eyebrow eyebrow-block">রান্নাঘর থেকে</span>
+      <h2 class="rv-headline">মাশরুম দিয়ে<br><em>কী রান্না করবেন?</em></h2>
+
+      <div style="margin-bottom:24px;">
+        <h4 style="font-family:var(--fb);font-size:15px;color:rgba(245,239,230,.9);margin-bottom:6px;">ঝটপট ও পুষ্টিকর ভাজি</h4>
+        <p style="font-size:13.5px;font-weight:300;color:rgba(245,239,230,.5);line-height:1.7;">সকালের ব্যস্ততায় মাত্র ১০ মিনিটে তৈরি করুন তাজা মাশরুম ভাজি। রুটি বা পরোটার সাথে এর দারুণ স্বাদ ছোট-বড় সবাই চেটেপুটে খাবে।</p>
+      </div>
+
+      <div style="margin-bottom:32px;">
+        <h4 style="font-family:var(--fb);font-size:15px;color:rgba(245,239,230,.9);margin-bottom:6px;">রেস্টুরেন্ট স্টাইল স্যুপ, ঘরেই</h4>
+        <p style="font-size:13.5px;font-weight:300;color:rgba(245,239,230,.5);line-height:1.7;">বাচ্চার বিকেলের ক্ষুধা মেটাতে বা শীতের সন্ধ্যায় আমাদের মাশরুম পাউডার দিয়ে খুব সহজেই বানিয়ে ফেলুন স্বাস্থ্যকর ও মজাদার স্যুপ।</p>
+      </div>
+
+      <a href="recipes.html" class="btn-primary">
+        সব রেসিপি দেখুন
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+    </div>
+    <div class="rv-right">
+      <video class="rv-video" id="recipeVid"
+             loop muted playsinline preload="metadata"
+             poster="SaFa Fresh Oyester Mushroom.png">
+        <source src="Recipe Video.mp4" type="video/mp4">
+      </video>
+      <!-- window.playRV() defined in main.js -->
+      <div class="rv-play-overlay" id="rvOverlay"
+           onclick="window.playRV()">
+        <div class="rv-play-btn">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="white">
+            <polygon points="5 3 19 12 5 21 5 3"/>
+          </svg>
+        </div>
+      </div>
+      <div class="rv-label">মাশরুম রান্নার ভিডিও · SaFa Naturals Kitchen</div>
+    </div>
+  </div>
+
+
+  <!-- ════════════════════════════════════════════════════
+       VISION / ROADMAP
+  ════════════════════════════════════════════════════ -->
+  <section class="vision" id="vision">
+    <div class="vision-header">
+      <span class="vision-eyebrow">BUILDING A CLEAN FUTURE</span>
+      <h2 class="vision-title">
+        Beyond mushrooms — <br>a <em class="vision-emphasis">বিষমুক্ত</em> food system
+      </h2>
+      <p class="vision-desc">We started with mushrooms. Now we're building a full ecosystem of clean, traceable food — each product built with the same zero-compromise standard we apply to every spore.</p>
+    </div>
+
+    <div class="vision-grid">
+      <div class="vc live fi">
+        <span class="vc-pill pill-now">AVAILABLE NOW</span>
+        <div class="vc-icon">🍄</div>
+        <h3 class="vc-heading">Fresh &amp; Dried<br>Mushrooms</h3>
+        <p>Our flagship. Fresh oyster mushrooms delivered within 48 hours. Dried for 6+ months of storage. Powder for daily nutritional boost. All pesticide-free, all monitored.</p>
+      </div>
+
+      <div class="vc vc-center fi">
+        <span class="vc-pill pill-soon">Q2 2025</span>
+        <div class="vc-icon">🥬</div>
+        <h3 class="vc-heading">Hydroponic Leafy<br>Greens</h3>
+        <p>Lettuce, spinach, and fresh herbs grown in our expanded controlled environment. No soil = no pesticides needed. Harvested daily, delivered fresh.</p>
+      </div>
+
+      <div class="vc vc-center fi">
+        <span class="vc-pill pill-soon vc-pill-faded">Q3 2025</span>
+        <div class="vc-icon">🥗</div>
+        <h3 class="vc-heading">Meal-Ready Kits</h3>
+        <p>Pre-portioned, pre-washed combinations of our mushrooms and greens. Recipes included. From our farm to your wok in under 48 hours.</p>
+      </div>
+
+      <div class="vc vc-center fi">
+        <span class="vc-pill pill-soon vc-pill-faded">Q4 2025</span>
+        <div class="vc-icon">🫙</div>
+        <h3 class="vc-heading">Achar &amp; Condiments</h3>
+        <p>Traditional-style achar, mushroom sauce, and cooking pastes made with our own produce. No artificial preservatives — just salt, spice, and time-tested recipes.</p>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ════════════════════════════════════════════════════
+       FAQ
+  ════════════════════════════════════════════════════ -->
+  <section class="faq-section" id="faq">
+    <div class="products-header">
+      <div>
+        <span class="section-eyebrow">আপনার প্রশ্ন</span>
+        <h2 class="section-title">প্রায়শই জিজ্ঞাসিত <em>প্রশ্ন</em></h2>
+      </div>
+    </div>
+    <div class="faq-grid">
+      <div class="faq-item fi">
+        <h3 class="faq-q">আমার এলাকার ডেলিভারি কত সময়ে হবে?</h3>
+        <p class="faq-a">সিরাজগঞ্জ ও ঢাকার প্রধান এলাকায় ২৪-৪৮ ঘণ্টার মধ্যে। অন্যান্য জেলা শহরে ২-৩ কর্মদিবস।</p>
+      </div>
+      <div class="faq-item fi">
+        <h3 class="faq-q">এই মাশরুম কী সত্যি কীটনাশক মুক্ত?</h3>
+        <p class="faq-a">হ্যাঁ। আমাদের মাশরুম ১০০% কীটনাশক মুক্ত পরিবেশে, তাজা প্রতিটি ব্যাচ ল্যাব পরীক্ষা এবং ট্রেসেবল QR কোড দিয়ে আসে।</p>
+      </div>
+      <div class="faq-item fi">
+        <h3 class="faq-q">ওজন কমানোর জন্য ডোজ কত?</h3>
+        <p class="faq-a">প্রতি খাবারে ১০০-১৫০ গ্রাম রান্না করে খেলে ভালো, সপ্তাহে কমপক্ষে ৪ দিন মেনেই রাখা উত্তম।</p>
+      </div>
+      <div class="faq-item fi">
+        <h3 class="faq-q">মাশরুম কি ডায়াবেটিস রোগীর উত্তম খাবার?</h3>
+        <p class="faq-a">মাশরুমের গ্লাইসেমিক ইনডেক্স কম, তাই ডায়াবেটিস রোগীর উপযোগী। অবশ্য, চিকিৎসকের পরামর্শ ব্যতীত ডোজ বাড়াবেন না।</p>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ════════════════════════════════════════════════════
+       TESTIMONIAL
+  ════════════════════════════════════════════════════ -->
+  <section class="testimonial">
+    <div class="t-stars">★★★★★</div>
+    <p class="t-quote">তিন মাস ধরে ড্রাই মাশরুম ব্যবহার করছি এবং এই মানের মাশরুম বাংলাদেশে আর কোথাও পাইনি। যখন খাবার যত্ন নিয়ে চাষ করা হয়, সেটা মুখে টের পাওয়া যায়।</p>
+    <p class="t-author">Farida Hossain</p>
+    <p class="t-loc">Mirpur, Dhaka</p>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════
+       FOOTER
+  ════════════════════════════════════════════════════ -->
+  <footer id="footer">
+
+    <!-- CTA banner -->
+    <div class="footer-cta">
+      <div>
+        <p class="footer-cta-eyebrow">আমাদের ফার্ম থেকে আপনার পরিবারের থালায়</p>
+        <h2 class="footer-cta-title">বিষমুক্ত খাবার —<br><em>আপনার পরিবার এটাই দাবি রাখে</em></h2>
+      </div>
+      <a href="#products" class="footer-cta-btn">
+        Shop Now
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+          <path d="M3 8h10M9 4l4 4-4 4"
+                stroke="currentColor" stroke-width="1.5"
+                stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+    </div>
+
+    <!-- 4-column main grid -->
+    <div class="footer-main">
+
+      <!-- ── Col 1: Brand ── -->
+      <div>
+        <div class="f-logo-wrap">
+          <div>
+            <span class="f-logo-text">SaFa Naturals</span>
+            <span class="f-logo-sub">Agrotech Farm · Sirajganj</span>
+          </div>
+        </div>
+        <p class="f-brand-desc">Building Bangladesh's most trusted organic food ecosystem — from our climate-controlled farms to your family's table, every product meets pharmaceutical-grade standards.</p>
+        <div class="f-badges">
+          <span class="f-badge">বিষমুক্ত</span>
+          <span class="f-badge">Zero Pesticide</span>
+          <span class="f-badge">Est. 2020</span>
+        </div>
+      </div>
+
+      <!-- ── Col 2: Find Us + Map ── -->
+      <div>
+        <h3 class="f-col-title">Find Us</h3>
+        <p class="f-group-label">Farm</p>
+        <p class="f-addr">Alompur, Sirajganj,<br>Bangladesh</p>
+        <p class="f-group-label">Contact</p>
+
+        <!-- Google Map — shows Sirajganj city (not exact farm location) -->
+        <div style="margin-bottom:18px;border-radius:6px;overflow:hidden;
+                    border:1px solid rgba(255,255,255,0.06);">
+          <iframe
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d58151.94!2d89.7006!3d24.4539!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39fce1b9a8c3f1ab%3A0x5b8e3b1d8f3e2a1c!2sSirajganj%2C+Bangladesh!5e0!3m2!1sen!2sbd!4v1"
+            width="100%"
+            height="160"
+            style="display:block;border:0;filter:invert(90%) hue-rotate(180deg);"
+            allowfullscreen=""
+            loading="lazy"
+            referrerpolicy="no-referrer"
+            title="SaFa Naturals — Sirajganj, Bangladesh">
+          </iframe>
+        </div>
+
+        <a href="tel:+8801970099378" class="f-contact">
+          <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
+            <path d="M2 2h3l1.5 3.5-1.5 1a7 7 0 003.5 3.5l1-1.5L13 10v3a1 1 0 01-1 1C5.37 14 0 8.63 0 2a1 1 0 011-1h1z"
+                  fill="currentColor"/>
+          </svg>
+          +880 1970 099378
+        </a>
+        <a href="mailto:mushroombangladesh.info@gmail.com" class="f-contact">
+          <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
+            <rect x="1" y="3" width="12" height="8" rx="1"
+                  stroke="currentColor" stroke-width="1.2" fill="none"/>
+            <path d="M1 4l6 4 6-4"
+                  stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+          mushroombangladesh.info@gmail.com
+        </a>
+      </div>
+
+      <!-- ── Col 3: Navigation links ── -->
+      <div>
+        <h3 class="f-col-title">Explore</h3>
+        <ul class="f-links">
+          <li><a href="about.html">Our Story</a></li>
+          <li><a href="recipes.html">Recipes &amp; Tips</a></li>
+          <li><a href="shop.html">Shop All</a></li>
+          <li><a href="privacy.html">Privacy Policy</a></li>
+        </ul>
+        <h3 class="f-col-title mt">Support</h3>
+        <ul class="f-links">
+          <li><a href="delivery.html">Delivery Process</a></li>
+          <li><a href="quality.html">Quality Standards</a></li>
+          <li><a href="cancellation.html">Cancellation Policy</a></li>
+          <li><a href="returns.html">Refund &amp; Returns</a></li>
+        </ul>
+      </div>
+
+      <!-- ── Col 4: Newsletter ── -->
+      <div>
+        <h3 class="f-col-title">Stay Updated</h3>
+        <p class="f-nl-text">Harvest alerts, seasonal recipes, and updates on our upcoming <strong>hydroponic vegetables</strong> range.</p>
+        <div class="f-input-wrap">
+          <input type="email" class="f-email" placeholder="আপনার ইমেইল">
+          <button class="f-join">Join</button>
+        </div>
+        <p class="f-privacy">No spam. Unsubscribe anytime.</p>
+      </div>
+
+    </div><!-- /footer-main -->
+
+    <!-- Footer bottom bar -->
+    <div class="footer-divider"></div>
+
+    <div class="footer-bottom">
+      <p class="f-copy">© 2026 SaFa Naturals Agrotech Farm · All rights reserved</p>
+
+      <div class="f-socials">
+        <a href="https://www.facebook.com/SaFaNaturalsAgro/"
+           class="f-social" aria-label="Facebook"
+           target="_blank" rel="noopener">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/>
+          </svg>
+        </a>
+        <a href="https://www.instagram.com/safanaturalsagro/"
+           class="f-social" aria-label="Instagram"
+           target="_blank" rel="noopener">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="2" width="20" height="20" rx="5"/>
+            <circle cx="12" cy="12" r="4"/>
+            <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/>
+          </svg>
+        </a>
+        <a href="#" class="f-social" aria-label="YouTube">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M22.54 6.42a2.78 2.78 0 00-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 001.46 6.42 29 29 0 001 12a29 29 0 00.46 5.58 2.78 2.78 0 001.95 1.96C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 001.95-1.96A29 29 0 0023 12a29 29 0 00-.46-5.58z"/>
+            <polygon points="9.75,15.02 15.5,12 9.75,8.98 9.75,15.02" fill="white"/>
+          </svg>
+        </a>
+      </div>
+
+      <a href="https://www.safanaturals.org" class="f-web">
+        www.safanaturals.org
+      </a>
+    </div>
+
+  </footer><!-- /footer -->
+
+
+  <!-- ════════════════════════════════════════════════════
+       WHATSAPP FLOATING BUTTON
+       Fixed bottom-right. z-index 599 so it hides
+       behind the cart overlay (z-index 600) when open.
+  ════════════════════════════════════════════════════ -->
+  <a href="https://wa.me/+8801970099378"
+     class="wa-floating-btn"
+     target="_blank"
+     rel="noopener noreferrer"
+     aria-label="Chat with SaFa Naturals on WhatsApp">
+    <div class="wa-content">
+      <span class="wa-text">সরাসরি কথা বলুন</span>
+      <div class="wa-icon-box">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"
+             aria-hidden="true">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+        </svg>
+      </div>
+    </div>
+  </a>
+
+
+  <!-- ════════════════════════════════════════════════════
+       SCRIPTS
+       ─────────────────────────────────────────────────
+       Load order:
+       1. Supabase SDK      → loaded in <head>
+       2. Supabase auth     → inline script in <head> body
+       3. main.js (module)  → loads here, deferred by browser
+
+       ES modules are automatically deferred — they execute
+       after HTML is parsed but before DOMContentLoaded fires.
+       main.js assigns window.* globals then calls all inits.
+
+       The old script.js is fully replaced by src/main.js.
+       Do NOT include both — remove script.js from htdocs.
+  ════════════════════════════════════════════════════ -->
+  <script type="module" src="/src/main.js"></script>
+
+</body>
+</html>

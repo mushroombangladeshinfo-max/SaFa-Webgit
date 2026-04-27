@@ -1,0 +1,241 @@
+<!-- ════════════════════════════════════════════════════
+     HERO FRAGMENT — SaFa Naturals
+     ─────────────────────────────────────────────────
+     Fetched and injected into index.html at runtime:
+       fetch('/hero.html') → #hero-placeholder.innerHTML
+
+     VITE: This file must live in public/hero.html
+     so it is served as a static asset at /hero.html.
+
+     Contains:
+       1. Split hero (text left, video right)
+       2. Scrolling ticker
+       3. Trust ribbon (4 items)
+════════════════════════════════════════════════════ -->
+
+
+<!-- ══════════════════════════════════════════════════
+     1. HERO SPLIT LAYOUT
+     Left: headline + copy + CTA buttons + scroll dot
+     Right: autoplay video with gradient blend
+══════════════════════════════════════════════════ -->
+<section class="hero-modern">
+
+  <!-- ── Left: text content ── -->
+  <div class="hero-content-left">
+
+    <!-- Eyebrow pill tag -->
+    <div class="hero-tag">
+      <span class="tag-dot"></span>
+      সিরাজগঞ্জ থেকে সরাসরি
+    </div>
+
+    <!-- Main headline -->
+    <h1 class="hero-h1-new">
+      আপনার পরিবারের<br>
+      <em>শতভাগ নিরাপদ</em> খাবার
+    </h1>
+
+    <!-- Supporting copy -->
+    <p class="hero-p-new">
+      কোনো কীটনাশক নেই। কোনো প্রিজারভেটিভ নেই।
+      সিরাজগঞ্জের নিজস্ব এগ্রিটেক ফার্মে উৎপাদিত
+      প্রিমিয়াম মাশরুম — যা আমরা নিজেদের পরিবারকেও
+      নিশ্চিন্তে খাওয়াই।
+    </p>
+
+    <!-- Urgency line -->
+    <div class="hero-urgency-new">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round"
+           aria-hidden="true">
+        <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/>
+        <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>
+      </svg>
+      অর্ডারের পরই সরাসরি ফার্ম থেকে ফ্রেশ হারভেস্ট
+    </div>
+
+    <!-- Inline stat strip — social proof before CTA -->
+    <div style="
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 36px;
+      flex-wrap: wrap;
+    ">
+      <div style="display:flex;flex-direction:column;gap:2px;">
+        <span style="font-family:var(--fd);font-size:26px;font-weight:300;
+                     color:var(--c);line-height:1;">100%</span>
+        <span style="font-family:var(--fl);font-size:8px;font-weight:700;
+                     letter-spacing:.14em;text-transform:uppercase;
+                     color:rgba(245,239,230,.42);">Pesticide Free</span>
+      </div>
+      <div style="width:1px;height:28px;background:rgba(255,255,255,.1);"></div>
+      <div style="display:flex;flex-direction:column;gap:2px;">
+        <span style="font-family:var(--fd);font-size:26px;font-weight:300;
+                     color:var(--c);line-height:1;">500+</span>
+        <span style="font-family:var(--fl);font-size:8px;font-weight:700;
+                     letter-spacing:.14em;text-transform:uppercase;
+                     color:rgba(245,239,230,.42);">Families Trust Us</span>
+      </div>
+      <div style="width:1px;height:28px;background:rgba(255,255,255,.1);"></div>
+      <div style="display:flex;flex-direction:column;gap:2px;">
+        <span style="font-family:var(--fd);font-size:26px;font-weight:300;
+                     color:var(--c);line-height:1;">24h</span>
+        <span style="font-family:var(--fl);font-size:8px;font-weight:700;
+                     letter-spacing:.14em;text-transform:uppercase;
+                     color:rgba(245,239,230,.42);">Farm to Door</span>
+      </div>
+    </div>
+
+    <!-- CTA buttons -->
+    <div class="hero-btns-new">
+      <a href="#products"
+         class="btn-primary"
+         aria-label="Order now — scroll to shop section">
+        এখনই অর্ডার করুন
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"
+             aria-hidden="true">
+          <path d="M3 8h10M9 4l4 4-4 4"
+                stroke="currentColor" stroke-width="1.5"
+                stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+      <a href="#story"
+         class="btn-ghost-dark"
+         aria-label="Learn about our farm story">
+        আমাদের গল্প
+      </a>
+    </div>
+
+    <!-- Scroll indicator
+         CSS uses .scroll-track::after for the animated dot —
+         no inner element needed. -->
+    <div class="hero-scroll-indicator">
+      <div class="scroll-track" aria-hidden="true"></div>
+      <span>Scroll</span>
+    </div>
+
+  </div><!-- /hero-content-left -->
+
+
+  <!-- ── Right: video panel ── -->
+  <div class="hero-visual-right">
+    <!--
+      Video file: Recipe Video.mp4
+      In Vite, this file lives in public/ and is served at /Recipe Video.mp4
+      poster image also from public/
+    -->
+    <video
+      autoplay
+      loop
+      muted
+      playsinline
+      preload="metadata"
+      poster="SaFa Fresh Oyester Mushroom.png"
+      aria-label="Fresh oyster mushrooms from SaFa Naturals farm">
+      <source src="Recipe Video.mp4" type="video/mp4">
+    </video>
+  </div>
+
+</section><!-- /hero-modern -->
+
+
+<!-- ══════════════════════════════════════════════════
+     2. SCROLLING TICKER
+     Duplicated items (×3) for seamless infinite scroll
+     at 30s speed. Pauses on hover (CSS animation-play-state).
+══════════════════════════════════════════════════ -->
+<div class="scrolling-ticker" aria-hidden="true">
+  <div class="ticker-track">
+    <!-- Set 1 -->
+    <div class="ticker-item">🌿 Harvested Daily</div>
+    <div class="ticker-item">💵 Cash on Delivery</div>
+    <div class="ticker-item">✓ No Preservatives</div>
+    <div class="ticker-item">🍄 বিষমুক্ত খাবার</div>
+    <div class="ticker-item">🚜 Farm to Plate</div>
+    <div class="ticker-item">🔬 Lab Tested Batches</div>
+    <div class="ticker-item">📦 Same-Day Dispatch</div>
+    <!-- Set 2 — duplicate for seamless loop -->
+    <div class="ticker-item">🌿 Harvested Daily</div>
+    <div class="ticker-item">💵 Cash on Delivery</div>
+    <div class="ticker-item">✓ No Preservatives</div>
+    <div class="ticker-item">🍄 বিষমুক্ত খাবার</div>
+    <div class="ticker-item">🚜 Farm to Plate</div>
+    <div class="ticker-item">🔬 Lab Tested Batches</div>
+    <div class="ticker-item">📦 Same-Day Dispatch</div>
+    <!-- Set 3 — extra buffer prevents gap flash -->
+    <div class="ticker-item">🌿 Harvested Daily</div>
+    <div class="ticker-item">💵 Cash on Delivery</div>
+    <div class="ticker-item">✓ No Preservatives</div>
+    <div class="ticker-item">🍄 বিষমুক্ত খাবার</div>
+    <div class="ticker-item">🚜 Farm to Plate</div>
+    <div class="ticker-item">🔬 Lab Tested Batches</div>
+    <div class="ticker-item">📦 Same-Day Dispatch</div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════
+     3. TRUST RIBBON
+     4 icon + text items. Responsive: wraps at 992px,
+     stacks at 768px. Defined in style.css (.trust-ribbon-new).
+══════════════════════════════════════════════════ -->
+<div class="trust-ribbon-new">
+
+  <div class="ribbon-item">
+    <div class="ribbon-icon" aria-hidden="true">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="1.5">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+      </svg>
+    </div>
+    <div class="ribbon-text">
+      <strong>বিষমুক্ত · Zero Pesticides</strong>
+      <span>Controlled environment farming</span>
+    </div>
+  </div>
+
+  <div class="ribbon-item">
+    <div class="ribbon-icon" aria-hidden="true">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="1.5">
+        <circle cx="12" cy="12" r="10"/>
+        <polyline points="12 6 12 12 16 14"/>
+      </svg>
+    </div>
+    <div class="ribbon-text">
+      <strong>২৪ ঘণ্টায় ডেলিভারি</strong>
+      <span>Farm to doorstep in 24h</span>
+    </div>
+  </div>
+
+  <div class="ribbon-item">
+    <div class="ribbon-icon" aria-hidden="true">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="1.5">
+        <rect x="2" y="5" width="20" height="14" rx="2"/>
+        <line x1="2" y1="10" x2="22" y2="10"/>
+      </svg>
+    </div>
+    <div class="ribbon-text">
+      <strong>ক্যাশ অন ডেলিভারি</strong>
+      <span>Pay only when you receive</span>
+    </div>
+  </div>
+
+  <div class="ribbon-item">
+    <div class="ribbon-icon" aria-hidden="true">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="1.5">
+        <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
+      </svg>
+    </div>
+    <div class="ribbon-text">
+      <strong>500+ পরিবারের বিশ্বাস</strong>
+      <span>Trusted by 500+ families</span>
+    </div>
+  </div>
+
+</div><!-- /trust-ribbon-new -->
