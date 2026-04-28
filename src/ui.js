@@ -28,6 +28,7 @@ import {
   saveCart,
   addToCart,
   updateQuantity,
+  getCartCount,
 } from './cart.js';
 
 
@@ -35,11 +36,25 @@ import {
    1. CART DRAWER
 ============================================================ */
 
+let previousCartCount = null;
+
 /**
  * Rebuilds the cart drawer contents from current cart state.
  * Called after every cart mutation (add, remove, update).
  */
 export function renderCartDrawer() {
+  /* ── Animate Cart Icon on new items ── */
+  const currentCount = getCartCount();
+  if (previousCartCount !== null && currentCount > previousCartCount) {
+    const navIcon = document.querySelector('.nav-icon');
+    if (navIcon) {
+      navIcon.classList.remove('cart-bounce');
+      void navIcon.offsetWidth; /* Trigger reflow to restart animation */
+      navIcon.classList.add('cart-bounce');
+    }
+  }
+  previousCartCount = currentCount;
+
   const container = document.querySelector('.cart-items-container');
   const subtotalEl = document.querySelector('.cart-subtotal span:last-child');
   if (!container) return;

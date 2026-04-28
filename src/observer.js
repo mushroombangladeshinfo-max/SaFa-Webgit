@@ -31,4 +31,22 @@ export function initFadeObserver() {
   });
 
   document.querySelectorAll('.fi').forEach(el => observer.observe(el));
+
+  /* ── Video Autoplay Observer ──
+     Plays the recipe video silently when it scrolls into view,
+     and pauses it when off-screen to save battery/data. */
+  const recipeVid = document.getElementById('recipeVid');
+  if (recipeVid) {
+    const vidObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.play().catch(err => console.warn('[SaFa] Autoplay blocked:', err));
+        } else {
+          entry.target.pause();
+        }
+      });
+    }, { threshold: 0.1 }); /* Trigger when 10% of the video is visible */
+    
+    vidObserver.observe(recipeVid);
+  }
 }
