@@ -82,6 +82,13 @@ export function addToCart(name, price, id, unit = '', image = '') {
   }
 
   saveCart(cart);
+
+  /* ── Dispatch event for UI notifications ── */
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('cart-item-added', {
+      detail: { name, image }
+    }));
+  }
 }
 
 /**

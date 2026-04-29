@@ -1,0 +1,41 @@
+{
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "files.exclude": {
+    "**/.DS_Store": true,
+    "**/dist": true
+  },
+
+  /* ══════════════════════════════════════════════════════
+     .vscode/settings.json — SaFa Naturals
+     Suppresses Microsoft Edge Tools linter warnings that
+     are informational only and do not affect the build.
+  ══════════════════════════════════════════════════════ */
+
+  /* ── Disable specific Edge Tools CSS compat rules ──
+     backdrop-filter, scrollbar-width/color, and
+     webkit-overflow-scrolling warnings are either already
+     handled with prefixes or wrapped in @supports blocks.
+  ── */
+  "edge-devtools.webhint.css.compat-api/css": false,
+  "edge-devtools.webhint.css.css-prefix-order": false,
+
+  /* ── Disable HTML compat warnings ──
+     video[playsinline] is valid HTML — Edge Tools flags it
+     because older Edge didn't support it. Modern browsers do.
+  ── */
+  "edge-devtools.webhint.html.compat-api/html": false,
+
+  /* ── Disable inline styles rule ──
+     Our hero stats strip and recipe modal use intentional
+     inline styles. This is a code-style opinion, not an error.
+  ── */
+  "edge-devtools.webhint.html.no-inline-styles": false,
+
+  /* ── Keep other useful linting on ──
+     Only the noisy false-positive rules are disabled above.
+  ── */
+  "css.validate": true,
+  "html.validate.scripts": true,
+  "html.validate.styles": true
+}

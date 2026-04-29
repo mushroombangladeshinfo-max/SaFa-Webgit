@@ -473,3 +473,56 @@ export function initAddToCartButtons() {
 
   console.log(`[SaFa] Wired ${buttons.length} add-to-cart button(s)`);
 }
+
+
+/* ============================================================
+   6. TOAST NOTIFICATIONS
+   Listens for custom 'cart-item-added' events from cart.js.
+============================================================ */
+
+/**
+ * Creates and slides in a toast notification.
+ * Auto-removes from the DOM after 3 seconds.
+ */
+export function showToast(itemName, itemImage) {
+  let container = document.getElementById('toast-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'toast-container';
+    document.body.appendChild(container);
+  }
+
+  const toast = document.createElement('div');
+  toast.className = 'safa-toast';
+
+  /* Image or emoji fallback */
+  const imgHtml = itemImage
+    ? `<img src="${itemImage}" alt="${itemName}" class="toast-img" onerror="this.outerHTML='<div class=\\'toast-img\\'>🍄</div>'">`
+    : `<div class="toast-img">🍄</div>`;
+
+  toast.innerHTML = `
+    ${imgHtml}
+    <div class="toast-content">
+      <span class="toast-title">✓ Added to Cart</span>
+      <span class="toast-desc">${itemName}</span>
+    </div>
+  `;
+
+  container.appendChild(toast);
+
+  /* Trigger reflow to start CSS animation */
+  void toast.offsetWidth;
+  toast.classList.add('show');
+
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => toast.remove(), 400); /* Wait for CSS slide-out */
+  }, 3000);
+}
+
+/* Register listener automatically */
+if (typeof window !== 'undefined') {
+  window.addEventListener('cart-item-added', (e) => {
+    showToast(e.detail.name, e.detail.image);
+  });
+}
