@@ -2,6 +2,7 @@
 <html lang="bn">
 <head>
   <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/favicon.png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <!-- ── Open Graph ── -->
@@ -183,7 +184,7 @@
 
        data-image paths must match filenames in public/ folder.
   ════════════════════════════════════════════════════ -->
-  <section class="products-section" id="products">
+  <section class="products-premium" id="products">
     <div class="products-header">
       <div>
         <span class="section-eyebrow">আমাদের পণ্য</span>
@@ -195,7 +196,7 @@
     <div class="pl-grid">
 
       <!-- ── Card 1: Fresh Oyster ── -->
-      <div class="pl-card fi" data-category="fresh">
+      <div class="pl-card fi" data-category="fresh" data-id="fresh_oyster">
         <div class="pl-img-box">
           <div class="pl-img-badges">
             <span class="pl-badge gold">FARM FRESH</span>
@@ -234,7 +235,7 @@
       </div>
 
       <!-- ── Card 2: Dried Oyster ── -->
-      <div class="pl-card fi" data-category="dry">
+      <div class="pl-card fi" data-category="dry" data-id="dried_oyster">
         <div class="pl-img-box">
           <div class="pl-img-badges">
             <span class="pl-badge gold">LONG SHELF LIFE</span>
@@ -272,7 +273,7 @@
       </div>
 
       <!-- ── Card 3: Mushroom Powder ── -->
-      <div class="pl-card fi" data-category="dry">
+      <div class="pl-card fi" data-category="dry" data-id="mushroom_powder">
         <div class="pl-img-box">
           <div class="pl-img-badges">
             <span class="pl-badge gold">SUPERFOOD</span>
@@ -310,7 +311,7 @@
       </div>
 
       <!-- ── Card 4: Button Mushroom (Coming Soon) ── -->
-      <div class="pl-card fi pl-card-coming" data-category="coming">
+      <div class="pl-card fi pl-card-coming" data-category="coming" data-id="button_mushroom">
         <div class="pl-img-box">
           <div class="pl-img-badges">
             <span class="pl-badge gold">MYSTERY</span>
@@ -799,6 +800,55 @@
        Do NOT include both — remove script.js from htdocs.
   ════════════════════════════════════════════════════ -->
   <script type="module" src="/src/main.js"></script>
+
+  <!-- ════════════════════════════════════════════════════
+       INVENTORY STATUS SCRIPT
+       Fetches stock levels and updates product cards.
+  ════════════════════════════════════════════════════ -->
+  <script type="module">
+    import { supabase } from '/src/supabase.js';
+
+    async function updateStockStatus() {
+      const { data: products, error } = await supabase
+        .from('products')
+        .select('id, inventory_count');
+
+      if (error) {
+        console.error("Error fetching product stock:", error);
+        return;
+      }
+
+      const productCards = document.querySelectorAll('.pl-card[data-id]');
+
+      productCards.forEach(card => {
+        const productId = card.dataset.id;
+        if (!productId) return;
+
+        const product = products.find(p => p.id === productId);
+        if (product && product.inventory_count <= 0) {
+          const btn = card.querySelector('.add-to-cart-btn');
+          const stockEl = card.querySelector('.pl-stock');
+
+          if (btn) {
+            btn.classList.remove('add-to-cart-btn');
+            btn.textContent = 'Notify Me';
+            btn.onclick = () => {
+              window.location.href = `mailto:mushroombangladesh.info@gmail.com?subject=Notify Me: Out of Stock Inquiry for ${btn.dataset.name}`;
+            };
+          }
+          if (stockEl) {
+            stockEl.textContent = 'Out of Stock';
+            stockEl.style.color = 'var(--t)';
+          }
+        }
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // A small delay to ensure other scripts have run
+      setTimeout(updateStockStatus, 150);
+    });
+  </script>
 
 </body>
 </html>

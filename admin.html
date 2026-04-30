@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard — SaFa Naturals</title>
+
+  <!-- ── Fonts & Global Styles ── -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Syne:wght@600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+
+  <style>
+    body { padding: 60px 5%; background: var(--g900); }
+    
+    .admin-title { font-family: var(--fd); font-size: 36px; color: var(--c); margin-bottom: 8px; }
+    .admin-title em { color: var(--a); font-style: italic; }
+    
+    .hidden { display: none !important; }
+    
+    /* Login Form */
+    .login-container { max-width: 400px; margin: 80px auto; background: var(--g800); padding: 40px; border-radius: 12px; border: 1px solid rgba(255,255,255,.07); text-align: center; }
+    .login-container input { width: 100%; padding: 14px; margin-bottom: 16px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1); color: var(--c); border-radius: 6px; outline: none; font-family: var(--fb); }
+    .login-container input:focus { border-color: rgba(196,154,60,.5); background: rgba(255,255,255,.07); }
+    
+    /* Dashboard Table */
+    .admin-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 24px; }
+    .admin-header-right { display: flex; gap: 12px; align-items: center; }
+    .admin-search { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1); padding: 10px 14px; color: var(--c); border-radius: 6px; outline: none; font-family: var(--fb); font-size: 13.5px; width: 220px; transition: border-color .2s; }
+    .admin-search::placeholder { color: rgba(245,239,230,.3); }
+    .admin-search:focus { border-color: rgba(196,154,60,.5); background: rgba(255,255,255,.07); }
+    
+    input[type="date"]::-webkit-calendar-picker-indicator {
+      filter: invert(1);
+      opacity: 0.6;
+      cursor: pointer;
+    }
+
+    .admin-table { width: 100%; border-collapse: collapse; background: var(--g800); border-radius: 8px; overflow: hidden; border: 1px solid rgba(255,255,255,.07); }
+    .admin-table th, .admin-table td { padding: 14px 20px; text-align: left; border-bottom: 1px solid rgba(255,255,255,.05); font-size: 14px; color: var(--c); }
+    .admin-table th { background: rgba(255,255,255,.02); color: rgba(245,239,230,.5); font-family: var(--fl); font-size: 10.5px; text-transform: uppercase; letter-spacing: .1em; font-weight: 700; }
+    .admin-table tr:last-child td { border-bottom: none; }
+    
+    select { background: var(--g900); color: var(--c); border: 1px solid rgba(255,255,255,.15); padding: 8px 12px; border-radius: 4px; font-family: var(--fb); font-size: 13px; cursor: pointer; outline: none; }
+    select:focus { border-color: var(--a); }
+    
+    .btn-admin-action {
+      padding: 6px 12px;
+      font-size: 11px;
+      letter-spacing: .08em;
+    }
+    .btn-mark-paid { color: #5fcf80 !important; border-color: rgba(95,207,128,.3) !important; }
+    .btn-mark-paid:hover { background: rgba(95,207,128,.1) !important; border-color: #5fcf80 !important; }
+    
+    .payment-status-badge {
+      font-family: var(--fl); font-size: 9px; font-weight: 700; letter-spacing: .1em;
+      text-transform: uppercase; padding: 4px 8px; border-radius: 4px; display: inline-block;
+    }
+    .payment-status-badge.paid   { background: rgba(95,207,128,.15); color: #5fcf80; }
+    .payment-status-badge.unpaid { background: rgba(217,178,84,.15); color: var(--al); }
+    
+    .admin-pagination { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; }
+    .admin-pagination span { color: rgba(245,239,230,.6); font-size: 13px; font-family: var(--fb); }
+    .admin-pagination button:disabled { opacity: 0.5; cursor: not-allowed; }
+    
+    .status-toast { position: fixed; bottom: 20px; right: 20px; background: #5fcf80; color: #060d09; padding: 12px 24px; border-radius: 4px; font-weight: 600; font-size: 13px; transform: translateY(100px); opacity: 0; transition: all 0.3s ease; }
+    .status-toast.show { transform: translateY(0); opacity: 1; }
+
+    .dashboard-widgets { display: flex; gap: 20px; margin-bottom: 24px; }
+    .widget { background: rgba(255,255,255,.02); border: 1px solid rgba(255,255,255,.05); border-radius: 8px; padding: 20px; flex: 1; display: flex; flex-direction: column; justify-content: center; }
+    .widget-title { font-family: var(--fl); font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: rgba(245,239,230,.5); margin-bottom: 8px; }
+    .widget-value { font-family: var(--fd); font-size: 32px; font-weight: 300; color: var(--al); line-height: 1; }
+  </style>
+</head>
+<body>
+
+  <!-- LOGIN SECTION -->
+  <div id="login-section" class="login-container">
+    <h1 class="admin-title">Admin <em>Access</em></h1>
+    <p style="color: rgba(245,239,230,.5); margin-bottom: 24px; font-size: 14px;">Sign in to manage orders.</p>
+    <input type="email" id="admin-email" placeholder="Admin Email">
+    <input type="password" id="admin-password" placeholder="Password">
+    <button onclick="window.adminLogin()" class="btn-primary" style="width: 100%; justify-content: center;">Log In</button>
+  </div>
+
+  <!-- DASHBOARD SECTION -->
+  <div id="dashboard-section" class="hidden">
+    <div class="admin-header">
+      <h1 class="admin-title">Order <em>Management</em></h1>
+      <div class="admin-header-right">
+        <input type="date" id="filter-date-from" class="admin-search" style="width: 130px;" title="From Date" onchange="window.handleDateChange()">
+        <span style="color: rgba(245,239,230,.5); font-size: 13px;">to</span>
+        <input type="date" id="filter-date-to" class="admin-search" style="width: 130px;" title="To Date" onchange="window.handleDateChange()">
+        <input type="tel" class="admin-search" placeholder="Search phone..." oninput="window.handleSearch(this.value)">
+        <button id="export-btn" onclick="window.exportCSV()" class="btn-ghost-dark">Export CSV</button>
+        <button onclick="window.adminLogout()" class="btn-ghost-dark">Log Out</button>
+      </div>
+    </div>
+
+    <div class="dashboard-widgets">
+      <div class="widget">
+        <div class="widget-title">Today's Sales</div>
+        <div class="widget-value" id="today-sales-val">৳0</div>
+      </div>
+      <div class="widget">
+        <div class="widget-title">Today's Orders</div>
+        <div class="widget-value" id="today-orders-val">0</div>
+      </div>
+    </div>
+    
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Order ID</th>
+          <th>Date</th>
+          <th>Customer</th>
+          <th>Location</th>
+          <th>Total</th>
+          <th>Status</th>
+          <th>Payment</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="order-list">
+        <tr><td colspan="8" style="text-align: center; padding: 30px; color: rgba(245,239,230,.5);">Loading orders...</td></tr>
+      </tbody>
+    </table>
+    
+    <div id="pagination-controls" class="admin-pagination" style="display: none;">
+      <button id="btn-prev" class="btn-ghost-dark" onclick="window.changePage(-1)" style="padding: 8px 16px;">Previous</button>
+      <span id="page-info">Page 1</span>
+      <button id="btn-next" class="btn-ghost-dark" onclick="window.changePage(1)" style="padding: 8px 16px;">Next</button>
+    </div>
+
+    <!-- ── INVENTORY MANAGEMENT SECTION ── -->
+    <div style="margin-top: 60px;">
+      <div class="admin-header">
+        <h2 class="admin-title" style="font-size: 28px;">Inventory <em>Management</em></h2>
+        <button onclick="window.fetchInventory()" class="btn-ghost-dark">Refresh Stock</button>
+      </div>
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Product ID</th>
+            <th>Name</th>
+            <th>Current Stock</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="inventory-list">
+          <tr><td colspan="4" style="text-align: center; padding: 30px; color: rgba(245,239,230,.5);">Loading inventory...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="toast" class="status-toast">Status Updated!</div>
+
+  <script type="module" src="/src/main.js"></script>
+  <script type="module">
+    import { supabase } from '/src/supabase.js';
+
+    // ⚙️ Set this to your actual admin email!
+    const ADMIN_EMAIL = 'your_actual_email@example.com';
+
+    let currentPage = 1;
+    const PAGE_SIZE = 15; // Set to however many orders you want per page
+    let currentSearchQuery = '';
+    let totalOrders = 0;
+    let allFetchedOrders = [];
+    let filterDateFrom = '';
+    let filterDateTo = '';
+
+    async function checkAuth() {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (session && session.user.email === ADMIN_EMAIL) {
+        document.getElementById('login-section').classList.add('hidden');
+        document.getElementById('dashboard-section').classList.remove('hidden');
+        fetchOrders();
+        fetchDashboardStats();
+        fetchInventory();
+      } else if (session) {
+        alert("Access Denied: You do not have admin privileges.");
+        await supabase.auth.signOut();
+      }
+    }
+
+    window.adminLogin = async () => {
+      const email = document.getElementById('admin-email').value;
+      const password = document.getElementById('admin-password').value;
+      
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) alert(error.message);
+      else checkAuth();
+    };
+
+    window.adminLogout = async () => {
+      await supabase.auth.signOut();
+      location.reload();
+    };
+
+    let searchTimeout;
+    window.handleSearch = (query) => {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => {
+        currentSearchQuery = query.trim();
+        currentPage = 1; // Reset to page 1 on new search
+        fetchOrders();
+      }, 300); // 300ms debounce
+    };
+    
+    window.handleDateChange = () => {
+      filterDateFrom = document.getElementById('filter-date-from').value;
+      filterDateTo = document.getElementById('filter-date-to').value;
+      currentPage = 1;
+      fetchOrders();
+    };
+
+    async function fetchDashboardStats() {
+      const startOfDay = new Date();
+      startOfDay.setHours(0, 0, 0, 0); // Set to midnight
+
+      const { data: todayOrders, error } = await supabase
+        .from('orders')
+        .select('total_amount, status')
+        .gte('created_at', startOfDay.toISOString());
+
+      if (error) return console.error("Error fetching stats:", error.message);
+
+      let sales = 0;
+      let count = 0;
+      todayOrders.forEach(o => {
+        if (o.status !== 'cancelled') {
+          sales += o.total_amount || 0;
+          count++;
+        }
+      });
+
+      document.getElementById('today-sales-val').textContent = `৳${sales.toLocaleString()}`;
+      document.getElementById('today-orders-val').textContent = count;
+    }
+
+    async function fetchOrders() {
+      const from = (currentPage - 1) * PAGE_SIZE;
+      const to = from + PAGE_SIZE - 1;
+
+      let req = supabase
+        .from('orders')
+        .select('*', { count: 'exact' })
+        .order('created_at', { ascending: false })
+        .range(from, to);
+
+      if (currentSearchQuery) {
+        req = req.ilike('customer_phone', `%${currentSearchQuery}%`);
+      }
+      
+      if (filterDateFrom) {
+        const fd = new Date(filterDateFrom + 'T00:00:00');
+        req = req.gte('created_at', fd.toISOString());
+      }
+      if (filterDateTo) {
+        const td = new Date(filterDateTo + 'T23:59:59.999');
+        req = req.lte('created_at', td.toISOString());
+      }
+
+      const { data: orders, error, count } = await req;
+
+      if (error) return alert("Could not fetch orders: " + error.message);
+      totalOrders = count || 0;
+      allFetchedOrders = orders;
+      
+      if (orders.length === 0) {
+        document.getElementById('order-list').innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 30px; color: rgba(245,239,230,.5);">No orders found.</td></tr>`;
+        updatePaginationUI();
+        return;
+      }
+
+      document.getElementById('order-list').innerHTML = orders.map(o => {
+        const markPaidBtn = o.payment_status !== 'paid'
+          ? `<button class="btn-ghost-dark btn-admin-action btn-mark-paid" onclick="window.markAsPaid('${o.id}')">Mark Paid</button>`
+          : '';
+
+        return `
+        <tr>
+          <td style="font-family: var(--fl); font-weight: 700; letter-spacing: .05em;">${o.order_number}</td>
+          <td>${new Date(o.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</td>
+          <td>${o.customer_name}<br><span style="font-size:12px; color:rgba(245,239,230,.5);">${o.customer_phone}</span></td>
+          <td>${o.thana}, ${o.district}</td>
+          <td style="color: var(--al); font-weight:500;">৳${o.total_amount.toLocaleString()}</td>
+          <td>
+            <select onchange="window.updateOrderStatus('${o.id}', this.value)">
+              <option value="pending" ${o.status === 'pending' ? 'selected' : ''}>Pending</option>
+              <option value="confirmed" ${o.status === 'confirmed' ? 'selected' : ''}>Confirmed</option>
+              <option value="dispatched" ${o.status === 'dispatched' ? 'selected' : ''}>Dispatched</option>
+              <option value="delivered" ${o.status === 'delivered' ? 'selected' : ''}>Delivered</option>
+              <option value="cancelled" ${o.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+            </select>
+          </td>
+          <td>
+            <span class="payment-status-badge ${o.payment_status || 'unpaid'}">${o.payment_status || 'unpaid'}</span>
+          </td>
+          <td>
+            <button class="btn-ghost-dark btn-admin-action" onclick="window.printReceipt('${o.id}')">Print</button>
+            ${markPaidBtn}
+          </td>
+        </tr>
+      `}).join('');
+      
+      updatePaginationUI();
+    }
+
+    window.changePage = (dir) => {
+      currentPage += dir;
+      fetchOrders();
+    };
+
+    function updatePaginationUI() {
+      const prevBtn = document.getElementById('btn-prev');
+      const nextBtn = document.getElementById('btn-next');
+      const pageInfo = document.getElementById('page-info');
+      const paginationSection = document.getElementById('pagination-controls');
+
+      paginationSection.style.display = 'flex';
+      const totalPages = Math.ceil(totalOrders / PAGE_SIZE) || 1;
+      pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+      
+      prevBtn.disabled = currentPage === 1;
+      nextBtn.disabled = currentPage >= totalPages;
+    }
+
+    window.updateOrderStatus = async (id, status) => {
+      const { error } = await supabase.from('orders').update({ status }).eq('id', id);
+      const toast = document.getElementById('toast');
+      
+      if (error) {
+        toast.style.background = 'var(--tl)';
+        toast.textContent = 'Error updating status';
+      } else {
+        toast.style.background = '#5fcf80';
+        toast.textContent = 'Order updated to ' + status;
+        fetchOrders(); // Refresh table on success
+        fetchDashboardStats(); // Refresh stats if a today's order was cancelled
+      }
+      
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    };
+
+    window.markAsPaid = async (orderId) => {
+      if (!confirm('Are you sure you want to mark this order as paid? This cannot be undone.')) return;
+      
+      const { error } = await supabase
+        .from('orders')
+        .update({ payment_status: 'paid' })
+        .eq('id', orderId);
+
+      if (error) {
+        alert('Error marking as paid: ' + error.message);
+      } else {
+        fetchOrders(); // Refresh table on success
+      }
+    };
+
+    window.printReceipt = (orderId) => {
+      const order = allFetchedOrders.find(o => o.id === orderId);
+      if (!order) {
+        alert('Order not found.');
+        return;
+      }
+
+      const printStyles = `
+        <style>
+          body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 20px; background: #fff; color: #000; line-height: 1.5; }
+          .receipt-container { max-width: 550px; margin: 0 auto; }
+          .header { text-align: center; border-bottom: 1px dashed #ccc; padding-bottom: 10px; margin-bottom: 20px; }
+          .header h1 { font-size: 24px; margin: 0; font-weight: 600; }
+          .header p { margin: 0; font-size: 12px; color: #555; }
+          .details-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+          .details-table td { padding: 8px 0; font-size: 14px; border-bottom: 1px solid #eee; vertical-align: top; }
+          .details-table td:first-child { color: #333; width: 100px; }
+          .details-table td:last-child { text-align: right; font-weight: 500; }
+          h3 { font-size: 16px; margin-top: 30px; margin-bottom: 10px; border-bottom: 1px solid #ccc; padding-bottom: 5px; }
+          .items-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+          .items-table th, .items-table td { padding: 8px; text-align: left; border-bottom: 1px solid #eee; font-size: 14px; }
+          .items-table th { background: #f8f8f8; font-size: 12px; text-transform: uppercase; font-weight: 600; }
+          .items-table .price, .items-table .total { text-align: right; }
+          .totals-section { width: 50%; margin-left: auto; margin-top: 20px; }
+          .totals-section td { padding: 5px 0; text-align: right; }
+          .totals-section td:first-child { text-align: left; color: #333; }
+          .grand-total td { font-size: 18px; font-weight: bold; border-top: 2px solid #000; padding-top: 10px; }
+          .notes { margin-top: 20px; padding: 10px; background: #f8f8f8; border-radius: 4px; font-size: 13px; }
+          .footer { text-align: center; margin-top: 30px; font-size: 12px; color: #777; }
+          @media print { body { margin: 0; } }
+        </style>
+      `;
+
+      const receiptBody = `
+        <div class="receipt-container">
+          <div class="header">
+            <h1>SaFa Naturals</h1>
+            <p>Order Receipt</p>
+          </div>
+          <table class="details-table">
+            <tr><td>Order ID:</td><td>${order.order_number}</td></tr>
+            <tr><td>Date:</td><td>${new Date(order.created_at).toLocaleString('en-BD', { dateStyle: 'medium', timeStyle: 'short' })}</td></tr>
+            <tr><td>Customer:</td><td>${order.customer_name}</td></tr>
+            <tr><td>Phone:</td><td>${order.customer_phone}</td></tr>
+            <tr><td>Address:</td><td>${order.full_address}, ${order.thana}, ${order.district}</td></tr>
+            <tr><td>Payment:</td><td>Cash on Delivery (${order.payment_status || 'unpaid'})</td></tr>
+          </table>
+          <h3>Items</h3>
+          <table class="items-table">
+            <thead><tr><th>Item</th><th>Qty</th><th class="price">Price</th><th class="total">Total</th></tr></thead>
+            <tbody>
+              ${order.items.map(item => `
+                <tr>
+                  <td>${item.name}</td>
+                  <td>${item.qty}</td>
+                  <td class="price">৳${item.price.toLocaleString()}</td>
+                  <td class="total">৳${(item.qty * item.price).toLocaleString()}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+          <table class="totals-section">
+            <tr><td>Subtotal:</td><td class="price">৳${order.subtotal.toLocaleString()}</td></tr>
+            <tr><td>Delivery:</td><td class="price">৳${order.delivery_fee.toLocaleString()}</td></tr>
+            <tr class="grand-total"><td>Total:</td><td class="price">৳${order.total_amount.toLocaleString()}</td></tr>
+          </table>
+          ${order.special_notes ? `<div class="notes"><h4>Notes:</h4><p>${order.special_notes}</p></div>` : ''}
+          <div class="footer"><p>Thank you for your order!</p></div>
+        </div>
+      `;
+
+      const printWindow = window.open('', '_blank');
+      printWindow.document.write(`<!DOCTYPE html><html><head><title>Print Receipt - ${order.order_number}</title>${printStyles}</head><body>${receiptBody}</body></html>`);
+      printWindow.document.close();
+      printWindow.focus();
+      setTimeout(() => {
+        printWindow.print();
+        printWindow.close();
+      }, 250);
+    };
+
+    window.exportCSV = async () => {
+      const btn = document.getElementById('export-btn');
+      const originalText = btn.textContent;
+      btn.textContent = 'Exporting...';
+      btn.disabled = true;
+
+      try {
+        // Fetch all orders matching the current search (bypassing pagination limits)
+        let req = supabase.from('orders').select('*').order('created_at', { ascending: false });
+        if (currentSearchQuery) req = req.ilike('customer_phone', `%${currentSearchQuery}%`);
+        
+        if (filterDateFrom) {
+          const fd = new Date(filterDateFrom + 'T00:00:00');
+          req = req.gte('created_at', fd.toISOString());
+        }
+        if (filterDateTo) {
+          const td = new Date(filterDateTo + 'T23:59:59.999');
+          req = req.lte('created_at', td.toISOString());
+        }
+
+        const { data, error } = await req;
+        if (error) throw error;
+        if (!data || data.length === 0) return alert('No orders to export.');
+
+        const headers = ['Order ID', 'Date', 'Customer Name', 'Phone', 'District', 'Thana', 'Address', 'Subtotal', 'Delivery', 'Total', 'Payment Status', 'Order Status', 'Items', 'Notes'];
+        
+        const rows = data.map(o => {
+          const date = new Date(o.created_at).toLocaleString('en-BD').replace(/,/g, '');
+          const itemsStr = o.items.map(i => `${i.name} (x${i.qty})`).join('; ');
+          
+          // Wrap strings in quotes to handle commas, use a leading space for phone to prevent Excel dropping the leading zero
+          return [
+            o.order_number,
+            `"${date}"`,
+            `"${o.customer_name}"`,
+            `" ${o.customer_phone}"`,
+            `"${o.district}"`,
+            `"${o.thana}"`,
+            `"${o.full_address.replace(/"/g, '""')}"`,
+            o.subtotal,
+            o.delivery_fee,
+            o.total_amount,
+            o.payment_status || 'unpaid',
+            o.status,
+            `"${itemsStr}"`,
+            `"${(o.special_notes || '').replace(/"/g, '""')}"`
+          ].join(',');
+        });
+
+        const csvContent = [headers.join(','), ...rows].join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `safa_orders_${new Date().toISOString().split('T')[0]}.csv`;
+        link.click();
+      } catch (err) {
+        alert('Error exporting CSV: ' + err.message);
+      } finally {
+        btn.textContent = originalText;
+        btn.disabled = false;
+      }
+    };
+
+    checkAuth();
+  </script>
+</body>
+</html>
