@@ -13,13 +13,6 @@
   <!-- ── Global styles (CSS variables, nav, buttons, cart) ── -->
   <link rel="stylesheet" href="style.css">
 
-  <!-- ── Supabase SDK ──
-       Must load BEFORE inline scripts below.
-       CDN exposes window.supabase — we name our client 'db'
-       to avoid the self-reference ReferenceError crash.
-  ── -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
   <!-- ════════════════════════════════════════════════════
        CHECKOUT PAGE — LOCAL STYLES
        Scoped to checkout.html only.
@@ -967,7 +960,6 @@
                           placeholder="House no., road, area, landmark..."
                           autocomplete="street-address"
                           aria-required="true"
-                          maxlength="300"
                           aria-describedby="custAddress-error custAddress-counter">
                 </textarea>
                 <div style="display:flex;justify-content:space-between;
@@ -979,7 +971,7 @@
                   <span class="field-counter"
                         id="custAddress-counter"
                         aria-live="polite"
-                        aria-label="Character count">0 / 300</span>
+                        aria-label="Character count"></span>
                 </div>
               </div>
 
@@ -1164,7 +1156,7 @@
   ════════════════════════════════════════════════════ -->
   <script type="module" src="/src/main.js"></script>
 
-  <script>
+  <script type="module">
     /* ============================================================
        CHECKOUT — INLINE SCRIPT
        ─────────────────────────────────────────────────────────
@@ -1215,11 +1207,7 @@
        Status flow: pending → confirmed → dispatched → delivered
     ───────────────────────────────────────────────────────── */
 
-    const SUPABASE_URL  = 'https://uiwmerejtrdrykqpumdu.supabase.co';
-    const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVpd21lcmVqdHJkcnlrcXB1bWR1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3NzQ1MjIsImV4cCI6MjA5MTM1MDUyMn0.bF1GPeGFhAphNFG-E6MfZCrZihT3iTeCFIDi6g3w0n0';
-
-    /* ✅ window.supabase = CDN global. 'db' avoids self-reference crash. */
-    const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+    import { supabase } from '/src/supabase.js';
 
     const SELLER_PHONE      = '8801970099378'; /* seller WhatsApp */
     const MAX_RETRIES       = 3;               /* Supabase retry attempts */
@@ -1392,6 +1380,10 @@
       const orderId  = generateOrderId();
       const date     = formatDate();
 
+      /* NEW: Validate Supabase session before proceeding */
+      const { data: { session } } = await supabase.auth.getSession();
+      const userId = session?.user?.id || null;
+
       const order = {
         orderId, date, name, phone,
         district, thana, address, notes,
@@ -1412,8 +1404,8 @@
         Processing Securely...`;
 
       try {
-        /* 5. Save to Supabase */
-        await saveOrderToSupabase(order, items);
+        /* 5. Save to Supabase (passing the validated user ID if logged in) */
+        await saveOrderToSupabase(order, items, userId);
 
         /* 6. Notify seller via WhatsApp (fire-and-forget) */
         notifySeller(order, items, total);
@@ -1473,7 +1465,7 @@
       }));
     }
 
-    async function saveOrderToSupabase(order, items) {
+    async function saveOrderToSupabase(order, items, userId = null) {
 
       const row = {
         order_number:   order.orderId,
@@ -1492,13 +1484,19 @@
         /* created_at set automatically by Supabase */
       };
 
+      /* If the user is logged in, attach their ID to the order.
+         NOTE: You must add a `user_id` (type UUID) column to your `orders` table in Supabase! */
+      if (userId) {
+        row.user_id = userId;
+      }
+
       console.log('[SaFa] Saving order:', row.order_number);
 
       let lastError = null;
 
       for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
 
-        const { data, error } = await db
+        const { data, error } = await supabase
           .from('orders')
           .insert([row])
           .select('id, order_number, created_at')
@@ -1852,14 +1850,14 @@
       /* 4. Address character counter */
       const addressEl = document.getElementById('custAddress');
       const counterEl = document.getElementById('custAddress-counter');
-      const MAX_CHARS = 300;
+      const MAX_CHARS = 1000;
       if (addressEl && counterEl) {
         const updateCounter = () => {
           const len = addressEl.value.length;
-          counterEl.textContent = `${len} / ${MAX_CHARS}`;
+          counterEl.textContent = len > 800 ? `${len} / 1000` : '';
           counterEl.classList.remove('warn', 'limit');
-          if (len >= MAX_CHARS)            counterEl.classList.add('limit');
-          else if (len >= MAX_CHARS * 0.85) counterEl.classList.add('warn');
+          if (len >= 1000)       counterEl.classList.add('limit');
+          else if (len >= 850)   counterEl.classList.add('warn');
         };
         addressEl.addEventListener('input', updateCounter);
         updateCounter();
@@ -1881,6 +1879,34 @@
           });
         });
       });
+
+      /* 6. Pre-fill user data from Supabase if logged in */
+      async function prefillFromAuth() {
+        try {
+          const { data: { user } } = await supabase.auth.getUser();
+          if (!user) return;
+
+          const meta = user.user_metadata || {};
+          const nameEl = document.getElementById('custName');
+          
+          /* Only pre-fill if localStorage didn't already populate it */
+          if (nameEl && !nameEl.value) {
+            nameEl.value = meta.first_name || user.email.split('@')[0];
+          }
+
+          const phoneEl = document.getElementById('custPhone');
+          if (phoneEl && !phoneEl.value && meta.phone) {
+            const raw = meta.phone.replace(/\D/g, '').slice(0, 11);
+            phoneEl.dataset.rawPhone = raw;
+            phoneEl.value = formatPhoneDisplay(raw);
+          }
+
+          updateFormProgress();
+        } catch (err) {
+          console.error('[SaFa] Auth pre-fill failed:', err);
+        }
+      }
+      prefillFromAuth();
 
     }); /* end DOMContentLoaded */
 
