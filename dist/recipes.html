@@ -274,6 +274,11 @@
       gap: 8px;
       flex-wrap: wrap;
       align-items: center;
+      position: sticky;
+      top: 68px;
+      z-index: 100;
+      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(12px);
     }
     .rp-filter-btn {
       font-family: var(--fl);
@@ -297,6 +302,24 @@
       border-color: var(--a);
     }
 
+
+    /* ─────────────────────────────────────────────────────
+       3b. FILTER EMPTY STATE
+    ───────────────────────────────────────────────────── */
+    .rp-empty {
+      display: none;
+      text-align: center;
+      padding: 72px 24px;
+      color: rgba(245,239,230,.45);
+    }
+    .rp-empty-icon { font-size: 40px; margin-bottom: 16px; }
+    .rp-empty-label {
+      font-family: var(--fl);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
 
     /* ─────────────────────────────────────────────────────
        4. RECIPE SECTION WRAPPER
@@ -910,17 +933,12 @@
     .rp-tab-btn:hover:not(.active) { color: rgba(245,239,230,0.75); }
 
     /* ── Tab panel (content area) ── */
+    @keyframes panelIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
     .rp-modal-panels { padding: 32px 40px; min-height: 240px; }
-    .rp-modal-panel {
-      display: none;
-      opacity: 0;
-      transform: translateY(8px);
-      transition: opacity 0.25s ease, transform 0.25s ease;
-    }
+    .rp-modal-panel  { display: none; }
     .rp-modal-panel.active {
       display: block;
-      opacity: 1;
-      transform: translateY(0);
+      animation: panelIn 0.28s cubic-bezier(0.22,1,0.36,1) both;
     }
 
     /* ── Ingredients panel ── */
@@ -1291,10 +1309,10 @@
     <p class="rp-product-strip-label">🍄 এই রেসিপিগুলোতে যা লাগবে</p>
     <div class="rp-product-track">
 
-      <!-- r1.png — Fresh Oyster -->
+      <!-- Fresh Oyster -->
       <div class="rp-product-card">
         <div class="rp-product-img">
-          <img src="r1.png" alt="Fresh Oyster Mushroom" onerror="this.remove()">
+          <img src="/SaFa Fresh Oyster Mushroom.png" alt="Fresh Oyster Mushroom" onerror="this.remove()">
           <span class="rp-product-emoji">🍄</span>
         </div>
         <div class="rp-product-info">
@@ -1302,17 +1320,17 @@
           <span class="rp-product-price">350 ৳ · 1kg</span>
         </div>
         <button class="rp-product-add"
-                onclick="window.addToCart('Fresh Oyster Mushrooms',350,'fresh_oyster','1kg','r1.png')"
+                onclick="window.addToCart('Fresh Oyster Mushrooms',350,'fresh_oyster','1kg','/SaFa Fresh Oyster Mushroom.png')"
                 aria-label="Add Fresh Oyster to cart">
           <span>Add to Cart</span>
           <span class="rp-product-add-icon">+</span>
         </button>
       </div>
 
-      <!-- r2.png — Dried Oyster -->
+      <!-- Dried Oyster -->
       <div class="rp-product-card">
         <div class="rp-product-img">
-          <img src="r2.png" alt="Dried Oyster Mushroom" onerror="this.remove()">
+          <img src="/SaFa Dried Oyster Mushroom.png" alt="Dried Oyster Mushroom" onerror="this.remove()">
           <span class="rp-product-emoji">🌿</span>
         </div>
         <div class="rp-product-info">
@@ -1320,17 +1338,17 @@
           <span class="rp-product-price">280 ৳ · 100g</span>
         </div>
         <button class="rp-product-add"
-                onclick="window.addToCart('Dried Oyster Mushroom',280,'dried_oyster','100g','r2.png')"
+                onclick="window.addToCart('Dried Oyster Mushroom',280,'dried_oyster','100g','/SaFa Dried Oyster Mushroom.png')"
                 aria-label="Add Dried Oyster to cart">
           <span>Add to Cart</span>
           <span class="rp-product-add-icon">+</span>
         </button>
       </div>
 
-      <!-- r3.png — Mushroom Powder -->
+      <!-- Mushroom Powder -->
       <div class="rp-product-card">
         <div class="rp-product-img">
-          <img src="r3.png" alt="Oyster Mushroom Powder" onerror="this.remove()">
+          <img src="/SaFa Oyster Mushroom Powder.png" alt="Oyster Mushroom Powder" onerror="this.remove()">
           <span class="rp-product-emoji">🫙</span>
         </div>
         <div class="rp-product-info">
@@ -1338,7 +1356,7 @@
           <span class="rp-product-price">350 ৳ · 100g</span>
         </div>
         <button class="rp-product-add"
-                onclick="window.addToCart('Oyster Mushroom Powder',350,'mushroom_powder','100g','r3.png')"
+                onclick="window.addToCart('Oyster Mushroom Powder',350,'mushroom_powder','100g','/SaFa Oyster Mushroom Powder.png')"
                 aria-label="Add Mushroom Powder to cart">
           <span>Add to Cart</span>
           <span class="rp-product-add-icon">+</span>
@@ -1413,6 +1431,14 @@
     <button class="rp-filter-btn"
             data-filter="dry"
             role="tab" aria-selected="false">শুকনো রান্না</button>
+    <button class="rp-filter-btn"
+            data-filter="drink"
+            role="tab" aria-selected="false">পানীয়</button>
+  </div>
+  <!-- Empty state — shown when no cards match the active filter -->
+  <div id="recipeEmpty" class="rp-empty">
+    <div class="rp-empty-icon">🍄</div>
+    <p class="rp-empty-label">এই ক্যাটাগরিতে রেসিপি নেই</p>
   </div>
 
   <!-- ════════════════════════════════════════════════════
@@ -1434,7 +1460,7 @@
     <div class="rp-video-wrap">
       <video id="recipeVid"
              loop muted playsinline preload="metadata"
-             poster="SaFa Fresh Oyster Mushroom.png">
+             poster="/SaFa Fresh Oyster Mushroom.png">
         <source src="Recipe Video.mp4" type="video/mp4">
       </video>
       <div class="rp-video-overlay" id="rvOverlay"
@@ -1467,7 +1493,7 @@
       <div class="rp-featured fi" data-category="rice">
 
         <div class="rp-featured-img">
-          <img src="Mushroom Biryani.png" alt="Mushroom Biryani"
+          <img src="/Mushroom Biryani.png" alt="Mushroom Biryani"
                onerror="this.remove()">
           <span class="rp-featured-emoji">🍄</span>
           <span class="rp-featured-label">⭐ Chef's Pick</span>
@@ -1520,7 +1546,7 @@
       <div class="rp-card fi" data-category="curry">
         <div class="rp-card-img">
           <div class="rp-card-img-inner">
-            <img src="Mushroom Bhuna.png" alt="Mushroom Bhuna"
+            <img src="/Mushroom Bhuna.png" alt="Mushroom Bhuna"
                  onerror="this.remove()">
             <span class="rp-card-emoji">🍄</span>
           </div>
@@ -1563,7 +1589,7 @@
       <div class="rp-card fi" data-category="soup">
         <div class="rp-card-img">
           <div class="rp-card-img-inner">
-            <img src="Mushroom Soup.png" alt="Creamy Mushroom Soup"
+            <img src="/Mushroom Soup.png" alt="Creamy Mushroom Soup"
                  onerror="this.remove()">
             <span class="rp-card-emoji">🥣</span>
           </div>
@@ -1606,7 +1632,7 @@
       <div class="rp-card fi" data-category="snack">
         <div class="rp-card-img">
           <div class="rp-card-img-inner">
-            <img src="Mushroom Chop.png" alt="Mushroom Chop"
+            <img src="/Mushroom Chop.png" alt="Mushroom Chop"
                  onerror="this.remove()">
             <span class="rp-card-emoji">🫓</span>
           </div>
@@ -1649,7 +1675,7 @@
       <div class="rp-card fi" data-category="curry">
         <div class="rp-card-img">
           <div class="rp-card-img-inner">
-            <img src="Mushroom Daal.png" alt="Mushroom Masoor Daal"
+            <img src="/Mushroom Daal.png" alt="Mushroom Masoor Daal"
                  onerror="this.remove()">
             <span class="rp-card-emoji">🫕</span>
           </div>
@@ -1692,7 +1718,7 @@
       <div class="rp-card fi" data-category="dry">
         <div class="rp-card-img">
           <div class="rp-card-img-inner">
-            <img src="Mushroom Bhaji.png" alt="Mushroom Stir Fry"
+            <img src="/Mushroom Bhaji.png" alt="Mushroom Stir Fry"
                  onerror="this.remove()">
             <span class="rp-card-emoji">🌿</span>
           </div>
@@ -1735,7 +1761,7 @@
       <div class="rp-card fi" data-category="rice">
         <div class="rp-card-img">
           <div class="rp-card-img-inner">
-            <img src="Mushroom Khichuri.png" alt="Mushroom Khichuri"
+            <img src="/Mushroom Khichuri.png" alt="Mushroom Khichuri"
                  onerror="this.remove()">
             <span class="rp-card-emoji">🍲</span>
           </div>
@@ -1778,7 +1804,7 @@
       <div class="rp-card fi" data-category="snack">
         <div class="rp-card-img">
           <div class="rp-card-img-inner">
-            <img src="Mushroom Singara.png" alt="Mushroom Singara"
+            <img src="/Mushroom Singara.png" alt="Mushroom Singara"
                  onerror="this.remove()">
             <span class="rp-card-emoji">🥟</span>
           </div>
@@ -1818,10 +1844,10 @@
            CARD 8: Immunity Boost Smoothie
            Image: Mushroom Smoothie.png
       ══════════════════════════════════════════════ -->
-      <div class="rp-card fi" data-category="soup">
+      <div class="rp-card fi" data-category="drink">
         <div class="rp-card-img">
           <div class="rp-card-img-inner">
-            <img src="Mushroom Smoothie.png" alt="Immunity Boost Smoothie"
+            <img src="/Mushroom Smoothie.png" alt="Immunity Boost Smoothie"
                  onerror="this.remove()">
             <span class="rp-card-emoji">🥤</span>
           </div>
@@ -2499,16 +2525,20 @@
 
       /* ── Show modal ── */
       document.getElementById('recipeModal').classList.add('open');
+      document._savedScrollY = window.scrollY;
       document.body.style.overflow = 'hidden';
+      document.body.style.top = `-${document._savedScrollY}px`;
 
       /* Scroll modal to top */
       document.querySelector('.rp-modal').scrollTop = 0;
     }
 
-    /** Closes the recipe modal. */
+    /** Closes the recipe modal and restores scroll position. */
     function closeRecipe() {
       document.getElementById('recipeModal').classList.remove('open');
       document.body.style.overflow = '';
+      document.body.style.top = '';
+      window.scrollTo({ top: document._savedScrollY || 0, behavior: 'instant' });
     }
 
     /**
@@ -2567,32 +2597,67 @@
     ──────────────────────────────────────────────────── */
 
     function initRecipeFilters() {
-      const btns  = document.querySelectorAll('.rp-filter-btn');
-      const cards = document.querySelectorAll('#recipeGrid [data-category]');
+      const btns     = Array.from(document.querySelectorAll('.rp-filter-btn'));
+      const cards    = Array.from(document.querySelectorAll('#recipeGrid [data-category]'));
+      const emptyEl  = document.getElementById('recipeEmpty');
       if (!btns.length) return;
 
+      /* Build per-category counts and stamp them onto buttons */
       btns.forEach(btn => {
-        btn.addEventListener('click', () => {
-          /* Update active button */
-          btns.forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
+        const f     = btn.dataset.filter;
+        const count = f === 'all'
+          ? cards.length
+          : cards.filter(c => c.dataset.category === f).length;
+        if (count > 0) btn.dataset.count = count;
+      });
 
-          const filter = btn.dataset.filter;
+      function applyFilter(filter) {
+        /* Update active state + aria */
+        btns.forEach(b => {
+          const active = b.dataset.filter === filter;
+          b.classList.toggle('active', active);
+          b.setAttribute('aria-selected', active);
+        });
 
-          cards.forEach(card => {
-            const match = filter === 'all' ||
-              card.dataset.category === filter;
+        let visible = 0;
+        cards.forEach((card, i) => {
+          const match = filter === 'all' || card.dataset.category === filter;
+          if (match) {
+            card.style.display = '';
+            /* Staggered entrance — CSS animation resets each filter */
+            card.style.animation = 'none';
+            card.offsetHeight; /* force reflow */
+            card.style.animation = `cardIn 0.35s cubic-bezier(0.22,1,0.36,1) ${i * 40}ms both`;
+            visible++;
+          } else {
+            card.style.display = 'none';
+          }
+        });
 
-            card.style.display = match ? '' : 'none';
+        if (emptyEl) emptyEl.style.display = visible === 0 ? 'block' : 'none';
+      }
 
-            /* Re-trigger fade-in for matching cards */
-            if (match) {
-              card.classList.remove('show');
-              setTimeout(() => card.classList.add('show'), 50);
-            }
-          });
+      /* Click */
+      btns.forEach(btn => {
+        btn.addEventListener('click', () => applyFilter(btn.dataset.filter));
+      });
+
+      /* Keyboard arrow-key navigation between filter tabs */
+      btns.forEach((btn, i) => {
+        btn.addEventListener('keydown', e => {
+          if (e.key === 'ArrowRight') { e.preventDefault(); btns[(i + 1) % btns.length].focus(); }
+          if (e.key === 'ArrowLeft')  { e.preventDefault(); btns[(i - 1 + btns.length) % btns.length].focus(); }
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); btn.click(); }
         });
       });
+
+      /* Inject card entrance keyframe */
+      if (!document.getElementById('cardInStyle')) {
+        const s = document.createElement('style');
+        s.id = 'cardInStyle';
+        s.textContent = '@keyframes cardIn { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }';
+        document.head.appendChild(s);
+      }
     }
 
 
@@ -2609,7 +2674,7 @@
         const overlay = document.getElementById('rvOverlay');
         if (!vid || !overlay) return;
         overlay.classList.add('hidden');
-        vid.muted = false; /* Unmute on user interaction */
+        vid.muted = false;
         vid.play();
       };
     });
