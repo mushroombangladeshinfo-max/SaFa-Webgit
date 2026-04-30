@@ -27,13 +27,6 @@
   <!-- ── Global styles ── -->
   <link rel="stylesheet" href="style.css">
 
-  <!-- ── Supabase SDK ──
-       Must load before the inline auth script below.
-       window.supabase is the CDN global — we name our
-       client 'db' to avoid self-reference crash.
-  ── -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
   <!-- ── Structured data ── -->
   <script type="application/ld+json">
   {
@@ -145,19 +138,14 @@
   <!-- ════════════════════════════════════════════════════
        SUPABASE AUTH — user status check
        Checks if a customer is logged in and updates the nav.
-       Uses 'db' not 'supabase' to avoid self-reference crash.
   ════════════════════════════════════════════════════ -->
-  <script>
-    /* ✅ Fixed: window.supabase.createClient (CDN global),
-       NOT supabase.createClient (would be a self-reference crash). */
-    const SUPABASE_URL  = 'https://uiwmerejtrdrykqpumdu.supabase.co';
-    const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVpd21lcmVqdHJkcnlrcXB1bWR1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3NzQ1MjIsImV4cCI6MjA5MTM1MDUyMn0.bF1GPeGFhAphNFG-E6MfZCrZihT3iTeCFIDi6g3w0n0';
-    const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+  <script type="module">
+    import { supabase } from '/src/supabase.js';
 
     /** Checks auth state and swaps nav CTA for a user avatar pill if logged in. */
     async function checkUserStatus() {
       try {
-        const { data: { user } } = await db.auth.getUser();
+        const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
         const firstName = user.user_metadata?.first_name
@@ -178,7 +166,7 @@
     }
 
     /* React to login/logout events */
-    db.auth.onAuthStateChange((event) => {
+    supabase.auth.onAuthStateChange((event) => {
       if (event === 'SIGNED_IN')  checkUserStatus();
       if (event === 'SIGNED_OUT') location.reload();
     });

@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Account — SaFa Naturals</title>
+
+  <!-- ── Fonts ── -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Syne:wght@600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+
+  <!-- ── Global styles ── -->
+  <link rel="stylesheet" href="style.css">
+
+  <style>
+    /* ════════════════════════════════════════════════════
+       AUTH PAGE STYLES
+    ════════════════════════════════════════════════════ */
+    .auth-layout {
+      max-width: 440px;
+      margin: 140px auto 80px;
+      padding: 0 24px;
+      min-height: 55vh;
+    }
+    .auth-card {
+      background: var(--g800);
+      border: 1px solid rgba(255,255,255,.07);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 24px 50px rgba(0,0,0,.4);
+    }
+    .auth-tabs {
+      display: flex;
+      border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+    .auth-tab {
+      flex: 1;
+      text-align: center;
+      padding: 18px;
+      font-family: var(--fl);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      color: rgba(245,239,230,.4);
+      cursor: pointer;
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .auth-tab:hover { color: rgba(245,239,230,.8); }
+    .auth-tab.active {
+      color: var(--al);
+      border-bottom-color: var(--a);
+    }
+    .auth-body { padding: 32px 32px 40px; }
+    
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      margin-bottom: 20px;
+    }
+    .form-group label {
+      font-family: var(--fl);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: rgba(245,239,230,.68);
+    }
+    .form-group input {
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 5px;
+      padding: 14px;
+      color: var(--c);
+      font-family: var(--fb);
+      font-size: 14px;
+      font-weight: 300;
+      outline: none;
+      transition: border-color .2s, background .2s;
+      width: 100%;
+    }
+    .form-group input:focus {
+      border-color: rgba(196,154,60,.45);
+      background: rgba(255,255,255,.06);
+    }
+    .form-group input::placeholder { color: rgba(245,239,230,.25); }
+
+    .auth-btn {
+      width: 100%;
+      padding: 16px;
+      background: var(--t);
+      color: var(--c);
+      font-family: var(--fl);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: background .2s, transform .15s;
+    }
+    .auth-btn:hover:not(:disabled) {
+      background: var(--tl);
+      transform: translateY(-1px);
+    }
+    .auth-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+    .auth-error {
+      background: rgba(184,92,56,.08);
+      border: 1px solid rgba(184,92,56,.28);
+      border-radius: 6px;
+      padding: 14px;
+      margin-bottom: 24px;
+      font-size: 13.5px;
+      color: var(--tl);
+      display: none;
+      line-height: 1.5;
+    }
+    .auth-error.visible { display: block; }
+
+    /* Account Details View */
+    #account-view { display: none; }
+    .acc-header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .acc-avatar {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: rgba(196,154,60,.15);
+      border: 1px solid rgba(196,154,60,.3);
+      color: var(--al);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--fd);
+      font-size: 28px;
+      margin: 0 auto 16px;
+    }
+    .acc-title {
+      font-family: var(--fd);
+      font-size: 32px;
+      font-weight: 300;
+      color: var(--c);
+    }
+    .acc-details {
+      background: var(--g900);
+      border: 1px solid rgba(255,255,255,.05);
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+    .acc-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255,255,255,.05);
+      font-size: 14px;
+    }
+    .acc-row:last-child { border-bottom: none; }
+    .acc-label { color: rgba(245,239,230,.5); }
+    .acc-val { color: var(--c); font-weight: 400; }
+
+    /* Order History */
+    #order-history-section {
+      margin-top: 40px;
+    }
+    .order-history-title {
+      font-family: var(--fl);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: rgba(245,239,230,.5);
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+    .order-history-card {
+      background: var(--g900);
+      border: 1px solid rgba(255,255,255,.06);
+      border-radius: 8px;
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+    .order-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+      background: rgba(255,255,255,.02);
+      border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+    .order-id {
+      font-family: var(--fl);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .1em;
+      color: var(--c);
+    }
+    .order-status {
+      font-family: var(--fl);
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+    .order-status.pending   { background: rgba(217,178,84,.15); color: var(--al); }
+    .order-status.confirmed { background: rgba(95,207,128,.15); color: #5fcf80; }
+    .order-status.dispatched{ background: rgba(60,154,196,.15); color: #3c9ac4; }
+    .order-status.delivered { background: rgba(255,255,255,.1); color: rgba(255,255,255,.6); }
+    .order-status.cancelled { background: rgba(184,92,56,.15); color: var(--tl); }
+
+    .order-body { padding: 16px; }
+    .order-meta { display: flex; justify-content: space-between; font-size: 12px; color: rgba(245,239,230,.6); margin-bottom: 12px; }
+    .order-meta strong { font-weight: 500; color: var(--c); }
+    .order-items-preview { font-size: 13px; color: rgba(245,239,230,.8); line-height: 1.6; border-top: 1px solid rgba(255,255,255,.05); padding-top: 12px; }
+    .order-history-loading, .order-history-empty { font-size: 13px; color: rgba(245,239,230,.5); text-align: center; padding: 24px 0; }
+  </style>
+</head>
+<body>
+
+  <!-- ── Cart Drawer & Overlay (Reused from global layout) ── -->
+  <div class="cart-overlay" id="cartOverlay" onclick="window.toggleCart()"></div>
+  <div class="cart-drawer" id="cartDrawer">
+    <div class="cart-header">
+      <h2 class="cart-title">Your Cart</h2>
+      <button class="cart-close" onclick="window.toggleCart()" aria-label="Close cart">✕</button>
+    </div>
+    <div class="cart-items-container"></div>
+    <div class="cart-footer">
+      <div class="cart-subtotal"><span>Subtotal</span><span>0 ৳</span></div>
+      <button class="cart-checkout-btn" onclick="window.location.href='checkout.html'">Proceed to Checkout →</button>
+    </div>
+  </div>
+
+  <!-- ── Navigation ── -->
+  <nav class="nav scrolled" id="nav">
+    <a href="index.html" class="nav-logo">
+      <span class="logo-main">SaFa</span>
+      <span class="logo-sub">Naturals</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html#products">Shop</a></li>
+      <li><a href="index.html#benefits">কেন মাশরুম</a></li>
+      <li><a href="index.html#story">Our Story</a></li>
+      <li><a href="recipes.html">Recipes</a></li>
+    </ul>
+    <div class="nav-right">
+      <button class="nav-icon" onclick="window.toggleCart()" aria-label="Open cart">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+        <span class="nav-dot"></span>
+      </button>
+      <button class="hamburger" id="hamburger" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ── Mobile Menu ── -->
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="index.html#products" onclick="window.closeMenu()">Shop</a>
+    <a href="index.html#benefits" onclick="window.closeMenu()">কেন মাশরুম</a>
+    <a href="index.html#story"    onclick="window.closeMenu()">Our Story</a>
+    <a href="recipes.html"        onclick="window.closeMenu()">Recipes</a>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════
+       ACCOUNT & AUTHENTICATION MAIN CONTENT
+  ════════════════════════════════════════════════════ -->
+  <main class="auth-layout">
+    
+    <!-- 1. AUTHENTICATION VIEW (Guest) -->
+    <div class="auth-card" id="auth-view">
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tab-login" onclick="window.switchTab('login')">Log In</button>
+        <button class="auth-tab" id="tab-signup" onclick="window.switchTab('signup')">Sign Up</button>
+      </div>
+      <div class="auth-body">
+        <div class="auth-error" id="auth-error" role="alert"></div>
+
+        <!-- Log In Form -->
+        <form id="login-form" onsubmit="window.handleLogin(event)">
+          <div class="form-group">
+            <label for="login-email">Email Address</label>
+            <input type="email" id="login-email" required placeholder="you@example.com">
+          </div>
+          <div class="form-group">
+            <label for="login-password">Password</label>
+            <input type="password" id="login-password" required placeholder="••••••••">
+          </div>
+          <button type="submit" class="auth-btn" id="login-btn">Log In</button>
+        </form>
+
+        <!-- Sign Up Form (Hidden by default) -->
+        <form id="signup-form" style="display:none;" onsubmit="window.handleSignup(event)">
+          <div class="form-group">
+            <label for="signup-name">First Name</label>
+            <input type="text" id="signup-name" required placeholder="Your name">
+          </div>
+          <div class="form-group">
+            <label for="signup-phone">Phone Number</label>
+            <input type="tel" id="signup-phone" required placeholder="01XXXXXXXXX">
+          </div>
+          <div class="form-group">
+            <label for="signup-email">Email Address</label>
+            <input type="email" id="signup-email" required placeholder="you@example.com">
+          </div>
+          <div class="form-group">
+            <label for="signup-password">Password</label>
+            <input type="password" id="signup-password" required minlength="6" placeholder="At least 6 characters">
+          </div>
+          <button type="submit" class="auth-btn" id="signup-btn">Create Account</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- 2. ACCOUNT VIEW (Logged In) -->
+    <div class="auth-card" id="account-view">
+      <div class="auth-body" style="padding-top: 40px;">
+        <div class="acc-header">
+          <div class="acc-avatar" id="acc-avatar"></div>
+          <h1 class="acc-title">Hello, <em id="acc-name">User</em></h1>
+        </div>
+        
+        <div class="acc-details">
+          <div class="acc-row">
+            <span class="acc-label">Email</span>
+            <span class="acc-val" id="acc-email"></span>
+          </div>
+          <div class="acc-row">
+            <span class="acc-label">Phone</span>
+            <span class="acc-val" id="acc-phone"></span>
+          </div>
+        </div>
+
+        <!-- Order History -->
+        <div id="order-history-section">
+          <h2 class="order-history-title">Your Orders</h2>
+          <div id="order-history-list">
+            <p class="order-history-loading">Loading your orders...</p>
+          </div>
+        </div>
+
+        <button onclick="window.handleLogout()" class="btn-ghost-dark" style="width: 100%; justify-content: center; margin-top: 32px;">Log Out</button>
+      </div>
+    </div>
+
+  </main>
+
+  <script type="module" src="/src/main.js"></script>
+  <script type="module">
+    import { supabase } from '/src/supabase.js';
+
+    const authView = document.getElementById('auth-view');
+    const accountView = document.getElementById('account-view');
+    const errorBanner = document.getElementById('auth-error');
+
+    window.switchTab = (tab) => {
+      errorBanner.classList.remove('visible');
+      const isLogin = tab === 'login';
+      document.getElementById('tab-login').classList.toggle('active', isLogin);
+      document.getElementById('tab-signup').classList.toggle('active', !isLogin);
+      document.getElementById('login-form').style.display = isLogin ? 'block' : 'none';
+      document.getElementById('signup-form').style.display = isLogin ? 'none' : 'block';
+    };
+
+    window.handleLogin = async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('login-btn');
+      btn.textContent = 'Logging in...'; btn.disabled = true;
+      const { error } = await supabase.auth.signInWithPassword({
+        email: document.getElementById('login-email').value,
+        password: document.getElementById('login-password').value
+      });
+      if (error) { errorBanner.textContent = error.message; errorBanner.classList.add('visible'); btn.textContent = 'Log In'; btn.disabled = false; }
+      else location.reload();
+    };
+
+    window.handleSignup = async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('signup-btn');
+      btn.textContent = 'Signing up...'; btn.disabled = true;
+      const { data, error } = await supabase.auth.signUp({
+        email: document.getElementById('signup-email').value,
+        password: document.getElementById('signup-password').value,
+        options: { data: {
+          first_name: document.getElementById('signup-name').value,
+          phone: document.getElementById('signup-phone').value
+        }}
+      });
+      if (error) { errorBanner.textContent = error.message; errorBanner.classList.add('visible'); btn.textContent = 'Create Account'; btn.disabled = false; }
+      else if (data.session) location.reload();
+      else { errorBanner.textContent = 'Success! Please check your email to verify your account.'; errorBanner.classList.add('visible'); errorBanner.style.borderColor = '#5fcf80'; errorBanner.style.color = '#5fcf80'; errorBanner.style.background = 'rgba(95,207,128,.08)'; btn.textContent = 'Create Account'; btn.disabled = false; }
+    };
+
+    window.handleLogout = async () => {
+      await supabase.auth.signOut();
+      location.href = 'index.html';
+    };
+
+    /* Check Session on Load */
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        authView.style.display = 'none';
+        accountView.style.display = 'block';
+        const meta = session.user.user_metadata || {};
+        const name = meta.first_name || session.user.email.split('@')[0];
+        document.getElementById('acc-name').textContent = name;
+        document.getElementById('acc-avatar').textContent = name[0].toUpperCase();
+        document.getElementById('acc-email').textContent = session.user.email;
+        document.getElementById('acc-phone').textContent = meta.phone || 'Not provided';
+
+        fetchAndDisplayOrders(session.user);
+      } else {
+        authView.style.display = 'block';
+        accountView.style.display = 'none';
+      }
+    });
+
+    async function fetchAndDisplayOrders(user) {
+      const listEl = document.getElementById('order-history-list');
+      if (!listEl) return;
+
+      try {
+        const { data: orders, error } = await supabase
+          .from('orders')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        if (orders.length === 0) {
+          listEl.innerHTML = '<p class="order-history-empty">You have no past orders.</p>';
+          return;
+        }
+
+        const html = orders.map(order => {
+          const orderDate = new Date(order.created_at).toLocaleDateString('en-GB', {
+            day: 'numeric', month: 'short', year: 'numeric'
+          });
+          const itemsPreview = order.items.map(item => `${item.name} (×${item.qty})`).join(', ');
+
+          return `
+            <div class="order-history-card">
+              <div class="order-header">
+                <span class="order-id">Order #${order.order_number}</span>
+                <span class="order-status ${order.status.toLowerCase()}">${order.status}</span>
+              </div>
+              <div class="order-body">
+                <div class="order-meta">
+                  <span><strong>Date:</strong> ${orderDate}</span>
+                  <span><strong>Total:</strong> ৳${order.total_amount.toLocaleString()}</span>
+                </div>
+                <div class="order-items-preview">${itemsPreview}</div>
+              </div>
+            </div>`;
+        }).join('');
+
+        listEl.innerHTML = html;
+      } catch (err) {
+        console.error('[SaFa] Error fetching orders:', err);
+        listEl.innerHTML = '<p class="order-history-empty">Could not load your orders. Please try again later.</p>';
+      }
+    }
+  </script>
+</body>
+</html>

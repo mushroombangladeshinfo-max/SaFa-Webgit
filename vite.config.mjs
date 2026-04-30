@@ -12,6 +12,7 @@ export default defineConfig({
         main:     resolve(__dirname, 'index.html'),
         recipes:  resolve(__dirname, 'recipes.html'),
         checkout: resolve(__dirname, 'checkout.html'),
+        account:  resolve(__dirname, 'account.html'),
       }
     }
   },
