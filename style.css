@@ -834,6 +834,11 @@ img {
 /* Extra margin variant */
 .title-spacing  { margin-bottom: 24px; }
 
+/* Generic section header wrapper */
+.products-header {
+  margin-bottom: 48px;
+}
+
 /* ── Trust ribbon mobile ── */
 @media (max-width: 992px) {
   .trust-ribbon-new { flex-wrap: wrap; }

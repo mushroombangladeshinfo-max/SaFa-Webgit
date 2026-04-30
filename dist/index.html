@@ -2,6 +2,7 @@
 <html lang="bn">
 <head>
   <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/favicon.png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <!-- ── Open Graph ── -->
@@ -25,13 +26,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,200;0,300;0,400;0,600;1,200;1,300;1,400;1,600&family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@200;300;400;500&family=Hind+Siliguri:wght@300;400;500;600&display=swap" rel="stylesheet">
 
   <!-- ── Global styles ── -->
-
-  <!-- ── Supabase SDK ──
-       Must load before the inline auth script below.
-       window.supabase is the CDN global — we name our
-       client 'db' to avoid self-reference crash.
-  ── -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <!-- ── Structured data ── -->
   <script type="application/ld+json">
@@ -61,8 +55,10 @@
     "knowsAbout": ["Organic Mushrooms", "Controlled Environment Agriculture", "Sustainable Farming"]
   }
   </script>
-  <script type="module" crossorigin src="/assets/main-DPoH9ZMZ.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/main-BEpGqEiR.css">
+  <script type="module" crossorigin src="/assets/main-CXDuLJwc.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/main-B3pLGffD.js">
+  <link rel="modulepreload" crossorigin href="/assets/supabase-CkkPnFpI.js">
+  <link rel="stylesheet" crossorigin href="/assets/main-Dy9Li3jC.css">
 </head>
 <body>
 
@@ -146,46 +142,7 @@
   <!-- ════════════════════════════════════════════════════
        SUPABASE AUTH — user status check
        Checks if a customer is logged in and updates the nav.
-       Uses 'db' not 'supabase' to avoid self-reference crash.
   ════════════════════════════════════════════════════ -->
-  <script>
-    /* ✅ Fixed: window.supabase.createClient (CDN global),
-       NOT supabase.createClient (would be a self-reference crash). */
-    const SUPABASE_URL  = 'https://uiwmerejtrdrykqpumdu.supabase.co';
-    const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVpd21lcmVqdHJkcnlrcXB1bWR1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3NzQ1MjIsImV4cCI6MjA5MTM1MDUyMn0.bF1GPeGFhAphNFG-E6MfZCrZihT3iTeCFIDi6g3w0n0';
-    const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
-
-    /** Checks auth state and swaps nav CTA for a user avatar pill if logged in. */
-    async function checkUserStatus() {
-      try {
-        const { data: { user } } = await db.auth.getUser();
-        if (!user) return;
-
-        const firstName = user.user_metadata?.first_name
-          || user.email.split('@')[0];
-        const navRight = document.querySelector('.nav-right');
-        const orderBtn = navRight?.querySelector('.nav-cta');
-
-        if (orderBtn) {
-          orderBtn.outerHTML = `
-            <a href="account.html" class="nav-user-pill">
-              <div class="nav-avatar">${firstName[0].toUpperCase()}</div>
-              <span class="nav-user-name">${firstName}</span>
-            </a>`;
-        }
-      } catch (err) {
-        console.error('[SaFa] Auth check failed:', err);
-      }
-    }
-
-    /* React to login/logout events */
-    db.auth.onAuthStateChange((event) => {
-      if (event === 'SIGNED_IN')  checkUserStatus();
-      if (event === 'SIGNED_OUT') location.reload();
-    });
-
-    document.addEventListener('DOMContentLoaded', checkUserStatus);
-  </script>
 
   <!-- ════════════════════════════════════════════════════
        PRODUCTS SECTION
@@ -196,7 +153,7 @@
 
        data-image paths must match filenames in public/ folder.
   ════════════════════════════════════════════════════ -->
-  <section class="products-section" id="products">
+  <section class="products-premium" id="products">
     <div class="products-header">
       <div>
         <span class="section-eyebrow">আমাদের পণ্য</span>
@@ -208,7 +165,7 @@
     <div class="pl-grid">
 
       <!-- ── Card 1: Fresh Oyster ── -->
-      <div class="pl-card fi" data-category="fresh">
+      <div class="pl-card fi" data-category="fresh" data-id="fresh_oyster">
         <div class="pl-img-box">
           <div class="pl-img-badges">
             <span class="pl-badge gold">FARM FRESH</span>
@@ -247,7 +204,7 @@
       </div>
 
       <!-- ── Card 2: Dried Oyster ── -->
-      <div class="pl-card fi" data-category="dry">
+      <div class="pl-card fi" data-category="dry" data-id="dried_oyster">
         <div class="pl-img-box">
           <div class="pl-img-badges">
             <span class="pl-badge gold">LONG SHELF LIFE</span>
@@ -285,7 +242,7 @@
       </div>
 
       <!-- ── Card 3: Mushroom Powder ── -->
-      <div class="pl-card fi" data-category="dry">
+      <div class="pl-card fi" data-category="dry" data-id="mushroom_powder">
         <div class="pl-img-box">
           <div class="pl-img-badges">
             <span class="pl-badge gold">SUPERFOOD</span>
@@ -323,7 +280,7 @@
       </div>
 
       <!-- ── Card 4: Button Mushroom (Coming Soon) ── -->
-      <div class="pl-card fi pl-card-coming" data-category="coming">
+      <div class="pl-card fi pl-card-coming" data-category="coming" data-id="button_mushroom">
         <div class="pl-img-box">
           <div class="pl-img-badges">
             <span class="pl-badge gold">MYSTERY</span>
@@ -810,6 +767,11 @@
 
        The old script.js is fully replaced by src/main.js.
        Do NOT include both — remove script.js from htdocs.
+  ════════════════════════════════════════════════════ -->
+
+  <!-- ════════════════════════════════════════════════════
+       INVENTORY STATUS SCRIPT
+       Fetches stock levels and updates product cards.
   ════════════════════════════════════════════════════ -->
 
 </body>

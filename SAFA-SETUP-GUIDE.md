@@ -28,6 +28,9 @@ CREATE TABLE IF NOT EXISTS public.orders (
   -- Primary key — auto-generated UUID
   id                uuid          DEFAULT gen_random_uuid() PRIMARY KEY,
 
+  -- Link to the authenticated user (if logged in)
+  user_id           uuid          REFERENCES auth.users(id),
+
   -- Human-readable order ID (e.g. SAFA-1904-7823)
   -- UNIQUE prevents duplicate order numbers
   order_number      text          NOT NULL UNIQUE,
@@ -54,6 +57,7 @@ CREATE TABLE IF NOT EXISTS public.orders (
 
   -- Payment & fulfilment status
   payment_method    text          NOT NULL DEFAULT 'cod',
+  payment_status    text          NOT NULL DEFAULT 'unpaid',
   status            text          NOT NULL DEFAULT 'pending',
 
   -- Timestamp — set automatically by Supabase
@@ -76,6 +80,10 @@ CREATE INDEX IF NOT EXISTS idx_orders_district
 -- Sort by newest first (default dashboard view)
 CREATE INDEX IF NOT EXISTS idx_orders_created_at
   ON public.orders (created_at DESC);
+
+-- Filter by payment status
+CREATE INDEX IF NOT EXISTS idx_orders_payment_status
+  ON public.orders (payment_status);
 
 -- ── Add a comment so future you knows what this table is ──
 COMMENT ON TABLE public.orders IS
@@ -127,8 +135,24 @@ CREATE POLICY "deny_anon_select"
   USING (false);                 -- always false = always denied
 
 
--- 4. DENY: nobody can UPDATE or DELETE via the API
---    All status changes should go through your Supabase dashboard.
+-- 4. ALLOW: Authenticated users can view their own orders
+CREATE POLICY "auth_can_select_own_orders"
+  ON public.orders
+  FOR SELECT
+  TO authenticated
+  USING (auth.uid() = user_id);
+
+
+-- 5. ALLOW: Authenticated users can update their own orders (e.g. to cancel)
+CREATE POLICY "auth_can_update_own_orders"
+  ON public.orders
+  FOR UPDATE
+  TO authenticated
+  USING (auth.uid() = user_id AND status = 'pending')
+  WITH CHECK (auth.uid() = user_id);
+
+
+-- 6. DENY: anon users cannot UPDATE or DELETE
 CREATE POLICY "deny_anon_update"
   ON public.orders
   FOR UPDATE
@@ -140,6 +164,15 @@ CREATE POLICY "deny_anon_delete"
   FOR DELETE
   TO anon
   USING (false);
+
+
+-- 7. ALLOW: Admin can do everything (Replace with your actual email)
+CREATE POLICY "admin_all_orders"
+  ON public.orders
+  FOR ALL
+  TO authenticated
+  USING (auth.jwt() ->> 'email' = 'your_actual_email@example.com')
+  WITH CHECK (auth.jwt() ->> 'email' = 'your_actual_email@example.com');
 ```
 
 **You should see:** `Success. No rows returned.`
@@ -191,6 +224,7 @@ Expected output (12 rows):
 | delivery_fee   | integer                  | NO          |
 | total_amount   | integer                  | NO          |
 | payment_method | text                     | NO          |
+| payment_status | text                     | NO          |
 | status         | text                     | NO          |
 | created_at     | timestamp with time zone | NO          |
 
@@ -398,3 +432,83 @@ Customer receives order → update status: dispatched → delivered
 
 *SaFa Naturals Backend Setup — Generated during development session.*
 *All 5 checkout phases complete.*
+
+---
+
+## PART 9 — INVENTORY TRACKING (Optional)
+
+This adds inventory tracking to your products. When an order is placed, the stock for each item will be automatically decremented.
+
+### Step 8 — Create the `products` table
+
+Run this SQL in the Supabase SQL Editor to create a `products` table and populate it with your current items.
+
+```sql
+-- Create products table
+CREATE TABLE IF NOT EXISTS public.products (
+  id              text          PRIMARY KEY,
+  name            text          NOT NULL,
+  price           integer       NOT NULL,
+  inventory_count integer       DEFAULT 0,
+  -- Add other fields like image_url, description if you want to manage them from the DB
+  image_url       text,
+  description     text,
+  unit            text
+);
+
+-- Enable RLS for products table
+ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;
+
+-- Allow anyone to read products
+CREATE POLICY "public_can_read_products"
+  ON public.products
+  FOR SELECT
+  TO anon, authenticated
+  USING (true);
+
+-- Only allow admin to update products (e.g., inventory)
+CREATE POLICY "admin_can_update_products"
+  ON public.products
+  FOR UPDATE
+  TO authenticated
+  USING (auth.jwt() ->> 'email' = 'your_actual_email@example.com')
+  WITH CHECK (auth.jwt() ->> 'email' = 'your_actual_email@example.com');
+
+-- Populate with initial data from index.html
+-- ⚙️ Set your initial inventory_count values here!
+INSERT INTO public.products (id, name, price, inventory_count, image_url, description, unit)
+VALUES
+  ('fresh_oyster', 'Fresh Oyster Mushrooms', 350, 100, 'SaFa Fresh Oyster Mushroom.png', 'Experience the rich, meaty texture...', '1kg'),
+  ('dried_oyster', 'Dried Oyster Mushroom', 280, 100, 'SaFa Dried Oyster Mushroom.png', 'Sun-dried to lock in nutrients...', '100g'),
+  ('mushroom_powder', 'Oyster Mushroom Powder', 350, 100, 'SaFa Oyster Mushroom Powder.png', 'Super-fine, nutrient-dense powder...', '100g')
+ON CONFLICT (id) DO NOTHING;
+```
+
+### Step 9 — Create inventory decrement function and trigger
+
+This function will run automatically every time a new order is inserted.
+
+```sql
+-- Function to decrement inventory
+CREATE OR REPLACE FUNCTION public.decrement_inventory()
+RETURNS TRIGGER AS $$
+BEGIN
+  -- Loop through each item in the new order
+  FOR item IN SELECT * FROM jsonb_to_recordset(NEW.items) AS x(id text, qty int)
+  LOOP
+    -- Decrement the inventory for the corresponding product
+    UPDATE public.products
+    SET inventory_count = inventory_count - item.qty
+    WHERE id = item.id AND inventory_count IS NOT NULL; -- Only decrement if tracking is enabled
+  END LOOP;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger to call the function after a new order is inserted
+DROP TRIGGER IF EXISTS on_order_placed ON public.orders;
+CREATE TRIGGER on_order_placed
+  AFTER INSERT ON public.orders
+  FOR EACH ROW
+  EXECUTE FUNCTION public.decrement_inventory();
+```
