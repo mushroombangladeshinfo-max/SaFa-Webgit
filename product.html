@@ -5,7 +5,28 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title id="page-title">Product — SaFa Naturals</title>
   <meta name="description" id="page-desc" content="Premium organic mushrooms by SaFa Naturals, Bangladesh." />
+  <link rel="canonical" id="page-canonical" href="https://www.safanaturals.org/product.html" />
   <link rel="icon" type="image/png" href="/favicon.png" />
+
+  <!-- Open Graph (updated dynamically by JS) -->
+  <meta property="og:type"        content="product" />
+  <meta property="og:site_name"   content="SaFa Naturals" />
+  <meta property="og:title"       id="og-title"       content="SaFa Naturals — Organic Mushrooms" />
+  <meta property="og:description" id="og-description" content="Premium organic mushrooms from Sirajganj, Bangladesh." />
+  <meta property="og:image"       id="og-image"       content="https://www.safanaturals.org/SaFa%20Fresh%20Oyster%20Mushroom.png" />
+  <meta property="og:url"         id="og-url"         content="https://www.safanaturals.org/product.html" />
+  <meta property="product:price:amount"   id="og-price"    content="350" />
+  <meta property="product:price:currency" content="BDT" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary_large_image" />
+  <meta name="twitter:site"        content="@safanaturals" />
+  <meta name="twitter:title"       id="tw-title"       content="SaFa Naturals — Organic Mushrooms" />
+  <meta name="twitter:description" id="tw-description" content="Premium organic mushrooms from Sirajganj, Bangladesh." />
+  <meta name="twitter:image"       id="tw-image"       content="https://www.safanaturals.org/SaFa%20Fresh%20Oyster%20Mushroom.png" />
+
+  <!-- JSON-LD Product schema (populated by JS) -->
+  <script type="application/ld+json" id="product-schema">{}</script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500;600;700&family=Hind+Siliguri:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
@@ -858,9 +879,55 @@ async function loadReviews(productId, staticReviews) {
 
 /* ── MAIN RENDER ── */
 function renderProduct(p) {
-  document.title = `${p.name} — SaFa Naturals`
+  const BASE      = 'https://www.safanaturals.org'
+  const pageUrl   = `${BASE}/product.html?id=${p.id}`
+  const imgUrl    = `${BASE}${p.image}`
+  const descShort = p.description.split('\n\n')[0].replace(/\n/g, ' ')
+
+  document.title              = `${p.name} — SaFa Naturals`
   $('page-title').textContent = `${p.name} — SaFa Naturals`
-  $('page-desc').content = p.description.split('\n')[0]
+  $('page-desc').content      = descShort
+  $('page-canonical').href    = pageUrl
+
+  /* Open Graph */
+  $('og-title').content       = `${p.name} — SaFa Naturals`
+  $('og-description').content = descShort
+  $('og-image').content       = imgUrl
+  $('og-url').content         = pageUrl
+  if (p.price) $('og-price').content = String(p.price)
+
+  /* Twitter Card */
+  $('tw-title').content       = `${p.name} — SaFa Naturals`
+  $('tw-description').content = descShort
+  $('tw-image').content       = imgUrl
+
+  /* JSON-LD Product schema */
+  const schema = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: p.name,
+    description: descShort,
+    image: imgUrl,
+    url: pageUrl,
+    sku: `SAFA-${p.id.toUpperCase()}`,
+    brand: { '@type': 'Brand', name: 'SaFa Naturals' },
+    offers: p.price ? {
+      '@type': 'Offer',
+      price: String(p.price),
+      priceCurrency: 'BDT',
+      availability: p.coming ? 'https://schema.org/PreOrder' : 'https://schema.org/InStock',
+      itemCondition: 'https://schema.org/NewCondition',
+      seller: { '@type': 'Organization', name: 'SaFa Naturals' }
+    } : undefined,
+    aggregateRating: p.rating ? {
+      '@type': 'AggregateRating',
+      ratingValue: String(p.rating),
+      reviewCount: String(p.reviews),
+      bestRating: '5',
+      worstRating: '1'
+    } : undefined
+  }
+  $('product-schema').textContent = JSON.stringify(schema)
 
   const waMsg = encodeURIComponent(`হ্যালো, আমি ${p.waText} অর্ডার করতে চাই।`)
 
