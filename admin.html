@@ -382,6 +382,26 @@
     .inv-save-btn:hover { background:rgba(196,154,60,.2); }
     .pf-hint { opacity:.5; font-size:.85em; }
 
+    /* ══ CUSTOMERS ══ */
+    .cust-toolbar { display:flex; align-items:center; gap:12px; margin-bottom:18px; flex-wrap:wrap; }
+    .cust-headline { font-family:'Cormorant Garamond',serif; font-size:24px; font-weight:300; color:var(--c); flex:1; }
+    .cust-headline em { font-style:italic; color:var(--al); }
+    .cust-stat-strip { display:flex; gap:16px; margin-bottom:20px; }
+    .cust-stat { background:var(--g800); border:1px solid rgba(255,255,255,.07); border-radius:8px; padding:14px 18px; flex:1; }
+    .cust-stat-val { font-family:'Cormorant Garamond',serif; font-size:26px; font-weight:300; color:var(--al); line-height:1; }
+    .cust-stat-lbl { font-family:'Syne',sans-serif; font-size:9px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:rgba(245,239,230,.38); margin-top:4px; }
+    /* Order history drawer */
+    .cust-orders-row td { padding:0; border-bottom:1px solid rgba(255,255,255,.04); }
+    .cust-orders-panel { padding:14px 20px 18px; background:rgba(255,255,255,.012); animation:expand .2s ease; }
+    .cust-orders-title { font-family:'Syne',sans-serif; font-size:9px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:rgba(196,154,60,.8); margin-bottom:10px; }
+    .cust-order-row { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid rgba(255,255,255,.04); font-size:13px; flex-wrap:wrap; gap:8px; }
+    .cust-order-row:last-child { border-bottom:none; }
+    .cust-order-id { font-family:'Syne',sans-serif; font-size:10px; font-weight:700; letter-spacing:.06em; color:var(--c); }
+    .cust-order-meta { font-size:11px; color:rgba(245,239,230,.45); }
+    .cust-order-total { font-family:'Cormorant Garamond',serif; font-size:16px; font-weight:300; color:var(--al); }
+    .cell-phone { font-family:'DM Sans',sans-serif; letter-spacing:.04em; font-size:13px; }
+    .cell-spent { font-family:'Cormorant Garamond',serif; font-size:18px; font-weight:300; color:var(--al); }
+
     /* ─── Responsive ─── */
     @media (max-width:1100px) { .stats-grid { grid-template-columns:repeat(2,1fr); } .promo-settings-row { grid-template-columns:1fr 1fr; } .quick-tiers { grid-template-columns:1fr 1fr; } .kpi-row { grid-template-columns:1fr 1fr; } .charts-row { grid-template-columns:1fr; } }
     @media (max-width:600px)  { .promo-settings-row { grid-template-columns:1fr; } .quick-tiers { grid-template-columns:1fr; } .add-form-grid { grid-template-columns:1fr 1fr; } }
@@ -603,6 +623,10 @@
         <button type="button" class="dash-tab" id="tab-products" onclick="switchDashTab('products')">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
           Products
+        </button>
+        <button type="button" class="dash-tab" id="tab-customers" onclick="switchDashTab('customers')">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+          Customers
         </button>
       </div>
 
@@ -970,6 +994,62 @@
         </div>
 
       </div><!-- /panel-products -->
+
+      <!-- ═══════════════ CUSTOMERS PANEL ═══════════════ -->
+      <div id="panel-customers" class="panel-hidden">
+
+        <div class="cust-toolbar">
+          <div class="cust-headline">Customers <em>&amp; History</em></div>
+          <input type="text" id="cust-search" class="f-search wide"
+                 placeholder="Search name or phone…" oninput="filterCustomers(this.value)">
+          <button type="button" class="f-action-btn" id="cust-export-btn" onclick="exportCustomers()">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export CSV
+          </button>
+        </div>
+
+        <!-- Summary strip -->
+        <div class="cust-stat-strip">
+          <div class="cust-stat">
+            <div class="cust-stat-val" id="cust-stat-total">—</div>
+            <div class="cust-stat-lbl">Total Customers</div>
+          </div>
+          <div class="cust-stat">
+            <div class="cust-stat-val" id="cust-stat-repeat">—</div>
+            <div class="cust-stat-lbl">Repeat Buyers (2+ orders)</div>
+          </div>
+          <div class="cust-stat">
+            <div class="cust-stat-val" id="cust-stat-revenue">—</div>
+            <div class="cust-stat-lbl">Total Revenue (all)</div>
+          </div>
+          <div class="cust-stat">
+            <div class="cust-stat-val" id="cust-stat-aov">—</div>
+            <div class="cust-stat-lbl">Avg Customer Value</div>
+          </div>
+        </div>
+
+        <!-- Customers table -->
+        <div class="orders-table-wrap">
+          <table class="orders-table">
+            <thead>
+              <tr>
+                <th></th>
+                <th>Customer</th>
+                <th>Phone</th>
+                <th>Location</th>
+                <th>Orders</th>
+                <th>Total Spent</th>
+                <th>Last Order</th>
+                <th>Last Status</th>
+              </tr>
+            </thead>
+            <tbody id="cust-tbody">
+              <tr><td colspan="8"><div class="table-empty"><div class="table-empty-icon">⏳</div><p class="table-empty-text">Loading customers…</p></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div><!-- /panel-customers -->
 
     </div><!-- /dash-content -->
 
@@ -1557,8 +1637,8 @@
 
     /* Tab switching */
     window.switchDashTab = function(tab) {
-      const panels = { orders:'panel-orders', promotions:'panel-promotions', analytics:'panel-analytics', products:'panel-products' };
-      const tabs   = { orders:'tab-orders',   promotions:'tab-promos',       analytics:'tab-analytics',  products:'tab-products'   };
+      const panels = { orders:'panel-orders', promotions:'panel-promotions', analytics:'panel-analytics', products:'panel-products', customers:'panel-customers' };
+      const tabs   = { orders:'tab-orders',   promotions:'tab-promos',       analytics:'tab-analytics',  products:'tab-products',   customers:'tab-customers'   };
       Object.entries(panels).forEach(([k, id]) => {
         const el = document.getElementById(id);
         if (el) el.classList.toggle('panel-hidden', k !== tab);
@@ -1570,6 +1650,7 @@
       if (tab === 'promotions') { loadSettings(); loadCoupons(); }
       if (tab === 'analytics')  { loadAnalytics(); }
       if (tab === 'products')   { loadProducts(); }
+      if (tab === 'customers')  { loadCustomers(); }
     };
 
     /* Settings — read */
@@ -2141,6 +2222,171 @@
       const { error } = await supabase.from('products').update({ active }).eq('id', id);
       if (error) { toast('Failed to update', 'error'); loadProducts(); }
       else toast(active ? 'Product activated' : 'Product deactivated');
+    };
+
+    /* ════════════════ CUSTOMERS ════════════════ */
+
+    let _allCustomers  = [];   /* aggregated customer rows */
+    let _custOrders    = {};   /* phone → [orders] */
+
+    async function loadCustomers() {
+      const tbody = document.getElementById('cust-tbody');
+      tbody.innerHTML = `<tr><td colspan="8"><div class="table-empty"><div class="table-empty-text">Loading…</div></div></td></tr>`;
+
+      const { data, error } = await supabase
+        .from('orders')
+        .select('id,order_number,customer_name,customer_phone,district,thana,total_amount,status,created_at')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        tbody.innerHTML = `<tr><td colspan="8"><div class="table-empty"><div class="table-empty-icon">⚠️</div><p class="table-empty-text">Could not load orders</p></div></td></tr>`;
+        return;
+      }
+
+      /* Aggregate by phone */
+      const map = {};
+      (data || []).forEach(o => {
+        const phone = o.customer_phone || 'unknown';
+        if (!map[phone]) {
+          map[phone] = {
+            phone,
+            name:       o.customer_name,
+            district:   o.district,
+            thana:      o.thana,
+            orders:     [],
+            totalSpent: 0,
+          };
+        }
+        map[phone].orders.push(o);
+        map[phone].totalSpent += o.total_amount || 0;
+        /* Keep most recent name */
+        if (new Date(o.created_at) > new Date(map[phone].orders[0]?.created_at || 0)) {
+          map[phone].name     = o.customer_name;
+          map[phone].district = o.district;
+          map[phone].thana    = o.thana;
+        }
+      });
+
+      _allCustomers = Object.values(map).sort((a, b) => b.totalSpent - a.totalSpent);
+      _custOrders   = map;
+
+      /* Summary stats */
+      const total    = _allCustomers.length;
+      const repeat   = _allCustomers.filter(c => c.orders.length >= 2).length;
+      const revenue  = _allCustomers.reduce((s, c) => s + c.totalSpent, 0);
+      const avgVal   = total ? Math.round(revenue / total) : 0;
+
+      document.getElementById('cust-stat-total').textContent   = total;
+      document.getElementById('cust-stat-repeat').textContent  = repeat;
+      document.getElementById('cust-stat-revenue').textContent = fmt(revenue);
+      document.getElementById('cust-stat-aov').textContent     = fmt(avgVal);
+
+      renderCustomers(_allCustomers);
+    }
+
+    function renderCustomers(list) {
+      const tbody = document.getElementById('cust-tbody');
+      if (!list.length) {
+        tbody.innerHTML = `<tr><td colspan="8"><div class="table-empty"><div class="table-empty-icon">👤</div><p class="table-empty-text">No customers found</p></div></td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = list.map((c, idx) => {
+        const lastOrder  = c.orders[0];
+        const lastStatus = lastOrder?.status || '—';
+        const lastDate   = lastOrder ? fmtDay(lastOrder.created_at) : '—';
+        const sc         = `s-${lastStatus.toLowerCase()}`;
+        const waMsg      = encodeURIComponent(`হ্যালো ${c.name}! 🍄 SaFa Naturals থেকে বলছি।`);
+        return `
+          <tr class="order-row" data-phone="${c.phone}" onclick="toggleCustRow('${c.phone}')">
+            <td style="width:28px;padding:14px 8px 14px 16px;">
+              <svg class="expand-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+            </td>
+            <td>
+              <div class="cell-id">${c.name}</div>
+              <div class="cell-sub">${c.orders.length} order${c.orders.length !== 1 ? 's' : ''}</div>
+            </td>
+            <td><span class="cell-phone">${c.phone}</span></td>
+            <td class="cell-sub">${c.thana ? c.thana + ', ' : ''}${c.district || '—'}</td>
+            <td>
+              <div style="font-size:18px;font-family:'Cormorant Garamond',serif;font-weight:300;">${c.orders.length}</div>
+              ${c.orders.length >= 2 ? '<div class="cell-sub" style="color:var(--al)">Repeat buyer</div>' : ''}
+            </td>
+            <td><div class="cell-spent">${fmt(c.totalSpent)}</div></td>
+            <td class="cell-sub">${lastDate}</td>
+            <td onclick="event.stopPropagation()">
+              <span class="status-badge ${sc}">${cap(lastStatus)}</span>
+            </td>
+          </tr>
+          <tr id="cust-detail-${c.phone.replace(/\+/g,'')}" class="cust-orders-row" style="display:none;">
+            <td colspan="8">
+              <div class="cust-orders-panel">
+                <div class="cust-orders-title">Order History · ${c.name}</div>
+                ${c.orders.map(o => `
+                  <div class="cust-order-row">
+                    <div>
+                      <div class="cust-order-id">#${o.order_number}</div>
+                      <div class="cust-order-meta">${fmtDay(o.created_at)}</div>
+                    </div>
+                    <span class="status-badge s-${(o.status||'pending').toLowerCase()}">${cap(o.status||'pending')}</span>
+                    <div class="cust-order-total">${fmt(o.total_amount)}</div>
+                  </div>`).join('')}
+                <div style="margin-top:12px;">
+                  <a class="f-action-btn green-btn" href="https://wa.me/${SELLER_WA}?text=${waMsg}" target="_blank" rel="noopener">
+                    <svg viewBox="0 0 24 24" width="11" height="11" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+                    WhatsApp ${c.name.split(' ')[0]}
+                  </a>
+                </div>
+              </div>
+            </td>
+          </tr>`;
+      }).join('');
+    }
+
+    window.toggleCustRow = function(phone) {
+      const safe      = phone.replace(/\+/g, '');
+      const detailRow = document.getElementById(`cust-detail-${safe}`);
+      const mainRow   = document.querySelector(`tr.order-row[data-phone="${phone}"]`);
+      if (!detailRow || !mainRow) return;
+      const isOpen = detailRow.style.display !== 'none';
+      detailRow.style.display = isOpen ? 'none' : 'table-row';
+      mainRow.classList.toggle('expanded', !isOpen);
+    };
+
+    window.filterCustomers = function(q) {
+      const term = q.trim().toLowerCase();
+      if (!term) { renderCustomers(_allCustomers); return; }
+      renderCustomers(_allCustomers.filter(c =>
+        c.name.toLowerCase().includes(term) ||
+        c.phone.includes(term) ||
+        (c.district || '').toLowerCase().includes(term)
+      ));
+    };
+
+    window.exportCustomers = function() {
+      if (!_allCustomers.length) { toast('No customers to export', 'error'); return; }
+      const headers = ['Name','Phone','District','Thana','Orders','Total Spent (৳)','Last Order Date','Last Status'];
+      const rows = _allCustomers.map(c => {
+        const last = c.orders[0];
+        return [
+          `"${c.name}"`,
+          `" ${c.phone}"`,
+          `"${c.district || ''}"`,
+          `"${c.thana || ''}"`,
+          c.orders.length,
+          c.totalSpent,
+          last ? `"${fmtDay(last.created_at)}"` : '',
+          last?.status || '',
+        ].join(',');
+      });
+      const csv  = [headers.join(','), ...rows].join('\n');
+      const blob = new Blob([csv], { type:'text/csv;charset=utf-8;' });
+      const link = Object.assign(document.createElement('a'), {
+        href:     URL.createObjectURL(blob),
+        download: `safa_customers_${new Date().toISOString().slice(0,10)}.csv`,
+      });
+      link.click();
+      toast(`Exported ${_allCustomers.length} customers`);
     };
 
     /* ── Init ── */
