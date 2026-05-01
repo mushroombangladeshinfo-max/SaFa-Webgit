@@ -21,27 +21,105 @@
     body { font-family:'DM Sans',sans-serif; background:var(--g900,#060d09); color:var(--c,#f5efe6); min-height:100vh; margin:0; -webkit-font-smoothing:antialiased; }
 
     /* ════════════════ LOGIN ════════════════ */
-    .login-page { min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px; }
-    .login-card { width:100%; max-width:400px; background:var(--g800,#0e1a13); border:1px solid rgba(255,255,255,.08); border-radius:14px; overflow:hidden; box-shadow:0 32px 64px rgba(0,0,0,.5); animation:fadeUp .4s cubic-bezier(0.22,1,0.36,1) both; }
-    .login-card-top { padding:32px 32px 0; text-align:center; }
-    .login-logo { font-family:'Cormorant Garamond',serif; font-size:26px; font-weight:300; color:var(--c); }
-    .login-logo em { font-style:italic; color:var(--al); }
-    .login-badge { display:inline-block; font-family:'Syne',sans-serif; font-size:9px; font-weight:700; letter-spacing:.2em; text-transform:uppercase; color:var(--a); background:rgba(196,154,60,.1); border:1px solid rgba(196,154,60,.2); border-radius:20px; padding:4px 12px; margin:10px 0 24px; }
-    .login-body { padding:0 32px 36px; }
-    .login-banner { border-radius:8px; padding:12px 14px; margin-bottom:18px; font-size:13px; line-height:1.45; display:none; align-items:center; gap:9px; background:rgba(184,92,56,.08); border:1px solid rgba(184,92,56,.3); color:var(--tl); }
+    .login-page { min-height:100vh; display:flex; background:var(--g900); position:relative; overflow:hidden; }
+    .login-page::before { content:''; position:absolute; width:700px; height:700px; border-radius:50%; background:radial-gradient(circle,rgba(196,154,60,.055) 0%,transparent 70%); top:-250px; right:-150px; pointer-events:none; }
+    .login-page::after  { content:''; position:absolute; width:450px; height:450px; border-radius:50%; background:radial-gradient(circle,rgba(95,207,128,.04) 0%,transparent 70%); bottom:-120px; left:180px; pointer-events:none; }
+
+    /* Left brand panel */
+    .login-brand { flex:1; display:flex; flex-direction:column; justify-content:space-between; padding:52px 56px; background:linear-gradient(155deg,rgba(14,26,19,.85) 0%,rgba(6,13,9,.97) 100%); border-right:1px solid rgba(255,255,255,.045); position:relative; overflow:hidden; }
+    .login-brand::before { content:''; position:absolute; inset:0; background:url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.012'%3E%3Ccircle cx='40' cy='40' r='30'/%3E%3C/g%3E%3C/svg%3E"); pointer-events:none; }
+    .lb-logo { font-family:'Cormorant Garamond',serif; font-size:30px; font-weight:300; color:var(--c); position:relative; }
+    .lb-logo em { font-style:italic; color:var(--al); }
+    .lb-tagline { font-family:'Syne',sans-serif; font-size:9px; font-weight:700; letter-spacing:.22em; text-transform:uppercase; color:rgba(245,239,230,.25); margin-top:4px; position:relative; }
+    .lb-mid { position:relative; }
+    .lb-headline { font-family:'Cormorant Garamond',serif; font-size:clamp(26px,3.5vw,42px); font-weight:300; color:var(--c); line-height:1.2; margin-bottom:36px; }
+    .lb-headline em { font-style:italic; color:var(--al); }
+    .lb-bullets { display:flex; flex-direction:column; gap:18px; }
+    .lb-bullet { display:flex; align-items:flex-start; gap:13px; }
+    .lb-bullet-icon { width:30px; height:30px; border-radius:7px; background:rgba(196,154,60,.08); border:1px solid rgba(196,154,60,.18); display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px; }
+    .lb-bullet-icon svg { width:13px; height:13px; color:var(--al); }
+    .lb-bullet-text strong { display:block; font-size:13px; font-weight:500; color:var(--c); margin-bottom:2px; }
+    .lb-bullet-text span { font-size:12px; color:rgba(245,239,230,.38); line-height:1.55; }
+    .lb-version { font-family:'Syne',sans-serif; font-size:9px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:rgba(245,239,230,.17); position:relative; }
+
+    /* Right form panel */
+    .login-form-panel { width:440px; min-height:100vh; display:flex; flex-direction:column; justify-content:center; padding:52px 44px; background:var(--g800); position:relative; overflow:hidden; }
+
+    /* Method tabs */
+    .login-tabs { display:flex; gap:0; border:1px solid rgba(255,255,255,.08); border-radius:8px; padding:3px; margin-bottom:28px; background:rgba(255,255,255,.02); }
+    .login-tab { flex:1; padding:9px 12px; border:none; border-radius:6px; background:none; font-family:'Syne',sans-serif; font-size:9px; font-weight:700; letter-spacing:.11em; text-transform:uppercase; color:rgba(245,239,230,.35); cursor:pointer; transition:all .2s; }
+    .login-tab.active { background:rgba(196,154,60,.12); border:1px solid rgba(196,154,60,.22); color:var(--al); }
+
+    /* Panels */
+    .login-panel { display:none; }
+    .login-panel.active { display:block; animation:fadeUp .25s ease; }
+
+    /* Panel heading */
+    .lp-title { font-family:'Cormorant Garamond',serif; font-size:26px; font-weight:300; color:var(--c); margin-bottom:4px; }
+    .lp-sub   { font-size:12px; color:rgba(245,239,230,.38); line-height:1.6; margin-bottom:22px; }
+
+    /* Banner */
+    .login-banner { border-radius:8px; padding:12px 14px; margin-bottom:16px; font-size:13px; line-height:1.45; display:none; align-items:center; gap:9px; }
     .login-banner.visible { display:flex; animation:fadeUp .2s ease; }
+    .login-banner.error   { background:rgba(184,92,56,.08); border:1px solid rgba(184,92,56,.28); color:var(--tl); }
+    .login-banner.success { background:rgba(95,207,128,.08); border:1px solid rgba(95,207,128,.28); color:#5fcf80; }
+
+    /* Attempt warning */
+    .attempt-warn { font-family:'Syne',sans-serif; font-size:9px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:rgba(217,178,84,.82); margin-bottom:12px; display:none; }
+    .attempt-warn.visible { display:block; }
+
+    /* Lockout overlay */
+    .lockout-overlay { position:absolute; inset:0; background:rgba(6,13,9,.94); display:none; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:40px; z-index:20; }
+    .lockout-overlay.active { display:flex; animation:fadeUp .3s ease; }
+    .lockout-icon  { font-size:42px; margin-bottom:16px; }
+    .lockout-title { font-family:'Cormorant Garamond',serif; font-size:24px; font-weight:300; color:var(--c); margin-bottom:8px; }
+    .lockout-msg   { font-size:13px; color:rgba(245,239,230,.48); line-height:1.65; margin-bottom:20px; }
+    .lockout-timer { font-family:'Syne',sans-serif; font-size:36px; font-weight:700; color:var(--tl); letter-spacing:.02em; }
+    .lockout-lbl   { font-size:9px; font-family:'Syne',sans-serif; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:rgba(245,239,230,.28); margin-top:4px; }
+
+    /* Fields */
     .f-group { display:flex; flex-direction:column; gap:6px; margin-bottom:16px; }
-    .f-label { font-family:'Syne',sans-serif; font-size:10px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:rgba(245,239,230,.58); }
-    .f-wrap { position:relative; }
+    .f-label { font-family:'Syne',sans-serif; font-size:10px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:rgba(245,239,230,.56); }
+    .f-wrap  { position:relative; }
     .f-input { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.1); border-radius:6px; padding:13px 14px; width:100%; color:var(--c); font-family:'DM Sans',sans-serif; font-size:14px; font-weight:300; outline:none; transition:border-color .2s, background .2s, box-shadow .2s; }
     .f-input:focus { border-color:rgba(196,154,60,.5); background:rgba(255,255,255,.06); box-shadow:0 0 0 3px rgba(196,154,60,.07); }
-    .f-input::placeholder { color:rgba(245,239,230,.28); }
+    .f-input::placeholder { color:rgba(245,239,230,.26); }
     .f-input.has-toggle { padding-right:44px; }
-    .f-eye { position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:rgba(245,239,230,.4); padding:4px; transition:color .2s; }
+    .f-eye  { position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:rgba(245,239,230,.38); padding:4px; transition:color .2s; }
     .f-eye:hover { color:rgba(245,239,230,.8); }
-    .login-btn { width:100%; padding:14px; background:var(--t,#b85c38); color:var(--c); font-family:'Syne',sans-serif; font-size:11px; font-weight:700; letter-spacing:.18em; text-transform:uppercase; border:none; border-radius:6px; cursor:pointer; margin-top:6px; transition:background .2s, transform .15s; display:flex; align-items:center; justify-content:center; gap:8px; }
-    .login-btn:hover:not(:disabled) { background:var(--tl); transform:translateY(-1px); }
-    .login-btn:disabled { opacity:.6; cursor:not-allowed; transform:none; }
+
+    /* Caps lock */
+    .caps-warn { font-size:11px; color:rgba(217,178,84,.9); margin-top:5px; display:none; align-items:center; gap:5px; }
+    .caps-warn.visible { display:flex; }
+
+    /* Forgot link */
+    .forgot-link { font-family:'Syne',sans-serif; font-size:9px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:rgba(245,239,230,.32); background:none; border:none; cursor:pointer; padding:0; margin-top:-6px; margin-bottom:16px; display:block; text-align:right; width:100%; transition:color .2s; }
+    .forgot-link:hover { color:rgba(245,239,230,.65); }
+
+    /* Back link */
+    .back-link { font-family:'Syne',sans-serif; font-size:9px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:rgba(245,239,230,.28); background:none; border:none; cursor:pointer; display:flex; align-items:center; gap:5px; padding:0; margin-top:14px; transition:color .2s; }
+    .back-link:hover { color:rgba(245,239,230,.62); }
+
+    /* Buttons */
+    .login-btn { width:100%; padding:14px; color:var(--c); font-family:'Syne',sans-serif; font-size:11px; font-weight:700; letter-spacing:.18em; text-transform:uppercase; border:none; border-radius:6px; cursor:pointer; margin-top:4px; transition:background .2s, transform .15s; display:flex; align-items:center; justify-content:center; gap:8px; }
+    .login-btn.pw    { background:var(--t,#b85c38); }
+    .login-btn.pw:hover:not(:disabled)    { background:var(--tl); transform:translateY(-1px); }
+    .login-btn.magic { background:rgba(196,154,60,.14); border:1px solid rgba(196,154,60,.28); color:var(--al); }
+    .login-btn.magic:hover:not(:disabled) { background:rgba(196,154,60,.24); transform:translateY(-1px); }
+    .login-btn.reset { background:rgba(95,207,128,.1); border:1px solid rgba(95,207,128,.25); color:#5fcf80; }
+    .login-btn.reset:hover:not(:disabled) { background:rgba(95,207,128,.2); transform:translateY(-1px); }
+    .login-btn:disabled { opacity:.55; cursor:not-allowed; transform:none; }
+
+    /* Security footer */
+    .login-security { margin-top:28px; display:flex; align-items:center; justify-content:center; gap:6px; font-family:'Syne',sans-serif; font-size:9px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:rgba(245,239,230,.16); }
+    .login-security svg { width:10px; height:10px; }
+    .banner-icon { flex-shrink:0; }
+
+    /* Last login in topbar */
+    .topbar-last { font-size:10px; color:rgba(245,239,230,.28); font-family:'DM Sans',sans-serif; }
+
+    @media (max-width:860px) { .login-brand { display:none; } .login-form-panel { width:100%; padding:44px 28px; } }
+    @media (max-width:400px) { .login-form-panel { padding:32px 18px; } }
 
     /* ════════════════ DASHBOARD SHELL ════════════════ */
     .dash-page { display:none; min-height:100vh; }
@@ -261,7 +339,7 @@
       .orders-table th:nth-child(5), .orders-table td:nth-child(5) { display:none; }
     }
   </style>
-  <script type="module" crossorigin src="/assets/admin-CnDlOsw6.js"></script>
+  <script type="module" crossorigin src="/assets/admin-CjeE42hb.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/index-DshXEMtg.js">
   <link rel="modulepreload" crossorigin href="/assets/main-EM0ZYaKl.js">
   <link rel="stylesheet" crossorigin href="/assets/main-CpNDrKw3.css">
@@ -269,21 +347,82 @@
 <body>
 
   <!-- ════════════ LOGIN ════════════ -->
-  <div class="login-page" id="login-page">
-    <div class="login-card">
-      <div class="login-card-top">
-        <div class="login-logo">SaFa <em>Naturals</em></div>
-        <div class="login-badge">Admin Dashboard</div>
+  <div class="login-page" id="login-page" style="display:none;">
+
+    <!-- Left: brand panel -->
+    <div class="login-brand">
+      <div>
+        <div class="lb-logo">SaFa <em>Naturals</em></div>
+        <div class="lb-tagline">Agrotech Farm · Sirajganj</div>
       </div>
-      <div class="login-body">
-        <div class="login-banner" id="login-banner">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-          <span id="login-banner-text"></span>
+      <div class="lb-mid">
+        <h2 class="lb-headline">The dashboard behind<br><em>Bangladesh's cleanest</em><br>mushroom farm.</h2>
+        <div class="lb-bullets">
+          <div class="lb-bullet">
+            <div class="lb-bullet-icon">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+            </div>
+            <div class="lb-bullet-text">
+              <strong>Live order management</strong>
+              <span>Real-time alerts the moment a customer places an order</span>
+            </div>
+          </div>
+          <div class="lb-bullet">
+            <div class="lb-bullet-icon">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+            </div>
+            <div class="lb-bullet-text">
+              <strong>Smart promotions</strong>
+              <span>AOV-boosting coupons and free delivery controls</span>
+            </div>
+          </div>
+          <div class="lb-bullet">
+            <div class="lb-bullet-icon">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+            </div>
+            <div class="lb-bullet-text">
+              <strong>Admin-only access</strong>
+              <span>Sign in with password or a one-tap magic link</span>
+            </div>
+          </div>
         </div>
-        <form id="admin-login-form">
+      </div>
+      <div class="lb-version">v2.0 · SaFa Admin Dashboard</div>
+    </div>
+
+    <!-- Right: form panel -->
+    <div class="login-form-panel">
+
+      <!-- Lockout overlay -->
+      <div class="lockout-overlay" id="lockout-overlay">
+        <div class="lockout-icon">🔒</div>
+        <div class="lockout-title">Access Temporarily Locked</div>
+        <p class="lockout-msg">Too many failed attempts. For your security,<br>please wait before trying again.</p>
+        <div class="lockout-timer" id="lockout-timer">5:00</div>
+        <div class="lockout-lbl">minutes remaining</div>
+      </div>
+
+      <!-- Method tabs -->
+      <div class="login-tabs" role="tablist">
+        <button type="button" class="login-tab active" id="tab-password" onclick="switchLoginTab('password')" role="tab">🔑 Password</button>
+        <button type="button" class="login-tab"        id="tab-magic"    onclick="switchLoginTab('magic')"    role="tab">✨ Magic Link</button>
+      </div>
+
+      <!-- ── Password panel ── -->
+      <div class="login-panel active" id="panel-password">
+        <div class="lp-title">Welcome back</div>
+        <div class="lp-sub">Sign in with your admin credentials.</div>
+        <div class="login-banner error" id="pw-banner">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="banner-icon" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <span id="pw-banner-text"></span>
+        </div>
+        <div class="attempt-warn" id="attempt-warn"></div>
+        <form id="admin-login-form" autocomplete="on">
           <div class="f-group">
             <label class="f-label" for="admin-email">Admin Email</label>
-            <div class="f-wrap"><input type="email" id="admin-email" class="f-input" placeholder="admin@example.com" autocomplete="email" required></div>
+            <div class="f-wrap">
+              <input type="email" id="admin-email" class="f-input" placeholder="admin@safanaturals.org" autocomplete="email" required>
+            </div>
           </div>
           <div class="f-group">
             <label class="f-label" for="admin-password">Password</label>
@@ -293,12 +432,58 @@
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
               </button>
             </div>
+            <div class="caps-warn" id="caps-warn" aria-live="polite">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 9v4M12 17h.01"/><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+              Caps Lock is on
+            </div>
           </div>
-          <button type="submit" class="login-btn" id="login-btn">Log In to Dashboard</button>
+          <button type="button" class="forgot-link" onclick="switchLoginTab('forgot')">Forgot password?</button>
+          <button type="submit" class="login-btn pw" id="login-btn">Log In to Dashboard</button>
         </form>
       </div>
-    </div>
-  </div>
+
+      <!-- ── Magic Link panel ── -->
+      <div class="login-panel" id="panel-magic">
+        <div class="lp-title">Magic Link</div>
+        <div class="lp-sub">Enter your admin email and we'll send a one-time sign-in link. No password needed — expires in 1 hour.</div>
+        <div class="login-banner error" id="ml-banner">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="banner-icon" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <span id="ml-banner-text"></span>
+        </div>
+        <div class="f-group">
+          <label class="f-label" for="magic-email">Admin Email</label>
+          <input type="email" id="magic-email" class="f-input" placeholder="admin@safanaturals.org" autocomplete="email">
+        </div>
+        <button type="button" class="login-btn magic" id="magic-btn" onclick="sendMagicLink()">✨ Send Magic Link</button>
+      </div>
+
+      <!-- ── Forgot password panel ── -->
+      <div class="login-panel" id="panel-forgot">
+        <div class="lp-title">Reset Password</div>
+        <div class="lp-sub">Enter your admin email and we'll send a secure password reset link.</div>
+        <div class="login-banner error" id="fp-banner">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="banner-icon" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <span id="fp-banner-text"></span>
+        </div>
+        <div class="f-group">
+          <label class="f-label" for="reset-email">Admin Email</label>
+          <input type="email" id="reset-email" class="f-input" placeholder="admin@safanaturals.org" autocomplete="email">
+        </div>
+        <button type="button" class="login-btn reset" id="reset-btn" onclick="sendPasswordReset()">Send Reset Link</button>
+        <button type="button" class="back-link" onclick="switchLoginTab('password')">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+          Back to password login
+        </button>
+      </div>
+
+      <!-- Security footer -->
+      <div class="login-security">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+        Secured by Supabase Auth · End-to-end encrypted
+      </div>
+
+    </div><!-- /login-form-panel -->
+  </div><!-- /login-page -->
 
   <!-- ════════════ DASHBOARD ════════════ -->
   <div class="dash-page" id="dash-page">
@@ -310,6 +495,7 @@
         <span class="topbar-pill">Admin</span>
       </div>
       <div class="topbar-right">
+        <span class="topbar-last" id="topbar-last"></span>
         <span class="topbar-dot" title="Live"></span>
         <span class="topbar-admin-email" id="topbar-email"></span>
         <button type="button" class="topbar-logout" id="logout-btn">Log Out</button>
