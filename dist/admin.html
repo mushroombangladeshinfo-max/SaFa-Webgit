@@ -165,7 +165,7 @@
     .f-search.narrow { width:140px; }
     .f-date { width:140px; }
     input[type="date"].f-search::-webkit-calendar-picker-indicator { filter:invert(1); opacity:.5; cursor:pointer; }
-    .f-select { background:var(--g800); border:1px solid rgba(255,255,255,.1); border-radius:6px; padding:10px 14px; color:var(--c); font-family:'DM Sans',sans-serif; font-size:13px; cursor:pointer; outline:none; transition:border-color .2s; appearance:none; -webkit-appearance:none; padding-right:32px; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(245,239,230,0.4)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 10px center; }
+    .f-select { background:var(--g800); border:1px solid rgba(255,255,255,.1); border-radius:6px; padding:10px 14px; color:var(--c); font-family:'DM Sans',sans-serif; font-size:13px; cursor:pointer; outline:none; transition:border-color .2s; -webkit-appearance:none; appearance:none; padding-right:32px; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(245,239,230,0.4)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 10px center; }
     .f-select:focus { border-color:rgba(196,154,60,.45); }
     .f-select option { background:#0e1a13; }
     .filter-sep { width:1px; height:32px; background:rgba(255,255,255,.08); flex-shrink:0; }
@@ -180,6 +180,7 @@
     .realtime-dot { width:6px; height:6px; border-radius:50%; background:#5fcf80; animation:pulse-dot 2s ease infinite; flex-shrink:0; }
     @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.8)} }
     .ml-auto { margin-left:auto; }
+    .filter-date-sep { color:rgba(245,239,230,.35); font-size:12px; }
 
     /* ─── Orders table ─── */
     .orders-table-wrap { background:var(--g800); border:1px solid rgba(255,255,255,.07); border-radius:12px; overflow:hidden; margin-bottom:18px; }
@@ -221,7 +222,7 @@
     .s-cancelled  { background:rgba(184,92,56,.12); color:var(--tl);    border:1px solid rgba(184,92,56,.22); }
     .s-returned   { background:rgba(184,92,56,.08); color:rgba(184,92,56,.75); border:1px solid rgba(184,92,56,.15); }
 
-    .status-select { background:var(--g900); border:1px solid rgba(255,255,255,.12); border-radius:5px; padding:6px 28px 6px 10px; color:var(--c); font-family:'DM Sans',sans-serif; font-size:12px; cursor:pointer; outline:none; transition:border-color .2s; appearance:none; -webkit-appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='rgba(245,239,230,0.4)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 8px center; }
+    .status-select { background:var(--g900); border:1px solid rgba(255,255,255,.12); border-radius:5px; padding:6px 28px 6px 10px; color:var(--c); font-family:'DM Sans',sans-serif; font-size:12px; cursor:pointer; outline:none; transition:border-color .2s; -webkit-appearance:none; appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='rgba(245,239,230,0.4)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 8px center; }
     .status-select:focus { border-color:rgba(196,154,60,.45); }
     .status-select option { background:#060d09; }
 
@@ -353,6 +354,33 @@
     .an-loading { text-align:center; padding:64px 24px; font-family:'Syne',sans-serif; font-size:10px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:rgba(245,239,230,.3); }
     .panel-hidden { display:none; }
 
+    /* ══ PRODUCTS PANEL ══ */
+    .prod-toolbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; flex-wrap:wrap; gap:12px; }
+    .prod-headline { font-family:'Cormorant Garamond',serif; font-size:24px; font-weight:300; color:var(--c); }
+    .prod-headline em { font-style:italic; color:var(--al); }
+    /* Add/Edit form card */
+    .prod-form-card { background:var(--g800); border:1px solid rgba(196,154,60,.2); border-radius:10px; padding:22px 24px; margin-bottom:20px; animation:expand .2s ease; }
+    .prod-form-title { font-family:'Syne',sans-serif; font-size:9px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:rgba(196,154,60,.8); margin-bottom:16px; }
+    .prod-form-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+    .pf-field { display:flex; flex-direction:column; gap:6px; }
+    .pf-field.span2 { grid-column:span 2; }
+    .pf-field.span3 { grid-column:1/-1; }
+    .pf-field label { font-family:'Syne',sans-serif; font-size:9px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:rgba(245,239,230,.42); }
+    .pf-input { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.1); border-radius:6px; padding:10px 13px; color:var(--c); font-family:'DM Sans',sans-serif; font-size:13.5px; font-weight:300; outline:none; transition:border-color .2s, background .2s; width:100%; resize:none; }
+    .pf-input:focus { border-color:rgba(196,154,60,.5); background:rgba(255,255,255,.06); }
+    .pf-input::placeholder { color:rgba(245,239,230,.26); }
+    .pf-select { -webkit-appearance:none; appearance:none; cursor:pointer; }
+    .pf-select option { background:#0e1a13; }
+    .pf-actions { display:flex; gap:10px; margin-top:16px; flex-wrap:wrap; }
+    /* Product table */
+    .prod-img-thumb { width:40px; height:40px; border-radius:6px; object-fit:cover; background:rgba(255,255,255,.04); display:block; }
+    .prod-price-cell { font-family:'Cormorant Garamond',serif; font-size:18px; font-weight:300; color:var(--al); }
+    .inv-input { width:72px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.1); border-radius:4px; padding:5px 8px; color:var(--c); font-family:'DM Sans',sans-serif; font-size:13px; text-align:center; outline:none; transition:border-color .2s; }
+    .inv-input:focus { border-color:rgba(196,154,60,.5); }
+    .inv-save-btn { font-family:'Syne',sans-serif; font-size:8px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; padding:5px 10px; border-radius:4px; border:1px solid rgba(196,154,60,.25); background:rgba(196,154,60,.08); color:var(--al); cursor:pointer; transition:all .2s; margin-left:4px; }
+    .inv-save-btn:hover { background:rgba(196,154,60,.2); }
+    .pf-hint { opacity:.5; font-size:.85em; }
+
     /* ─── Responsive ─── */
     @media (max-width:1100px) { .stats-grid { grid-template-columns:repeat(2,1fr); } .promo-settings-row { grid-template-columns:1fr 1fr; } .quick-tiers { grid-template-columns:1fr 1fr; } .kpi-row { grid-template-columns:1fr 1fr; } .charts-row { grid-template-columns:1fr; } }
     @media (max-width:600px)  { .promo-settings-row { grid-template-columns:1fr; } .quick-tiers { grid-template-columns:1fr; } .add-form-grid { grid-template-columns:1fr 1fr; } }
@@ -365,7 +393,7 @@
       .orders-table th:nth-child(5), .orders-table td:nth-child(5) { display:none; }
     }
   </style>
-  <script type="module" crossorigin src="/assets/admin-Bo4qUgu9.js"></script>
+  <script type="module" crossorigin src="/assets/admin-C_KaKAFY.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/index-DshXEMtg.js">
   <link rel="modulepreload" crossorigin href="/assets/main-CfI1Yhwj.js">
   <link rel="stylesheet" crossorigin href="/assets/main-DZQD0wys.css">
@@ -373,7 +401,7 @@
 <body>
 
   <!-- ════════════ LOGIN ════════════ -->
-  <div class="login-page" id="login-page" style="display:none;">
+  <div class="login-page panel-hidden" id="login-page">
 
     <!-- Left: brand panel -->
     <div class="login-brand">
@@ -575,6 +603,10 @@
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
           Analytics
         </button>
+        <button type="button" class="dash-tab" id="tab-products" onclick="switchDashTab('products')">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+          Products
+        </button>
       </div>
 
       <!-- ═══════════════ ORDERS PANEL ═══════════════ -->
@@ -584,7 +616,7 @@
       <div class="filter-bar">
         <input type="text"   id="search-input"    class="f-search wide"   placeholder="Search name or phone...">
         <input type="date"   id="filter-date-from" class="f-search f-date" title="From Date">
-        <span style="color:rgba(245,239,230,.35);font-size:12px;">to</span>
+        <span class="filter-date-sep">to</span>
         <input type="date"   id="filter-date-to"   class="f-search f-date" title="To Date">
         <select id="filter-status" class="f-select">
           <option value="">All Statuses</option>
@@ -627,7 +659,7 @@
       </div>
 
       <!-- Pagination -->
-      <div class="pagination-bar" id="pagination-bar" style="display:none;">
+      <div class="pagination-bar panel-hidden" id="pagination-bar">
         <span class="pagination-info" id="page-info">Page 1 of 1</span>
         <div class="pagination-btns">
           <button type="button" class="pg-btn" id="btn-prev" disabled>← Prev</button>
@@ -857,6 +889,90 @@
         </div>
 
       </div><!-- /panel-analytics -->
+
+      <!-- ═══════════════ PRODUCTS PANEL ═══════════════ -->
+      <div id="panel-products" class="panel-hidden">
+
+        <div class="prod-toolbar">
+          <div class="prod-headline">Products <em>&amp; Inventory</em></div>
+          <button type="button" class="f-action-btn green-btn" id="prod-add-btn" onclick="toggleProdForm()">+ Add Product</button>
+        </div>
+
+        <!-- Add / Edit form -->
+        <div id="prod-form-wrap" class="panel-hidden">
+          <div class="prod-form-card">
+            <div class="prod-form-title" id="prod-form-title">New Product</div>
+            <div class="prod-form-grid">
+              <div class="pf-field">
+                <label for="pf-id">Product ID <span class="pf-hint">(slug, no spaces)</span></label>
+                <input type="text" id="pf-id" class="pf-input" placeholder="fresh_oyster" autocomplete="off">
+              </div>
+              <div class="pf-field">
+                <label for="pf-name">Name (English)</label>
+                <input type="text" id="pf-name" class="pf-input" placeholder="Fresh Oyster Mushrooms">
+              </div>
+              <div class="pf-field">
+                <label for="pf-name-bn">Name (Bengali)</label>
+                <input type="text" id="pf-name-bn" class="pf-input" placeholder="তাজা অয়েস্টার মাশরুম">
+              </div>
+              <div class="pf-field">
+                <label for="pf-price">Price (৳)</label>
+                <input type="number" id="pf-price" class="pf-input" placeholder="350" min="0">
+              </div>
+              <div class="pf-field">
+                <label for="pf-unit">Unit / Pack Size</label>
+                <input type="text" id="pf-unit" class="pf-input" placeholder="1 KG Pack">
+              </div>
+              <div class="pf-field">
+                <label for="pf-category">Category</label>
+                <select id="pf-category" class="pf-input pf-select">
+                  <option value="fresh">Fresh</option>
+                  <option value="dry">Dry / Dried</option>
+                  <option value="powder">Powder</option>
+                  <option value="coming">Coming Soon</option>
+                </select>
+              </div>
+              <div class="pf-field">
+                <label for="pf-inventory">Stock Count</label>
+                <input type="number" id="pf-inventory" class="pf-input" placeholder="100" min="0">
+              </div>
+              <div class="pf-field span2">
+                <label for="pf-image">Image URL (from /public folder)</label>
+                <input type="text" id="pf-image" class="pf-input" placeholder="SaFa Fresh Oyster Mushroom.png">
+              </div>
+              <div class="pf-field span3">
+                <label for="pf-desc">Description</label>
+                <textarea id="pf-desc" class="pf-input" rows="3" placeholder="Product description..."></textarea>
+              </div>
+            </div>
+            <div class="pf-actions">
+              <button type="button" class="f-action-btn green-btn" id="prod-save-btn" onclick="saveProduct()">Save Product</button>
+              <button type="button" class="f-clear-btn" onclick="cancelProdForm()">Cancel</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Products table -->
+        <div class="orders-table-wrap">
+          <table class="orders-table">
+            <thead>
+              <tr>
+                <th>Image</th>
+                <th>Product</th>
+                <th>Price</th>
+                <th>Unit</th>
+                <th>Stock</th>
+                <th>Active</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="prod-tbody">
+              <tr><td colspan="7"><div class="table-empty"><div class="table-empty-icon">⏳</div><p class="table-empty-text">Loading products...</p></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div><!-- /panel-products -->
 
     </div><!-- /dash-content -->
 

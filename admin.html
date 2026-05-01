@@ -166,7 +166,7 @@
     .f-search.narrow { width:140px; }
     .f-date { width:140px; }
     input[type="date"].f-search::-webkit-calendar-picker-indicator { filter:invert(1); opacity:.5; cursor:pointer; }
-    .f-select { background:var(--g800); border:1px solid rgba(255,255,255,.1); border-radius:6px; padding:10px 14px; color:var(--c); font-family:'DM Sans',sans-serif; font-size:13px; cursor:pointer; outline:none; transition:border-color .2s; appearance:none; -webkit-appearance:none; padding-right:32px; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(245,239,230,0.4)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 10px center; }
+    .f-select { background:var(--g800); border:1px solid rgba(255,255,255,.1); border-radius:6px; padding:10px 14px; color:var(--c); font-family:'DM Sans',sans-serif; font-size:13px; cursor:pointer; outline:none; transition:border-color .2s; -webkit-appearance:none; appearance:none; padding-right:32px; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(245,239,230,0.4)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 10px center; }
     .f-select:focus { border-color:rgba(196,154,60,.45); }
     .f-select option { background:#0e1a13; }
     .filter-sep { width:1px; height:32px; background:rgba(255,255,255,.08); flex-shrink:0; }
@@ -223,7 +223,7 @@
     .s-cancelled  { background:rgba(184,92,56,.12); color:var(--tl);    border:1px solid rgba(184,92,56,.22); }
     .s-returned   { background:rgba(184,92,56,.08); color:rgba(184,92,56,.75); border:1px solid rgba(184,92,56,.15); }
 
-    .status-select { background:var(--g900); border:1px solid rgba(255,255,255,.12); border-radius:5px; padding:6px 28px 6px 10px; color:var(--c); font-family:'DM Sans',sans-serif; font-size:12px; cursor:pointer; outline:none; transition:border-color .2s; appearance:none; -webkit-appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='rgba(245,239,230,0.4)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 8px center; }
+    .status-select { background:var(--g900); border:1px solid rgba(255,255,255,.12); border-radius:5px; padding:6px 28px 6px 10px; color:var(--c); font-family:'DM Sans',sans-serif; font-size:12px; cursor:pointer; outline:none; transition:border-color .2s; -webkit-appearance:none; appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='rgba(245,239,230,0.4)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 8px center; }
     .status-select:focus { border-color:rgba(196,154,60,.45); }
     .status-select option { background:#060d09; }
 
@@ -380,6 +380,7 @@
     .inv-input:focus { border-color:rgba(196,154,60,.5); }
     .inv-save-btn { font-family:'Syne',sans-serif; font-size:8px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; padding:5px 10px; border-radius:4px; border:1px solid rgba(196,154,60,.25); background:rgba(196,154,60,.08); color:var(--al); cursor:pointer; transition:all .2s; margin-left:4px; }
     .inv-save-btn:hover { background:rgba(196,154,60,.2); }
+    .pf-hint { opacity:.5; font-size:.85em; }
 
     /* ─── Responsive ─── */
     @media (max-width:1100px) { .stats-grid { grid-template-columns:repeat(2,1fr); } .promo-settings-row { grid-template-columns:1fr 1fr; } .quick-tiers { grid-template-columns:1fr 1fr; } .kpi-row { grid-template-columns:1fr 1fr; } .charts-row { grid-template-columns:1fr; } }
@@ -900,7 +901,7 @@
             <div class="prod-form-title" id="prod-form-title">New Product</div>
             <div class="prod-form-grid">
               <div class="pf-field">
-                <label for="pf-id">Product ID <span style="opacity:.5;font-size:.85em">(slug, no spaces)</span></label>
+                <label for="pf-id">Product ID <span class="pf-hint">(slug, no spaces)</span></label>
                 <input type="text" id="pf-id" class="pf-input" placeholder="fresh_oyster" autocomplete="off">
               </div>
               <div class="pf-field">
@@ -1958,6 +1959,189 @@
 
       _analyticsLoaded = true;
     }
+
+    /* ════════════════ PRODUCTS ════════════════ */
+
+    let _editingProdId = null;
+
+    /* Seed data — pre-populates form when admin first opens the panel */
+    const SEED_PRODUCTS = [
+      { id:'fresh_oyster',    name:'Fresh Oyster Mushrooms',  name_bn:'তাজা অয়েস্টার মাশরুম', price:350,  unit:'1 KG Pack',  category:'fresh',  inventory_count:100, image_url:'SaFa Fresh Oyster Mushroom.png',  description:'Farm-fresh oyster mushrooms harvested daily. Zero pesticides, zero preservatives.', active:true },
+      { id:'dried_oyster',    name:'Dried Oyster Mushroom',   name_bn:'শুকনো অয়েস্টার মাশরুম', price:280, unit:'100g Pack',  category:'dry',    inventory_count:100, image_url:'SaFa Dried Oyster Mushroom.png',  description:'Sun-dried mushrooms with no additives. 12+ month shelf life.', active:true },
+      { id:'mushroom_powder', name:'Oyster Mushroom Powder',  name_bn:'অয়েস্টার মাশরুম পাউডার', price:350, unit:'100g Jar', category:'powder', inventory_count:100, image_url:'SaFa Oyster Mushroom Powder.png', description:'Super-fine mushroom powder. No fillers or additives.', active:true },
+      { id:'button_mushroom', name:'Premium Button Mushroom', name_bn:'প্রিমিয়াম বাটন মাশরুম',  price:null, unit:'250g Pack', category:'coming', inventory_count:0,   image_url:'SaFa Fresh Button Mushroom.png', description:'Coming soon — grown pesticide-free in climate-controlled chambers.', active:false },
+    ];
+
+    async function loadProducts() {
+      const tbody = document.getElementById('prod-tbody');
+      tbody.innerHTML = `<tr><td colspan="7"><div class="table-empty"><div class="table-empty-text">Loading...</div></div></td></tr>`;
+
+      let { data, error } = await supabase.from('products').select('*').order('created_at', { ascending: true });
+
+      /* If table doesn't exist or is empty, offer to seed */
+      if (error || !data?.length) {
+        tbody.innerHTML = `
+          <tr><td colspan="7">
+            <div class="table-empty">
+              <div class="table-empty-icon">🍄</div>
+              <p class="table-empty-text" style="margin-bottom:16px">${error ? 'Products table not found. Run the SQL below, then click Seed.' : 'No products yet.'}</p>
+              <button type="button" class="f-action-btn green-btn" onclick="seedProducts()">Seed Default Products</button>
+            </div>
+          </td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = data.map(p => `
+        <tr>
+          <td>
+            <img src="/${p.image_url}" alt="${p.name}" class="prod-img-thumb"
+                 onerror="this.style.opacity='.3'">
+          </td>
+          <td>
+            <div class="cell-id">${p.name}</div>
+            <div class="cell-sub">${p.name_bn || ''} · ${p.id}</div>
+          </td>
+          <td>
+            <div class="prod-price-cell">${p.price ? fmt(p.price) : 'TBA'}</div>
+            <div class="cell-sub">${p.unit || ''}</div>
+          </td>
+          <td class="cell-sub">${cap(p.category || '')}</td>
+          <td>
+            <input type="number" class="inv-input" value="${p.inventory_count ?? 0}"
+                   min="0" id="inv-${p.id}" aria-label="Stock for ${p.name}">
+            <button type="button" class="inv-save-btn"
+                    onclick="saveInventory('${p.id}')">Save</button>
+          </td>
+          <td onclick="event.stopPropagation()">
+            <label class="tog" title="${p.active ? 'Active' : 'Inactive'}">
+              <input type="checkbox" ${p.active ? 'checked' : ''}
+                     onchange="toggleProduct('${p.id}', this.checked)">
+              <span class="tog-track"><span class="tog-thumb"></span></span>
+            </label>
+          </td>
+          <td onclick="event.stopPropagation()" style="white-space:nowrap">
+            <button type="button" class="f-action-btn" style="padding:6px 12px;font-size:8px"
+                    onclick="editProduct('${p.id}')">Edit</button>
+            <button type="button" class="f-clear-btn"
+                    onclick="openDelModal('${p.id}','${p.name}')" title="Delete">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="3 6 5 6 21 6"/>
+                <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
+                <path d="M10 11v6M14 11v6"/>
+                <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
+              </svg>
+            </button>
+          </td>
+        </tr>`).join('');
+    }
+
+    window.seedProducts = async function() {
+      let ok = 0;
+      for (const p of SEED_PRODUCTS) {
+        const { error } = await supabase.from('products').upsert(p, { onConflict: 'id' });
+        if (!error) ok++;
+      }
+      toast(`Seeded ${ok} products`);
+      loadProducts();
+    };
+
+    window.toggleProdForm = function() {
+      const wrap = document.getElementById('prod-form-wrap');
+      const btn  = document.getElementById('prod-add-btn');
+      const open = wrap.classList.toggle('panel-hidden');
+      btn.textContent = open ? '+ Add Product' : '✕ Cancel';
+      if (!open) {
+        _editingProdId = null;
+        document.getElementById('prod-form-title').textContent = 'New Product';
+        ['pf-id','pf-name','pf-name-bn','pf-price','pf-unit','pf-inventory','pf-image','pf-desc'].forEach(id => {
+          document.getElementById(id).value = '';
+        });
+        document.getElementById('pf-category').value = 'fresh';
+        document.getElementById('pf-id').disabled = false;
+      }
+    };
+
+    window.cancelProdForm = function() {
+      const wrap = document.getElementById('prod-form-wrap');
+      if (!wrap.classList.contains('panel-hidden')) toggleProdForm();
+    };
+
+    window.editProduct = async function(id) {
+      const { data } = await supabase.from('products').select('*').eq('id', id).single();
+      if (!data) return;
+      _editingProdId = id;
+
+      document.getElementById('pf-id').value        = data.id;
+      document.getElementById('pf-id').disabled     = true;
+      document.getElementById('pf-name').value      = data.name || '';
+      document.getElementById('pf-name-bn').value   = data.name_bn || '';
+      document.getElementById('pf-price').value     = data.price ?? '';
+      document.getElementById('pf-unit').value      = data.unit || '';
+      document.getElementById('pf-category').value  = data.category || 'fresh';
+      document.getElementById('pf-inventory').value = data.inventory_count ?? 0;
+      document.getElementById('pf-image').value     = data.image_url || '';
+      document.getElementById('pf-desc').value      = data.description || '';
+      document.getElementById('prod-form-title').textContent = `Editing — ${data.name}`;
+
+      const wrap = document.getElementById('prod-form-wrap');
+      if (wrap.classList.contains('panel-hidden')) toggleProdForm();
+      wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+
+    window.saveProduct = async function() {
+      const id       = document.getElementById('pf-id').value.trim().replace(/\s+/g, '_').toLowerCase();
+      const name     = document.getElementById('pf-name').value.trim();
+      const price    = parseFloat(document.getElementById('pf-price').value) || null;
+      const inv      = parseInt(document.getElementById('pf-inventory').value) || 0;
+
+      if (!id)   { toast('Product ID is required', 'error'); return; }
+      if (!name) { toast('Product name is required', 'error'); return; }
+
+      const row = {
+        id,
+        name,
+        name_bn:         document.getElementById('pf-name-bn').value.trim() || null,
+        price,
+        unit:            document.getElementById('pf-unit').value.trim() || null,
+        category:        document.getElementById('pf-category').value,
+        inventory_count: inv,
+        image_url:       document.getElementById('pf-image').value.trim() || null,
+        description:     document.getElementById('pf-desc').value.trim() || null,
+        active:          true,
+      };
+
+      const btn  = document.getElementById('prod-save-btn');
+      const orig = btn.textContent;
+      btn.textContent = 'Saving…'; btn.disabled = true;
+
+      const { error } = _editingProdId
+        ? await supabase.from('products').update(row).eq('id', _editingProdId)
+        : await supabase.from('products').insert([row]);
+
+      btn.textContent = orig; btn.disabled = false;
+
+      if (error) {
+        toast(error.code === '23505' ? `ID "${id}" already exists` : error.message, 'error');
+      } else {
+        toast(`${name} ${_editingProdId ? 'updated' : 'created'} ✓`);
+        cancelProdForm();
+        loadProducts();
+      }
+    };
+
+    window.saveInventory = async function(id) {
+      const val = parseInt(document.getElementById(`inv-${id}`)?.value ?? 0);
+      const { error } = await supabase.from('products').update({ inventory_count: val }).eq('id', id);
+      if (error) toast('Failed to update stock', 'error');
+      else toast(`Stock updated → ${val}`);
+    };
+
+    window.toggleProduct = async function(id, active) {
+      const { error } = await supabase.from('products').update({ active }).eq('id', id);
+      if (error) { toast('Failed to update', 'error'); loadProducts(); }
+      else toast(active ? 'Product activated' : 'Product deactivated');
+    };
 
     /* ── Init ── */
     checkAuth();
