@@ -349,14 +349,37 @@
     /* ─────────────────────────────────────────────────────
        5. VIDEO PLAYER
     ───────────────────────────────────────────────────── */
+    .rp-video-outer {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 64px;
+    }
+    .rp-video-frame {
+      width: 100%;
+      max-width: 680px;
+      position: relative;
+    }
+    /* Decorative gold corner accent */
+    .rp-video-frame::before {
+      content: '';
+      position: absolute;
+      inset: -6px;
+      border-radius: 20px;
+      background: linear-gradient(135deg,
+        rgba(196,154,60,0.25) 0%,
+        transparent 50%,
+        rgba(184,92,56,0.15) 100%);
+      z-index: 0;
+      pointer-events: none;
+    }
     .rp-video-wrap {
       position: relative;
-      border-radius: 14px;
+      border-radius: 16px;
       overflow: hidden;
       aspect-ratio: 16/9;
       background: var(--g800);
-      margin-bottom: 64px;
-      box-shadow: 0 24px 64px rgba(0,0,0,0.55);
+      box-shadow: 0 24px 56px rgba(0,0,0,0.6), 0 0 0 1px rgba(196,154,60,0.15);
+      z-index: 1;
     }
     .rp-video-wrap video {
       width: 100%;
@@ -371,35 +394,36 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      background: rgba(6,13,9,0.42);
+      background: rgba(6,13,9,0.45);
       cursor: pointer;
       transition: background 0.25s;
     }
-    .rp-video-overlay:hover { background: rgba(6,13,9,0.2); }
+    .rp-video-overlay:hover { background: rgba(6,13,9,0.18); }
     .rp-video-overlay.hidden { display: none; }
     .rp-video-play-btn {
-      width: 72px;
-      height: 72px;
+      width: 64px;
+      height: 64px;
       border-radius: 50%;
       background: var(--t);
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 8px 32px rgba(184,92,56,0.55);
-      margin-bottom: 16px;
-      transition: transform 0.2s, background 0.2s;
+      box-shadow: 0 8px 28px rgba(184,92,56,0.5);
+      margin-bottom: 14px;
+      transition: transform 0.2s, background 0.2s, box-shadow 0.2s;
     }
     .rp-video-overlay:hover .rp-video-play-btn {
-      transform: scale(1.08);
+      transform: scale(1.1);
       background: var(--tl);
+      box-shadow: 0 12px 36px rgba(184,92,56,0.65);
     }
     .rp-video-label {
       font-family: var(--fl);
-      font-size: 10px;
+      font-size: 9px;
       font-weight: 700;
-      letter-spacing: 0.18em;
+      letter-spacing: 0.2em;
       text-transform: uppercase;
-      color: rgba(245,239,230,0.55);
+      color: rgba(245,239,230,0.5);
     }
 
 
@@ -1457,23 +1481,27 @@
          window.playRV() exposed by main.js.
          Same Recipe Video.mp4 used on index.html.
     ── -->
-    <div class="rp-video-wrap">
-      <video id="recipeVid"
-             loop muted playsinline preload="metadata"
-             poster="/SaFa Fresh Oyster Mushroom.png">
-        <source src="Recipe Video.mp4" type="video/mp4">
-      </video>
-      <div class="rp-video-overlay" id="rvOverlay"
-           onclick="window.playRV()">
-        <div class="rp-video-play-btn">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="white"
-               aria-hidden="true">
-            <polygon points="5 3 19 12 5 21 5 3"/>
-          </svg>
+    <div class="rp-video-outer">
+      <div class="rp-video-frame">
+        <div class="rp-video-wrap">
+          <video id="recipeVid"
+                 loop muted playsinline preload="metadata"
+                 poster="/SaFa Fresh Oyster Mushroom.png">
+            <source src="/Recipe Video.mp4" type="video/mp4">
+          </video>
+          <div class="rp-video-overlay" id="rvOverlay"
+               onclick="window.playRV()">
+            <div class="rp-video-play-btn">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="white"
+                   aria-hidden="true">
+                <polygon points="5 3 19 12 5 21 5 3"/>
+              </svg>
+            </div>
+            <span class="rp-video-label">
+              মাশরুম রান্নার ভিডিও · SaFa Naturals Kitchen
+            </span>
+          </div>
         </div>
-        <span class="rp-video-label">
-          মাশরুম রান্নার ভিডিও · SaFa Naturals Kitchen
-        </span>
       </div>
     </div>
 
@@ -1847,7 +1875,7 @@
       <div class="rp-card fi" data-category="drink">
         <div class="rp-card-img">
           <div class="rp-card-img-inner">
-            <img src="/Mushroom Smoothie.png" alt="Immunity Boost Smoothie"
+            <img src="/Immunity Boost Smoothie.png" alt="Immunity Boost Smoothie"
                  onerror="this.remove()">
             <span class="rp-card-emoji">🥤</span>
           </div>
@@ -2408,7 +2436,7 @@
         titleBn:    'ইমিউনিটি স্মুদি',
         category:   'স্বাস্থ্যকর · Powder Recipe',
         emoji:      '🥤',
-        image:      'Mushroom Smoothie.png',
+        image:      'Immunity Boost Smoothie.png',
         time:       '5 min',
         serves:     '2 glasses',
         rating:     '★ 5.0',
