@@ -1,4 +1,4 @@
-import{s as i}from"./main-CfI1Yhwj.js";const o=["mushroombangladesh.info@gmail.com","quazishab@gmail.com"];async function c(){var t;try{const{data:{user:a}}=await i.auth.getUser();if(!a)return;const e=((t=a.user_metadata)==null?void 0:t.first_name)||a.email.split("@")[0],n=document.getElementById("nav-account-link");if(n&&(n.outerHTML=`
+import{s as i}from"./main-Dg_YR6XK.js";const o=["mushroombangladesh.info@gmail.com","quazishab@gmail.com"];async function c(){var t;try{const{data:{user:a}}=await i.auth.getUser();if(!a)return;const e=((t=a.user_metadata)==null?void 0:t.first_name)||a.email.split("@")[0],n=document.getElementById("nav-account-link");if(n&&(n.outerHTML=`
         <a href="account.html" class="nav-user-pill">
           <div class="nav-avatar">${e[0].toUpperCase()}</div>
           <span class="nav-user-name">${e}</span>

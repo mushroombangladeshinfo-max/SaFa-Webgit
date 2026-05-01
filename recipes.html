@@ -156,7 +156,7 @@
       overflow-x: auto;
       scroll-snap-type: x mandatory;
       padding-right: 56px;
-      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-x: contain;
     }
     .rp-product-track::-webkit-scrollbar { display: none; }
 
@@ -647,6 +647,7 @@
       font-weight: 600;
       color: rgba(245,239,230,0.8);
       background: rgba(6,13,9,0.72);
+      -webkit-backdrop-filter: blur(4px);
       backdrop-filter: blur(4px);
       padding: 3px 9px;
       border-radius: 2px;
@@ -765,8 +766,8 @@
       position: fixed;
       inset: 0;
       background: rgba(6,13,9,0.88);
-      backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(12px);
       z-index: 800;
       display: flex;
       align-items: center;
@@ -854,6 +855,7 @@
       height: 38px;
       border-radius: 50%;
       background: rgba(6,13,9,0.65);
+      -webkit-backdrop-filter: blur(8px);
       backdrop-filter: blur(8px);
       border: 1px solid rgba(255,255,255,0.12);
       color: rgba(245,239,230,0.85);
@@ -1677,8 +1679,7 @@
               রেসিপি দেখুন →
             </button>
             <!-- Quick add — adds the main ingredient to cart -->
-            <button class="btn-ghost-dark"
-                    style="font-size:11px;padding:13px 18px;"
+            <button class="btn-ghost-dark btn-quick-add"
                     onclick="window.addToCart(
                       'Fresh Oyster Mushrooms',350,
                       'fresh_oyster','1kg',
