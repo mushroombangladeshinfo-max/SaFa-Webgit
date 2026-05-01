@@ -19,6 +19,8 @@
     
     .hidden { display: none !important; }
     
+    .fade-transition { transition: opacity 0.3s ease; }
+    
     /* Login Form */
     .login-container { max-width: 400px; margin: 80px auto; background: var(--g800); padding: 40px; border-radius: 12px; border: 1px solid rgba(255,255,255,.07); text-align: center; }
     .login-container input { width: 100%; padding: 14px; margin-bottom: 16px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1); color: var(--c); border-radius: 6px; outline: none; font-family: var(--fb); }
@@ -53,6 +55,38 @@
     .btn-mark-paid { color: #5fcf80 !important; border-color: rgba(95,207,128,.3) !important; }
     .btn-mark-paid:hover { background: rgba(95,207,128,.1) !important; border-color: #5fcf80 !important; }
     
+    /* Loading Skeleton & Buttons */
+    @keyframes pulse-skeleton {
+      0% { opacity: 0.3; }
+      50% { opacity: 0.7; }
+      100% { opacity: 0.3; }
+    }
+    .skeleton-box {
+      background: rgba(255,255,255,0.06);
+      height: 16px;
+      border-radius: 4px;
+      animation: pulse-skeleton 1.5s infinite ease-in-out;
+    }
+    .btn-loading {
+      color: transparent !important;
+      pointer-events: none;
+      position: relative;
+    }
+    .btn-loading::after {
+      content: ''; position: absolute; top: 50%; left: 50%;
+      width: 16px; height: 16px; margin: -8px 0 0 -8px;
+      border: 2px solid rgba(255,255,255,0.2);
+      border-top-color: #fff; border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    
+    /* Empty States */
+    .admin-empty {
+      text-align: center; padding: 48px 24px !important;
+      color: rgba(245,239,230,.5); background: rgba(255,255,255,.01);
+    }
+    .admin-empty-icon { font-size: 32px; margin-bottom: 12px; opacity: 0.6; }
+
     .payment-status-badge {
       font-family: var(--fl); font-size: 9px; font-weight: 700; letter-spacing: .1em;
       text-transform: uppercase; padding: 4px 8px; border-radius: 4px; display: inline-block;
@@ -72,33 +106,34 @@
     .widget-title { font-family: var(--fl); font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: rgba(245,239,230,.5); margin-bottom: 8px; }
     .widget-value { font-family: var(--fd); font-size: 32px; font-weight: 300; color: var(--al); line-height: 1; }
   </style>
-  <script type="module" crossorigin src="/assets/admin-D1xstHW1.js"></script>
-  <link rel="modulepreload" crossorigin href="/assets/main-B3pLGffD.js">
-  <link rel="modulepreload" crossorigin href="/assets/supabase-CkkPnFpI.js">
+  <script type="module" crossorigin src="/assets/admin-BChAvMqb.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/main-q8TLCeIc.js">
   <link rel="stylesheet" crossorigin href="/assets/main-Dy9Li3jC.css">
 </head>
 <body>
 
   <!-- LOGIN SECTION -->
-  <div id="login-section" class="login-container">
+  <div id="login-section" class="login-container fade-transition">
     <h1 class="admin-title">Admin <em>Access</em></h1>
     <p style="color: rgba(245,239,230,.5); margin-bottom: 24px; font-size: 14px;">Sign in to manage orders.</p>
-    <input type="email" id="admin-email" placeholder="Admin Email">
-    <input type="password" id="admin-password" placeholder="Password">
-    <button onclick="window.adminLogin()" class="btn-primary" style="width: 100%; justify-content: center;">Log In</button>
+    <form id="admin-login-form">
+      <input type="email" id="admin-email" placeholder="Admin Email" required autocomplete="email">
+      <input type="password" id="admin-password" placeholder="Password" required autocomplete="current-password">
+      <button type="submit" id="login-btn" class="btn-primary" style="width: 100%; justify-content: center;">Log In</button>
+    </form>
   </div>
 
   <!-- DASHBOARD SECTION -->
-  <div id="dashboard-section" class="hidden">
+  <div id="dashboard-section" class="hidden fade-transition">
     <div class="admin-header">
       <h1 class="admin-title">Order <em>Management</em></h1>
       <div class="admin-header-right">
-        <input type="date" id="filter-date-from" class="admin-search" style="width: 130px;" title="From Date" onchange="window.handleDateChange()">
+        <input type="date" id="filter-date-from" class="admin-search" style="width: 130px;" title="From Date">
         <span style="color: rgba(245,239,230,.5); font-size: 13px;">to</span>
-        <input type="date" id="filter-date-to" class="admin-search" style="width: 130px;" title="To Date" onchange="window.handleDateChange()">
-        <input type="tel" class="admin-search" placeholder="Search phone..." oninput="window.handleSearch(this.value)">
-        <button id="export-btn" onclick="window.exportCSV()" class="btn-ghost-dark">Export CSV</button>
-        <button onclick="window.adminLogout()" class="btn-ghost-dark">Log Out</button>
+        <input type="date" id="filter-date-to" class="admin-search" style="width: 130px;" title="To Date">
+        <input type="tel" id="search-input" class="admin-search" placeholder="Search phone...">
+        <button id="export-btn" class="btn-ghost-dark">Export CSV</button>
+        <button id="logout-btn" class="btn-ghost-dark">Log Out</button>
       </div>
     </div>
 
@@ -127,21 +162,21 @@
         </tr>
       </thead>
       <tbody id="order-list">
-        <tr><td colspan="8" style="text-align: center; padding: 30px; color: rgba(245,239,230,.5);">Loading orders...</td></tr>
+        <!-- Injected via JS -->
       </tbody>
     </table>
     
     <div id="pagination-controls" class="admin-pagination" style="display: none;">
-      <button id="btn-prev" class="btn-ghost-dark" onclick="window.changePage(-1)" style="padding: 8px 16px;">Previous</button>
+      <button id="btn-prev" class="btn-ghost-dark" style="padding: 8px 16px;">Previous</button>
       <span id="page-info">Page 1</span>
-      <button id="btn-next" class="btn-ghost-dark" onclick="window.changePage(1)" style="padding: 8px 16px;">Next</button>
+      <button id="btn-next" class="btn-ghost-dark" style="padding: 8px 16px;">Next</button>
     </div>
 
     <!-- ── INVENTORY MANAGEMENT SECTION ── -->
     <div style="margin-top: 60px;">
       <div class="admin-header">
         <h2 class="admin-title" style="font-size: 28px;">Inventory <em>Management</em></h2>
-        <button onclick="window.fetchInventory()" class="btn-ghost-dark">Refresh Stock</button>
+        <button id="refresh-stock-btn" class="btn-ghost-dark">Refresh Stock</button>
       </div>
       <table class="admin-table">
         <thead>
@@ -153,7 +188,7 @@
           </tr>
         </thead>
         <tbody id="inventory-list">
-          <tr><td colspan="4" style="text-align: center; padding: 30px; color: rgba(245,239,230,.5);">Loading inventory...</td></tr>
+          <!-- Injected via JS -->
         </tbody>
       </table>
     </div>
