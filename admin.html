@@ -786,7 +786,10 @@
     import { supabase } from '/src/supabase.js';
 
     /* ── Config ── */
-    const ADMIN_EMAIL = 'mushrombangladesh.info@gmail.com';
+    const ADMIN_EMAILS = [
+      'mushroombangladesh.info@gmail.com',
+      'quazishab@gmail.com',
+    ];
     const SELLER_WA   = '8801970099378';
     const PAGE_SIZE   = 20;
 
@@ -1000,7 +1003,7 @@
 
     async function checkAuth() {
       const { data: { session } } = await supabase.auth.getSession();
-      if (session && session.user.email === ADMIN_EMAIL) {
+      if (session && ADMIN_EMAILS.includes(session.user.email)) {
         showDashboard(session.user);
       } else if (session) {
         showBanner('pw-banner', 'Access denied — this account has no admin privileges.');

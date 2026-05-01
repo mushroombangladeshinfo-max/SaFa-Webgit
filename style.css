@@ -364,6 +364,8 @@ img {
   transition: color 0.2s;
 }
 .nav-icon:hover { color: var(--c); }
+.nav-admin-link { display: none; }
+.footer-admin-link { opacity: .28; font-size: .85em; }
 
 /* Red dot indicator on cart icon */
 .nav-dot {
