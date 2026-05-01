@@ -1393,7 +1393,8 @@
       const { data:orders, error, count } = await q;
 
       if (error) {
-        tbody.innerHTML = `<tr><td colspan="8"><div class="table-empty"><div class="table-empty-icon">⚠️</div><p class="table-empty-text">Could not load orders</p></div></td></tr>`;
+        console.error('[Admin] fetchOrders error:', error);
+        tbody.innerHTML = `<tr><td colspan="8"><div class="table-empty"><div class="table-empty-icon">⚠️</div><p class="table-empty-text">Could not load orders: ${error.message}</p></div></td></tr>`;
         return;
       }
 
