@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>অর্ডার ট্র্যাক করুন — SaFa Naturals</title>
+  <meta name="description" content="আপনার SaFa Naturals অর্ডারের সর্বশেষ অবস্থা জানুন।" />
+  <link rel="icon" type="image/png" href="/favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Hind+Siliguri:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green:   #1a472a;
+      --green2:  #2d6a4f;
+      --leaf:    #52b788;
+      --cream:   #faf7f2;
+      --white:   #ffffff;
+      --ink:     #1c1c1e;
+      --muted:   #6b7280;
+      --border:  #e5e7eb;
+      --shadow:  0 4px 24px rgba(0,0,0,.08);
+      --radius:  16px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--cream);
+      color: var(--ink);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--green);
+      padding: 0 24px;
+      height: 62px;
+      display: flex; align-items: center; justify-content: space-between;
+      box-shadow: 0 2px 12px rgba(0,0,0,.18);
+    }
+    .nav-brand {
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none;
+    }
+    .nav-brand img { height: 36px; border-radius: 8px; }
+    .nav-brand span {
+      font-size: 1.15rem; font-weight: 700; color: #fff;
+      letter-spacing: -.3px;
+    }
+    .nav-back {
+      display: flex; align-items: center; gap: 6px;
+      color: rgba(255,255,255,.8); text-decoration: none;
+      font-size: .9rem; font-weight: 500;
+      transition: color .2s;
+    }
+    .nav-back:hover { color: #fff; }
+    .nav-back svg { width: 16px; height: 16px; }
+
+    /* ── HERO ── */
+    .hero {
+      background: linear-gradient(135deg, var(--green) 0%, var(--green2) 100%);
+      color: #fff;
+      text-align: center;
+      padding: 56px 24px 48px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Ccircle cx='30' cy='30' r='20'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      pointer-events: none;
+    }
+    .hero-icon {
+      width: 64px; height: 64px;
+      background: rgba(255,255,255,.12);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 20px;
+      backdrop-filter: blur(8px);
+    }
+    .hero-icon svg { width: 32px; height: 32px; }
+    .hero h1 {
+      font-size: clamp(1.6rem, 5vw, 2.2rem);
+      font-weight: 700; letter-spacing: -.5px;
+      margin-bottom: 10px;
+    }
+    .hero p {
+      font-size: 1rem; color: rgba(255,255,255,.75);
+      font-family: 'Hind Siliguri', sans-serif;
+    }
+
+    /* ── MAIN ── */
+    main {
+      flex: 1;
+      max-width: 600px;
+      width: 100%;
+      margin: -28px auto 60px;
+      padding: 0 16px;
+    }
+
+    /* ── SEARCH CARD ── */
+    .search-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 32px 28px;
+      margin-bottom: 24px;
+    }
+    .search-card h2 {
+      font-size: 1.1rem; font-weight: 700;
+      margin-bottom: 6px; color: var(--green);
+    }
+    .search-card p {
+      font-size: .875rem; color: var(--muted);
+      font-family: 'Hind Siliguri', sans-serif;
+      margin-bottom: 24px;
+    }
+
+    .field { margin-bottom: 16px; }
+    .field label {
+      display: block;
+      font-size: .8rem; font-weight: 600;
+      color: var(--muted); letter-spacing: .4px;
+      text-transform: uppercase; margin-bottom: 6px;
+    }
+    .field-wrap {
+      position: relative;
+    }
+    .field-wrap svg {
+      position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+      width: 18px; height: 18px; color: var(--muted);
+      pointer-events: none;
+    }
+    .field input {
+      width: 100%;
+      padding: 13px 14px 13px 42px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      font-size: .95rem;
+      font-family: 'DM Sans', sans-serif;
+      color: var(--ink);
+      background: var(--cream);
+      transition: border-color .2s, box-shadow .2s;
+      outline: none;
+    }
+    .field input:focus {
+      border-color: var(--leaf);
+      box-shadow: 0 0 0 3px rgba(82,183,136,.15);
+      background: #fff;
+    }
+    .field input::placeholder { color: #b0b8c1; }
+
+    .btn-track {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, var(--green) 0%, var(--green2) 100%);
+      color: #fff;
+      border: none; border-radius: 10px;
+      font-size: 1rem; font-weight: 700;
+      font-family: 'DM Sans', sans-serif;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      transition: opacity .2s, transform .15s;
+      margin-top: 8px;
+    }
+    .btn-track:hover { opacity: .92; transform: translateY(-1px); }
+    .btn-track:active { transform: translateY(0); }
+    .btn-track:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+
+    .spinner {
+      width: 18px; height: 18px;
+      border: 2.5px solid rgba(255,255,255,.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      display: none;
+    }
+    .btn-track.loading .spinner { display: block; }
+    .btn-track.loading .btn-label { display: none; }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── ERROR ── */
+    .error-banner {
+      background: #fef2f2; border: 1.5px solid #fca5a5;
+      color: #dc2626; border-radius: 10px;
+      padding: 13px 16px;
+      font-size: .875rem; font-weight: 500;
+      display: none; align-items: center; gap: 8px;
+      margin-top: 14px;
+    }
+    .error-banner.show { display: flex; }
+    .error-banner svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+    /* ── RESULT CARD ── */
+    .result-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      display: none;
+      animation: slideUp .4s cubic-bezier(.16,1,.3,1);
+    }
+    .result-card.show { display: block; }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── STATUS HEADER ── */
+    .status-header {
+      padding: 24px 28px 20px;
+      border-bottom: 1.5px solid var(--border);
+    }
+    .status-top {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      margin-bottom: 20px;
+      gap: 12px;
+    }
+    .order-meta h3 {
+      font-size: 1.1rem; font-weight: 700; color: var(--green);
+      margin-bottom: 4px;
+    }
+    .order-meta span {
+      font-size: .8rem; color: var(--muted);
+    }
+    .status-badge {
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: .78rem; font-weight: 700;
+      letter-spacing: .3px; white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .badge-pending    { background: #fef9c3; color: #854d0e; }
+    .badge-confirmed  { background: #dbeafe; color: #1d4ed8; }
+    .badge-processing { background: #ede9fe; color: #6d28d9; }
+    .badge-shipped    { background: #d1fae5; color: #065f46; }
+    .badge-delivered  { background: #dcfce7; color: #14532d; }
+    .badge-cancelled  { background: #fee2e2; color: #991b1b; }
+
+    /* ── PROGRESS STEPPER ── */
+    .stepper {
+      display: flex; align-items: flex-start;
+      position: relative;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+    .stepper::before {
+      content: '';
+      position: absolute;
+      top: 18px; left: 18px; right: 18px; height: 2px;
+      background: var(--border);
+      z-index: 0;
+    }
+    .stepper-progress {
+      position: absolute;
+      top: 18px; left: 18px; height: 2px;
+      background: linear-gradient(90deg, var(--green), var(--leaf));
+      z-index: 1;
+      transition: width .6s cubic-bezier(.4,0,.2,1);
+    }
+    .step {
+      flex: 1; display: flex; flex-direction: column; align-items: center;
+      gap: 8px; position: relative; z-index: 2; min-width: 60px;
+    }
+    .step-dot {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: var(--border);
+      display: flex; align-items: center; justify-content: center;
+      transition: background .4s, transform .3s;
+    }
+    .step-dot svg { width: 16px; height: 16px; color: #9ca3af; }
+    .step.done .step-dot {
+      background: var(--green);
+      transform: scale(1.1);
+    }
+    .step.done .step-dot svg { color: #fff; }
+    .step.active .step-dot {
+      background: var(--leaf);
+      transform: scale(1.15);
+      box-shadow: 0 0 0 4px rgba(82,183,136,.25);
+    }
+    .step.active .step-dot svg { color: #fff; }
+    .step-label {
+      font-size: .72rem; font-weight: 600;
+      color: var(--muted); text-align: center;
+      font-family: 'Hind Siliguri', sans-serif;
+      line-height: 1.3;
+    }
+    .step.done .step-label,
+    .step.active .step-label { color: var(--green); }
+
+    /* ── CANCELLED STATE ── */
+    .cancelled-banner {
+      background: #fef2f2;
+      padding: 16px 20px;
+      display: flex; align-items: center; gap: 12px;
+      border-radius: 10px;
+      margin-top: 8px;
+    }
+    .cancelled-banner svg { width: 24px; height: 24px; color: #dc2626; flex-shrink: 0; }
+    .cancelled-banner p { font-size: .875rem; color: #991b1b; font-weight: 500; }
+
+    /* ── DETAIL BODY ── */
+    .detail-body { padding: 24px 28px; }
+
+    .info-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 14px; margin-bottom: 24px;
+    }
+    .info-item label {
+      display: block;
+      font-size: .72rem; font-weight: 700;
+      color: var(--muted); text-transform: uppercase;
+      letter-spacing: .5px; margin-bottom: 4px;
+    }
+    .info-item span {
+      font-size: .9rem; font-weight: 600; color: var(--ink);
+      font-family: 'Hind Siliguri', sans-serif;
+    }
+
+    .section-title {
+      font-size: .8rem; font-weight: 700;
+      color: var(--muted); text-transform: uppercase;
+      letter-spacing: .5px; margin-bottom: 12px;
+    }
+
+    /* ── ITEMS ── */
+    .items-list { margin-bottom: 20px; }
+    .item-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      gap: 8px;
+    }
+    .item-row:last-child { border-bottom: none; }
+    .item-name {
+      font-size: .9rem; font-weight: 500;
+      font-family: 'Hind Siliguri', sans-serif;
+      flex: 1;
+    }
+    .item-qty {
+      font-size: .8rem; color: var(--muted);
+      background: var(--cream); border-radius: 6px;
+      padding: 2px 8px; font-weight: 600;
+    }
+    .item-price { font-size: .9rem; font-weight: 700; color: var(--green); }
+
+    /* ── TOTALS ── */
+    .totals {
+      background: var(--cream);
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin-bottom: 24px;
+    }
+    .total-row {
+      display: flex; justify-content: space-between;
+      font-size: .875rem; padding: 4px 0;
+      color: var(--muted);
+    }
+    .total-row.grand {
+      font-size: 1rem; font-weight: 700;
+      color: var(--ink); margin-top: 8px;
+      padding-top: 10px;
+      border-top: 1.5px solid var(--border);
+    }
+
+    /* ── ACTIONS ── */
+    .actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    .btn-wa {
+      flex: 1; min-width: 140px;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 13px 16px;
+      background: #25d366; color: #fff;
+      border: none; border-radius: 10px;
+      font-size: .9rem; font-weight: 700;
+      font-family: 'DM Sans', sans-serif;
+      cursor: pointer; text-decoration: none;
+      transition: opacity .2s, transform .15s;
+    }
+    .btn-wa:hover { opacity: .9; transform: translateY(-1px); }
+    .btn-wa svg { width: 20px; height: 20px; }
+
+    .btn-home {
+      flex: 1; min-width: 140px;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 13px 16px;
+      background: var(--cream); color: var(--green);
+      border: 1.5px solid var(--border); border-radius: 10px;
+      font-size: .9rem; font-weight: 700;
+      font-family: 'DM Sans', sans-serif;
+      cursor: pointer; text-decoration: none;
+      transition: background .2s, transform .15s;
+    }
+    .btn-home:hover { background: #eff7f3; transform: translateY(-1px); }
+
+    /* ── TIPS ── */
+    .tips {
+      background: #f0fdf4;
+      border: 1.5px solid #bbf7d0;
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-top: 24px;
+    }
+    .tips h4 {
+      font-size: .85rem; font-weight: 700;
+      color: #15803d; margin-bottom: 10px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .tips ul {
+      list-style: none; display: flex; flex-direction: column; gap: 6px;
+    }
+    .tips li {
+      font-size: .82rem; color: #166534;
+      font-family: 'Hind Siliguri', sans-serif;
+      display: flex; align-items: flex-start; gap: 8px;
+    }
+    .tips li::before {
+      content: '✓';
+      font-weight: 700; flex-shrink: 0; margin-top: 1px;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center; padding: 28px 16px;
+      font-size: .8rem; color: var(--muted);
+      border-top: 1px solid var(--border);
+    }
+    footer a { color: var(--green); text-decoration: none; font-weight: 600; }
+
+    @media (max-width: 480px) {
+      .hero { padding: 40px 16px 36px; }
+      .search-card, .detail-body { padding: 24px 20px; }
+      .status-header { padding: 20px 20px 16px; }
+      .info-grid { grid-template-columns: 1fr; gap: 10px; }
+      .step-label { font-size: .68rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="/" class="nav-brand">
+    <img src="/favicon.png" alt="SaFa Naturals" />
+    <span>SaFa Naturals</span>
+  </a>
+  <a href="/" class="nav-back">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+    </svg>
+    হোমপেজ
+  </a>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-icon">
+    <svg fill="none" viewBox="0 0 24 24" stroke="#fff" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round"
+        d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0
+           014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42
+           3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806
+           1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42
+           3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0
+           01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438
+           3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
+    </svg>
+  </div>
+  <h1>অর্ডার ট্র্যাক করুন</h1>
+  <p>অর্ডার নম্বর ও ফোন নম্বর দিয়ে আপনার অর্ডারের অবস্থা জানুন</p>
+</div>
+
+<main>
+  <!-- SEARCH -->
+  <div class="search-card">
+    <h2>অর্ডারের তথ্য দিন</h2>
+    <p>আপনার কনফার্মেশন SMS-এ অর্ডার নম্বর পাবেন।</p>
+
+    <div class="field">
+      <label>অর্ডার নম্বর</label>
+      <div class="field-wrap">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"/>
+        </svg>
+        <input id="inp-order" type="text" placeholder="যেমন: SN-20240501-ABCD"
+          autocomplete="off" spellcheck="false" />
+      </div>
+    </div>
+
+    <div class="field">
+      <label>ফোন নম্বর</label>
+      <div class="field-wrap">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0
+               01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13
+               -2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2
+               0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+        </svg>
+        <input id="inp-phone" type="tel" placeholder="০১XXXXXXXXX"
+          autocomplete="tel" />
+      </div>
+    </div>
+
+    <button class="btn-track" id="btn-track" onclick="trackOrder()">
+      <div class="spinner" id="spinner"></div>
+      <span class="btn-label">অর্ডার খুঁজুন</span>
+    </button>
+
+    <div class="error-banner" id="error-banner">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="12"/>
+        <line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      <span id="error-text">কিছু একটা সমস্যা হয়েছে।</span>
+    </div>
+  </div>
+
+  <!-- RESULT -->
+  <div class="result-card" id="result-card"></div>
+
+  <!-- TIPS -->
+  <div class="tips">
+    <h4>
+      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/>
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 16v-4M12 8h.01"/>
+      </svg>
+      জানা দরকার
+    </h4>
+    <ul>
+      <li>ঢাকার ভেতরে সাধারণত ১–২ কার্যদিবসে ডেলিভারি হয়।</li>
+      <li>ঢাকার বাইরে ২–৪ কার্যদিবস সময় লাগতে পারে।</li>
+      <li>কোনো সমস্যা হলে সরাসরি WhatsApp-এ যোগাযোগ করুন।</li>
+    </ul>
+  </div>
+</main>
+
+<footer>
+  &copy; 2024 SaFa Naturals. সকল স্বত্ব সংরক্ষিত।
+  <br/>
+  <a href="/">হোম</a> &nbsp;·&nbsp; <a href="/account.html">অ্যাকাউন্ট</a>
+</footer>
+
+<script type="module">
+import { createClient } from '@supabase/supabase-js'
+
+const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_ANON_KEY
+)
+
+const STEPS = [
+  { key: 'pending',    label: 'অর্ডার\nদেওয়া হয়েছে',   icon: shoppingIcon() },
+  { key: 'confirmed',  label: 'নিশ্চিত\nহয়েছে',          icon: checkIcon() },
+  { key: 'processing', label: 'প্রস্তুত\nহচ্ছে',          icon: gearIcon() },
+  { key: 'shipped',    label: 'পাঠানো\nহয়েছে',           icon: truckIcon() },
+  { key: 'delivered',  label: 'পৌঁছে\nগেছে',             icon: homeIcon() },
+]
+const STATUS_ORDER = ['pending','confirmed','processing','shipped','delivered']
+
+function shoppingIcon() {
+  return `<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+    <path stroke-linecap="round" stroke-linejoin="round"
+      d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>`
+}
+function checkIcon() {
+  return `<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>`
+}
+function gearIcon() {
+  return `<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+    <path stroke-linecap="round" stroke-linejoin="round"
+      d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573
+         1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426
+         1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37
+         2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724
+         1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0
+         00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066
+         -2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+  </svg>`
+}
+function truckIcon() {
+  return `<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+    <path stroke-linecap="round" stroke-linejoin="round"
+      d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/>
+    <path stroke-linecap="round" stroke-linejoin="round"
+      d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10m9 0H9m4 0h5m-5-8h4l2 4"/>
+  </svg>`
+}
+function homeIcon() {
+  return `<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+    <path stroke-linecap="round" stroke-linejoin="round"
+      d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1
+         1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+  </svg>`
+}
+
+function showError(msg) {
+  const el = document.getElementById('error-banner')
+  document.getElementById('error-text').textContent = msg
+  el.classList.add('show')
+}
+function hideError() {
+  document.getElementById('error-banner').classList.remove('show')
+}
+
+function setLoading(on) {
+  const btn = document.getElementById('btn-track')
+  btn.disabled = on
+  btn.classList.toggle('loading', on)
+}
+
+function badgeClass(status) {
+  return `status-badge badge-${status}`
+}
+function badgeLabel(status) {
+  const map = {
+    pending: 'অপেক্ষায়', confirmed: 'নিশ্চিত',
+    processing: 'প্রস্তুত হচ্ছে', shipped: 'পাঠানো হয়েছে',
+    delivered: 'ডেলিভারি হয়েছে', cancelled: 'বাতিল'
+  }
+  return map[status] || status
+}
+
+function formatDate(iso) {
+  if (!iso) return '—'
+  return new Date(iso).toLocaleDateString('bn-BD', {
+    day: 'numeric', month: 'long', year: 'numeric'
+  })
+}
+
+function formatTaka(n) {
+  return '৳' + Number(n || 0).toLocaleString('bn-BD')
+}
+
+function buildResult(order) {
+  const isCancelled = order.status === 'cancelled'
+  const items = Array.isArray(order.items) ? order.items : []
+  const currentIdx = STATUS_ORDER.indexOf(order.status)
+
+  /* stepper progress bar width */
+  const progressPct = isCancelled ? 0
+    : currentIdx < 0 ? 0
+    : Math.round((currentIdx / (STATUS_ORDER.length - 1)) * 100)
+
+  /* steps HTML */
+  const stepsHtml = STEPS.map((s, i) => {
+    let cls = ''
+    if (!isCancelled) {
+      if (i < currentIdx) cls = 'done'
+      else if (i === currentIdx) cls = 'active'
+    }
+    return `
+      <div class="step ${cls}">
+        <div class="step-dot">${s.icon}</div>
+        <div class="step-label">${s.label.replace('\n','<br/>')}</div>
+      </div>`
+  }).join('')
+
+  /* items HTML */
+  const itemsHtml = items.length
+    ? items.map(it => `
+        <div class="item-row">
+          <span class="item-name">${it.name || it.title || 'পণ্য'}</span>
+          <span class="item-qty">×${it.qty || it.quantity || 1}</span>
+          <span class="item-price">${formatTaka((it.price || 0) * (it.qty || it.quantity || 1))}</span>
+        </div>`).join('')
+    : `<div class="item-row"><span class="item-name" style="color:var(--muted)">পণ্যের বিবরণ পাওয়া যায়নি</span></div>`
+
+  const subtotal = items.reduce((s, it) => s + (it.price||0)*(it.qty||it.quantity||1), 0)
+  const delivery = order.delivery_charge || 0
+  const waMsg = encodeURIComponent(
+    `হ্যালো, আমার অর্ডার নম্বর ${order.order_number} সম্পর্কে জানতে চাই।`
+  )
+
+  return `
+    <div class="status-header">
+      <div class="status-top">
+        <div class="order-meta">
+          <h3>${order.order_number}</h3>
+          <span>${formatDate(order.created_at)}</span>
+        </div>
+        <span class="${badgeClass(order.status)}">${badgeLabel(order.status)}</span>
+      </div>
+
+      ${isCancelled ? `
+        <div class="cancelled-banner">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 9l-6 6M9 9l6 6"/>
+          </svg>
+          <p>এই অর্ডারটি বাতিল করা হয়েছে। কোনো প্রশ্ন থাকলে WhatsApp-এ যোগাযোগ করুন।</p>
+        </div>` : `
+        <div class="stepper">
+          <div class="stepper-progress" style="width:${progressPct}%"></div>
+          ${stepsHtml}
+        </div>`}
+    </div>
+
+    <div class="detail-body">
+      <div class="info-grid">
+        <div class="info-item">
+          <label>গ্রাহকের নাম</label>
+          <span>${order.customer_name || '—'}</span>
+        </div>
+        <div class="info-item">
+          <label>জেলা</label>
+          <span>${order.district || '—'}</span>
+        </div>
+        <div class="info-item" style="grid-column:1/-1">
+          <label>ঠিকানা</label>
+          <span>${order.address || '—'}</span>
+        </div>
+        ${order.notes ? `
+        <div class="info-item" style="grid-column:1/-1">
+          <label>নোট</label>
+          <span>${order.notes}</span>
+        </div>` : ''}
+      </div>
+
+      <div class="section-title">অর্ডারকৃত পণ্য</div>
+      <div class="items-list">${itemsHtml}</div>
+
+      <div class="totals">
+        <div class="total-row">
+          <span>পণ্যের মূল্য</span>
+          <span>${formatTaka(subtotal || order.total_amount - delivery)}</span>
+        </div>
+        <div class="total-row">
+          <span>ডেলিভারি চার্জ</span>
+          <span>${delivery === 0 ? 'বিনামূল্যে ✨' : formatTaka(delivery)}</span>
+        </div>
+        <div class="total-row grand">
+          <span>মোট</span>
+          <span>${formatTaka(order.total_amount)}</span>
+        </div>
+      </div>
+
+      <div class="actions">
+        <a class="btn-wa"
+           href="https://wa.me/8801XXXXXXXXX?text=${waMsg}"
+           target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15
+              -.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463
+              -2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606
+              .134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371
+              -.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51
+              -.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016
+              -1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487
+              .709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719
+              2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+            <path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.117 1.528 5.845L.057 23.25a.75.75
+              0 00.916.915l5.405-1.471A11.943 11.943 0 0012 24c6.627 0 12-5.373 12-12S18.627 0
+              12 0zm0 21.75c-1.99 0-3.855-.544-5.455-1.49l-.39-.232-4.04 1.099 1.1-4.041
+              -.231-.389A9.718 9.718 0 012.25 12C2.25 6.615 6.615 2.25 12 2.25S21.75 6.615
+              21.75 12 17.385 21.75 12 21.75z"/>
+          </svg>
+          WhatsApp সাপোর্ট
+        </a>
+        <a class="btn-home" href="/">
+          <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1
+                 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+          </svg>
+          আরও অর্ডার করুন
+        </a>
+      </div>
+    </div>
+  `
+}
+
+window.trackOrder = async function() {
+  hideError()
+  const orderNum = document.getElementById('inp-order').value.trim()
+  const phone    = document.getElementById('inp-phone').value.trim()
+
+  if (!orderNum) { showError('অর্ডার নম্বর দিন।'); return }
+  if (!phone)    { showError('ফোন নম্বর দিন।'); return }
+
+  setLoading(true)
+  document.getElementById('result-card').classList.remove('show')
+
+  try {
+    const { data, error } = await supabase
+      .rpc('track_order', { p_order_number: orderNum, p_phone: phone })
+
+    if (error) throw error
+    if (!data) {
+      showError('অর্ডার পাওয়া যায়নি। অর্ডার নম্বর ও ফোন নম্বর মিলিয়ে দেখুন।')
+      return
+    }
+
+    const card = document.getElementById('result-card')
+    card.innerHTML = buildResult(data)
+    card.classList.add('show')
+    card.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  } catch (e) {
+    showError('সংযোগে সমস্যা হয়েছে। একটু পরে আবার চেষ্টা করুন।')
+    console.error(e)
+  } finally {
+    setLoading(false)
+  }
+}
+
+/* Enter key submits */
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && (
+    document.activeElement === document.getElementById('inp-order') ||
+    document.activeElement === document.getElementById('inp-phone')
+  )) window.trackOrder()
+})
+
+/* Pre-fill from URL params e.g. /track.html?order=SN-xxx&phone=01xxx */
+const params = new URLSearchParams(location.search)
+if (params.get('order')) document.getElementById('inp-order').value = params.get('order')
+if (params.get('phone')) document.getElementById('inp-phone').value = params.get('phone')
+if (params.get('order') && params.get('phone')) window.trackOrder()
+</script>
+</body>
+</html>

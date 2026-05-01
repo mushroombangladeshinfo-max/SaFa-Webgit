@@ -14,6 +14,7 @@ export default defineConfig({
         checkout: resolve(__dirname, 'checkout.html'),
         account:  resolve(__dirname, 'account.html'),
         admin:    resolve(__dirname, 'admin.html'),
+        track:    resolve(__dirname, 'track.html'),
       }
     }
   },
