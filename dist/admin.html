@@ -381,6 +381,26 @@
     .inv-save-btn:hover { background:rgba(196,154,60,.2); }
     .pf-hint { opacity:.5; font-size:.85em; }
 
+    /* ══ CUSTOMERS ══ */
+    .cust-toolbar { display:flex; align-items:center; gap:12px; margin-bottom:18px; flex-wrap:wrap; }
+    .cust-headline { font-family:'Cormorant Garamond',serif; font-size:24px; font-weight:300; color:var(--c); flex:1; }
+    .cust-headline em { font-style:italic; color:var(--al); }
+    .cust-stat-strip { display:flex; gap:16px; margin-bottom:20px; }
+    .cust-stat { background:var(--g800); border:1px solid rgba(255,255,255,.07); border-radius:8px; padding:14px 18px; flex:1; }
+    .cust-stat-val { font-family:'Cormorant Garamond',serif; font-size:26px; font-weight:300; color:var(--al); line-height:1; }
+    .cust-stat-lbl { font-family:'Syne',sans-serif; font-size:9px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:rgba(245,239,230,.38); margin-top:4px; }
+    /* Order history drawer */
+    .cust-orders-row td { padding:0; border-bottom:1px solid rgba(255,255,255,.04); }
+    .cust-orders-panel { padding:14px 20px 18px; background:rgba(255,255,255,.012); animation:expand .2s ease; }
+    .cust-orders-title { font-family:'Syne',sans-serif; font-size:9px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:rgba(196,154,60,.8); margin-bottom:10px; }
+    .cust-order-row { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid rgba(255,255,255,.04); font-size:13px; flex-wrap:wrap; gap:8px; }
+    .cust-order-row:last-child { border-bottom:none; }
+    .cust-order-id { font-family:'Syne',sans-serif; font-size:10px; font-weight:700; letter-spacing:.06em; color:var(--c); }
+    .cust-order-meta { font-size:11px; color:rgba(245,239,230,.45); }
+    .cust-order-total { font-family:'Cormorant Garamond',serif; font-size:16px; font-weight:300; color:var(--al); }
+    .cell-phone { font-family:'DM Sans',sans-serif; letter-spacing:.04em; font-size:13px; }
+    .cell-spent { font-family:'Cormorant Garamond',serif; font-size:18px; font-weight:300; color:var(--al); }
+
     /* ─── Responsive ─── */
     @media (max-width:1100px) { .stats-grid { grid-template-columns:repeat(2,1fr); } .promo-settings-row { grid-template-columns:1fr 1fr; } .quick-tiers { grid-template-columns:1fr 1fr; } .kpi-row { grid-template-columns:1fr 1fr; } .charts-row { grid-template-columns:1fr; } }
     @media (max-width:600px)  { .promo-settings-row { grid-template-columns:1fr; } .quick-tiers { grid-template-columns:1fr; } .add-form-grid { grid-template-columns:1fr 1fr; } }
@@ -393,7 +413,7 @@
       .orders-table th:nth-child(5), .orders-table td:nth-child(5) { display:none; }
     }
   </style>
-  <script type="module" crossorigin src="/assets/admin-C_KaKAFY.js"></script>
+  <script type="module" crossorigin src="/assets/admin-CpPu9Mxx.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/index-DshXEMtg.js">
   <link rel="modulepreload" crossorigin href="/assets/main-CfI1Yhwj.js">
   <link rel="stylesheet" crossorigin href="/assets/main-DZQD0wys.css">
@@ -606,6 +626,10 @@
         <button type="button" class="dash-tab" id="tab-products" onclick="switchDashTab('products')">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
           Products
+        </button>
+        <button type="button" class="dash-tab" id="tab-customers" onclick="switchDashTab('customers')">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+          Customers
         </button>
       </div>
 
@@ -973,6 +997,62 @@
         </div>
 
       </div><!-- /panel-products -->
+
+      <!-- ═══════════════ CUSTOMERS PANEL ═══════════════ -->
+      <div id="panel-customers" class="panel-hidden">
+
+        <div class="cust-toolbar">
+          <div class="cust-headline">Customers <em>&amp; History</em></div>
+          <input type="text" id="cust-search" class="f-search wide"
+                 placeholder="Search name or phone…" oninput="filterCustomers(this.value)">
+          <button type="button" class="f-action-btn" id="cust-export-btn" onclick="exportCustomers()">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export CSV
+          </button>
+        </div>
+
+        <!-- Summary strip -->
+        <div class="cust-stat-strip">
+          <div class="cust-stat">
+            <div class="cust-stat-val" id="cust-stat-total">—</div>
+            <div class="cust-stat-lbl">Total Customers</div>
+          </div>
+          <div class="cust-stat">
+            <div class="cust-stat-val" id="cust-stat-repeat">—</div>
+            <div class="cust-stat-lbl">Repeat Buyers (2+ orders)</div>
+          </div>
+          <div class="cust-stat">
+            <div class="cust-stat-val" id="cust-stat-revenue">—</div>
+            <div class="cust-stat-lbl">Total Revenue (all)</div>
+          </div>
+          <div class="cust-stat">
+            <div class="cust-stat-val" id="cust-stat-aov">—</div>
+            <div class="cust-stat-lbl">Avg Customer Value</div>
+          </div>
+        </div>
+
+        <!-- Customers table -->
+        <div class="orders-table-wrap">
+          <table class="orders-table">
+            <thead>
+              <tr>
+                <th></th>
+                <th>Customer</th>
+                <th>Phone</th>
+                <th>Location</th>
+                <th>Orders</th>
+                <th>Total Spent</th>
+                <th>Last Order</th>
+                <th>Last Status</th>
+              </tr>
+            </thead>
+            <tbody id="cust-tbody">
+              <tr><td colspan="8"><div class="table-empty"><div class="table-empty-icon">⏳</div><p class="table-empty-text">Loading customers…</p></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div><!-- /panel-customers -->
 
     </div><!-- /dash-content -->
 
