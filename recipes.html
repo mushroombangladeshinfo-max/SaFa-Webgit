@@ -2967,35 +2967,40 @@
       heroEmoji.textContent = r.emoji;
 
       /* ── Category pill ── */
-      document.getElementById('modalCategory').textContent = r.category;
+      const modalCategory = document.getElementById('modalCategory');
+      if (modalCategory) modalCategory.textContent = r.category;
 
       /* ── Title ── */
-      document.getElementById('modalTitle').textContent   = r.title;
-      document.getElementById('modalTitleBn').textContent = r.titleBn;
+      const modalTitle = document.getElementById('modalTitle');
+      if (modalTitle) modalTitle.textContent = r.title;
+      
+      const modalTitleBn = document.getElementById('modalTitleBn');
+      if (modalTitleBn) modalTitleBn.textContent = r.titleBn;
 
       /* ── Stats pills ── */
-      const diffClass = {
-        easy: 'diff-easy', medium: 'diff-medium', hard: 'diff-hard'
-      }[r.difficulty] || '';
-      document.getElementById('modalStats').innerHTML = `
-        <span class="rp-modal-stat-pill">⏱ <strong>${r.time}</strong></span>
-        <span class="rp-modal-stat-pill">👥 <strong>${r.serves}</strong></span>
-        <span class="rp-modal-stat-pill">${r.rating}</span>
-        <span class="rp-modal-stat-pill ${diffClass}">
-          ${r.difficulty.charAt(0).toUpperCase() + r.difficulty.slice(1)}
-        </span>`;
+      const modalStats = document.getElementById('modalStats');
+      if (modalStats) {
+        const diffClass = { easy: 'diff-easy', medium: 'diff-medium', hard: 'diff-hard' }[r.difficulty] || '';
+        modalStats.innerHTML = `
+          <span class="rp-modal-stat-pill">⏱ <strong>${r.time}</strong></span>
+          <span class="rp-modal-stat-pill">👥 <strong>${r.serves}</strong></span>
+          <span class="rp-modal-stat-pill">${r.rating}</span>
+          <span class="rp-modal-stat-pill ${diffClass}">
+            ${r.difficulty.charAt(0).toUpperCase() + r.difficulty.slice(1)}
+          </span>`;
+      }
 
       /* ── Ingredients ── */
-      document.getElementById('modalIngredients').innerHTML =
-        r.ingredients.map(ing => `
-          <li>
-            <span class="rp-ingredient-amount">${ing.amount}</span>
-            ${ing.name}
-          </li>`).join('');
+      const modalIng = document.getElementById('modalIngredients');
+      if (modalIng) {
+        modalIng.innerHTML = r.ingredients.map(ing => `
+          <li><span class="rp-ingredient-amount">${ing.amount}</span>${ing.name}</li>`).join('');
+      }
 
       /* ── Steps ── */
-      document.getElementById('modalSteps').innerHTML =
-        r.steps.map((step, i) => `
+      const modalSteps = document.getElementById('modalSteps');
+      if (modalSteps) {
+        modalSteps.innerHTML = r.steps.map((step, i) => `
           <div class="rp-step">
             <span class="rp-step-num">${i + 1}</span>
             <div class="rp-step-content">
@@ -3003,40 +3008,53 @@
               <p class="rp-step-text">${step.text}</p>
             </div>
           </div>`).join('');
+      }
 
       /* ── Tips ── */
-      document.getElementById('modalTips').innerHTML =
-        r.tips.map(tip => `
+      const modalTips = document.getElementById('modalTips');
+      if (modalTips) {
+        modalTips.innerHTML = r.tips.map(tip => `
           <div class="rp-tip">
             <p class="rp-tip-label">${tip.label}</p>
             <p class="rp-tip-text">${tip.text}</p>
           </div>`).join('');
+      }
 
       /* ── Footer CTA ── */
       const p = r.mainProduct;
-      document.getElementById('modalFooterLabel').innerHTML =
-        `Ready to cook? <strong>${p.name} — ৳${p.price}/${p.unit}</strong>`;
-      document.getElementById('modalAddBtn').onclick = () => {
-        window.addToCart(p.name, p.price, p.id, p.unit, p.image);
-        window.closeRecipe();
-      };
+      const footerLabel = document.getElementById('modalFooterLabel');
+      if (footerLabel) footerLabel.innerHTML = `Ready to cook? <strong>${p.name} — ৳${p.price}/${p.unit}</strong>`;
+      
+      const addBtn = document.getElementById('modalAddBtn');
+      if (addBtn) {
+        addBtn.onclick = () => {
+          window.addToCart(p.name, p.price, p.id, p.unit, p.image);
+          window.closeRecipe();
+        };
+      }
 
       /* ── Reset to ingredients tab ── */
       window.switchTab('ingredients', false); /* false = no animation on open */
 
       /* ── Show modal ── */
-      document.getElementById('recipeModal').classList.add('open');
+      const modal = document.getElementById('recipeModal');
+      if (!modal) return;
+      
+      modal.classList.add('open');
       document._savedScrollY = window.scrollY;
       document.body.style.overflow = 'hidden';
       document.body.style.top = `-${document._savedScrollY}px`;
 
       /* Scroll modal to top */
-      document.querySelector('.rp-modal').scrollTop = 0;
+      const modalPanel = document.querySelector('.rp-modal');
+      if (modalPanel) modalPanel.scrollTop = 0;
     }
 
     /** Closes the recipe modal and restores scroll position. */
     window.closeRecipe = function() {
-      document.getElementById('recipeModal').classList.remove('open');
+      const modal = document.getElementById('recipeModal');
+      if (modal) modal.classList.remove('open');
+      
       document.body.style.overflow = '';
       document.body.style.top = '';
       window.scrollTo({ top: document._savedScrollY || 0, behavior: 'instant' });
@@ -3047,7 +3065,8 @@
      * Does NOT close if clicking inside .rp-modal itself.
      */
     window.closeModalOnOverlay = function(e) {
-      if (e.target === document.getElementById('recipeModal')) {
+      const modal = document.getElementById('recipeModal');
+      if (modal && e.target === modal) {
         window.closeRecipe();
       }
     }
