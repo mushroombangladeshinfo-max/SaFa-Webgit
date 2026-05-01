@@ -77,6 +77,13 @@
       <li><a href="recipes.html">Recipes</a></li>
     </ul>
     <div class="nav-right">
+      <!-- Account Icon -->
+      <a href="account.html" class="nav-icon" id="nav-account-link" aria-label="Account / Sign In">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+          <circle cx="12" cy="7" r="4"></circle>
+        </svg>
+      </a>
       <!-- Cart icon — toggleCart() exposed on window by main.js -->
       <button class="nav-icon"
               onclick="window.toggleCart()"
@@ -103,6 +110,7 @@
     <a href="#benefits" onclick="window.closeMenu()">কেন মাশরুম</a>
     <a href="#story"    onclick="window.closeMenu()">Our Story</a>
     <a href="recipes.html" onclick="window.closeMenu()">Recipes</a>
+    <a href="account.html" onclick="window.closeMenu()">Account</a>
     <a href="about.html"   onclick="window.closeMenu()">About</a>
     <a href="#products" class="mobile-cta" onclick="window.closeMenu()">এখনই অর্ডার করুন →</a>
   </div>
@@ -140,40 +148,7 @@
        SUPABASE AUTH — user status check
        Checks if a customer is logged in and updates the nav.
   ════════════════════════════════════════════════════ -->
-  <script type="module">
-    import { supabase } from '/src/supabase.js';
-
-    /** Checks auth state and swaps nav CTA for a user avatar pill if logged in. */
-    async function checkUserStatus() {
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
-
-        const firstName = user.user_metadata?.first_name
-          || user.email.split('@')[0];
-        const navRight = document.querySelector('.nav-right');
-        const orderBtn = navRight?.querySelector('.nav-cta');
-
-        if (orderBtn) {
-          orderBtn.outerHTML = `
-            <a href="account.html" class="nav-user-pill">
-              <div class="nav-avatar">${firstName[0].toUpperCase()}</div>
-              <span class="nav-user-name">${firstName}</span>
-            </a>`;
-        }
-      } catch (err) {
-        console.error('[SaFa] Auth check failed:', err);
-      }
-    }
-
-    /* React to login/logout events */
-    supabase.auth.onAuthStateChange((event) => {
-      if (event === 'SIGNED_IN')  checkUserStatus();
-      if (event === 'SIGNED_OUT') location.reload();
-    });
-
-    document.addEventListener('DOMContentLoaded', checkUserStatus);
-  </script>
+  <script type="module" src="/src/auth-nav.js"></script>
 
   <!-- ════════════════════════════════════════════════════
        PRODUCTS SECTION
@@ -705,6 +680,7 @@
           <li><a href="quality.html">Quality Standards</a></li>
           <li><a href="cancellation.html">Cancellation Policy</a></li>
           <li><a href="returns.html">Refund &amp; Returns</a></li>
+          <li><a href="admin.html" style="opacity: 0.5;">Admin Login</a></li>
         </ul>
       </div>
 
