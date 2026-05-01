@@ -562,6 +562,92 @@
     }
     .confirm-btn-shop:hover { border-color: rgba(255,255,255,.3); color: var(--c); background: rgba(255,255,255,.03); }
 
+    /* ── Coupon ── */
+    .coupon-row { margin-bottom: 16px; }
+    .coupon-input-wrap {
+      display: flex; gap: 8px;
+    }
+    .coupon-input-wrap input {
+      flex: 1; padding: 10px 14px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 6px;
+      color: var(--c); font-family: 'DM Sans', sans-serif;
+      font-size: 13px; font-weight: 400;
+      outline: none; letter-spacing: .06em;
+      text-transform: uppercase;
+      transition: border-color .2s, background .2s;
+    }
+    .coupon-input-wrap input:focus {
+      border-color: rgba(196,154,60,.5);
+      background: rgba(255,255,255,.06);
+    }
+    .coupon-input-wrap input::placeholder {
+      text-transform: none; color: rgba(245,239,230,.3); letter-spacing: 0;
+    }
+    .coupon-btn {
+      padding: 10px 16px;
+      background: rgba(196,154,60,.12);
+      border: 1px solid rgba(196,154,60,.3);
+      border-radius: 6px;
+      color: var(--al);
+      font-family: 'Syne', sans-serif;
+      font-size: 10px; font-weight: 700; letter-spacing: .12em;
+      text-transform: uppercase;
+      cursor: pointer; white-space: nowrap;
+      transition: background .2s, border-color .2s;
+    }
+    .coupon-btn:hover:not(:disabled) {
+      background: rgba(196,154,60,.2); border-color: rgba(196,154,60,.5);
+    }
+    .coupon-btn:disabled { opacity: .5; cursor: not-allowed; }
+
+    .coupon-applied {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 14px;
+      background: rgba(95,207,128,.07);
+      border: 1px solid rgba(95,207,128,.2);
+      border-radius: 6px;
+      animation: fadeUp .3s ease;
+    }
+    .coupon-applied-icon { font-size: 14px; flex-shrink: 0; }
+    .coupon-applied-text { flex: 1; }
+    .coupon-applied-code {
+      font-family: 'Syne', sans-serif;
+      font-size: 10px; font-weight: 700; letter-spacing: .1em;
+      color: #5fcf80; display: block;
+    }
+    .coupon-applied-desc {
+      font-size: 11px; color: rgba(245,239,230,.55); margin-top: 1px;
+    }
+    .coupon-remove {
+      background: none; border: none;
+      color: rgba(245,239,230,.35); cursor: pointer;
+      font-size: 14px; padding: 2px 4px;
+      flex-shrink: 0; line-height: 1;
+      transition: color .15s;
+    }
+    .coupon-remove:hover { color: var(--tl); }
+    .coupon-error {
+      font-size: 11px; color: var(--tl);
+      margin-top: 6px; min-height: 0;
+      transition: opacity .2s;
+    }
+    @keyframes couponShake {
+      0%,100%{transform:translateX(0)} 25%{transform:translateX(-5px)} 75%{transform:translateX(5px)}
+    }
+    .coupon-input-wrap.shake { animation: couponShake .3s ease; }
+
+    /* discount summary line */
+    #discountLine { display: none; }
+    #discountLine.visible { display: flex; }
+    .discount-line { color: #5fcf80 !important; }
+    .discount-line strong { color: #5fcf80 !important; }
+    .discount-code-label {
+      font-family: 'Syne', sans-serif;
+      font-size: 9px; letter-spacing: .1em;
+    }
+
     /* ── Responsive ── */
     @media (max-width: 768px) {
       .co-header  { padding: 14px 20px; }
@@ -780,9 +866,34 @@
               <div class="delivery-track"><div class="delivery-fill" id="deliveryFill" style="width:0%"></div></div>
             </div>
 
+            <!-- Coupon -->
+            <div class="coupon-row">
+              <div class="coupon-input-wrap" id="couponInputWrap">
+                <input type="text" id="couponInput" placeholder="Promo code"
+                       maxlength="24" autocomplete="off" spellcheck="false"
+                       onkeydown="if(event.key==='Enter')applyCoupon()" />
+                <button type="button" class="coupon-btn" id="couponBtn" onclick="applyCoupon()">Apply</button>
+              </div>
+              <div class="coupon-applied" id="couponApplied" style="display:none">
+                <span class="coupon-applied-icon">🏷️</span>
+                <div class="coupon-applied-text">
+                  <span class="coupon-applied-code" id="couponCodeLabel"></span>
+                  <span class="coupon-applied-desc" id="couponDesc"></span>
+                </div>
+                <button type="button" class="coupon-remove" onclick="removeCoupon()" aria-label="Remove coupon">✕</button>
+              </div>
+              <div class="coupon-error" id="couponError"></div>
+            </div>
+
             <div class="summary-line">
               <span>Subtotal</span>
               <strong id="subtotalVal">৳0</strong>
+            </div>
+            <div class="summary-line" id="discountLine">
+              <span class="discount-line">Discount
+                <span id="discountCodeLabel" class="discount-code-label"></span>
+              </span>
+              <strong class="discount-line" id="discountVal">−৳0</strong>
             </div>
             <div class="summary-line">
               <span>Delivery</span>
@@ -1040,7 +1151,8 @@
         const items    = Object.values(cart);
         const subtotal = items.reduce((s,i) => s + i.price * i.qty, 0);
         const delivery = subtotal >= window.FREE_SHIPPING_THRESHOLD ? 0 : window.DELIVERY_FEE;
-        const total    = subtotal + delivery;
+        const discount = calculateDiscount(subtotal);
+        const total    = subtotal + delivery - discount;
         const orderId  = generateOrderId();
         const date     = formatDate();
 
@@ -1050,7 +1162,7 @@
           userId = session?.user?.id || null;
         } catch { /* non-fatal */ }
 
-        const order = { orderId, date, name, phone, district, thana, address, notes, subtotal, delivery, total };
+        const order = { orderId, date, name, phone, district, thana, address, notes, subtotal, delivery, discount, total, couponCode: activeCoupon?.code || null };
 
         await saveOrderToSupabase(order, items, userId);
         notifySeller(order, items, total);
@@ -1098,6 +1210,8 @@
         items:          serializeItems(items),
         subtotal:       order.subtotal,
         delivery_fee:   order.delivery,
+        discount_amount: order.discount || 0,
+        coupon_code:    order.couponCode || null,
         total_amount:   order.total,
         payment_method: 'cod',
         status:         'pending',
@@ -1220,6 +1334,11 @@
           <span class="cd-label">Delivery</span>
           <span class="cd-val">${order.delivery===0 ? '<span style="color:#5fcf80;">Free 🎉</span>' : '৳'+order.delivery}</span>
         </div>
+        ${order.discount > 0 ? `
+        <div class="cd-row">
+          <span class="cd-label">Discount${order.couponCode ? ` (${order.couponCode})` : ''}</span>
+          <span class="cd-val" style="color:#5fcf80;">−৳${order.discount.toLocaleString()}</span>
+        </div>` : ''}
         <div class="cd-row">
           <span class="cd-label">Payment</span>
           <span class="cd-val">Cash on Delivery</span>
@@ -1312,6 +1431,20 @@
         });
       });
 
+      /* Restore saved coupon */
+      const savedCoupon = JSON.parse(localStorage.getItem('activeCoupon') || 'null');
+      if (savedCoupon) {
+        activeCoupon = savedCoupon;
+        document.getElementById('couponInputWrap').style.display  = 'none';
+        document.getElementById('couponApplied').style.display    = 'flex';
+        document.getElementById('couponCodeLabel').textContent    = savedCoupon.code;
+        const discText = savedCoupon.type === 'percent'
+          ? `${savedCoupon.value}% off applied`
+          : `৳${savedCoupon.value} off applied`;
+        document.getElementById('couponDesc').textContent = savedCoupon.description || discText;
+        refreshDiscountUI();
+      }
+
       /* Auth prefill */
       (async () => {
         try {
@@ -1335,6 +1468,111 @@
     } else {
       initCheckout();
     }
+
+    /* ─── Coupon system ─── */
+
+    let activeCoupon = null; /* { code, type, value, description } */
+
+    function calculateDiscount(subtotal) {
+      if (!activeCoupon) return 0;
+      if (activeCoupon.type === 'percent') {
+        return Math.round(subtotal * activeCoupon.value / 100);
+      }
+      return Math.min(Number(activeCoupon.value), subtotal);
+    }
+
+    function refreshDiscountUI() {
+      const cart     = window.getCart ? window.getCart() : {};
+      const subtotal = Object.values(cart).reduce((s, i) => s + i.price * i.qty, 0);
+      const discount = calculateDiscount(subtotal);
+      const discLine = document.getElementById('discountLine');
+      if (activeCoupon && discount > 0) {
+        document.getElementById('discountVal').textContent      = '−৳' + discount.toLocaleString();
+        document.getElementById('discountCodeLabel').textContent = activeCoupon.code;
+        discLine.classList.add('visible');
+        /* Patch the total shown by ui.js */
+        const totalEl = document.getElementById('totalVal');
+        if (totalEl) {
+          const raw = parseInt(totalEl.textContent.replace(/[^\d]/g, ''), 10) || 0;
+          totalEl.textContent = '৳' + Math.max(0, raw - discount).toLocaleString();
+        }
+      } else {
+        discLine.classList.remove('visible');
+      }
+    }
+
+    /* Monkey-patch updateTotals so discount is always re-applied */
+    const _origUpdateTotals = window.updateTotals;
+    window.updateTotals = function (subtotal) {
+      if (_origUpdateTotals) _origUpdateTotals(subtotal);
+      refreshDiscountUI();
+    };
+
+    async function applyCoupon() {
+      const input = document.getElementById('couponInput');
+      const code  = input.value.trim().toUpperCase();
+      const errEl = document.getElementById('couponError');
+      errEl.textContent = '';
+
+      if (!code) {
+        errEl.textContent = 'Please enter a promo code.';
+        return;
+      }
+
+      const cart     = window.getCart ? window.getCart() : {};
+      const subtotal = Object.values(cart).reduce((s, i) => s + i.price * i.qty, 0);
+
+      const btn = document.getElementById('couponBtn');
+      btn.disabled = true; btn.textContent = '…';
+
+      try {
+        const { data, error } = await supabase
+          .rpc('validate_coupon', { p_code: code, p_subtotal: subtotal });
+
+        if (error || !data?.valid) {
+          errEl.textContent = data?.message || 'Invalid or expired coupon code.';
+          const wrap = document.getElementById('couponInputWrap');
+          wrap.classList.add('shake');
+          wrap.addEventListener('animationend', () => wrap.classList.remove('shake'), { once: true });
+          return;
+        }
+
+        activeCoupon = { code: data.code, type: data.type, value: data.value, description: data.description };
+        localStorage.setItem('activeCoupon', JSON.stringify(activeCoupon));
+
+        /* Show applied state */
+        document.getElementById('couponInputWrap').style.display  = 'none';
+        document.getElementById('couponApplied').style.display    = 'flex';
+        document.getElementById('couponCodeLabel').textContent    = data.code;
+        const discText = data.type === 'percent'
+          ? `${data.value}% off applied`
+          : `৳${data.value} off applied`;
+        document.getElementById('couponDesc').textContent = data.description || discText;
+
+        refreshDiscountUI();
+      } catch {
+        errEl.textContent = 'Could not validate. Check connection and try again.';
+      } finally {
+        btn.disabled = false; btn.textContent = 'Apply';
+      }
+    }
+
+    function removeCoupon() {
+      activeCoupon = null;
+      localStorage.removeItem('activeCoupon');
+      document.getElementById('couponInputWrap').style.display = 'flex';
+      document.getElementById('couponApplied').style.display  = 'none';
+      document.getElementById('couponInput').value            = '';
+      document.getElementById('couponError').textContent      = '';
+      document.getElementById('discountLine').classList.remove('visible');
+      /* Re-run totals without discount */
+      const cart     = window.getCart ? window.getCart() : {};
+      const subtotal = Object.values(cart).reduce((s, i) => s + i.price * i.qty, 0);
+      if (window.updateTotals) window.updateTotals(subtotal);
+    }
+
+    window.applyCoupon  = applyCoupon;
+    window.removeCoupon = removeCoupon;
 
     window.processOrder = processOrder;
   </script>

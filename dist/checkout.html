@@ -561,6 +561,92 @@
     }
     .confirm-btn-shop:hover { border-color: rgba(255,255,255,.3); color: var(--c); background: rgba(255,255,255,.03); }
 
+    /* ── Coupon ── */
+    .coupon-row { margin-bottom: 16px; }
+    .coupon-input-wrap {
+      display: flex; gap: 8px;
+    }
+    .coupon-input-wrap input {
+      flex: 1; padding: 10px 14px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 6px;
+      color: var(--c); font-family: 'DM Sans', sans-serif;
+      font-size: 13px; font-weight: 400;
+      outline: none; letter-spacing: .06em;
+      text-transform: uppercase;
+      transition: border-color .2s, background .2s;
+    }
+    .coupon-input-wrap input:focus {
+      border-color: rgba(196,154,60,.5);
+      background: rgba(255,255,255,.06);
+    }
+    .coupon-input-wrap input::placeholder {
+      text-transform: none; color: rgba(245,239,230,.3); letter-spacing: 0;
+    }
+    .coupon-btn {
+      padding: 10px 16px;
+      background: rgba(196,154,60,.12);
+      border: 1px solid rgba(196,154,60,.3);
+      border-radius: 6px;
+      color: var(--al);
+      font-family: 'Syne', sans-serif;
+      font-size: 10px; font-weight: 700; letter-spacing: .12em;
+      text-transform: uppercase;
+      cursor: pointer; white-space: nowrap;
+      transition: background .2s, border-color .2s;
+    }
+    .coupon-btn:hover:not(:disabled) {
+      background: rgba(196,154,60,.2); border-color: rgba(196,154,60,.5);
+    }
+    .coupon-btn:disabled { opacity: .5; cursor: not-allowed; }
+
+    .coupon-applied {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 14px;
+      background: rgba(95,207,128,.07);
+      border: 1px solid rgba(95,207,128,.2);
+      border-radius: 6px;
+      animation: fadeUp .3s ease;
+    }
+    .coupon-applied-icon { font-size: 14px; flex-shrink: 0; }
+    .coupon-applied-text { flex: 1; }
+    .coupon-applied-code {
+      font-family: 'Syne', sans-serif;
+      font-size: 10px; font-weight: 700; letter-spacing: .1em;
+      color: #5fcf80; display: block;
+    }
+    .coupon-applied-desc {
+      font-size: 11px; color: rgba(245,239,230,.55); margin-top: 1px;
+    }
+    .coupon-remove {
+      background: none; border: none;
+      color: rgba(245,239,230,.35); cursor: pointer;
+      font-size: 14px; padding: 2px 4px;
+      flex-shrink: 0; line-height: 1;
+      transition: color .15s;
+    }
+    .coupon-remove:hover { color: var(--tl); }
+    .coupon-error {
+      font-size: 11px; color: var(--tl);
+      margin-top: 6px; min-height: 0;
+      transition: opacity .2s;
+    }
+    @keyframes couponShake {
+      0%,100%{transform:translateX(0)} 25%{transform:translateX(-5px)} 75%{transform:translateX(5px)}
+    }
+    .coupon-input-wrap.shake { animation: couponShake .3s ease; }
+
+    /* discount summary line */
+    #discountLine { display: none; }
+    #discountLine.visible { display: flex; }
+    .discount-line { color: #5fcf80 !important; }
+    .discount-line strong { color: #5fcf80 !important; }
+    .discount-code-label {
+      font-family: 'Syne', sans-serif;
+      font-size: 9px; letter-spacing: .1em;
+    }
+
     /* ── Responsive ── */
     @media (max-width: 768px) {
       .co-header  { padding: 14px 20px; }
@@ -577,7 +663,7 @@
       .confirm-title { font-size: 32px; }
     }
   </style>
-  <script type="module" crossorigin src="/assets/checkout-DQh4WBS_.js"></script>
+  <script type="module" crossorigin src="/assets/checkout-3YG_kche.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/index-DshXEMtg.js">
   <link rel="modulepreload" crossorigin href="/assets/main-Cib4N9Jv.js">
   <link rel="stylesheet" crossorigin href="/assets/main-CpNDrKw3.css">
@@ -783,9 +869,34 @@
               <div class="delivery-track"><div class="delivery-fill" id="deliveryFill" style="width:0%"></div></div>
             </div>
 
+            <!-- Coupon -->
+            <div class="coupon-row">
+              <div class="coupon-input-wrap" id="couponInputWrap">
+                <input type="text" id="couponInput" placeholder="Promo code"
+                       maxlength="24" autocomplete="off" spellcheck="false"
+                       onkeydown="if(event.key==='Enter')applyCoupon()" />
+                <button type="button" class="coupon-btn" id="couponBtn" onclick="applyCoupon()">Apply</button>
+              </div>
+              <div class="coupon-applied" id="couponApplied" style="display:none">
+                <span class="coupon-applied-icon">🏷️</span>
+                <div class="coupon-applied-text">
+                  <span class="coupon-applied-code" id="couponCodeLabel"></span>
+                  <span class="coupon-applied-desc" id="couponDesc"></span>
+                </div>
+                <button type="button" class="coupon-remove" onclick="removeCoupon()" aria-label="Remove coupon">✕</button>
+              </div>
+              <div class="coupon-error" id="couponError"></div>
+            </div>
+
             <div class="summary-line">
               <span>Subtotal</span>
               <strong id="subtotalVal">৳0</strong>
+            </div>
+            <div class="summary-line" id="discountLine">
+              <span class="discount-line">Discount
+                <span id="discountCodeLabel" class="discount-code-label"></span>
+              </span>
+              <strong class="discount-line" id="discountVal">−৳0</strong>
             </div>
             <div class="summary-line">
               <span>Delivery</span>
