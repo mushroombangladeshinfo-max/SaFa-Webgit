@@ -1200,7 +1200,8 @@
       /* Generate UUID client-side — avoids needing SELECT after INSERT */
       const rowId = crypto.randomUUID();
 
-      const row = {
+      /* Base row — always works with the original schema */
+      const baseRow = {
         id:             rowId,
         order_number:   order.orderId,
         customer_name:  order.name,
@@ -1208,20 +1209,31 @@
         district:       order.district,
         thana:          order.thana,
         full_address:   order.address,
-        special_notes:  order.notes || null,
+        /* Append coupon info to notes if columns don't exist yet */
+        special_notes:  [
+          order.notes || null,
+          order.couponCode ? `Coupon: ${order.couponCode} (৳${order.discount} off)` : null,
+        ].filter(Boolean).join(' | ') || null,
         items:          serializeItems(items),
         subtotal:       order.subtotal,
         delivery_fee:   order.delivery,
-        discount_amount: order.discount || 0,
-        coupon_code:    order.couponCode || null,
         total_amount:   order.total,
         payment_method: 'cod',
         status:         'pending',
       };
-      if (userId) row.user_id = userId;
+      if (userId) baseRow.user_id = userId;
 
-      console.log('[SaFa] Saving order:', row.order_number);
+      /* Extended row — includes coupon columns added in later migration */
+      const extRow = {
+        ...baseRow,
+        special_notes:  order.notes || null,   /* clean notes when columns exist */
+        discount_amount: order.discount || 0,
+        coupon_code:    order.couponCode || null,
+      };
+
+      console.log('[SaFa] Saving order:', baseRow.order_number);
       let lastError = null;
+      let row = extRow;   /* try extended first */
 
       for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
         const { error } = await supabase.from('orders').insert([row]);
@@ -1241,6 +1253,15 @@
         if (error.code === '23505') throw new Error('Duplicate order ID. Please try again.');
         if (error.code === 'PGRST301') { console.error('[SaFa] RLS blocked insert.'); throw new Error('Permission denied. Contact support.'); }
         if (error.code === '42P01' || error.message?.includes('does not exist')) { console.error('[SaFa] orders table missing.'); throw new Error('SETUP_NEEDED'); }
+
+        /* 400 with column-not-found = schema missing coupon columns → fall back to base row */
+        const isSchemaError = error.code === 'PGRST204' ||
+          (error.message && (error.message.includes('discount_amount') || error.message.includes('coupon_code')));
+        if (isSchemaError && row === extRow) {
+          console.warn('[SaFa] Coupon columns not in schema — falling back to base row.');
+          row = baseRow;
+          continue;
+        }
 
         const waitMs = attempt * 600;
         console.warn(`[SaFa] Attempt ${attempt}/${MAX_RETRIES} failed, retrying in ${waitMs}ms.`);
