@@ -10,6 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Syne:wght@600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
   <style>
     *, *::before, *::after { box-sizing: border-box; }
@@ -328,8 +329,33 @@
     .del-no    { font-family:'Syne',sans-serif; font-size:9px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; padding:11px 22px; background:none; border:1px solid rgba(255,255,255,.1); border-radius:6px; color:rgba(245,239,230,.55); cursor:pointer; transition:all .2s; }
     .del-no:hover { border-color:rgba(255,255,255,.28); color:var(--c); }
 
+    /* ══ ANALYTICS ══ */
+    .an-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:22px; flex-wrap:wrap; gap:12px; }
+    .an-headline { font-family:'Cormorant Garamond',serif; font-size:24px; font-weight:300; color:var(--c); }
+    .an-headline em { font-style:italic; color:var(--al); }
+    .period-btns { display:flex; gap:4px; }
+    .period-btn { font-family:'Syne',sans-serif; font-size:9px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; padding:7px 14px; border-radius:5px; cursor:pointer; border:1px solid rgba(255,255,255,.1); background:rgba(255,255,255,.03); color:rgba(245,239,230,.5); transition:all .2s; }
+    .period-btn:hover { border-color:rgba(255,255,255,.2); color:var(--c); }
+    .period-btn.active { background:rgba(196,154,60,.12); border-color:rgba(196,154,60,.3); color:var(--al); }
+    .kpi-row { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:22px; }
+    .kpi-card { background:var(--g800); border:1px solid rgba(255,255,255,.07); border-radius:10px; padding:18px 20px; position:relative; overflow:hidden; }
+    .kpi-card::before { content:''; position:absolute; inset:0; background:linear-gradient(135deg,rgba(196,154,60,.04) 0%,transparent 60%); pointer-events:none; }
+    .kpi-lbl { font-family:'Syne',sans-serif; font-size:9px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:rgba(245,239,230,.38); margin-bottom:8px; }
+    .kpi-val { font-family:'Cormorant Garamond',serif; font-size:32px; font-weight:300; color:var(--al); line-height:1; }
+    .kpi-sub { font-size:11px; color:rgba(245,239,230,.32); margin-top:5px; }
+    .kpi-delta { font-size:11px; font-weight:600; margin-top:4px; display:inline-flex; align-items:center; gap:3px; }
+    .kpi-delta.up   { color:#5fcf80; }
+    .kpi-delta.down { color:var(--tl); }
+    .charts-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:18px; }
+    .chart-card { background:var(--g800); border:1px solid rgba(255,255,255,.07); border-radius:10px; padding:20px 22px; }
+    .chart-title { font-family:'Syne',sans-serif; font-size:9px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:rgba(245,239,230,.4); margin-bottom:16px; }
+    .chart-wrap { position:relative; height:200px; }
+    .chart-wrap-donut { position:relative; height:200px; display:flex; align-items:center; justify-content:center; }
+    .an-loading { text-align:center; padding:64px 24px; font-family:'Syne',sans-serif; font-size:10px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:rgba(245,239,230,.3); }
+    .panel-hidden { display:none; }
+
     /* ─── Responsive ─── */
-    @media (max-width:1100px) { .stats-grid { grid-template-columns:repeat(2,1fr); } .promo-settings-row { grid-template-columns:1fr 1fr; } .quick-tiers { grid-template-columns:1fr 1fr; } }
+    @media (max-width:1100px) { .stats-grid { grid-template-columns:repeat(2,1fr); } .promo-settings-row { grid-template-columns:1fr 1fr; } .quick-tiers { grid-template-columns:1fr 1fr; } .kpi-row { grid-template-columns:1fr 1fr; } .charts-row { grid-template-columns:1fr; } }
     @media (max-width:600px)  { .promo-settings-row { grid-template-columns:1fr; } .quick-tiers { grid-template-columns:1fr; } .add-form-grid { grid-template-columns:1fr 1fr; } }
     @media (max-width:900px)  { .od-grid { grid-template-columns:1fr; } .dash-content { padding:24px 20px 48px; } }
     @media (max-width:700px)  {
@@ -542,6 +568,10 @@
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
           Promotions &amp; Coupons
         </button>
+        <button type="button" class="dash-tab" id="tab-analytics" onclick="switchDashTab('analytics')">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          Analytics
+        </button>
       </div>
 
       <!-- ═══════════════ ORDERS PANEL ═══════════════ -->
@@ -605,7 +635,7 @@
       </div><!-- /panel-orders -->
 
       <!-- ═══════════════ PROMOTIONS PANEL ═══════════════ -->
-      <div id="panel-promotions" style="display:none;">
+      <div id="panel-promotions" class="panel-hidden">
 
         <!-- Settings row -->
         <div class="promo-settings-row">
@@ -762,6 +792,68 @@
         </div>
 
       </div><!-- /panel-promotions -->
+
+      <!-- ═══════════════ ANALYTICS PANEL ═══════════════ -->
+      <div id="panel-analytics" class="panel-hidden">
+
+        <div class="an-header">
+          <div class="an-headline">Analytics <em>Overview</em></div>
+          <div class="period-btns">
+            <button type="button" class="period-btn active" id="period-7"  onclick="setPeriod(7)">7D</button>
+            <button type="button" class="period-btn"        id="period-30" onclick="setPeriod(30)">30D</button>
+            <button type="button" class="period-btn"        id="period-90" onclick="setPeriod(90)">90D</button>
+          </div>
+        </div>
+
+        <!-- KPIs -->
+        <div class="kpi-row">
+          <div class="kpi-card">
+            <div class="kpi-lbl">Revenue (Period)</div>
+            <div class="kpi-val" id="kpi-revenue">—</div>
+            <div class="kpi-delta" id="kpi-revenue-delta"></div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-lbl">Orders (Period)</div>
+            <div class="kpi-val" id="kpi-orders-an">—</div>
+            <div class="kpi-delta" id="kpi-orders-delta"></div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-lbl">Avg Order Value</div>
+            <div class="kpi-val" id="kpi-aov">—</div>
+            <div class="kpi-sub">per successful order</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-lbl">Unique Customers</div>
+            <div class="kpi-val" id="kpi-customers">—</div>
+            <div class="kpi-sub">distinct phone numbers</div>
+          </div>
+        </div>
+
+        <!-- Charts row 1 -->
+        <div class="charts-row">
+          <div class="chart-card">
+            <div class="chart-title">Revenue Over Time</div>
+            <div class="chart-wrap"><canvas id="chart-revenue"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">Daily Order Volume</div>
+            <div class="chart-wrap"><canvas id="chart-volume"></canvas></div>
+          </div>
+        </div>
+
+        <!-- Charts row 2 -->
+        <div class="charts-row">
+          <div class="chart-card">
+            <div class="chart-title">Top Products by Units Sold</div>
+            <div class="chart-wrap"><canvas id="chart-products"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">Order Status Breakdown</div>
+            <div class="chart-wrap-donut"><canvas id="chart-status"></canvas></div>
+          </div>
+        </div>
+
+      </div><!-- /panel-analytics -->
 
     </div><!-- /dash-content -->
 
@@ -1345,12 +1437,18 @@
 
     /* Tab switching */
     window.switchDashTab = function(tab) {
-      const isOrders = tab === 'orders';
-      document.getElementById('panel-orders').style.display     = isOrders ? 'block' : 'none';
-      document.getElementById('panel-promotions').style.display = isOrders ? 'none'  : 'block';
-      document.getElementById('tab-orders').classList.toggle('active', isOrders);
-      document.getElementById('tab-promos').classList.toggle('active', !isOrders);
-      if (!isOrders) { loadSettings(); loadCoupons(); }
+      const panels = { orders:'panel-orders', promotions:'panel-promotions', analytics:'panel-analytics' };
+      const tabs   = { orders:'tab-orders',   promotions:'tab-promos',       analytics:'tab-analytics'  };
+      Object.entries(panels).forEach(([k, id]) => {
+        const el = document.getElementById(id);
+        if (el) el.classList.toggle('panel-hidden', k !== tab);
+      });
+      Object.entries(tabs).forEach(([k, id]) => {
+        const el = document.getElementById(id);
+        if (el) el.classList.toggle('active', k === tab);
+      });
+      if (tab === 'promotions') { loadSettings(); loadCoupons(); }
+      if (tab === 'analytics')  { loadAnalytics(); }
     };
 
     /* Settings — read */
@@ -1500,6 +1598,246 @@
       toggleAddForm();
       loadCoupons();
     };
+
+    /* ════════════════ ANALYTICS ════════════════ */
+
+    let _analyticsPeriod = 7;
+    let _charts = {};
+    let _analyticsLoaded = false;
+
+    window.setPeriod = function(days) {
+      _analyticsPeriod = days;
+      [7, 30, 90].forEach(d => {
+        document.getElementById(`period-${d}`)?.classList.toggle('active', d === days);
+      });
+      _analyticsLoaded = false;
+      loadAnalytics();
+    };
+
+    async function loadAnalytics() {
+      if (_analyticsLoaded) return;
+
+      const now    = new Date();
+      const start  = new Date(now);
+      start.setDate(start.getDate() - _analyticsPeriod);
+      const prevStart = new Date(start);
+      prevStart.setDate(prevStart.getDate() - _analyticsPeriod);
+
+      /* Fetch current + previous period in parallel */
+      const [{ data: curr }, { data: prev }] = await Promise.all([
+        supabase.from('orders').select('created_at,total_amount,status,items,customer_phone')
+          .gte('created_at', start.toISOString()).order('created_at', { ascending: true }),
+        supabase.from('orders').select('total_amount,status')
+          .gte('created_at', prevStart.toISOString())
+          .lt('created_at', start.toISOString()),
+      ]);
+
+      const active  = o => o.status !== 'cancelled';
+      const currActive = (curr || []).filter(active);
+      const prevActive = (prev || []).filter(active);
+
+      /* ── KPIs ── */
+      const revenue    = currActive.reduce((s, o) => s + (o.total_amount || 0), 0);
+      const prevRev    = prevActive.reduce((s, o) => s + (o.total_amount || 0), 0);
+      const orderCount = currActive.length;
+      const prevCount  = prevActive.length;
+      const aov        = orderCount ? Math.round(revenue / orderCount) : 0;
+      const customers  = new Set(currActive.map(o => o.customer_phone).filter(Boolean)).size;
+
+      const setKpi = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+      setKpi('kpi-revenue',   fmt(revenue));
+      setKpi('kpi-orders-an', orderCount);
+      setKpi('kpi-aov',       fmt(aov));
+      setKpi('kpi-customers', customers);
+
+      const delta = (cur, prv, prefix = '') => {
+        if (!prv) return '';
+        const pct  = Math.round(((cur - prv) / prv) * 100);
+        const up   = pct >= 0;
+        return `<span class="kpi-delta ${up ? 'up' : 'down'}">${up ? '▲' : '▼'} ${Math.abs(pct)}% vs prev period</span>`;
+      };
+      const revDelta = document.getElementById('kpi-revenue-delta');
+      const ordDelta = document.getElementById('kpi-orders-delta');
+      if (revDelta) revDelta.innerHTML = delta(revenue, prevRev);
+      if (ordDelta) ordDelta.innerHTML = delta(orderCount, prevCount);
+
+      /* ── Time-series data ── */
+      const days   = _analyticsPeriod;
+      const labels = [];
+      const revMap = {};
+      const volMap = {};
+
+      for (let i = days - 1; i >= 0; i--) {
+        const d   = new Date(now);
+        d.setDate(d.getDate() - i);
+        const key = d.toISOString().slice(0, 10);
+        labels.push(d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }));
+        revMap[key] = 0;
+        volMap[key] = 0;
+      }
+      currActive.forEach(o => {
+        const key = o.created_at.slice(0, 10);
+        if (revMap[key] !== undefined) revMap[key] += o.total_amount || 0;
+        if (volMap[key] !== undefined) volMap[key] += 1;
+      });
+      const revData = Object.values(revMap);
+      const volData = Object.values(volMap);
+
+      /* ── Product totals ── */
+      const prodMap = {};
+      currActive.forEach(o => {
+        (o.items || []).forEach(item => {
+          const name = item.name || 'Unknown';
+          prodMap[name] = (prodMap[name] || 0) + (item.qty || 1);
+        });
+      });
+      const prodSorted = Object.entries(prodMap).sort((a, b) => b[1] - a[1]).slice(0, 6);
+
+      /* ── Status breakdown ── */
+      const statusMap = {};
+      (curr || []).forEach(o => {
+        const s = o.status || 'pending';
+        statusMap[s] = (statusMap[s] || 0) + 1;
+      });
+      const statusColors = {
+        pending:    'rgba(217,178,84,.75)',
+        confirmed:  'rgba(95,207,128,.75)',
+        processing: 'rgba(60,154,196,.75)',
+        shipped:    'rgba(60,154,196,.55)',
+        delivered:  'rgba(255,255,255,.45)',
+        cancelled:  'rgba(184,92,56,.75)',
+        returned:   'rgba(184,92,56,.45)',
+      };
+
+      /* ── Chart.js defaults ── */
+      Chart.defaults.color           = 'rgba(245,239,230,0.38)';
+      Chart.defaults.borderColor     = 'rgba(255,255,255,0.06)';
+      Chart.defaults.font.family     = "'DM Sans', sans-serif";
+      Chart.defaults.font.size       = 11;
+
+      const commonGrid = {
+        color: 'rgba(255,255,255,0.05)',
+        drawBorder: false,
+      };
+      const commonTicks = { maxRotation: 0, autoSkipPadding: 12 };
+
+      /* Helper: destroy old chart before recreating */
+      const mkChart = (id, config) => {
+        if (_charts[id]) { _charts[id].destroy(); delete _charts[id]; }
+        const el = document.getElementById(id);
+        if (!el) return;
+        _charts[id] = new Chart(el, config);
+      };
+
+      /* Revenue line chart */
+      mkChart('chart-revenue', {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [{
+            label: 'Revenue (৳)',
+            data: revData,
+            borderColor: 'rgba(196,154,60,1)',
+            backgroundColor: 'rgba(196,154,60,0.08)',
+            fill: true,
+            tension: 0.4,
+            pointRadius: days <= 7 ? 4 : 2,
+            pointBackgroundColor: 'rgba(196,154,60,1)',
+            borderWidth: 2,
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false }, tooltip: {
+            callbacks: { label: ctx => ' ৳' + ctx.parsed.y.toLocaleString() }
+          }},
+          scales: {
+            x: { grid: commonGrid, ticks: commonTicks },
+            y: { grid: commonGrid, ticks: { callback: v => '৳' + (v >= 1000 ? (v/1000).toFixed(0)+'k' : v) } }
+          }
+        }
+      });
+
+      /* Volume bar chart */
+      mkChart('chart-volume', {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [{
+            label: 'Orders',
+            data: volData,
+            backgroundColor: 'rgba(95,207,128,0.55)',
+            borderColor: 'rgba(95,207,128,0.9)',
+            borderWidth: 1,
+            borderRadius: 4,
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { grid: commonGrid, ticks: commonTicks },
+            y: { grid: commonGrid, ticks: { stepSize: 1 } }
+          }
+        }
+      });
+
+      /* Top products horizontal bar */
+      mkChart('chart-products', {
+        type: 'bar',
+        data: {
+          labels: prodSorted.map(([n]) => n),
+          datasets: [{
+            label: 'Units sold',
+            data: prodSorted.map(([, v]) => v),
+            backgroundColor: [
+              'rgba(196,154,60,.65)', 'rgba(95,207,128,.65)',
+              'rgba(60,154,196,.65)', 'rgba(184,92,56,.65)',
+              'rgba(217,178,84,.55)', 'rgba(255,255,255,.25)',
+            ],
+            borderRadius: 4,
+            borderWidth: 0,
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { grid: commonGrid, ticks: { stepSize: 1 } },
+            y: { grid: { display: false } }
+          }
+        }
+      });
+
+      /* Status doughnut */
+      const statusEntries = Object.entries(statusMap);
+      mkChart('chart-status', {
+        type: 'doughnut',
+        data: {
+          labels: statusEntries.map(([k]) => cap(k)),
+          datasets: [{
+            data: statusEntries.map(([, v]) => v),
+            backgroundColor: statusEntries.map(([k]) => statusColors[k] || 'rgba(255,255,255,.3)'),
+            borderColor: 'rgba(14,26,19,1)',
+            borderWidth: 2,
+            hoverOffset: 6,
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          cutout: '68%',
+          plugins: {
+            legend: {
+              position: 'right',
+              labels: { boxWidth: 10, padding: 14, font: { size: 10 } }
+            }
+          }
+        }
+      });
+
+      _analyticsLoaded = true;
+    }
 
     /* ── Init ── */
     checkAuth();

@@ -9,6 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Syne:wght@600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
   <style>
     *, *::before, *::after { box-sizing: border-box; }
@@ -327,8 +328,33 @@
     .del-no    { font-family:'Syne',sans-serif; font-size:9px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; padding:11px 22px; background:none; border:1px solid rgba(255,255,255,.1); border-radius:6px; color:rgba(245,239,230,.55); cursor:pointer; transition:all .2s; }
     .del-no:hover { border-color:rgba(255,255,255,.28); color:var(--c); }
 
+    /* ══ ANALYTICS ══ */
+    .an-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:22px; flex-wrap:wrap; gap:12px; }
+    .an-headline { font-family:'Cormorant Garamond',serif; font-size:24px; font-weight:300; color:var(--c); }
+    .an-headline em { font-style:italic; color:var(--al); }
+    .period-btns { display:flex; gap:4px; }
+    .period-btn { font-family:'Syne',sans-serif; font-size:9px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; padding:7px 14px; border-radius:5px; cursor:pointer; border:1px solid rgba(255,255,255,.1); background:rgba(255,255,255,.03); color:rgba(245,239,230,.5); transition:all .2s; }
+    .period-btn:hover { border-color:rgba(255,255,255,.2); color:var(--c); }
+    .period-btn.active { background:rgba(196,154,60,.12); border-color:rgba(196,154,60,.3); color:var(--al); }
+    .kpi-row { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:22px; }
+    .kpi-card { background:var(--g800); border:1px solid rgba(255,255,255,.07); border-radius:10px; padding:18px 20px; position:relative; overflow:hidden; }
+    .kpi-card::before { content:''; position:absolute; inset:0; background:linear-gradient(135deg,rgba(196,154,60,.04) 0%,transparent 60%); pointer-events:none; }
+    .kpi-lbl { font-family:'Syne',sans-serif; font-size:9px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:rgba(245,239,230,.38); margin-bottom:8px; }
+    .kpi-val { font-family:'Cormorant Garamond',serif; font-size:32px; font-weight:300; color:var(--al); line-height:1; }
+    .kpi-sub { font-size:11px; color:rgba(245,239,230,.32); margin-top:5px; }
+    .kpi-delta { font-size:11px; font-weight:600; margin-top:4px; display:inline-flex; align-items:center; gap:3px; }
+    .kpi-delta.up   { color:#5fcf80; }
+    .kpi-delta.down { color:var(--tl); }
+    .charts-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:18px; }
+    .chart-card { background:var(--g800); border:1px solid rgba(255,255,255,.07); border-radius:10px; padding:20px 22px; }
+    .chart-title { font-family:'Syne',sans-serif; font-size:9px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:rgba(245,239,230,.4); margin-bottom:16px; }
+    .chart-wrap { position:relative; height:200px; }
+    .chart-wrap-donut { position:relative; height:200px; display:flex; align-items:center; justify-content:center; }
+    .an-loading { text-align:center; padding:64px 24px; font-family:'Syne',sans-serif; font-size:10px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:rgba(245,239,230,.3); }
+    .panel-hidden { display:none; }
+
     /* ─── Responsive ─── */
-    @media (max-width:1100px) { .stats-grid { grid-template-columns:repeat(2,1fr); } .promo-settings-row { grid-template-columns:1fr 1fr; } .quick-tiers { grid-template-columns:1fr 1fr; } }
+    @media (max-width:1100px) { .stats-grid { grid-template-columns:repeat(2,1fr); } .promo-settings-row { grid-template-columns:1fr 1fr; } .quick-tiers { grid-template-columns:1fr 1fr; } .kpi-row { grid-template-columns:1fr 1fr; } .charts-row { grid-template-columns:1fr; } }
     @media (max-width:600px)  { .promo-settings-row { grid-template-columns:1fr; } .quick-tiers { grid-template-columns:1fr; } .add-form-grid { grid-template-columns:1fr 1fr; } }
     @media (max-width:900px)  { .od-grid { grid-template-columns:1fr; } .dash-content { padding:24px 20px 48px; } }
     @media (max-width:700px)  {
@@ -339,7 +365,7 @@
       .orders-table th:nth-child(5), .orders-table td:nth-child(5) { display:none; }
     }
   </style>
-  <script type="module" crossorigin src="/assets/admin-BPGScYVB.js"></script>
+  <script type="module" crossorigin src="/assets/admin-Bo4qUgu9.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/index-DshXEMtg.js">
   <link rel="modulepreload" crossorigin href="/assets/main-CfI1Yhwj.js">
   <link rel="stylesheet" crossorigin href="/assets/main-DZQD0wys.css">
@@ -545,6 +571,10 @@
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
           Promotions &amp; Coupons
         </button>
+        <button type="button" class="dash-tab" id="tab-analytics" onclick="switchDashTab('analytics')">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          Analytics
+        </button>
       </div>
 
       <!-- ═══════════════ ORDERS PANEL ═══════════════ -->
@@ -608,7 +638,7 @@
       </div><!-- /panel-orders -->
 
       <!-- ═══════════════ PROMOTIONS PANEL ═══════════════ -->
-      <div id="panel-promotions" style="display:none;">
+      <div id="panel-promotions" class="panel-hidden">
 
         <!-- Settings row -->
         <div class="promo-settings-row">
@@ -765,6 +795,68 @@
         </div>
 
       </div><!-- /panel-promotions -->
+
+      <!-- ═══════════════ ANALYTICS PANEL ═══════════════ -->
+      <div id="panel-analytics" class="panel-hidden">
+
+        <div class="an-header">
+          <div class="an-headline">Analytics <em>Overview</em></div>
+          <div class="period-btns">
+            <button type="button" class="period-btn active" id="period-7"  onclick="setPeriod(7)">7D</button>
+            <button type="button" class="period-btn"        id="period-30" onclick="setPeriod(30)">30D</button>
+            <button type="button" class="period-btn"        id="period-90" onclick="setPeriod(90)">90D</button>
+          </div>
+        </div>
+
+        <!-- KPIs -->
+        <div class="kpi-row">
+          <div class="kpi-card">
+            <div class="kpi-lbl">Revenue (Period)</div>
+            <div class="kpi-val" id="kpi-revenue">—</div>
+            <div class="kpi-delta" id="kpi-revenue-delta"></div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-lbl">Orders (Period)</div>
+            <div class="kpi-val" id="kpi-orders-an">—</div>
+            <div class="kpi-delta" id="kpi-orders-delta"></div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-lbl">Avg Order Value</div>
+            <div class="kpi-val" id="kpi-aov">—</div>
+            <div class="kpi-sub">per successful order</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-lbl">Unique Customers</div>
+            <div class="kpi-val" id="kpi-customers">—</div>
+            <div class="kpi-sub">distinct phone numbers</div>
+          </div>
+        </div>
+
+        <!-- Charts row 1 -->
+        <div class="charts-row">
+          <div class="chart-card">
+            <div class="chart-title">Revenue Over Time</div>
+            <div class="chart-wrap"><canvas id="chart-revenue"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">Daily Order Volume</div>
+            <div class="chart-wrap"><canvas id="chart-volume"></canvas></div>
+          </div>
+        </div>
+
+        <!-- Charts row 2 -->
+        <div class="charts-row">
+          <div class="chart-card">
+            <div class="chart-title">Top Products by Units Sold</div>
+            <div class="chart-wrap"><canvas id="chart-products"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">Order Status Breakdown</div>
+            <div class="chart-wrap-donut"><canvas id="chart-status"></canvas></div>
+          </div>
+        </div>
+
+      </div><!-- /panel-analytics -->
 
     </div><!-- /dash-content -->
 
