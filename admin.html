@@ -181,6 +181,7 @@
     .realtime-dot { width:6px; height:6px; border-radius:50%; background:#5fcf80; animation:pulse-dot 2s ease infinite; flex-shrink:0; }
     @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.8)} }
     .ml-auto { margin-left:auto; }
+    .filter-date-sep { color:rgba(245,239,230,.35); font-size:12px; }
 
     /* ─── Orders table ─── */
     .orders-table-wrap { background:var(--g800); border:1px solid rgba(255,255,255,.07); border-radius:12px; overflow:hidden; margin-bottom:18px; }
@@ -354,6 +355,32 @@
     .an-loading { text-align:center; padding:64px 24px; font-family:'Syne',sans-serif; font-size:10px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:rgba(245,239,230,.3); }
     .panel-hidden { display:none; }
 
+    /* ══ PRODUCTS PANEL ══ */
+    .prod-toolbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; flex-wrap:wrap; gap:12px; }
+    .prod-headline { font-family:'Cormorant Garamond',serif; font-size:24px; font-weight:300; color:var(--c); }
+    .prod-headline em { font-style:italic; color:var(--al); }
+    /* Add/Edit form card */
+    .prod-form-card { background:var(--g800); border:1px solid rgba(196,154,60,.2); border-radius:10px; padding:22px 24px; margin-bottom:20px; animation:expand .2s ease; }
+    .prod-form-title { font-family:'Syne',sans-serif; font-size:9px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:rgba(196,154,60,.8); margin-bottom:16px; }
+    .prod-form-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+    .pf-field { display:flex; flex-direction:column; gap:6px; }
+    .pf-field.span2 { grid-column:span 2; }
+    .pf-field.span3 { grid-column:1/-1; }
+    .pf-field label { font-family:'Syne',sans-serif; font-size:9px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:rgba(245,239,230,.42); }
+    .pf-input { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.1); border-radius:6px; padding:10px 13px; color:var(--c); font-family:'DM Sans',sans-serif; font-size:13.5px; font-weight:300; outline:none; transition:border-color .2s, background .2s; width:100%; resize:none; }
+    .pf-input:focus { border-color:rgba(196,154,60,.5); background:rgba(255,255,255,.06); }
+    .pf-input::placeholder { color:rgba(245,239,230,.26); }
+    .pf-select { -webkit-appearance:none; appearance:none; cursor:pointer; }
+    .pf-select option { background:#0e1a13; }
+    .pf-actions { display:flex; gap:10px; margin-top:16px; flex-wrap:wrap; }
+    /* Product table */
+    .prod-img-thumb { width:40px; height:40px; border-radius:6px; object-fit:cover; background:rgba(255,255,255,.04); display:block; }
+    .prod-price-cell { font-family:'Cormorant Garamond',serif; font-size:18px; font-weight:300; color:var(--al); }
+    .inv-input { width:72px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.1); border-radius:4px; padding:5px 8px; color:var(--c); font-family:'DM Sans',sans-serif; font-size:13px; text-align:center; outline:none; transition:border-color .2s; }
+    .inv-input:focus { border-color:rgba(196,154,60,.5); }
+    .inv-save-btn { font-family:'Syne',sans-serif; font-size:8px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; padding:5px 10px; border-radius:4px; border:1px solid rgba(196,154,60,.25); background:rgba(196,154,60,.08); color:var(--al); cursor:pointer; transition:all .2s; margin-left:4px; }
+    .inv-save-btn:hover { background:rgba(196,154,60,.2); }
+
     /* ─── Responsive ─── */
     @media (max-width:1100px) { .stats-grid { grid-template-columns:repeat(2,1fr); } .promo-settings-row { grid-template-columns:1fr 1fr; } .quick-tiers { grid-template-columns:1fr 1fr; } .kpi-row { grid-template-columns:1fr 1fr; } .charts-row { grid-template-columns:1fr; } }
     @media (max-width:600px)  { .promo-settings-row { grid-template-columns:1fr; } .quick-tiers { grid-template-columns:1fr; } .add-form-grid { grid-template-columns:1fr 1fr; } }
@@ -370,7 +397,7 @@
 <body>
 
   <!-- ════════════ LOGIN ════════════ -->
-  <div class="login-page" id="login-page" style="display:none;">
+  <div class="login-page panel-hidden" id="login-page">
 
     <!-- Left: brand panel -->
     <div class="login-brand">
@@ -572,6 +599,10 @@
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
           Analytics
         </button>
+        <button type="button" class="dash-tab" id="tab-products" onclick="switchDashTab('products')">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+          Products
+        </button>
       </div>
 
       <!-- ═══════════════ ORDERS PANEL ═══════════════ -->
@@ -581,7 +612,7 @@
       <div class="filter-bar">
         <input type="text"   id="search-input"    class="f-search wide"   placeholder="Search name or phone...">
         <input type="date"   id="filter-date-from" class="f-search f-date" title="From Date">
-        <span style="color:rgba(245,239,230,.35);font-size:12px;">to</span>
+        <span class="filter-date-sep">to</span>
         <input type="date"   id="filter-date-to"   class="f-search f-date" title="To Date">
         <select id="filter-status" class="f-select">
           <option value="">All Statuses</option>
@@ -624,7 +655,7 @@
       </div>
 
       <!-- Pagination -->
-      <div class="pagination-bar" id="pagination-bar" style="display:none;">
+      <div class="pagination-bar panel-hidden" id="pagination-bar">
         <span class="pagination-info" id="page-info">Page 1 of 1</span>
         <div class="pagination-btns">
           <button type="button" class="pg-btn" id="btn-prev" disabled>← Prev</button>
@@ -854,6 +885,90 @@
         </div>
 
       </div><!-- /panel-analytics -->
+
+      <!-- ═══════════════ PRODUCTS PANEL ═══════════════ -->
+      <div id="panel-products" class="panel-hidden">
+
+        <div class="prod-toolbar">
+          <div class="prod-headline">Products <em>&amp; Inventory</em></div>
+          <button type="button" class="f-action-btn green-btn" id="prod-add-btn" onclick="toggleProdForm()">+ Add Product</button>
+        </div>
+
+        <!-- Add / Edit form -->
+        <div id="prod-form-wrap" class="panel-hidden">
+          <div class="prod-form-card">
+            <div class="prod-form-title" id="prod-form-title">New Product</div>
+            <div class="prod-form-grid">
+              <div class="pf-field">
+                <label for="pf-id">Product ID <span style="opacity:.5;font-size:.85em">(slug, no spaces)</span></label>
+                <input type="text" id="pf-id" class="pf-input" placeholder="fresh_oyster" autocomplete="off">
+              </div>
+              <div class="pf-field">
+                <label for="pf-name">Name (English)</label>
+                <input type="text" id="pf-name" class="pf-input" placeholder="Fresh Oyster Mushrooms">
+              </div>
+              <div class="pf-field">
+                <label for="pf-name-bn">Name (Bengali)</label>
+                <input type="text" id="pf-name-bn" class="pf-input" placeholder="তাজা অয়েস্টার মাশরুম">
+              </div>
+              <div class="pf-field">
+                <label for="pf-price">Price (৳)</label>
+                <input type="number" id="pf-price" class="pf-input" placeholder="350" min="0">
+              </div>
+              <div class="pf-field">
+                <label for="pf-unit">Unit / Pack Size</label>
+                <input type="text" id="pf-unit" class="pf-input" placeholder="1 KG Pack">
+              </div>
+              <div class="pf-field">
+                <label for="pf-category">Category</label>
+                <select id="pf-category" class="pf-input pf-select">
+                  <option value="fresh">Fresh</option>
+                  <option value="dry">Dry / Dried</option>
+                  <option value="powder">Powder</option>
+                  <option value="coming">Coming Soon</option>
+                </select>
+              </div>
+              <div class="pf-field">
+                <label for="pf-inventory">Stock Count</label>
+                <input type="number" id="pf-inventory" class="pf-input" placeholder="100" min="0">
+              </div>
+              <div class="pf-field span2">
+                <label for="pf-image">Image URL (from /public folder)</label>
+                <input type="text" id="pf-image" class="pf-input" placeholder="SaFa Fresh Oyster Mushroom.png">
+              </div>
+              <div class="pf-field span3">
+                <label for="pf-desc">Description</label>
+                <textarea id="pf-desc" class="pf-input" rows="3" placeholder="Product description..."></textarea>
+              </div>
+            </div>
+            <div class="pf-actions">
+              <button type="button" class="f-action-btn green-btn" id="prod-save-btn" onclick="saveProduct()">Save Product</button>
+              <button type="button" class="f-clear-btn" onclick="cancelProdForm()">Cancel</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Products table -->
+        <div class="orders-table-wrap">
+          <table class="orders-table">
+            <thead>
+              <tr>
+                <th>Image</th>
+                <th>Product</th>
+                <th>Price</th>
+                <th>Unit</th>
+                <th>Stock</th>
+                <th>Active</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="prod-tbody">
+              <tr><td colspan="7"><div class="table-empty"><div class="table-empty-icon">⏳</div><p class="table-empty-text">Loading products...</p></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div><!-- /panel-products -->
 
     </div><!-- /dash-content -->
 
@@ -1100,20 +1215,24 @@
       } else if (session) {
         showBanner('pw-banner', 'Access denied — this account has no admin privileges.');
         await supabase.auth.signOut();
-        document.getElementById('login-page').style.display = 'flex';
+        showLoginPage();
       } else {
-        document.getElementById('login-page').style.display = 'flex';
+        showLoginPage();
         if (checkLockout()) return;
         setTimeout(() => document.getElementById('admin-email')?.focus(), 80);
       }
+    }
+
+    function showLoginPage() {
+      document.getElementById('login-page').classList.remove('panel-hidden');
+      document.getElementById('dash-page').style.display = 'none';
     }
 
     /* Detect session expiry while dashboard is open */
     supabase.auth.onAuthStateChange((event) => {
       if (event === 'SIGNED_OUT' && _dashVisible) {
         _dashVisible = false;
-        document.getElementById('dash-page').style.display  = 'none';
-        document.getElementById('login-page').style.display = 'flex';
+        showLoginPage();
         switchLoginTab('password');
         showBanner('pw-banner', 'Your session expired. Please sign in again.', 'error');
       }
@@ -1123,8 +1242,8 @@
 
     function showDashboard(user) {
       _dashVisible = true;
-      document.getElementById('login-page').style.display = 'none';
-      document.getElementById('dash-page').style.display  = 'block';
+      document.getElementById('login-page').classList.add('panel-hidden');
+      document.getElementById('dash-page').style.display = 'block';
       document.getElementById('topbar-email').textContent = user.email;
 
       /* Last login time */
@@ -1314,7 +1433,7 @@
     function renderPagination() {
       const bar        = document.getElementById('pagination-bar');
       const totalPages = Math.ceil(S.totalCount / PAGE_SIZE) || 1;
-      bar.style.display = 'flex';
+      bar.classList.remove('panel-hidden');
       document.getElementById('page-info').textContent = `Page ${S.page} of ${totalPages} · ${S.totalCount} orders`;
       document.getElementById('btn-prev').disabled = S.page <= 1;
       document.getElementById('btn-next').disabled = S.page >= totalPages;
@@ -1437,8 +1556,8 @@
 
     /* Tab switching */
     window.switchDashTab = function(tab) {
-      const panels = { orders:'panel-orders', promotions:'panel-promotions', analytics:'panel-analytics' };
-      const tabs   = { orders:'tab-orders',   promotions:'tab-promos',       analytics:'tab-analytics'  };
+      const panels = { orders:'panel-orders', promotions:'panel-promotions', analytics:'panel-analytics', products:'panel-products' };
+      const tabs   = { orders:'tab-orders',   promotions:'tab-promos',       analytics:'tab-analytics',  products:'tab-products'   };
       Object.entries(panels).forEach(([k, id]) => {
         const el = document.getElementById(id);
         if (el) el.classList.toggle('panel-hidden', k !== tab);
@@ -1449,6 +1568,7 @@
       });
       if (tab === 'promotions') { loadSettings(); loadCoupons(); }
       if (tab === 'analytics')  { loadAnalytics(); }
+      if (tab === 'products')   { loadProducts(); }
     };
 
     /* Settings — read */
