@@ -55,9 +55,9 @@
     "knowsAbout": ["Organic Mushrooms", "Controlled Environment Agriculture", "Sustainable Farming"]
   }
   </script>
-  <script type="module" crossorigin src="/assets/main-CXDuLJwc.js"></script>
-  <link rel="modulepreload" crossorigin href="/assets/main-B3pLGffD.js">
-  <link rel="modulepreload" crossorigin href="/assets/supabase-CkkPnFpI.js">
+  <script type="module" crossorigin src="/assets/main-DHsPE6su.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/main-q8TLCeIc.js">
+  <link rel="modulepreload" crossorigin href="/assets/auth-nav-BctepwKZ.js">
   <link rel="stylesheet" crossorigin href="/assets/main-Dy9Li3jC.css">
 </head>
 <body>
@@ -80,6 +80,13 @@
       <li><a href="recipes.html">Recipes</a></li>
     </ul>
     <div class="nav-right">
+      <!-- Account Icon -->
+      <a href="account.html" class="nav-icon" id="nav-account-link" aria-label="Account / Sign In">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+          <circle cx="12" cy="7" r="4"></circle>
+        </svg>
+      </a>
       <!-- Cart icon — toggleCart() exposed on window by main.js -->
       <button class="nav-icon"
               onclick="window.toggleCart()"
@@ -106,6 +113,7 @@
     <a href="#benefits" onclick="window.closeMenu()">কেন মাশরুম</a>
     <a href="#story"    onclick="window.closeMenu()">Our Story</a>
     <a href="recipes.html" onclick="window.closeMenu()">Recipes</a>
+    <a href="account.html" onclick="window.closeMenu()">Account</a>
     <a href="about.html"   onclick="window.closeMenu()">About</a>
     <a href="#products" class="mobile-cta" onclick="window.closeMenu()">এখনই অর্ডার করুন →</a>
   </div>
@@ -674,6 +682,7 @@
           <li><a href="quality.html">Quality Standards</a></li>
           <li><a href="cancellation.html">Cancellation Policy</a></li>
           <li><a href="returns.html">Refund &amp; Returns</a></li>
+          <li><a href="admin.html" style="opacity: 0.5;">Admin Login</a></li>
         </ul>
       </div>
 
