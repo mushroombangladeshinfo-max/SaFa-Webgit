@@ -127,6 +127,38 @@
     .orders-empty-title { font-family:'Cormorant Garamond',serif; font-size:22px; font-weight:300; color:var(--c); margin-bottom:8px; }
     .orders-empty-text { font-size:13px; color:rgba(245,239,230,.45); margin-bottom:24px; }
 
+    /* ── Profile editing ── */
+    .edit-toggle-btn { font-family:'Syne',sans-serif; font-size:9px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:rgba(196,154,60,.75); background:rgba(196,154,60,.07); border:1px solid rgba(196,154,60,.18); border-radius:5px; padding:5px 13px; cursor:pointer; transition:all .2s; }
+    .edit-toggle-btn:hover { background:rgba(196,154,60,.15); color:var(--al); border-color:rgba(196,154,60,.35); }
+    .edit-toggle-btn.active { background:rgba(196,154,60,.15); color:var(--al); border-color:rgba(196,154,60,.4); }
+
+    .edit-panel { padding:18px 20px 20px; border-top:1px solid rgba(255,255,255,.05); display:none; animation:fadeUp .22s ease; }
+    .edit-panel.open { display:block; }
+
+    .edit-banner { font-size:12px; padding:10px 14px; border-radius:6px; margin-bottom:14px; display:none; align-items:center; gap:8px; line-height:1.45; }
+    .edit-banner.visible { display:flex; animation:fadeUp .2s ease; }
+    .edit-banner.success { background:rgba(95,207,128,.08); border:1px solid rgba(95,207,128,.25); color:#5fcf80; }
+    .edit-banner.error   { background:rgba(184,92,56,.08); border:1px solid rgba(184,92,56,.25); color:var(--tl); }
+
+    .edit-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    .edit-field { display:flex; flex-direction:column; gap:6px; }
+    .edit-field.full { grid-column:1/-1; }
+    .edit-field label { font-family:'Syne',sans-serif; font-size:9px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:rgba(245,239,230,.45); }
+    .edit-input { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.1); border-radius:6px; padding:11px 14px; width:100%; color:var(--c); font-family:'DM Sans',sans-serif; font-size:13.5px; font-weight:300; outline:none; transition:border-color .2s, background .2s; resize:none; }
+    .edit-input:focus { border-color:rgba(196,154,60,.5); background:rgba(255,255,255,.06); box-shadow:0 0 0 3px rgba(196,154,60,.07); }
+    .edit-input::placeholder { color:rgba(245,239,230,.26); }
+    .edit-select-wrap { position:relative; }
+    .edit-select-wrap::after { content:''; position:absolute; right:12px; top:50%; transform:translateY(-50%); width:0; height:0; border-left:4px solid transparent; border-right:4px solid transparent; border-top:5px solid rgba(245,239,230,.4); pointer-events:none; }
+    .edit-input.sel { appearance:none; -webkit-appearance:none; padding-right:32px; cursor:pointer; }
+    .edit-input.sel option { background:#0e1a13; }
+
+    .edit-actions { display:flex; gap:10px; margin-top:16px; flex-wrap:wrap; }
+    .save-btn { padding:11px 22px; background:var(--t,#b85c38); color:var(--c); font-family:'Syne',sans-serif; font-size:10px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; border:none; border-radius:6px; cursor:pointer; transition:background .2s, transform .15s; display:flex; align-items:center; gap:7px; }
+    .save-btn:hover:not(:disabled) { background:var(--tl); transform:translateY(-1px); }
+    .save-btn:disabled { opacity:.6; cursor:not-allowed; transform:none; }
+    .cancel-btn { padding:11px 18px; background:transparent; color:rgba(245,239,230,.48); font-family:'Syne',sans-serif; font-size:10px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; border:1px solid rgba(255,255,255,.1); border-radius:6px; cursor:pointer; transition:all .2s; }
+    .cancel-btn:hover { border-color:rgba(255,255,255,.22); color:var(--c); }
+
     /* Log out */
     .acc-logout-btn { width:100%; padding:13px; background:transparent; color:rgba(245,239,230,.5); font-family:'Syne',sans-serif; font-size:10px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; border:1px solid rgba(255,255,255,.1); border-radius:6px; cursor:pointer; transition:all .2s; display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:4px; }
     .acc-logout-btn:hover { border-color:rgba(184,92,56,.4); color:var(--tl); background:rgba(184,92,56,.05); }
@@ -172,7 +204,7 @@
       .acc-stat:last-child { border-bottom:none; }
     }
   </style>
-  <script type="module" crossorigin src="/assets/account-CruHUVRf.js"></script>
+  <script type="module" crossorigin src="/assets/account-K2-I4WfO.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/index-DshXEMtg.js">
   <link rel="modulepreload" crossorigin href="/assets/main-CfI1Yhwj.js">
   <link rel="stylesheet" crossorigin href="/assets/main-DZQD0wys.css">
@@ -317,10 +349,82 @@
 
       <!-- Details -->
       <div class="acc-details-card">
-        <div class="acc-section-header">Account Details</div>
-        <div class="acc-detail-row"><span class="acc-detail-label">Email</span><span class="acc-detail-val" id="acc-email">—</span></div>
-        <div class="acc-detail-row"><span class="acc-detail-label">Phone</span><span class="acc-detail-val" id="acc-phone">—</span></div>
-        <div class="acc-detail-row"><span class="acc-detail-label">Payment</span><span class="acc-detail-val">Cash on Delivery</span></div>
+        <div class="acc-section-header">
+          Account Details
+          <button type="button" class="edit-toggle-btn" id="profile-edit-btn" onclick="toggleProfileEdit()">Edit</button>
+        </div>
+        <!-- Read view -->
+        <div id="profile-read-view">
+          <div class="acc-detail-row"><span class="acc-detail-label">Email</span><span class="acc-detail-val" id="acc-email">—</span></div>
+          <div class="acc-detail-row"><span class="acc-detail-label">Name</span><span class="acc-detail-val" id="acc-name-detail">—</span></div>
+          <div class="acc-detail-row"><span class="acc-detail-label">Phone</span><span class="acc-detail-val" id="acc-phone">—</span></div>
+          <div class="acc-detail-row"><span class="acc-detail-label">Payment</span><span class="acc-detail-val">Cash on Delivery</span></div>
+        </div>
+        <!-- Edit panel -->
+        <div class="edit-panel" id="profile-edit-panel">
+          <div class="edit-banner" id="profile-banner"></div>
+          <div class="edit-grid">
+            <div class="edit-field">
+              <label for="edit-name">Display Name</label>
+              <input type="text" id="edit-name" class="edit-input" placeholder="Your name" autocomplete="given-name">
+            </div>
+            <div class="edit-field">
+              <label for="edit-phone">Phone Number</label>
+              <input type="tel" id="edit-phone" class="edit-input" placeholder="01XXXXXXXXX" autocomplete="tel" inputmode="numeric">
+            </div>
+          </div>
+          <div class="edit-actions">
+            <button type="button" class="save-btn" id="profile-save-btn" onclick="saveProfile()">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+              Save Changes
+            </button>
+            <button type="button" class="cancel-btn" onclick="toggleProfileEdit()">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Default Address -->
+      <div class="acc-details-card">
+        <div class="acc-section-header">
+          Default Delivery Address
+          <button type="button" class="edit-toggle-btn" id="address-edit-btn" onclick="toggleAddressEdit()">Edit</button>
+        </div>
+        <!-- Read view -->
+        <div id="address-read-view">
+          <div class="acc-detail-row"><span class="acc-detail-label">District</span><span class="acc-detail-val" id="addr-district">—</span></div>
+          <div class="acc-detail-row"><span class="acc-detail-label">Thana / Area</span><span class="acc-detail-val" id="addr-thana">—</span></div>
+          <div class="acc-detail-row"><span class="acc-detail-label">Full Address</span><span class="acc-detail-val" id="addr-full">—</span></div>
+        </div>
+        <!-- Edit panel -->
+        <div class="edit-panel" id="address-edit-panel">
+          <div class="edit-banner" id="address-banner"></div>
+          <div class="edit-grid">
+            <div class="edit-field">
+              <label for="edit-district">District</label>
+              <div class="edit-select-wrap">
+                <select id="edit-district" class="edit-input sel">
+                  <option value="">Select district...</option>
+                  <option>Bagerhat</option><option>Bandarban</option><option>Barguna</option><option>Barishal</option><option>Bhola</option><option>Bogura</option><option>Brahmanbaria</option><option>Chandpur</option><option>Chapai Nawabganj</option><option>Chattogram</option><option>Chuadanga</option><option>Cox's Bazar</option><option>Cumilla</option><option>Dhaka</option><option>Dinajpur</option><option>Faridpur</option><option>Feni</option><option>Gaibandha</option><option>Gazipur</option><option>Gopalganj</option><option>Habiganj</option><option>Jamalpur</option><option>Jashore</option><option>Jhalokati</option><option>Jhenaidah</option><option>Joypurhat</option><option>Khagrachhari</option><option>Khulna</option><option>Kishoreganj</option><option>Kurigram</option><option>Kushtia</option><option>Lakshmipur</option><option>Lalmonirhat</option><option>Madaripur</option><option>Magura</option><option>Manikganj</option><option>Meherpur</option><option>Moulvibazar</option><option>Munshiganj</option><option>Mymensingh</option><option>Naogaon</option><option>Narail</option><option>Narayanganj</option><option>Narsingdi</option><option>Natore</option><option>Netrokona</option><option>Nilphamari</option><option>Noakhali</option><option>Pabna</option><option>Panchagarh</option><option>Patuakhali</option><option>Pirojpur</option><option>Rajbari</option><option>Rajshahi</option><option>Rangamati</option><option>Rangpur</option><option>Satkhira</option><option>Shariatpur</option><option>Sherpur</option><option>Sirajganj</option><option>Sunamganj</option><option>Sylhet</option><option>Tangail</option><option>Thakurgaon</option>
+                </select>
+              </div>
+            </div>
+            <div class="edit-field">
+              <label for="edit-thana">Thana / Area</label>
+              <input type="text" id="edit-thana" class="edit-input" placeholder="e.g. Dhanmondi" autocomplete="address-level2">
+            </div>
+            <div class="edit-field full">
+              <label for="edit-address">Full Address</label>
+              <textarea id="edit-address" class="edit-input" rows="3" placeholder="House no., road, landmark..."></textarea>
+            </div>
+          </div>
+          <div class="edit-actions">
+            <button type="button" class="save-btn" id="address-save-btn" onclick="saveAddress()">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+              Save Address
+            </button>
+            <button type="button" class="cancel-btn" onclick="toggleAddressEdit()">Cancel</button>
+          </div>
+        </div>
       </div>
 
       <!-- Order history -->

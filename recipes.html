@@ -2108,7 +2108,7 @@
       <!-- Hero image banner -->
       <div class="rp-modal-hero" id="modalHero">
         <span class="rp-modal-hero-emoji" id="modalEmoji">🍄</span>
-        <img id="modalHeroImg" src="" alt="" onerror="this.remove()">
+        <img id="modalHeroImg" alt="" onerror="this.style.display='none'">
         <span class="rp-modal-category-pill" id="modalCategory"></span>
         <button class="rp-modal-close"
                 onclick="closeRecipe()"
@@ -2884,15 +2884,18 @@
      * from the RECIPES object for the given recipe ID.
      * @param {string} id — key in RECIPES e.g. 'biryani'
      */
-    function openRecipe(id) {
+    window.openRecipe = function(id) {
       const r = RECIPES[id];
       if (!r) return;
 
       /* ── Hero image ── */
       const heroImg  = document.getElementById('modalHeroImg');
       const heroEmoji = document.getElementById('modalEmoji');
-      heroImg.src = r.image;
-      heroImg.alt = r.title;
+      if (heroImg) {
+        heroImg.style.display = 'block';
+        heroImg.src = r.image;
+        heroImg.alt = r.title;
+      }
       heroEmoji.textContent = r.emoji;
 
       /* ── Category pill ── */
@@ -2964,7 +2967,7 @@
     }
 
     /** Closes the recipe modal and restores scroll position. */
-    function closeRecipe() {
+    window.closeRecipe = function() {
       document.getElementById('recipeModal').classList.remove('open');
       document.body.style.overflow = '';
       document.body.style.top = '';
@@ -2975,7 +2978,7 @@
      * Closes modal when clicking the dark overlay behind it.
      * Does NOT close if clicking inside .rp-modal itself.
      */
-    function closeModalOnOverlay(e) {
+    window.closeModalOnOverlay = function(e) {
       if (e.target === document.getElementById('recipeModal')) {
         closeRecipe();
       }
@@ -2986,7 +2989,7 @@
      * @param {string} tab      — 'ingredients' | 'steps' | 'tips'
      * @param {boolean} animate — whether to animate (default true)
      */
-    function switchTab(tab, animate = true) {
+    window.switchTab = function(tab, animate = true) {
       currentTab = tab;
 
       /* Update tab buttons */
