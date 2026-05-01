@@ -15,6 +15,7 @@ export default defineConfig({
         account:  resolve(__dirname, 'account.html'),
         admin:    resolve(__dirname, 'admin.html'),
         track:    resolve(__dirname, 'track.html'),
+        product:  resolve(__dirname, 'product.html'),
       }
     }
   },

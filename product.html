@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title id="page-title">Product — SaFa Naturals</title>
+  <meta name="description" id="page-desc" content="Premium organic mushrooms by SaFa Naturals, Bangladesh." />
+  <link rel="icon" type="image/png" href="/favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500;600;700&family=Hind+Siliguri:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green:  #1a472a;
+      --green2: #2d6a4f;
+      --leaf:   #52b788;
+      --gold:   #c9a84c;
+      --cream:  #faf7f2;
+      --white:  #ffffff;
+      --ink:    #1c1c1e;
+      --muted:  #6b7280;
+      --border: #e5e7eb;
+      --shadow: 0 4px 24px rgba(0,0,0,.07);
+      --r:      14px;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--cream);
+      color: var(--ink);
+    }
+
+    /* ── BREADCRUMB ── */
+    .breadcrumb {
+      padding: 14px 24px;
+      font-size: .8rem;
+      color: var(--muted);
+      display: flex; align-items: center; gap: 6px;
+      max-width: 1200px; margin: 0 auto;
+    }
+    .breadcrumb a { color: var(--muted); text-decoration: none; }
+    .breadcrumb a:hover { color: var(--green); }
+    .breadcrumb svg { width: 12px; height: 12px; flex-shrink: 0; }
+
+    /* ── PRODUCT HERO ── */
+    .product-hero {
+      max-width: 1200px;
+      margin: 0 auto 48px;
+      padding: 0 24px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 48px;
+      align-items: start;
+    }
+    @media (max-width: 768px) {
+      .product-hero { grid-template-columns: 1fr; gap: 24px; }
+    }
+
+    /* ── IMAGE SIDE ── */
+    .img-wrap {
+      position: sticky; top: 80px;
+      border-radius: 20px;
+      overflow: hidden;
+      background: var(--white);
+      box-shadow: var(--shadow);
+      aspect-ratio: 1/1;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .img-wrap img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transition: transform .5s cubic-bezier(.4,0,.2,1);
+    }
+    .img-wrap:hover img { transform: scale(1.04); }
+    .img-badges {
+      position: absolute; top: 16px; left: 16px;
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .img-badge {
+      font-size: .7rem; font-weight: 800; letter-spacing: .5px;
+      padding: 4px 10px; border-radius: 20px;
+      font-family: 'Syne', sans-serif;
+    }
+    .badge-gold { background: var(--gold); color: #fff; }
+    .badge-red  { background: #e53e3e; color: #fff; }
+    .badge-grey { background: rgba(0,0,0,.55); color: #fff; }
+
+    /* ── INFO SIDE ── */
+    .info-side { padding-top: 8px; }
+    .prod-eyebrow {
+      font-size: .72rem; font-weight: 700; letter-spacing: 1.5px;
+      text-transform: uppercase; color: var(--leaf);
+      margin-bottom: 10px;
+    }
+    .prod-name {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(1.6rem, 4vw, 2.2rem);
+      font-weight: 800; color: var(--green);
+      line-height: 1.15; margin-bottom: 6px;
+    }
+    .prod-name-bn {
+      font-family: 'Hind Siliguri', sans-serif;
+      font-size: 1rem; color: var(--muted);
+      margin-bottom: 16px;
+    }
+
+    /* Rating */
+    .rating-row {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 20px;
+    }
+    .stars { color: var(--gold); font-size: 1rem; letter-spacing: 1px; }
+    .rating-num { font-size: .9rem; font-weight: 700; }
+    .rating-count { font-size: .8rem; color: var(--muted); }
+    .rating-sep { width: 1px; height: 14px; background: var(--border); }
+
+    /* Price */
+    .price-row {
+      display: flex; align-items: baseline; gap: 10px;
+      margin-bottom: 6px;
+    }
+    .prod-price {
+      font-family: 'Syne', sans-serif;
+      font-size: 2rem; font-weight: 700; color: var(--green);
+    }
+    .prod-unit {
+      font-size: .85rem; color: var(--muted); font-weight: 500;
+    }
+    .delivery-note {
+      font-size: .8rem; color: var(--leaf); font-weight: 600;
+      margin-bottom: 24px;
+      display: flex; align-items: center; gap: 5px;
+    }
+
+    /* Tags */
+    .prod-tags {
+      display: flex; flex-wrap: wrap; gap: 6px;
+      margin-bottom: 24px;
+    }
+    .prod-tag {
+      font-size: .7rem; font-weight: 700; letter-spacing: .5px;
+      padding: 4px 10px; border-radius: 20px;
+      background: #f0fdf4; color: var(--green);
+      border: 1px solid #bbf7d0;
+    }
+
+    /* Qty + Cart */
+    .cart-row {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 16px; flex-wrap: wrap;
+    }
+    .qty-stepper {
+      display: flex; align-items: center;
+      border: 1.5px solid var(--border);
+      border-radius: 10px; overflow: hidden;
+      background: var(--white);
+    }
+    .qty-btn {
+      width: 42px; height: 48px;
+      background: none; border: none; cursor: pointer;
+      font-size: 1.2rem; color: var(--green); font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      transition: background .15s;
+    }
+    .qty-btn:hover { background: var(--cream); }
+    .qty-num {
+      width: 44px; text-align: center;
+      font-size: 1rem; font-weight: 700;
+    }
+    .btn-add-cart {
+      flex: 1; min-width: 180px;
+      padding: 14px 24px;
+      background: linear-gradient(135deg, var(--green), var(--green2));
+      color: #fff; border: none; border-radius: 10px;
+      font-family: 'Syne', sans-serif;
+      font-size: .95rem; font-weight: 700; letter-spacing: .5px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      transition: opacity .2s, transform .15s;
+    }
+    .btn-add-cart:hover { opacity: .92; transform: translateY(-1px); }
+    .btn-add-cart:active { transform: translateY(0); }
+    .btn-add-cart.added {
+      background: linear-gradient(135deg, var(--leaf), #40916c);
+    }
+    .btn-add-cart svg { width: 18px; height: 18px; }
+
+    .btn-wa-small {
+      padding: 14px 20px;
+      background: #25d366; color: #fff;
+      border: none; border-radius: 10px;
+      cursor: pointer; text-decoration: none;
+      display: flex; align-items: center; gap: 7px;
+      font-size: .85rem; font-weight: 700;
+      font-family: 'DM Sans', sans-serif;
+      transition: opacity .2s;
+      white-space: nowrap;
+    }
+    .btn-wa-small:hover { opacity: .9; }
+    .btn-wa-small svg { width: 18px; height: 18px; }
+
+    /* Trust badges */
+    .trust-strip {
+      display: flex; flex-wrap: wrap; gap: 10px;
+      margin-top: 20px; padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+    .trust-item {
+      display: flex; align-items: center; gap: 7px;
+      font-size: .78rem; font-weight: 600; color: var(--muted);
+    }
+    .trust-item svg { width: 16px; height: 16px; color: var(--leaf); flex-shrink: 0; }
+
+    /* Coming soon overlay */
+    .coming-overlay {
+      position: absolute; inset: 0;
+      background: rgba(250,247,242,.85);
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column; gap: 8px;
+      backdrop-filter: blur(2px);
+    }
+    .coming-overlay span {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.1rem; font-weight: 800;
+      color: var(--green); letter-spacing: 2px;
+    }
+    .coming-overlay small { font-size: .8rem; color: var(--muted); }
+
+    /* ── TABS ── */
+    .tabs-section {
+      max-width: 1200px;
+      margin: 0 auto 64px;
+      padding: 0 24px;
+    }
+
+    .tab-nav {
+      display: flex; gap: 0;
+      border-bottom: 2px solid var(--border);
+      margin-bottom: 32px;
+      overflow-x: auto;
+    }
+    .tab-btn {
+      padding: 12px 24px;
+      background: none; border: none;
+      font-family: 'DM Sans', sans-serif;
+      font-size: .9rem; font-weight: 600;
+      color: var(--muted); cursor: pointer;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      white-space: nowrap;
+      transition: color .2s, border-color .2s;
+    }
+    .tab-btn.active {
+      color: var(--green);
+      border-bottom-color: var(--green);
+    }
+    .tab-btn:hover:not(.active) { color: var(--ink); }
+
+    .tab-panel { display: none; }
+    .tab-panel.active {
+      display: block;
+      animation: fadeIn .3s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* About panel */
+    .about-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 32px;
+    }
+    @media (max-width: 640px) { .about-grid { grid-template-columns: 1fr; } }
+    .about-desc {
+      font-size: 1rem; line-height: 1.8;
+      color: #374151;
+      font-family: 'Hind Siliguri', sans-serif;
+    }
+    .about-benefits { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+    .about-benefits li {
+      display: flex; align-items: flex-start; gap: 10px;
+      font-size: .9rem; line-height: 1.5;
+    }
+    .benefit-dot {
+      width: 20px; height: 20px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--green), var(--leaf));
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; margin-top: 2px;
+    }
+    .benefit-dot svg { width: 11px; height: 11px; color: #fff; }
+
+    /* Nutrition panel */
+    .nutrition-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 32px;
+    }
+    @media (max-width: 640px) { .nutrition-grid { grid-template-columns: 1fr; } }
+    .nutrition-card {
+      background: var(--white);
+      border-radius: var(--r);
+      padding: 24px;
+      box-shadow: var(--shadow);
+    }
+    .nutrition-card h3 {
+      font-size: .8rem; font-weight: 700; color: var(--muted);
+      text-transform: uppercase; letter-spacing: .5px;
+      margin-bottom: 20px;
+    }
+    .nutr-row { margin-bottom: 16px; }
+    .nutr-label {
+      display: flex; justify-content: space-between;
+      font-size: .85rem; font-weight: 600;
+      margin-bottom: 6px;
+    }
+    .nutr-label span:last-child { color: var(--green); }
+    .nutr-bar-bg {
+      height: 6px; border-radius: 99px;
+      background: var(--border); overflow: hidden;
+    }
+    .nutr-bar {
+      height: 100%; border-radius: 99px;
+      background: linear-gradient(90deg, var(--green), var(--leaf));
+      width: 0;
+      transition: width .9s cubic-bezier(.4,0,.2,1);
+    }
+    .calorie-box {
+      text-align: center; padding: 24px 0;
+    }
+    .calorie-num {
+      font-family: 'Syne', sans-serif;
+      font-size: 3rem; font-weight: 800; color: var(--green);
+      line-height: 1;
+    }
+    .calorie-label { font-size: .85rem; color: var(--muted); margin-top: 4px; }
+    .calorie-sub { font-size: .75rem; color: var(--muted); margin-top: 8px; }
+
+    /* How to Use panel */
+    .how-grid { display: flex; flex-direction: column; gap: 20px; }
+    .how-item {
+      display: flex; gap: 20px; align-items: flex-start;
+      background: var(--white);
+      border-radius: var(--r);
+      padding: 20px 24px;
+      box-shadow: var(--shadow);
+    }
+    .how-num {
+      width: 40px; height: 40px; flex-shrink: 0;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--green), var(--leaf));
+      color: #fff; font-family: 'Syne', sans-serif;
+      font-size: .95rem; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .how-content h4 {
+      font-size: .95rem; font-weight: 700; margin-bottom: 4px;
+    }
+    .how-content p {
+      font-size: .85rem; color: #4b5563; line-height: 1.6;
+      font-family: 'Hind Siliguri', sans-serif;
+    }
+
+    /* Reviews panel */
+    .reviews-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 24px; flex-wrap: wrap; gap: 12px;
+    }
+    .reviews-avg {
+      display: flex; align-items: center; gap: 16px;
+    }
+    .avg-num {
+      font-family: 'Syne', sans-serif;
+      font-size: 3.5rem; font-weight: 800; color: var(--green);
+      line-height: 1;
+    }
+    .avg-stars { color: var(--gold); font-size: 1.2rem; letter-spacing: 2px; }
+    .avg-count { font-size: .8rem; color: var(--muted); }
+
+    .btn-write-review {
+      padding: 11px 20px;
+      background: var(--green); color: #fff;
+      border: none; border-radius: 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: .85rem; font-weight: 700;
+      cursor: pointer;
+      transition: opacity .2s;
+    }
+    .btn-write-review:hover { opacity: .88; }
+
+    .review-list { display: flex; flex-direction: column; gap: 16px; }
+    .review-card {
+      background: var(--white);
+      border-radius: var(--r);
+      padding: 20px 24px;
+      box-shadow: var(--shadow);
+    }
+    .review-top {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      margin-bottom: 10px; gap: 8px;
+    }
+    .reviewer-name { font-weight: 700; font-size: .9rem; }
+    .review-stars { color: var(--gold); font-size: .9rem; }
+    .review-date { font-size: .75rem; color: var(--muted); margin-top: 2px; }
+    .review-body {
+      font-size: .875rem; color: #374151;
+      line-height: 1.7;
+      font-family: 'Hind Siliguri', sans-serif;
+    }
+    .verified-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: .7rem; color: var(--leaf); font-weight: 700;
+      margin-top: 8px;
+    }
+    .verified-badge svg { width: 12px; height: 12px; }
+
+    .no-reviews {
+      text-align: center; padding: 40px 0;
+      color: var(--muted); font-size: .9rem;
+    }
+
+    /* Review form */
+    .review-form-wrap {
+      background: var(--white);
+      border-radius: var(--r);
+      padding: 28px;
+      box-shadow: var(--shadow);
+      margin-bottom: 24px;
+      display: none;
+    }
+    .review-form-wrap.open { display: block; animation: fadeIn .3s ease; }
+    .review-form-wrap h3 {
+      font-size: 1rem; font-weight: 700; margin-bottom: 20px;
+      color: var(--green);
+    }
+    .star-input {
+      display: flex; gap: 4px; margin-bottom: 16px;
+    }
+    .star-btn {
+      background: none; border: none; cursor: pointer;
+      font-size: 1.6rem; color: #d1d5db;
+      transition: color .15s, transform .15s;
+      padding: 2px;
+    }
+    .star-btn.active, .star-btn:hover ~ .star-btn { color: var(--gold); }
+    .star-btn.active { transform: scale(1.15); color: var(--gold); }
+    .rf-field { margin-bottom: 14px; }
+    .rf-field label {
+      display: block; font-size: .78rem; font-weight: 700;
+      color: var(--muted); text-transform: uppercase;
+      letter-spacing: .4px; margin-bottom: 5px;
+    }
+    .rf-field input, .rf-field textarea {
+      width: 100%; padding: 11px 14px;
+      border: 1.5px solid var(--border); border-radius: 8px;
+      font-family: 'DM Sans', sans-serif; font-size: .9rem;
+      color: var(--ink); background: var(--cream);
+      outline: none; transition: border-color .2s;
+      resize: none;
+    }
+    .rf-field input:focus, .rf-field textarea:focus {
+      border-color: var(--leaf);
+      background: #fff;
+    }
+    .rf-row { display: flex; gap: 12px; }
+    .rf-row .rf-field { flex: 1; }
+    .btn-submit-review {
+      padding: 12px 24px;
+      background: var(--green); color: #fff;
+      border: none; border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: .9rem; font-weight: 700;
+      cursor: pointer; transition: opacity .2s;
+    }
+    .btn-submit-review:hover { opacity: .88; }
+    .btn-submit-review:disabled { opacity: .5; cursor: not-allowed; }
+
+    /* ── RELATED ── */
+    .related-section {
+      max-width: 1200px; margin: 0 auto 64px; padding: 0 24px;
+    }
+    .related-section h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.4rem; font-weight: 800;
+      color: var(--green); margin-bottom: 24px;
+    }
+    .related-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 20px;
+    }
+    .related-card {
+      background: var(--white);
+      border-radius: var(--r);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      text-decoration: none; color: inherit;
+      transition: transform .2s, box-shadow .2s;
+      display: block;
+    }
+    .related-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 32px rgba(0,0,0,.12);
+    }
+    .related-img {
+      width: 100%; aspect-ratio: 4/3;
+      object-fit: cover;
+    }
+    .related-info { padding: 16px; }
+    .related-name { font-weight: 700; font-size: .95rem; margin-bottom: 4px; }
+    .related-price { font-size: .9rem; color: var(--green); font-weight: 700; }
+    .related-unit { font-size: .75rem; color: var(--muted); }
+
+    /* ── NOT FOUND ── */
+    .not-found {
+      text-align: center; padding: 80px 24px;
+    }
+    .not-found h2 { font-size: 1.5rem; color: var(--green); margin-bottom: 12px; }
+    .not-found p { color: var(--muted); margin-bottom: 24px; }
+    .not-found a {
+      display: inline-block; padding: 12px 28px;
+      background: var(--green); color: #fff;
+      border-radius: 10px; text-decoration: none;
+      font-weight: 700;
+    }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed; bottom: 24px; left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--ink); color: #fff;
+      padding: 13px 24px; border-radius: 99px;
+      font-size: .875rem; font-weight: 600;
+      z-index: 9999; white-space: nowrap;
+      transition: transform .35s cubic-bezier(.16,1,.3,1), opacity .35s;
+      opacity: 0; pointer-events: none;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+    .toast.green { background: var(--green); }
+  </style>
+</head>
+<body>
+
+<!-- NAV — identical to index.html -->
+<nav class="nav" id="nav">
+  <a href="index.html" class="nav-logo">
+    <span class="logo-main">SaFa</span>
+    <span class="logo-sub">Naturals</span>
+  </a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="index.html#products">Shop</a></li>
+    <li><a href="index.html#benefits">কেন মাশরুম</a></li>
+    <li><a href="index.html#story">Our Story</a></li>
+    <li><a href="recipes.html">Recipes</a></li>
+  </ul>
+  <div class="nav-right">
+    <a href="account.html" class="nav-icon" aria-label="Account">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>
+      </svg>
+    </a>
+    <button class="nav-icon" onclick="window.toggleCart()" aria-label="Cart">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
+        <line x1="3" y1="6" x2="21" y2="6"/>
+        <path d="M16 10a4 4 0 01-8 0"/>
+      </svg>
+      <span class="nav-dot"></span>
+    </button>
+    <a href="index.html#products" class="nav-cta">অর্ডার করুন</a>
+    <button class="hamburger" id="hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+<div class="mobile-menu" id="mobileMenu">
+  <a href="index.html#products" onclick="window.closeMenu()">Shop</a>
+  <a href="index.html#benefits" onclick="window.closeMenu()">কেন মাশরুম</a>
+  <a href="index.html#story"    onclick="window.closeMenu()">Our Story</a>
+  <a href="recipes.html"        onclick="window.closeMenu()">Recipes</a>
+  <a href="account.html"        onclick="window.closeMenu()">Account</a>
+  <a href="index.html#products" class="mobile-cta" onclick="window.closeMenu()">এখনই অর্ডার করুন →</a>
+</div>
+
+<!-- CONTENT — injected by JS -->
+<div id="app"></div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- WhatsApp float -->
+<a href="https://wa.me/+8801970099378" class="wa-floating-btn" target="_blank" rel="noopener" aria-label="WhatsApp">
+  <div class="wa-content">
+    <span class="wa-text">সরাসরি কথা বলুন</span>
+    <div class="wa-icon-box">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+      </svg>
+    </div>
+  </div>
+</a>
+
+<script type="module" src="/src/main.js"></script>
+<script type="module" src="/src/auth-nav.js"></script>
+
+<script type="module">
+import { createClient } from '@supabase/supabase-js'
+
+const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_ANON_KEY
+)
+
+/* ── PRODUCT DATA ── */
+const PRODUCTS = {
+  fresh_oyster: {
+    id:       'fresh_oyster',
+    name:     'Fresh Oyster Mushrooms',
+    nameBn:   'তাজা অয়েস্টার মাশরুম',
+    eyebrow:  'Organic · Farm Fresh',
+    price:    350,
+    unit:     '1 KG Pack',
+    image:    '/SaFa Fresh Oyster Mushroom.png',
+    badges:   [{ label: 'FARM FRESH', cls: 'badge-gold' }, { label: 'SELLING FAST', cls: 'badge-red' }],
+    tags:     ['HARVESTED DAILY', 'ZERO PRESERVATIVES', 'PESTICIDE FREE'],
+    rating:   4.9,
+    reviews:  120,
+    stock:    'Limited Stock',
+    coming:   false,
+    waText:   'Fresh Oyster Mushrooms (1 KG)',
+    description: `Our fresh oyster mushrooms are harvested daily at peak ripeness from our climate-controlled farm in Sirajganj. Each mushroom is hand-selected for texture, colour, and aroma before being packed and dispatched within hours — never sitting in cold storage for days like supermarket produce.\n\nWith a delicate, meaty texture and mild umami flavour, these mushrooms are incredibly versatile — perfect for stir-fries, curries, soups, pasta, and even grilling. They absorb marinades beautifully and cook in under five minutes.`,
+    benefits: [
+      'High in plant-based protein — more per gram than most vegetables',
+      'Supports immune function through beta-glucan compounds',
+      'Low calorie and low glycaemic — excellent for weight management and diabetics',
+      'Rich in B vitamins (B2, B3, B5) for energy metabolism',
+      'Zero cholesterol, zero preservatives, zero pesticides',
+      'High dietary fibre supports gut health and digestion',
+    ],
+    nutrition: {
+      per: '100g (fresh)',
+      calories: 33,
+      protein:  { g: 3.3,  dv: 7 },
+      carbs:    { g: 6.1,  dv: 2 },
+      fat:      { g: 0.4,  dv: 1 },
+      fiber:    { g: 2.3,  dv: 9 },
+    },
+    howToUse: [
+      { title: 'Quick Stir-Fry (5 min)', body: 'Heat oil, add sliced mushrooms with garlic and onion. Season with salt, soy sauce, and chilli. Serve with rice or roti. No soaking needed — cooks in minutes.' },
+      { title: 'Curry Base', body: 'Add mushrooms whole or halved into any dal or vegetable curry in the last 5 minutes of cooking. They absorb spice beautifully without getting mushy.' },
+      { title: 'Soup Booster', body: 'Toss a handful into any broth — chicken, vegetable, or daal — for extra protein and umami depth. Mushroom releases its own stock into the soup.' },
+      { title: 'Storage Tips', body: 'Keep refrigerated (4–7°C), unwashed, in the original paper bag or an open container. Use within 5–7 days for best freshness. Do not store in an airtight plastic bag.' },
+    ],
+    staticReviews: [
+      { name: 'Fatema Begum', rating: 5, body: 'অসাধারণ মাশরুম! একদম তাজা এবং স্বাদে অতুলনীয়। বাচ্চারাও খুব পছন্দ করেছে।', date: '2025-04-15', verified: true },
+      { name: 'Rahim Ahmed', rating: 5, body: 'Freshest mushrooms I have had in Bangladesh. Cooked them the same day and the texture was perfect. Will definitely reorder.', date: '2025-03-28', verified: true },
+      { name: 'Nusrat Jahan', rating: 5, body: 'ডাক্তার সুগার কমাতে বলেছেন, তাই মাশরুম খাওয়া শুরু করেছি। SaFa-র মাশরুম একদম বিষমুক্ত, এটা জানতে পেরে মন ভালো হয়ে গেল।', date: '2025-03-10', verified: true },
+      { name: 'Karim Hossain', rating: 4, body: 'Very good quality. Packaging could be slightly better but the product itself is excellent — no smell, great colour, cooks evenly.', date: '2025-02-20', verified: true },
+    ],
+  },
+
+  dried_oyster: {
+    id:       'dried_oyster',
+    name:     'Dried Oyster Mushroom',
+    nameBn:   'শুকনো অয়েস্টার মাশরুম',
+    eyebrow:  'Organic · Long Shelf Life',
+    price:    280,
+    unit:     '100g Pack',
+    image:    '/SaFa Dried Oyster Mushroom.png',
+    badges:   [{ label: 'LONG SHELF LIFE', cls: 'badge-gold' }],
+    tags:     ['PLANT PROTEIN', 'EASY PREP', 'NO ADDITIVES'],
+    rating:   4.8,
+    reviews:  85,
+    stock:    'In Stock',
+    coming:   false,
+    waText:   'Dried Oyster Mushroom (100g)',
+    description: `Sun-dried to lock in nutrients and concentrate natural flavours. Our dried oyster mushrooms are made from the same farm-fresh batch — simply dehydrated naturally without chemicals, colourants, or sulphur preservatives.\n\nWith a shelf life of 12+ months, they're perfect to keep in the pantry. Rehydrating takes just 15–20 minutes in warm water, after which they behave exactly like fresh mushrooms. Concentrated protein and fibre — 100g dried is roughly equivalent to 700g fresh in nutritional density.`,
+    benefits: [
+      '26g protein per 100g — one of the highest plant-protein foods',
+      'Extremely long shelf life (12+ months) — stock up without waste',
+      'Easy to rehydrate and cook — no complex preparation needed',
+      'High in dietary fibre — 18g per 100g, supports gut health',
+      'Ideal for travel, remote areas, and off-season cooking',
+      'Zero sulphur, zero colourants — just pure dried mushroom',
+    ],
+    nutrition: {
+      per: '100g (dried)',
+      calories: 265,
+      protein:  { g: 26,  dv: 52 },
+      carbs:    { g: 43,  dv: 14 },
+      fat:      { g: 3,   dv: 5  },
+      fiber:    { g: 18,  dv: 72 },
+    },
+    howToUse: [
+      { title: 'Basic Rehydration', body: 'Soak in warm (not boiling) water for 15–20 minutes until soft and pliable. Drain and squeeze out excess water. The soaking liquid is full of flavour — use it as a broth base.' },
+      { title: 'Instant Soup', body: 'Add directly to boiling broth or daal — no pre-soaking needed for soups. The mushroom rehydrates in the cooking liquid, adding deep umami flavour.' },
+      { title: 'Storage After Opening', body: 'Transfer to an airtight glass jar. Store in a cool, dry place away from sunlight. Keeps for 12+ months. Do not refrigerate — moisture causes clumping.' },
+      { title: 'Stir-Fry After Rehydration', body: 'Once rehydrated, treat exactly like fresh mushrooms. Pat dry before frying for better caramelisation and less steam in the pan.' },
+    ],
+    staticReviews: [
+      { name: 'Shahida Khatun', rating: 5, body: 'অনেক দিন সংরক্ষণ করা যায়, কিন্তু স্বাদ একদম তাজার মতো। ভেজানোর পর রান্না করলে মনে হয় তাজা মাশরুম।', date: '2025-04-02', verified: true },
+      { name: 'Tanvir Mahmud', rating: 5, body: 'Bought this for my mother who lives outside Dhaka. She loves it — easy to store, easy to cook, and the quality is great. No chemicals.', date: '2025-03-15', verified: true },
+      { name: 'Riya Das', rating: 4, body: 'Good product. Rehydrates very well. Would prefer a larger pack size option — 200g would be even better value.', date: '2025-02-28', verified: false },
+    ],
+  },
+
+  mushroom_powder: {
+    id:       'mushroom_powder',
+    name:     'Oyster Mushroom Powder',
+    nameBn:   'অয়েস্টার মাশরুম পাউডার',
+    eyebrow:  'Superfood · Immunity Boost',
+    price:    350,
+    unit:     '100g Jar',
+    image:    '/SaFa Oyster Mushroom Powder.png',
+    badges:   [{ label: 'SUPERFOOD', cls: 'badge-gold' }],
+    tags:     ['IMMUNITY BOOST', 'VERSATILE', 'ZERO ADDITIVES'],
+    rating:   4.9,
+    reviews:  92,
+    stock:    'In Stock',
+    coming:   false,
+    waText:   'Oyster Mushroom Powder (100g)',
+    description: `Super-fine, nutrient-dense mushroom powder made from 100% oyster mushrooms — nothing else. No fillers, no starch, no flow agents. Just pure mushroom goodness in a shelf-stable form.\n\nThe secret weapon of busy families: stir a teaspoon into soups, curries, smoothies, or even rice water while cooking. It dissolves seamlessly, boosting nutrition without changing texture or appearance. Your family gets all the benefits of fresh mushrooms every single day without even knowing it.`,
+    benefits: [
+      'Boosts daily nutrition without any taste or texture change',
+      'High in beta-glucans — clinically linked to immune support',
+      'Anti-inflammatory compounds support joint health',
+      'Contains ergothioneine — a rare antioxidant found mainly in mushrooms',
+      'Ideal for picky eaters and children — invisible in food',
+      'Perfect for elders managing cholesterol or blood sugar',
+    ],
+    nutrition: {
+      per: '1 tsp / 5g serving',
+      calories: 13,
+      protein:  { g: 1.3,  dv: 3  },
+      carbs:    { g: 2.2,  dv: 1  },
+      fat:      { g: 0.15, dv: 0  },
+      fiber:    { g: 0.9,  dv: 4  },
+    },
+    howToUse: [
+      { title: 'Add to Daal or Curry', body: 'Stir 1–2 tsp into any curry or daal while cooking. It dissolves fully, adds a slight umami depth, and boosts protein content. Completely invisible to the family.' },
+      { title: 'Morning Smoothie', body: 'Blend 1 tsp with banana, milk, and honey. Adds a nutrition punch without any mushroom flavour — the sweetness completely masks it.' },
+      { title: 'Rice or Khichuri', body: 'Add 1 tsp to the cooking water before adding rice. The powder absorbs into the grain and delivers nutrients in every bite.' },
+      { title: 'Soup or Broth', body: 'Dissolve directly into hot soup or broth. Makes an instant mushroom-flavoured stock — great for noodles, ramen, or shrimp broth.' },
+    ],
+    staticReviews: [
+      { name: 'Nasreen Akter', rating: 5, body: 'আমার বাচ্চারা মাশরুম খেতে চায় না, তাই পাউডার ডালে মিশিয়ে দিই। কোনো গন্ধ বা স্বাদ নেই, কিন্তু পুষ্টি পাচ্ছে — এটাই আমার কাছে সবচেয়ে বড় সুবিধা।', date: '2025-04-10', verified: true },
+      { name: 'Dr. Monirul Islam', rating: 5, body: 'As a physician, I appreciate the clean ingredient list. No additives whatsoever. I recommend this to my diabetic and hypertensive patients as a safe nutrition boost.', date: '2025-03-22', verified: true },
+      { name: 'Sumaiya Rahman', rating: 5, body: 'Excellent product. I use it in smoothies every morning. No mushroom taste at all, blends perfectly. Already seen a visible difference in energy levels.', date: '2025-03-05', verified: true },
+      { name: 'Jahangir Alam', rating: 4, body: 'Very good quality powder. Slightly clumped on arrival — suggest adding a silica packet inside the jar for humidity control.', date: '2025-02-14', verified: false },
+    ],
+  },
+
+  button_mushroom: {
+    id:       'button_mushroom',
+    name:     'Premium Button Mushroom',
+    nameBn:   'প্রিমিয়াম বাটন মাশরুম',
+    eyebrow:  'Organic · Coming Soon',
+    price:    null,
+    unit:     '250g Pack',
+    image:    '/SaFa Fresh Button Mushroom.png',
+    badges:   [{ label: 'COMING SOON', cls: 'badge-grey' }],
+    tags:     ['ORGANIC', 'PREMIUM', 'CONTROLLED FARM'],
+    rating:   null,
+    reviews:  0,
+    stock:    'Expected Q4',
+    coming:   true,
+    waText:   'Button Mushroom (notify me)',
+    description: 'A hidden gem of pure taste. Firm texture and earthy flavour, grown with zero pesticides in our climate-controlled chambers. Launching soon — register your interest below to be the first to order.',
+    benefits: [
+      'Firm, consistent texture — holds up to all cooking methods',
+      'Mild earthy flavour — the classic versatile mushroom',
+      'Grown to the same zero-pesticide standard as all SaFa products',
+      'Expected in 250g and 500g pack sizes',
+    ],
+    nutrition: { per: 'Coming soon', calories: null, protein: null, carbs: null, fat: null, fiber: null },
+    howToUse: [
+      { title: 'Coming Soon', body: 'Full usage guide will be published at launch. Sign up for our newsletter to be notified.' },
+    ],
+    staticReviews: [],
+  },
+}
+
+/* ── HELPERS ── */
+const $ = id => document.getElementById(id)
+
+let currentRating = 0
+
+function toast(msg, type = '') {
+  const el = $('toast')
+  el.textContent = msg
+  el.className = `toast show ${type}`
+  clearTimeout(el._t)
+  el._t = setTimeout(() => el.classList.remove('show'), 3000)
+}
+
+function renderStars(n) {
+  const full  = Math.floor(n)
+  const half  = n % 1 >= 0.5 ? 1 : 0
+  const empty = 5 - full - half
+  return '★'.repeat(full) + (half ? '½' : '') + '☆'.repeat(empty)
+}
+
+function timeAgo(dateStr) {
+  const diff = Date.now() - new Date(dateStr).getTime()
+  const d = Math.floor(diff / 86400000)
+  if (d < 1)  return 'আজ'
+  if (d < 7)  return `${d} দিন আগে`
+  if (d < 30) return `${Math.floor(d/7)} সপ্তাহ আগে`
+  return `${Math.floor(d/30)} মাস আগে`
+}
+
+function renderReviewCard(r) {
+  return `
+    <div class="review-card">
+      <div class="review-top">
+        <div>
+          <div class="reviewer-name">${r.customer_name || r.name}</div>
+          <div class="review-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</div>
+        </div>
+        <div class="review-date">${timeAgo(r.created_at || r.date)}</div>
+      </div>
+      <div class="review-body">${r.body}</div>
+      ${r.verified !== false ? `
+        <div class="verified-badge">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+          </svg>
+          Verified Purchase
+        </div>` : ''}
+    </div>`
+}
+
+async function loadReviews(productId, staticReviews) {
+  const container = $('review-list')
+  if (!container) return
+
+  let allReviews = [...staticReviews]
+
+  try {
+    const { data } = await supabase
+      .rpc('get_product_reviews', { p_product_id: productId })
+    if (Array.isArray(data) && data.length > 0) {
+      allReviews = [...data, ...staticReviews]
+    }
+  } catch { /* RPC not yet created — show static only */ }
+
+  if (allReviews.length === 0) {
+    container.innerHTML = '<div class="no-reviews">এখনো কোনো রিভিউ নেই। প্রথম রিভিউ দিন!</div>'
+    return
+  }
+  container.innerHTML = allReviews.map(renderReviewCard).join('')
+}
+
+/* ── MAIN RENDER ── */
+function renderProduct(p) {
+  document.title = `${p.name} — SaFa Naturals`
+  $('page-title').textContent = `${p.name} — SaFa Naturals`
+  $('page-desc').content = p.description.split('\n')[0]
+
+  const waMsg = encodeURIComponent(`হ্যালো, আমি ${p.waText} অর্ডার করতে চাই।`)
+
+  const related = Object.values(PRODUCTS)
+    .filter(pr => pr.id !== p.id && !pr.coming)
+    .slice(0, 3)
+
+  $('app').innerHTML = `
+    <!-- BREADCRUMB -->
+    <nav class="breadcrumb">
+      <a href="/">Home</a>
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+      <a href="index.html#products">Products</a>
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+      <span>${p.name}</span>
+    </nav>
+
+    <!-- PRODUCT HERO -->
+    <section class="product-hero">
+      <!-- Image -->
+      <div class="img-wrap">
+        <div class="img-badges">
+          ${p.badges.map(b => `<span class="img-badge ${b.cls}">${b.label}</span>`).join('')}
+        </div>
+        <img src="${p.image}" alt="${p.name}" loading="lazy" />
+        ${p.coming ? `
+          <div class="coming-overlay">
+            <span>COMING SOON</span>
+            <small>Be the first to know</small>
+          </div>` : ''}
+      </div>
+
+      <!-- Info -->
+      <div class="info-side">
+        <div class="prod-eyebrow">${p.eyebrow}</div>
+        <h1 class="prod-name">${p.name}</h1>
+        <div class="prod-name-bn">${p.nameBn}</div>
+
+        ${p.rating ? `
+        <div class="rating-row">
+          <span class="stars">${renderStars(p.rating)}</span>
+          <span class="rating-num">${p.rating}</span>
+          <div class="rating-sep"></div>
+          <span class="rating-count">${p.reviews} reviews</span>
+        </div>` : ''}
+
+        <div class="price-row">
+          <span class="prod-price">${p.price ? `৳${p.price}` : 'TBA'}</span>
+          <span class="prod-unit">/ ${p.unit}</span>
+        </div>
+        <div class="delivery-note">
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10"/>
+          </svg>
+          ৳800+ অর্ডারে বিনামূল্যে ডেলিভারি · ক্যাশ অন ডেলিভারি
+        </div>
+
+        <div class="prod-tags">
+          ${p.tags.map(t => `<span class="prod-tag">${t}</span>`).join('')}
+        </div>
+
+        ${p.coming ? `
+          <div style="margin-bottom:16px;">
+            <a class="btn-wa-small" href="https://wa.me/+8801970099378?text=${waMsg}" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+              </svg>
+              Launch করলে জানান
+            </a>
+          </div>` : `
+          <div class="cart-row">
+            <div class="qty-stepper">
+              <button class="qty-btn" onclick="changeQty(-1)">−</button>
+              <span class="qty-num" id="qty-display">1</span>
+              <button class="qty-btn" onclick="changeQty(1)">+</button>
+            </div>
+            <button class="btn-add-cart" id="btn-add" onclick="doAddToCart()">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+              </svg>
+              Add to Cart
+            </button>
+            <a class="btn-wa-small" href="https://wa.me/+8801970099378?text=${waMsg}" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+              </svg>
+              Order via WhatsApp
+            </a>
+          </div>`}
+
+        <div class="trust-strip">
+          <div class="trust-item">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+            100% Pesticide Free
+          </div>
+          <div class="trust-item">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+            Cash on Delivery
+          </div>
+          <div class="trust-item">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            Dispatched Same Day
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TABS -->
+    <section class="tabs-section">
+      <div class="tab-nav" role="tablist">
+        <button class="tab-btn active" onclick="switchTab('about')"   id="tab-about">About</button>
+        <button class="tab-btn"        onclick="switchTab('nutrition')" id="tab-nutrition">Nutrition</button>
+        <button class="tab-btn"        onclick="switchTab('howto')"   id="tab-howto">How to Use</button>
+        <button class="tab-btn"        onclick="switchTab('reviews')" id="tab-reviews">
+          Reviews ${p.reviews > 0 ? `<span style="background:var(--green);color:#fff;border-radius:99px;padding:1px 7px;font-size:.7rem;margin-left:4px">${p.reviews + p.staticReviews.length}</span>` : ''}
+        </button>
+      </div>
+
+      <!-- About -->
+      <div class="tab-panel active" id="panel-about">
+        <div class="about-grid">
+          <div>
+            ${p.description.split('\n\n').map(para =>
+              `<p class="about-desc" style="margin-bottom:16px">${para}</p>`
+            ).join('')}
+          </div>
+          <ul class="about-benefits">
+            ${p.benefits.map(b => `
+              <li>
+                <span class="benefit-dot">
+                  <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                  </svg>
+                </span>
+                ${b}
+              </li>`).join('')}
+          </ul>
+        </div>
+      </div>
+
+      <!-- Nutrition -->
+      <div class="tab-panel" id="panel-nutrition">
+        <div class="nutrition-grid">
+          <div class="nutrition-card">
+            <h3>Per ${p.nutrition.per}</h3>
+            ${p.nutrition.protein ? `
+            <div class="nutr-row">
+              <div class="nutr-label"><span>Protein</span><span>${p.nutrition.protein.g}g</span></div>
+              <div class="nutr-bar-bg"><div class="nutr-bar" data-pct="${Math.min(p.nutrition.protein.dv * 1.5, 100)}"></div></div>
+            </div>
+            <div class="nutr-row">
+              <div class="nutr-label"><span>Carbohydrates</span><span>${p.nutrition.carbs.g}g</span></div>
+              <div class="nutr-bar-bg"><div class="nutr-bar" data-pct="${Math.min(p.nutrition.carbs.dv * 4, 100)}"></div></div>
+            </div>
+            <div class="nutr-row">
+              <div class="nutr-label"><span>Dietary Fibre</span><span>${p.nutrition.fiber.g}g</span></div>
+              <div class="nutr-bar-bg"><div class="nutr-bar" data-pct="${Math.min(p.nutrition.fiber.dv * 1.5, 100)}"></div></div>
+            </div>
+            <div class="nutr-row">
+              <div class="nutr-label"><span>Total Fat</span><span>${p.nutrition.fat.g}g</span></div>
+              <div class="nutr-bar-bg"><div class="nutr-bar" data-pct="${Math.min(p.nutrition.fat.dv * 5, 100)}"></div></div>
+            </div>` : '<p style="color:var(--muted);font-size:.9rem">Nutritional data coming at launch.</p>'}
+          </div>
+          <div class="nutrition-card">
+            ${p.nutrition.calories !== null ? `
+            <div class="calorie-box">
+              <div class="calorie-num">${p.nutrition.calories}</div>
+              <div class="calorie-label">kcal per ${p.nutrition.per}</div>
+              <div class="calorie-sub" style="margin-top:20px;text-align:left;font-size:.78rem;color:var(--muted);line-height:1.8">
+                <strong>% Daily Value</strong> (based on 2000 kcal/day diet)<br>
+                Protein: ${p.nutrition.protein.dv}% DV<br>
+                Dietary Fibre: ${p.nutrition.fiber.dv}% DV<br>
+                Carbohydrates: ${p.nutrition.carbs.dv}% DV<br>
+                Total Fat: ${p.nutrition.fat.dv}% DV<br>
+                <em style="margin-top:8px;display:block">*Approximate values. Actual may vary by batch.</em>
+              </div>
+            </div>` : '<p style="color:var(--muted);font-size:.9rem">Full nutritional data will be published at launch.</p>'}
+          </div>
+        </div>
+      </div>
+
+      <!-- How to Use -->
+      <div class="tab-panel" id="panel-howto">
+        <div class="how-grid">
+          ${p.howToUse.map((step, i) => `
+            <div class="how-item">
+              <div class="how-num">${String(i+1).padStart(2,'0')}</div>
+              <div class="how-content">
+                <h4>${step.title}</h4>
+                <p>${step.body}</p>
+              </div>
+            </div>`).join('')}
+        </div>
+      </div>
+
+      <!-- Reviews -->
+      <div class="tab-panel" id="panel-reviews">
+        <div class="reviews-header">
+          <div class="reviews-avg">
+            ${p.rating ? `
+              <div class="avg-num">${p.rating}</div>
+              <div>
+                <div class="avg-stars">${'★'.repeat(Math.round(p.rating))}</div>
+                <div class="avg-count">${p.reviews + (p.staticReviews?.length||0)} reviews</div>
+              </div>` : '<div style="color:var(--muted)">No reviews yet</div>'}
+          </div>
+          <button class="btn-write-review" onclick="toggleReviewForm()">+ Write a Review</button>
+        </div>
+
+        <!-- Review form -->
+        <div class="review-form-wrap" id="review-form">
+          <h3>আপনার অভিজ্ঞতা শেয়ার করুন</h3>
+          <div class="rf-field">
+            <label>রেটিং</label>
+            <div class="star-input" id="star-input">
+              ${[1,2,3,4,5].map(n =>
+                `<button class="star-btn" data-val="${n}" onclick="setRating(${n})">★</button>`
+              ).join('')}
+            </div>
+          </div>
+          <div class="rf-row">
+            <div class="rf-field"><label>আপনার নাম</label><input id="rv-name" type="text" placeholder="Fatema Begum" /></div>
+            <div class="rf-field"><label>এলাকা (ঐচ্ছিক)</label><input id="rv-location" type="text" placeholder="Dhaka" /></div>
+          </div>
+          <div class="rf-field">
+            <label>রিভিউ লিখুন</label>
+            <textarea id="rv-body" rows="4" placeholder="পণ্যটি কেমন লেগেছে, স্বাদ কেমন ছিল, কোথায় ব্যবহার করেছেন — লিখুন..."></textarea>
+          </div>
+          <button class="btn-submit-review" id="btn-submit-review" onclick="submitReview('${p.id}')">রিভিউ জমা দিন</button>
+        </div>
+
+        <div class="review-list" id="review-list">
+          <div style="color:var(--muted);font-size:.875rem">লোড হচ্ছে…</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RELATED -->
+    ${related.length ? `
+    <section class="related-section">
+      <h2>আরও দেখুন</h2>
+      <div class="related-grid">
+        ${related.map(r => `
+          <a class="related-card" href="product.html?id=${r.id}">
+            <img class="related-img" src="${r.image}" alt="${r.name}" loading="lazy" />
+            <div class="related-info">
+              <div class="related-name">${r.name}</div>
+              <div class="related-price">৳${r.price}</div>
+              <div class="related-unit">${r.unit}</div>
+            </div>
+          </a>`).join('')}
+      </div>
+    </section>` : ''}
+  `
+
+  /* Wire qty stepper */
+  let qty = 1
+  window.changeQty = function(delta) {
+    qty = Math.max(1, Math.min(10, qty + delta))
+    $('qty-display').textContent = qty
+  }
+
+  /* Add to cart */
+  window.doAddToCart = function() {
+    const btn = $('btn-add')
+    if (!window.addToCart) { toast('Please refresh the page.'); return }
+    for (let i = 0; i < qty; i++) {
+      window.addToCart(p.name, p.price, p.id, p.unit, p.image.replace('/', ''))
+    }
+    btn.classList.add('added')
+    btn.innerHTML = `<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg> Added to Cart!`
+    toast(`${qty}× ${p.name} কার্টে যোগ হয়েছে ✓`, 'green')
+    setTimeout(() => {
+      btn.classList.remove('added')
+      btn.innerHTML = `<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg> Add to Cart`
+    }, 2500)
+
+    /* Update nav dot */
+    const dot = document.querySelector('.nav-dot')
+    if (dot) dot.style.display = 'block'
+  }
+
+  /* Tab switching */
+  window.switchTab = function(tab) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'))
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'))
+    $(`tab-${tab}`).classList.add('active')
+    $(`panel-${tab}`).classList.add('active')
+    /* Animate nutrition bars when tab becomes visible */
+    if (tab === 'nutrition') {
+      setTimeout(() => {
+        document.querySelectorAll('.nutr-bar').forEach(bar => {
+          bar.style.width = bar.dataset.pct + '%'
+        })
+      }, 80)
+    }
+  }
+
+  /* Review form toggle */
+  window.toggleReviewForm = function() {
+    $('review-form').classList.toggle('open')
+  }
+
+  /* Star rating */
+  window.setRating = function(val) {
+    currentRating = val
+    document.querySelectorAll('.star-btn').forEach(btn => {
+      btn.classList.toggle('active', Number(btn.dataset.val) <= val)
+    })
+  }
+
+  /* Submit review */
+  window.submitReview = async function(productId) {
+    const name = $('rv-name').value.trim()
+    const body = $('rv-body').value.trim()
+    if (!currentRating) { toast('রেটিং দিন (★ এ ক্লিক করুন)'); return }
+    if (!name)          { toast('আপনার নাম দিন'); return }
+    if (body.length < 20) { toast('অন্তত ২০ অক্ষরে রিভিউ লিখুন'); return }
+
+    const btn = $('btn-submit-review')
+    btn.disabled = true; btn.textContent = 'জমা হচ্ছে…'
+
+    try {
+      const { error } = await supabase.from('reviews').insert([{
+        product_id:    productId,
+        customer_name: name,
+        rating:        currentRating,
+        body,
+      }])
+      if (error) throw error
+      toast('রিভিউ জমা হয়েছে! ধন্যবাদ।', 'green')
+      $('review-form').classList.remove('open')
+      $('rv-name').value = ''; $('rv-body').value = ''; currentRating = 0
+      document.querySelectorAll('.star-btn').forEach(b => b.classList.remove('active'))
+    } catch {
+      toast('জমা হয়নি। একটু পরে আবার চেষ্টা করুন।')
+    } finally {
+      btn.disabled = false; btn.textContent = 'রিভিউ জমা দিন'
+    }
+  }
+
+  /* Load reviews async */
+  loadReviews(p.id, p.staticReviews || [])
+}
+
+/* ── INIT ── */
+const id = new URLSearchParams(location.search).get('id') || 'fresh_oyster'
+const product = PRODUCTS[id]
+
+if (!product) {
+  document.getElementById('app').innerHTML = `
+    <div class="not-found">
+      <h2>পণ্য পাওয়া যায়নি</h2>
+      <p>এই পণ্যটি আর পাওয়া যাচ্ছে না।</p>
+      <a href="index.html#products">সব পণ্য দেখুন</a>
+    </div>`
+} else {
+  renderProduct(product)
+}
+</script>
+</body>
+</html>
