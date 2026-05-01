@@ -11,10 +11,10 @@
 /* ── Shipping ── */
 
 /** Orders above this amount get free delivery (BDT) */
-export const FREE_SHIPPING_THRESHOLD = 500;
+export const FREE_SHIPPING_THRESHOLD = 700;
 
 /** Flat delivery fee when below threshold (BDT) */
-export const DELIVERY_FEE = 60;
+export const DELIVERY_FEE = 100;
 
 
 /* ── Cart ── */

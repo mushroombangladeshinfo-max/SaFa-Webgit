@@ -173,8 +173,85 @@
     /* ─── New order live badge ─── */
     .new-badge { background:rgba(95,207,128,.15); color:#5fcf80; border:1px solid rgba(95,207,128,.3); font-family:'Syne',sans-serif; font-size:8px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; padding:2px 8px; border-radius:20px; margin-left:8px; vertical-align:middle; animation:toastIn .3s ease; }
 
+    /* ══ TABS ══ */
+    .dash-tab-row { display:flex; gap:0; margin-bottom:20px; border-bottom:1px solid rgba(255,255,255,.06); }
+    .dash-tab { font-family:'Syne',sans-serif; font-size:10px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; padding:12px 22px; background:none; border:none; border-bottom:2px solid transparent; margin-bottom:-1px; cursor:pointer; color:rgba(245,239,230,.35); display:flex; align-items:center; gap:8px; transition:color .2s, border-color .2s; }
+    .dash-tab:hover { color:rgba(245,239,230,.65); }
+    .dash-tab.active { color:var(--al); border-bottom-color:var(--al); }
+
+    /* ══ PROMO PANEL ══ */
+    .promo-settings-row { display:grid; grid-template-columns:1fr 1fr 1.5fr; gap:16px; margin-bottom:24px; }
+    .promo-card { background:var(--g800); border:1px solid rgba(255,255,255,.07); border-radius:10px; padding:20px 22px; }
+    .pc-label { font-family:'Syne',sans-serif; font-size:9px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:rgba(245,239,230,.45); margin-bottom:5px; }
+    .pc-desc  { font-size:11px; color:rgba(245,239,230,.3); margin-bottom:14px; line-height:1.5; }
+    .pc-ctrl  { display:flex; align-items:center; gap:8px; }
+    .pc-taka  { font-family:'Cormorant Garamond',serif; font-size:22px; color:var(--al); }
+    .pc-num   { flex:1; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.1); border-radius:6px; padding:10px 12px; color:var(--c); font-family:'DM Sans',sans-serif; font-size:18px; font-weight:300; outline:none; min-width:0; transition:border-color .2s; }
+    .pc-num:focus { border-color:rgba(196,154,60,.5); }
+    .pc-save  { font-family:'Syne',sans-serif; font-size:9px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; padding:10px 16px; background:rgba(196,154,60,.1); border:1px solid rgba(196,154,60,.28); border-radius:6px; color:var(--al); cursor:pointer; white-space:nowrap; transition:all .2s; }
+    .pc-save:hover { background:rgba(196,154,60,.22); border-color:rgba(196,154,60,.55); }
+    .pc-stats-grid { display:flex; gap:0; margin-top:10px; }
+    .pc-stat { flex:1; text-align:center; padding:4px 0; }
+    .pc-stat-n { font-family:'Cormorant Garamond',serif; font-size:28px; font-weight:300; color:var(--al); line-height:1; }
+    .pc-stat-l { font-size:10px; color:rgba(245,239,230,.32); margin-top:3px; }
+    .pc-stat-sep { width:1px; background:rgba(255,255,255,.07); }
+
+    /* Quick tiers */
+    .promo-block-header { display:flex; align-items:flex-start; justify-content:space-between; margin:20px 0 12px; gap:12px; }
+    .pb-title { font-family:'Syne',sans-serif; font-size:10px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:rgba(245,239,230,.5); }
+    .pb-sub   { font-size:11px; color:rgba(245,239,230,.28); margin-top:3px; }
+    .quick-tiers { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:24px; }
+    .qt { background:var(--g800); border:1px solid rgba(255,255,255,.07); border-radius:10px; padding:18px; display:flex; flex-direction:column; gap:5px; position:relative; overflow:hidden; transition:border-color .2s; }
+    .qt::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; }
+    .qt:nth-child(1)::before { background:linear-gradient(90deg,rgba(196,154,60,.7),transparent); }
+    .qt:nth-child(2)::before { background:linear-gradient(90deg,rgba(95,207,128,.7),transparent); }
+    .qt:nth-child(3)::before { background:linear-gradient(90deg,rgba(60,154,196,.7),transparent); }
+    .qt:nth-child(4)::before { background:linear-gradient(90deg,rgba(184,92,56,.7),transparent); }
+    .qt:hover { border-color:rgba(255,255,255,.15); }
+    .qt-tier  { font-family:'Syne',sans-serif; font-size:8px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:rgba(196,154,60,.7); }
+    .qt-code  { font-family:'Syne',sans-serif; font-size:13px; font-weight:700; letter-spacing:.06em; color:var(--c); }
+    .qt-val   { font-family:'Cormorant Garamond',serif; font-size:30px; font-weight:300; color:var(--al); line-height:1.1; }
+    .qt-min   { font-size:11px; color:rgba(245,239,230,.45); }
+    .qt-why   { font-size:10.5px; color:rgba(245,239,230,.28); line-height:1.55; flex:1; margin-top:2px; }
+    .qt-add   { font-family:'Syne',sans-serif; font-size:9px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; padding:8px 14px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.1); border-radius:5px; color:rgba(245,239,230,.6); cursor:pointer; margin-top:8px; transition:all .2s; }
+    .qt-add:hover { background:rgba(196,154,60,.12); border-color:rgba(196,154,60,.3); color:var(--al); }
+    .qt-add:disabled { opacity:.4; cursor:not-allowed; }
+
+    /* Add coupon form */
+    .add-form-hidden { display:none; }
+    .add-form-card { background:var(--g800); border:1px solid rgba(255,255,255,.07); border-radius:10px; padding:22px; margin-bottom:16px; animation:expand .2s ease; }
+    .af-heading { margin-bottom:16px; }
+    .add-form-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+    .af-field label { display:block; font-family:'Syne',sans-serif; font-size:9px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:rgba(245,239,230,.42); margin-bottom:6px; }
+    .af-full { grid-column:1/-1; }
+    .af-full-w { width:100%; }
+    .af-upper { text-transform:uppercase; }
+    .af-actions { display:flex; gap:10px; margin-top:18px; flex-wrap:wrap; }
+
+    /* Toggle switch */
+    .tog { display:inline-flex; align-items:center; cursor:pointer; }
+    .tog input { display:none; }
+    .tog-track { width:38px; height:20px; background:rgba(255,255,255,.1); border-radius:99px; position:relative; transition:background .25s; }
+    .tog-thumb { position:absolute; top:3px; left:3px; width:14px; height:14px; background:#fff; border-radius:50%; transition:transform .25s; }
+    .tog input:checked + .tog-track { background:rgba(95,207,128,.45); }
+    .tog input:checked + .tog-track .tog-thumb { transform:translateX(18px); }
+
+    /* Delete modal */
+    .del-overlay { position:fixed; inset:0; background:rgba(0,0,0,.72); display:none; align-items:center; justify-content:center; z-index:9998; -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px); }
+    .del-overlay.open { display:flex; }
+    .del-card { background:var(--g800); border:1px solid rgba(255,255,255,.1); border-radius:14px; padding:30px 32px; max-width:360px; width:90%; text-align:center; animation:fadeUp .25s ease; -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px); }
+    .del-title { font-family:'Cormorant Garamond',serif; font-size:24px; font-weight:300; color:var(--c); margin-bottom:10px; }
+    .del-body  { font-size:13px; color:rgba(245,239,230,.5); line-height:1.65; margin-bottom:22px; }
+    .del-code  { font-family:'Syne',sans-serif; font-weight:700; color:var(--tl); }
+    .del-btns  { display:flex; gap:10px; justify-content:center; }
+    .del-yes   { font-family:'Syne',sans-serif; font-size:9px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; padding:11px 22px; background:rgba(184,92,56,.15); border:1px solid rgba(184,92,56,.35); border-radius:6px; color:var(--tl); cursor:pointer; transition:all .2s; }
+    .del-yes:hover { background:rgba(184,92,56,.28); }
+    .del-no    { font-family:'Syne',sans-serif; font-size:9px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; padding:11px 22px; background:none; border:1px solid rgba(255,255,255,.1); border-radius:6px; color:rgba(245,239,230,.55); cursor:pointer; transition:all .2s; }
+    .del-no:hover { border-color:rgba(255,255,255,.28); color:var(--c); }
+
     /* ─── Responsive ─── */
-    @media (max-width:1100px) { .stats-grid { grid-template-columns:repeat(2,1fr); } }
+    @media (max-width:1100px) { .stats-grid { grid-template-columns:repeat(2,1fr); } .promo-settings-row { grid-template-columns:1fr 1fr; } .quick-tiers { grid-template-columns:1fr 1fr; } }
+    @media (max-width:600px)  { .promo-settings-row { grid-template-columns:1fr; } .quick-tiers { grid-template-columns:1fr; } .add-form-grid { grid-template-columns:1fr 1fr; } }
     @media (max-width:900px)  { .od-grid { grid-template-columns:1fr; } .dash-content { padding:24px 20px 48px; } }
     @media (max-width:700px)  {
       .stats-grid { grid-template-columns:1fr 1fr; }
@@ -184,9 +261,9 @@
       .orders-table th:nth-child(5), .orders-table td:nth-child(5) { display:none; }
     }
   </style>
-  <script type="module" crossorigin src="/assets/admin-Bk1Aqpxh.js"></script>
+  <script type="module" crossorigin src="/assets/admin-CnDlOsw6.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/index-DshXEMtg.js">
-  <link rel="modulepreload" crossorigin href="/assets/main-Cib4N9Jv.js">
+  <link rel="modulepreload" crossorigin href="/assets/main-EM0ZYaKl.js">
   <link rel="stylesheet" crossorigin href="/assets/main-CpNDrKw3.css">
 </head>
 <body>
@@ -272,6 +349,21 @@
         </div>
       </div>
 
+      <!-- Tab nav -->
+      <div class="dash-tab-row">
+        <button type="button" class="dash-tab active" id="tab-orders" onclick="switchDashTab('orders')">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+          Orders
+        </button>
+        <button type="button" class="dash-tab" id="tab-promos" onclick="switchDashTab('promotions')">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+          Promotions &amp; Coupons
+        </button>
+      </div>
+
+      <!-- ═══════════════ ORDERS PANEL ═══════════════ -->
+      <div id="panel-orders">
+
       <!-- Filter bar -->
       <div class="filter-bar">
         <input type="text"   id="search-input"    class="f-search wide"   placeholder="Search name or phone...">
@@ -327,7 +419,180 @@
         </div>
       </div>
 
+      </div><!-- /panel-orders -->
+
+      <!-- ═══════════════ PROMOTIONS PANEL ═══════════════ -->
+      <div id="panel-promotions" style="display:none;">
+
+        <!-- Settings row -->
+        <div class="promo-settings-row">
+
+          <div class="promo-card">
+            <div class="pc-label">🚚 Free Delivery Threshold</div>
+            <div class="pc-desc">Orders above this amount automatically get free delivery</div>
+            <div class="pc-ctrl">
+              <span class="pc-taka">৳</span>
+              <input type="number" id="set-fdthreshold" class="pc-num" min="0" step="50" value="700" aria-label="Free delivery threshold">
+              <button type="button" class="pc-save" onclick="saveSetting('free_delivery_threshold','set-fdthreshold')">Save</button>
+            </div>
+          </div>
+
+          <div class="promo-card">
+            <div class="pc-label">📦 Delivery Fee</div>
+            <div class="pc-desc">Charged on orders below the free delivery threshold</div>
+            <div class="pc-ctrl">
+              <span class="pc-taka">৳</span>
+              <input type="number" id="set-deliveryfee" class="pc-num" min="0" step="10" value="100" aria-label="Delivery fee">
+              <button type="button" class="pc-save" onclick="saveSetting('delivery_fee','set-deliveryfee')">Save</button>
+            </div>
+          </div>
+
+          <div class="promo-card">
+            <div class="pc-label">🏷️ Coupon Performance</div>
+            <div class="pc-stats-grid">
+              <div class="pc-stat"><div class="pc-stat-n" id="cs-active">—</div><div class="pc-stat-l">Active</div></div>
+              <div class="pc-stat-sep"></div>
+              <div class="pc-stat"><div class="pc-stat-n" id="cs-total">—</div><div class="pc-stat-l">Total</div></div>
+              <div class="pc-stat-sep"></div>
+              <div class="pc-stat"><div class="pc-stat-n" id="cs-uses">—</div><div class="pc-stat-l">Uses</div></div>
+              <div class="pc-stat-sep"></div>
+              <div class="pc-stat"><div class="pc-stat-n" id="cs-maxuses">—</div><div class="pc-stat-l">Max Capped</div></div>
+            </div>
+          </div>
+
+        </div><!-- /settings-row -->
+
+        <!-- AOV Tier suggestions -->
+        <div class="promo-block-header">
+          <div>
+            <div class="pb-title">⚡ Recommended AOV Tiers</div>
+            <div class="pb-sub">Designed for avg order ৳280 · 15% margin · ৳100 delivery. Click "+ Add" to instantly create.</div>
+          </div>
+        </div>
+
+        <div class="quick-tiers">
+          <div class="qt">
+            <div class="qt-tier">Tier 1 — Starter</div>
+            <div class="qt-code">WELCOME50</div>
+            <div class="qt-val">৳50 off</div>
+            <div class="qt-min">Min order: ৳500</div>
+            <div class="qt-why">Pushes avg ৳280 → ৳500 basket. Customer gets ৳50 off, you keep ~৳25 margin on product + delivery profit.</div>
+            <button type="button" class="qt-add" onclick="addQuickTier('WELCOME50','fixed',50,500,'৳50 off on orders over ৳500')">+ Add</button>
+          </div>
+          <div class="qt">
+            <div class="qt-tier">Tier 2 — Loyalty</div>
+            <div class="qt-code">SAFA10</div>
+            <div class="qt-val">10% off</div>
+            <div class="qt-min">Min order: ৳800</div>
+            <div class="qt-why">Free delivery already unlocked at ৳700. 10% off drives customers to ৳800+ baskets, effective AOV 3× uplift.</div>
+            <button type="button" class="qt-add" onclick="addQuickTier('SAFA10','percent',10,800,'10% off on orders over ৳800')">+ Add</button>
+          </div>
+          <div class="qt">
+            <div class="qt-tier">Tier 3 — Bulk</div>
+            <div class="qt-code">SAFA15</div>
+            <div class="qt-val">15% off</div>
+            <div class="qt-min">Min order: ৳1,200</div>
+            <div class="qt-why">Strong incentive for family or repeat bulk orders. 15% discount at 15% margin is break-even — use for volume only.</div>
+            <button type="button" class="qt-add" onclick="addQuickTier('SAFA15','percent',15,1200,'15% off on bulk orders over ৳1200')">+ Add</button>
+          </div>
+          <div class="qt">
+            <div class="qt-tier">Tier 4 — Wholesale</div>
+            <div class="qt-code">MEGA20</div>
+            <div class="qt-val">20% off</div>
+            <div class="qt-min">Min order: ৳2,000</div>
+            <div class="qt-why">Corporate/restaurant wholesale. Max AOV pull. Accept thin margin for volume and relationship. Share selectively.</div>
+            <button type="button" class="qt-add" onclick="addQuickTier('MEGA20','percent',20,2000,'20% off on wholesale orders over ৳2000')">+ Add</button>
+          </div>
+        </div>
+
+        <!-- All coupons + create -->
+        <div class="promo-block-header">
+          <div>
+            <div class="pb-title">All Coupons</div>
+          </div>
+          <button type="button" class="f-action-btn" id="toggle-add-btn" onclick="toggleAddForm()">+ Create Coupon</button>
+        </div>
+
+        <!-- Add coupon form (hidden by default) -->
+        <div id="add-coupon-form" class="add-form-hidden">
+          <div class="add-form-card">
+            <div class="stat-card-label af-heading">New Coupon</div>
+            <div class="add-form-grid">
+              <div class="af-field">
+                <label for="ac-code">Code</label>
+                <input type="text" id="ac-code" class="f-search af-full-w af-upper" placeholder="SUMMER15" maxlength="24" autocomplete="off">
+              </div>
+              <div class="af-field">
+                <label for="ac-type">Discount Type</label>
+                <select id="ac-type" class="f-select af-full-w">
+                  <option value="percent">Percent (%)</option>
+                  <option value="fixed">Fixed (৳)</option>
+                </select>
+              </div>
+              <div class="af-field">
+                <label for="ac-value">Value</label>
+                <input type="number" id="ac-value" class="f-search af-full-w" placeholder="10" min="1">
+              </div>
+              <div class="af-field">
+                <label for="ac-min">Min Order (৳)</label>
+                <input type="number" id="ac-min" class="f-search af-full-w" placeholder="0" min="0" value="0">
+              </div>
+              <div class="af-field">
+                <label for="ac-maxuses">Max Uses (blank = ∞)</label>
+                <input type="number" id="ac-maxuses" class="f-search af-full-w" placeholder="Unlimited" min="1">
+              </div>
+              <div class="af-field">
+                <label for="ac-expires">Expires (blank = never)</label>
+                <input type="date" id="ac-expires" class="f-search f-date af-full-w">
+              </div>
+              <div class="af-field af-full">
+                <label for="ac-desc">Description (shown to customer)</label>
+                <input type="text" id="ac-desc" class="f-search af-full-w" placeholder="10% off your order">
+              </div>
+            </div>
+            <div class="af-actions">
+              <button type="button" class="f-action-btn green-btn" onclick="submitCoupon()">Create Coupon</button>
+              <button type="button" class="f-clear-btn" onclick="toggleAddForm()">Cancel</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Coupons table -->
+        <div class="orders-table-wrap">
+          <table class="orders-table">
+            <thead>
+              <tr>
+                <th>Code</th>
+                <th>Type</th>
+                <th>Discount</th>
+                <th>Min Order</th>
+                <th>Uses</th>
+                <th>Expires</th>
+                <th>Active</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="coupons-tbody">
+              <tr><td colspan="8"><div class="table-empty"><div class="table-empty-icon">⏳</div><p class="table-empty-text">Loading coupons...</p></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div><!-- /panel-promotions -->
+
     </div><!-- /dash-content -->
+
+  <!-- Delete confirmation modal -->
+  <div class="del-overlay" id="del-modal">
+    <div class="del-card">
+      <div class="del-title">Delete Coupon?</div>
+      <p class="del-body">This will permanently remove coupon <span class="del-code" id="del-code-label"></span>. This action cannot be undone.</p>
+      <div class="del-btns">
+        <button type="button" class="del-yes" onclick="confirmDelete()">Delete</button>
+        <button type="button" class="del-no"  onclick="closeDelModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
   </div>
 
   <!-- Toast stack -->
