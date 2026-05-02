@@ -71,7 +71,7 @@ The secret weapon of busy families: stir a teaspoon into soups, curries, smoothi
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/>
             <path stroke-linecap="round" stroke-linejoin="round" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10"/>
           </svg>
-          ৳800+ অর্ডারে বিনামূল্যে ডেলিভারি · ক্যাশ অন ডেলিভারি
+          ৳700+ অর্ডারে বিনামূল্যে ডেলিভারি · ক্যাশ অন ডেলিভারি
         </div>
 
         <div class="prod-tags">
