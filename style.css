@@ -2270,6 +2270,33 @@ footer::before {
 
 .btn-quick-add { font-size: 11px; padding: 13px 18px; }
 
+/* WhatsApp order button on product cards */
+.btn-wa-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: 100%;
+  padding: 11px 16px;
+  margin-top: 8px;
+  background: transparent;
+  border: 1px solid rgba(37,211,102,0.35);
+  border-radius: 4px;
+  color: #25d366;
+  font-family: var(--fl);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background .18s, border-color .18s;
+}
+.btn-wa-card:hover {
+  background: rgba(37,211,102,0.08);
+  border-color: rgba(37,211,102,0.6);
+}
+
 
 /* ============================================================
    17. CART DRAWER
