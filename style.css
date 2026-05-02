@@ -1628,6 +1628,101 @@ img {
 .pill-now  { background: rgba(95, 207, 128, 0.14); border: 1px solid rgba(95, 207, 128, 0.28); color: #5fcf80; }
 .pill-soon { background: rgba(196, 154, 60, 0.15); border: 1px solid rgba(196, 154, 60, 0.32); color: var(--al); }
 
+/* ── IoT Technology Section ── */
+.iot-section {
+  padding: 96px 48px;
+  background: var(--g900);
+  border-top: 1px solid rgba(255,255,255,.06);
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+.iot-section .products-header { margin-bottom: 56px; }
+.iot-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+  max-width: 1100px;
+  margin: 0 auto 56px;
+}
+.iot-card {
+  background: var(--g800);
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 14px;
+  padding: 36px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.iot-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: rgba(196,154,60,.1);
+  border: 1px solid rgba(196,154,60,.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--al);
+}
+.iot-value {
+  font-family: var(--fd);
+  font-size: 32px;
+  font-weight: 300;
+  color: var(--al);
+  line-height: 1;
+}
+.iot-label {
+  font-family: var(--fl);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: rgba(245,239,230,.45);
+  margin-top: -6px;
+}
+.iot-card-title {
+  font-family: var(--fb);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--c);
+}
+.iot-card-body {
+  font-size: 13.5px;
+  font-weight: 300;
+  color: rgba(245,239,230,.6);
+  line-height: 1.7;
+}
+.iot-callout {
+  max-width: 780px;
+  margin: 0 auto;
+  background: rgba(196,154,60,.06);
+  border: 1px solid rgba(196,154,60,.18);
+  border-radius: 12px;
+  padding: 28px 36px;
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+}
+.iot-callout-icon {
+  font-size: 22px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.iot-callout-text {
+  font-size: 14px;
+  font-weight: 300;
+  color: rgba(245,239,230,.75);
+  line-height: 1.75;
+}
+.iot-callout-text strong {
+  color: var(--c);
+  font-weight: 600;
+}
+@media (max-width: 900px) {
+  .iot-section { padding: 64px 24px; }
+  .iot-grid { grid-template-columns: 1fr; gap: 18px; }
+  .iot-callout { flex-direction: column; gap: 12px; padding: 22px 20px; }
+}
+
 /* ── Vision responsive ── */
 @media (max-width: 1100px) {
   .vision { padding: 76px 36px; }
