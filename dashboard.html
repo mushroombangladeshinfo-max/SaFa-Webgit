@@ -7,6 +7,12 @@
 <link rel="icon" type="image/png" href="/favicon.png"/>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Syne:wght@600;700;800&display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<!-- Toast -->
+<div class="dash-toast" id="dash-toast"></div>
+<!-- Modal -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal-box"></div>
+</div>
 <style>
 :root{
   --bg:#07100a;--panel:#0d1a0e;--panel2:#111f13;--panel3:#162018;
@@ -221,6 +227,48 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);disp
 @keyframes fin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 .fin{animation:fin .35s ease both}
 
+/* ── MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(7,16,10,.88);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--panel);border:1px solid var(--border2);border-radius:var(--r);padding:24px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;transform:translateY(12px);transition:transform .25s}
+.modal-overlay.open .modal{transform:translateY(0)}
+.modal-title{font-family:'Syne',sans-serif;font-size:.92rem;font-weight:700;color:var(--txt);margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.modal-close{width:26px;height:26px;background:none;border:1px solid var(--border);border-radius:6px;cursor:pointer;color:var(--txt2);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+.modal-close:hover{background:var(--reddim);color:var(--red);border-color:rgba(224,82,82,.3)}
+.modal-close svg{width:12px;height:12px}
+.form-note{font-size:.75rem;color:var(--txt2);margin-bottom:14px;line-height:1.5;background:var(--gdim);border:1px solid var(--border);border-radius:var(--r2);padding:10px 12px}
+.form-group{margin-bottom:12px}
+.form-group.span2{grid-column:span 2}
+.form-label{display:block;font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--txt3);margin-bottom:4px}
+.form-input{width:100%;padding:9px 12px;background:var(--panel2);border:1.5px solid var(--border);border-radius:var(--r2);font-family:'DM Mono',monospace;font-size:.83rem;color:var(--txt);outline:none;transition:border-color .2s;-webkit-appearance:none;appearance:none}
+.form-input:focus{border-color:var(--border2)}
+.form-input option{background:var(--panel2)}
+.form-hint{font-size:.62rem;color:var(--txt3);margin-top:4px}
+.form-g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.form-g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.modal-footer{display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-top:18px;padding-top:14px;border-top:1px solid var(--border)}
+.btn-cancel{padding:7px 15px;background:none;border:1px solid var(--border);border-radius:var(--r2);color:var(--txt2);font-size:.76rem;font-weight:600;cursor:pointer;transition:all .15s;font-family:'DM Sans',sans-serif}
+.btn-cancel:hover{border-color:var(--border2);color:var(--txt)}
+.btn-save{padding:7px 18px;background:var(--g);border:none;border-radius:var(--r2);color:var(--panel);font-size:.76rem;font-weight:700;cursor:pointer;transition:opacity .15s;font-family:'DM Sans',sans-serif}
+.btn-save:hover{opacity:.85}
+.btn-danger{padding:7px 15px;background:none;border:1px solid var(--border);border-radius:var(--r2);color:var(--red);font-size:.76rem;font-weight:600;cursor:pointer;transition:all .15s;margin-right:auto;font-family:'DM Sans',sans-serif}
+.btn-danger:hover{background:var(--reddim);border-color:rgba(224,82,82,.3)}
+/* Add / Edit / Delete inline buttons */
+.btn-add{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;background:var(--gdim2);border:1px solid var(--border2);border-radius:var(--r2);color:var(--g);font-size:.73rem;font-weight:700;cursor:pointer;transition:opacity .15s;font-family:'DM Sans',sans-serif;text-decoration:none}
+.btn-add:hover{opacity:.82}
+.btn-add svg{width:12px;height:12px}
+.btn-edit-sm{width:24px;height:24px;background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;color:var(--txt3);transition:all .15s;vertical-align:middle;flex-shrink:0}
+.btn-edit-sm:hover{background:var(--gdim);border-color:var(--border2);color:var(--g)}
+.btn-edit-sm svg{width:11px;height:11px}
+.btn-del-sm{width:24px;height:24px;background:none;border:1px solid var(--border);border-radius:5px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;color:var(--txt3);transition:all .15s;vertical-align:middle;flex-shrink:0}
+.btn-del-sm:hover{background:var(--reddim);border-color:rgba(224,82,82,.3);color:var(--red)}
+.btn-del-sm svg{width:11px;height:11px}
+.btn-resolve{font-size:.6rem;font-weight:700;padding:2px 8px;background:none;border:1px solid var(--border);border-radius:99px;color:var(--txt3);cursor:pointer;transition:all .15s;font-family:'DM Sans',sans-serif}
+.btn-resolve:hover{background:var(--gdim);border-color:var(--border2);color:var(--g)}
+/* Toast */
+.dash-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--panel);border:1px solid var(--border2);color:var(--txt);padding:9px 18px;border-radius:99px;font-size:.78rem;font-weight:600;z-index:9999;opacity:0;pointer-events:none;white-space:nowrap;display:flex;align-items:center;gap:8px;transition:all .3s;box-shadow:0 4px 24px rgba(0,0,0,.4)}
+.dash-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
 /* ── DATA POINTS SECTION ── */
 .mb18{margin-bottom:18px}
 .dp-freq{margin-left:auto;font-size:.62rem;font-weight:600}
@@ -321,7 +369,13 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);disp
     <div class="section active fin" id="section-overview">
       <div class="sh">
         <div><div class="sh-title">Farm Overview</div><div class="sh-sub">Real-time status across all grow rooms</div></div>
-        <div class="sh-right"><span id="ov-date" style="font-size:.72rem;color:var(--txt2)"></span></div>
+        <div class="sh-right">
+          <span id="ov-date" class="topbar-meta"></span>
+          <button type="button" class="btn-add" onclick="openAlertModal()">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+            Add Alert
+          </button>
+        </div>
       </div>
 
       <!-- KPIs -->
@@ -377,6 +431,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);disp
       <div class="sh">
         <div><div class="sh-title">Environment Monitor</div><div class="sh-sub">Live sensor readings · auto-refresh every 5s</div></div>
         <div class="sh-right">
+          <button type="button" class="btn-add" onclick="openSensorEdit(selectedRoom)">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg>
+            Enter Readings
+          </button>
           <div class="pill-tabs" id="room-tabs">
             <button class="ptab active" data-room="A" onclick="selectRoom('A',this)">Room A</button>
             <button class="ptab" data-room="B" onclick="selectRoom('B',this)">Room B</button>
@@ -435,6 +493,16 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);disp
     <div class="section fin" id="section-production">
       <div class="sh">
         <div><div class="sh-title">Production Tracker</div><div class="sh-sub">Batch lifecycle · harvest logs · biological efficiency</div></div>
+        <div class="sh-right">
+          <button type="button" class="btn-add" onclick="openBatchModal()">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+            Add Batch
+          </button>
+          <button type="button" class="btn-add" onclick="openHarvestModal()">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+            Log Harvest
+          </button>
+        </div>
       </div>
 
       <!-- Batch table -->
@@ -447,7 +515,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);disp
           <table class="tbl" id="batch-table">
             <thead><tr>
               <th>Batch ID</th><th>Species</th><th>Room</th><th>Stage</th>
-              <th>Colonisation</th><th>Days In</th><th>Est. Harvest</th><th>Status</th>
+              <th>Colonisation</th><th>Days In</th><th>Est. Harvest</th><th>Status</th><th></th>
             </tr></thead>
             <tbody id="batch-tbody"></tbody>
           </table>
@@ -473,7 +541,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);disp
         <div class="card-h">Recent Harvest Log</div>
         <div style="overflow-x:auto">
           <table class="tbl">
-            <thead><tr><th>Batch</th><th>Flush</th><th>Date</th><th>Weight (kg)</th><th>BE%</th><th>Room</th><th>Notes</th></tr></thead>
+            <thead><tr><th>Batch</th><th>Flush</th><th>Date</th><th>Weight (kg)</th><th>BE%</th><th>Room</th><th>Notes</th><th></th></tr></thead>
             <tbody id="harvest-tbody"></tbody>
           </table>
         </div>
@@ -1475,13 +1543,435 @@ function exportCSV() {
 function setPeriod(days, btn) {
   document.querySelectorAll('#section-analytics .ptab').forEach(b => b.classList.remove('active'))
   btn.classList.add('active')
-  // In production: re-fetch data for the selected period from Supabase
+}
+
+// ══════════════════════════════════════
+//  LOCALSTORAGE PERSISTENCE
+// ══════════════════════════════════════
+function saveData() {
+  try {
+    localStorage.setItem('safa_rooms',   JSON.stringify(ROOMS))
+    localStorage.setItem('safa_batches', JSON.stringify(BATCHES))
+    localStorage.setItem('safa_harvest', JSON.stringify(HARVEST_LOG))
+    localStorage.setItem('safa_alerts',  JSON.stringify(ALERTS))
+  } catch(e) {}
+}
+
+function loadData() {
+  try {
+    const rooms = localStorage.getItem('safa_rooms')
+    if (rooms) Object.assign(ROOMS, JSON.parse(rooms))
+    const batches = localStorage.getItem('safa_batches')
+    if (batches) { BATCHES.length = 0; BATCHES.push(...JSON.parse(batches)) }
+    const harvest = localStorage.getItem('safa_harvest')
+    if (harvest) { HARVEST_LOG.length = 0; HARVEST_LOG.push(...JSON.parse(harvest)) }
+    const alerts = localStorage.getItem('safa_alerts')
+    if (alerts) { ALERTS.length = 0; ALERTS.push(...JSON.parse(alerts)) }
+  } catch(e) {}
+}
+
+// ══════════════════════════════════════
+//  TOAST
+// ══════════════════════════════════════
+let _toastT
+function showToast(msg, type='ok') {
+  const t = document.getElementById('dash-toast')
+  const dot = type==='warn' ? 'var(--gold)' : type==='err' ? 'var(--red)' : 'var(--g)'
+  t.innerHTML = `<span style="width:7px;height:7px;border-radius:50%;background:${dot};flex-shrink:0"></span>${msg}`
+  t.classList.add('show')
+  clearTimeout(_toastT)
+  _toastT = setTimeout(() => t.classList.remove('show'), 2800)
+}
+
+// ══════════════════════════════════════
+//  MODAL ENGINE
+// ══════════════════════════════════════
+let _modalSave = null, _modalDelete = null
+
+function openModal(title, formHTML, onSave, showDelete, onDelete) {
+  const box = document.getElementById('modal-box')
+  const delBtn = showDelete
+    ? `<button type="button" class="btn-danger" onclick="_modalDelete()">Delete</button>`
+    : ''
+  box.innerHTML = `
+    <div class="modal-title">
+      <span>${title}</span>
+      <button type="button" class="modal-close" onclick="closeModal()">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    ${formHTML}
+    <div class="modal-footer">
+      ${delBtn}
+      <button type="button" class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button type="button" class="btn-save" onclick="_modalSave()">Save</button>
+    </div>`
+  _modalSave   = onSave
+  _modalDelete = onDelete || (() => {})
+  document.getElementById('modal-overlay').classList.add('open')
+  // Focus first input
+  setTimeout(() => box.querySelector('.form-input')?.focus(), 50)
+}
+
+function closeModal(e) {
+  if (e && e.target !== document.getElementById('modal-overlay')) return
+  document.getElementById('modal-overlay').classList.remove('open')
+}
+
+// ══════════════════════════════════════
+//  MODAL: SENSOR READINGS
+// ══════════════════════════════════════
+function openSensorEdit(roomKey) {
+  const r = ROOMS[roomKey]
+  openModal(`Enter Readings · ${r.name}`, `
+    <div class="form-note">Manually enter current sensor values for ${r.name}. Gauges and charts update immediately.</div>
+    <div class="form-g3">
+      <div class="form-group"><label class="form-label">Temp (°C)</label>
+        <input class="form-input" id="f-temp" type="number" step="0.1" min="0" max="50" value="${r.temp}"/></div>
+      <div class="form-group"><label class="form-label">Humidity (%RH)</label>
+        <input class="form-input" id="f-hum" type="number" step="0.1" min="0" max="100" value="${r.humidity}"/></div>
+      <div class="form-group"><label class="form-label">CO₂ (ppm)</label>
+        <input class="form-input" id="f-co2" type="number" step="1" min="300" max="5000" value="${r.co2}"/></div>
+      <div class="form-group"><label class="form-label">O₂ (%)</label>
+        <input class="form-input" id="f-o2" type="number" step="0.01" min="15" max="22" value="${r.o2}"/></div>
+      <div class="form-group"><label class="form-label">Airflow (m/s)</label>
+        <input class="form-input" id="f-af" type="number" step="0.01" min="0" max="5" value="${r.airflow}"/></div>
+      <div class="form-group"><label class="form-label">VPD (kPa)</label>
+        <input class="form-input" id="f-vpd" type="number" step="0.01" min="0" max="3" value="${r.vpd}"/></div>
+    </div>`,
+    () => {
+      const get = id => parseFloat(document.getElementById(id).value)
+      if (!isNaN(get('f-temp')))  r.temp     = get('f-temp')
+      if (!isNaN(get('f-hum')))   r.humidity = get('f-hum')
+      if (!isNaN(get('f-co2')))   r.co2      = get('f-co2')
+      if (!isNaN(get('f-o2')))    r.o2       = get('f-o2')
+      if (!isNaN(get('f-af')))    r.airflow  = get('f-af')
+      if (!isNaN(get('f-vpd')))   r.vpd      = get('f-vpd')
+      saveData(); closeModal()
+      renderGauges(); renderMetricBoxes(); renderRoomCards()
+      showToast(`${r.name} readings saved`)
+    }
+  )
+}
+
+// ══════════════════════════════════════
+//  MODAL: ROOM CONFIG
+// ══════════════════════════════════════
+function openRoomEdit(roomKey) {
+  const r = ROOMS[roomKey]
+  openModal(`Edit Room · ${roomKey}`, `
+    <div class="form-group"><label class="form-label">Room Display Name</label>
+      <input class="form-input" id="f-rname" type="text" value="${r.name}"/></div>
+    <div class="form-group"><label class="form-label">Species / Purpose</label>
+      <input class="form-input" id="f-rsp" type="text" value="${r.species}"/></div>`,
+    () => {
+      const name = document.getElementById('f-rname').value.trim()
+      const sp   = document.getElementById('f-rsp').value.trim()
+      if (name) r.name    = name
+      if (sp)   r.species = sp
+      saveData(); closeModal(); renderRoomCards(); updateEnvLabel()
+      // Update tab labels
+      const tab = document.querySelector(`[data-room="${roomKey}"]`)
+      if (tab) tab.textContent = name || roomKey
+      showToast('Room config saved')
+    }
+  )
+}
+
+// ══════════════════════════════════════
+//  MODAL: BATCH
+// ══════════════════════════════════════
+const STAGES = ['Inoculated','Colonising','Spawn Complete','Pinning','Fruiting','Harvest Ready','Completed']
+
+function openBatchModal(idx) {
+  const isEdit = idx !== undefined
+  const b = isEdit ? {...BATCHES[idx]} : { id:'', species:'', room:'A', stage:'Inoculated', col:0, days:0, est:30, status:'ok' }
+  const roomOpts = Object.entries(ROOMS).map(([k,r]) =>
+    `<option value="${k}" ${b.room===k?'selected':''}>${r.name}</option>`).join('')
+  const stageOpts = STAGES.map(s =>
+    `<option value="${s}" ${b.stage===s?'selected':''}>${s}</option>`).join('')
+  openModal(isEdit ? `Edit Batch · ${b.id}` : 'Add New Batch', `
+    <div class="form-g2">
+      <div class="form-group"><label class="form-label">Batch ID</label>
+        <input class="form-input" id="f-bid" type="text" placeholder="BAT-2025-045" value="${b.id}"/></div>
+      <div class="form-group"><label class="form-label">Room</label>
+        <select class="form-input" id="f-broom">${roomOpts}</select></div>
+      <div class="form-group span2"><label class="form-label">Species / Type</label>
+        <input class="form-input" id="f-bsp" type="text" placeholder="Oyster (Fresh)" value="${b.species}"/></div>
+      <div class="form-group"><label class="form-label">Stage</label>
+        <select class="form-input" id="f-bstage">${stageOpts}</select></div>
+      <div class="form-group"><label class="form-label">Colonisation (%)</label>
+        <input class="form-input" id="f-bcol" type="number" min="0" max="100" value="${b.col}"/></div>
+      <div class="form-group"><label class="form-label">Days In Farm</label>
+        <input class="form-input" id="f-bdays" type="number" min="0" value="${b.days}"/></div>
+      <div class="form-group"><label class="form-label">Est. Days to Harvest</label>
+        <input class="form-input" id="f-best" type="number" min="0" value="${b.est}"/></div>
+      <div class="form-group"><label class="form-label">Status</label>
+        <select class="form-input" id="f-bstatus">
+          <option value="ok"   ${b.status==='ok'  ?'selected':''}>On Track</option>
+          <option value="warn" ${b.status==='warn' ?'selected':''}>Monitor</option>
+          <option value="crit" ${b.status==='crit' ?'selected':''}>Action Required</option>
+        </select></div>
+    </div>`,
+    () => {
+      const id = document.getElementById('f-bid').value.trim()
+      const sp = document.getElementById('f-bsp').value.trim()
+      if (!id || !sp) { showToast('Batch ID and species required', 'warn'); return }
+      const data = {
+        id, species:sp,
+        room:   document.getElementById('f-broom').value,
+        stage:  document.getElementById('f-bstage').value,
+        col:    Math.max(0, Math.min(100, +document.getElementById('f-bcol').value  || 0)),
+        days:   +document.getElementById('f-bdays').value || 0,
+        est:    +document.getElementById('f-best').value  || 0,
+        status: document.getElementById('f-bstatus').value,
+      }
+      if (isEdit) BATCHES[idx] = data; else BATCHES.unshift(data)
+      saveData(); closeModal(); renderBatchTable()
+      document.getElementById('kpi-batches').textContent = BATCHES.filter(b => b.status !== 'done').length
+      showToast(isEdit ? 'Batch updated' : 'Batch added')
+    },
+    isEdit,
+    isEdit ? () => {
+      if (!confirm(`Delete batch ${BATCHES[idx].id}?`)) return
+      BATCHES.splice(idx, 1); saveData(); closeModal(); renderBatchTable()
+      document.getElementById('kpi-batches').textContent = BATCHES.length
+      showToast('Batch deleted', 'warn')
+    } : null
+  )
+}
+
+// ══════════════════════════════════════
+//  MODAL: HARVEST
+// ══════════════════════════════════════
+function openHarvestModal(idx) {
+  const isEdit = idx !== undefined
+  const today  = new Date().toISOString().slice(0, 10)
+  const h = isEdit ? {...HARVEST_LOG[idx]}
+    : { batch:'', flush:1, date:today, kg:'', be:'', room:'A', notes:'' }
+  const batchOpts = BATCHES.map(b =>
+    `<option value="${b.id}" ${h.batch===b.id?'selected':''}>${b.id}</option>`).join('')
+  const roomOpts = Object.entries(ROOMS).map(([k,r]) =>
+    `<option value="${k}" ${h.room===k?'selected':''}>${r.name}</option>`).join('')
+  openModal(isEdit ? `Edit Harvest · ${h.batch} F${h.flush}` : 'Log Harvest Event', `
+    <div class="form-g2">
+      <div class="form-group"><label class="form-label">Batch ID</label>
+        <select class="form-input" id="f-hbatch">
+          ${batchOpts}
+          <option value="manual" ${!BATCHES.find(b=>b.id===h.batch)?'selected':''}>Manual entry</option>
+        </select></div>
+      <div class="form-group"><label class="form-label">Flush #</label>
+        <input class="form-input" id="f-hflush" type="number" min="1" max="8" value="${h.flush}"/></div>
+      <div class="form-group"><label class="form-label">Harvest Date</label>
+        <input class="form-input" id="f-hdate" type="date" value="${h.date}"/></div>
+      <div class="form-group"><label class="form-label">Room</label>
+        <select class="form-input" id="f-hroom">${roomOpts}</select></div>
+      <div class="form-group"><label class="form-label">Yield (kg)</label>
+        <input class="form-input" id="f-hkg" type="number" step="0.01" min="0" placeholder="2.30" value="${h.kg}"/></div>
+      <div class="form-group"><label class="form-label">BE% <span class="form-hint" style="display:inline">yield ÷ dry substrate × 100</span></label>
+        <input class="form-input" id="f-hbe" type="number" step="0.1" min="0" max="200" placeholder="85" value="${h.be}"/></div>
+    </div>
+    <div class="form-group"><label class="form-label">Notes (optional)</label>
+      <input class="form-input" id="f-hnotes" type="text" placeholder="Any observations..." value="${h.notes === '—' ? '' : h.notes}"/></div>`,
+    () => {
+      const batchSel = document.getElementById('f-hbatch').value
+      const kg = parseFloat(document.getElementById('f-hkg').value)
+      const dt = document.getElementById('f-hdate').value
+      if (!dt || isNaN(kg) || kg <= 0) { showToast('Date and yield (kg) are required', 'warn'); return }
+      const data = {
+        batch: batchSel === 'manual' ? (h.batch || 'MANUAL') : batchSel,
+        flush: +document.getElementById('f-hflush').value || 1,
+        date:  dt, kg,
+        be:    parseFloat(document.getElementById('f-hbe').value) || 0,
+        room:  document.getElementById('f-hroom').value,
+        notes: document.getElementById('f-hnotes').value.trim() || '—',
+      }
+      if (isEdit) HARVEST_LOG[idx] = data; else HARVEST_LOG.unshift(data)
+      saveData(); closeModal(); renderHarvestLog()
+      // Refresh today's yield KPI
+      const todayYield = HARVEST_LOG.filter(h => h.date === today).reduce((s,h) => s+h.kg, 0)
+      if (todayYield > 0) document.getElementById('kpi-yield').textContent = todayYield.toFixed(2)+' kg'
+      showToast(isEdit ? 'Harvest updated' : 'Harvest logged')
+    },
+    isEdit,
+    isEdit ? () => {
+      HARVEST_LOG.splice(idx, 1); saveData(); closeModal(); renderHarvestLog()
+      showToast('Entry deleted', 'warn')
+    } : null
+  )
+}
+
+// ══════════════════════════════════════
+//  MODAL: ALERT
+// ══════════════════════════════════════
+function openAlertModal() {
+  const roomOpts = Object.entries(ROOMS).map(([k,r]) =>
+    `<option value="${k}">${r.name}</option>`).join('')
+  openModal('Add Alert', `
+    <div class="form-group"><label class="form-label">Message</label>
+      <input class="form-input" id="f-amsg" type="text" placeholder="Describe the issue or event..."/></div>
+    <div class="form-g2">
+      <div class="form-group"><label class="form-label">Room</label>
+        <select class="form-input" id="f-aroom">${roomOpts}</select></div>
+      <div class="form-group"><label class="form-label">Parameter</label>
+        <input class="form-input" id="f-aparam" type="text" placeholder="Temp · CO₂ · Harvest…"/></div>
+      <div class="form-group"><label class="form-label">Severity</label>
+        <select class="form-input" id="f-asev">
+          <option value="ok">Info</option>
+          <option value="warn">Warning</option>
+          <option value="crit">Critical</option>
+        </select></div>
+    </div>`,
+    () => {
+      const msg = document.getElementById('f-amsg').value.trim()
+      if (!msg) { showToast('Message required', 'warn'); return }
+      const now = new Date()
+      ALERTS.unshift({
+        sev:   document.getElementById('f-asev').value,
+        room:  document.getElementById('f-aroom').value,
+        param: document.getElementById('f-aparam').value.trim() || 'Manual',
+        msg,
+        time:  now.toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'}),
+      })
+      saveData(); closeModal(); renderAlerts()
+      const cnt = ALERTS.filter(a => a.sev !== 'ok').length
+      document.getElementById('kpi-alerts').textContent = cnt || 0
+      showToast('Alert added')
+    }
+  )
+}
+
+function resolveAlert(idx) {
+  ALERTS.splice(idx, 1)
+  saveData(); renderAlerts()
+  const cnt = ALERTS.filter(a => a.sev !== 'ok').length
+  document.getElementById('kpi-alerts').textContent = cnt || 0
+  showToast('Alert resolved')
+}
+
+// ══════════════════════════════════════
+//  UPDATE RENDER FUNCTIONS WITH EDIT BTNS
+// ══════════════════════════════════════
+
+// Override renderAlerts to add resolve + per-alert edit affordance
+function renderAlerts() {
+  const list = document.getElementById('alerts-list'); if (!list) return
+  if (!ALERTS.length) { list.innerHTML = '<div class="al-item" style="color:var(--txt3);font-size:.78rem">No active alerts</div>'; return }
+  list.innerHTML = ALERTS.map((a, i) => `
+    <div class="al-item">
+      <div class="al-dot ${a.sev}"></div>
+      <div style="flex:1;min-width:0">
+        <div class="al-msg">${a.msg}</div>
+        <div class="al-meta">${a.room} · ${a.param} · ${a.time}</div>
+      </div>
+      <button type="button" class="btn-resolve" onclick="resolveAlert(${i})">Resolve</button>
+    </div>`).join('')
+}
+
+// Override renderBatchTable to include edit/delete
+function renderBatchTable() {
+  const tbody = document.getElementById('batch-tbody'); if (!tbody) return
+  const statusMap = {ok:'b-ok', warn:'b-warn', crit:'b-crit'}
+  const statusLbl = {ok:'On Track', warn:'Monitor', crit:'Action'}
+  if (!BATCHES.length) {
+    tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;color:var(--txt3);padding:24px">No batches. Click "Add Batch" to start.</td></tr>`
+    return
+  }
+  tbody.innerHTML = BATCHES.map((b, i) => `<tr>
+    <td class="mono">${b.id}</td>
+    <td>${b.species}</td>
+    <td><span class="badge b-idle">Room ${b.room}</span></td>
+    <td><span class="badge b-ok">${b.stage}</span></td>
+    <td>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="prog-bg"><div class="prog-fill" style="width:${b.col}%"></div></div>
+        <span style="font-family:'DM Mono',monospace;font-size:.72rem">${b.col}%</span>
+      </div>
+    </td>
+    <td class="mono">${b.days}d</td>
+    <td class="mono" style="color:var(--gold)">${b.est}d</td>
+    <td><span class="badge ${statusMap[b.status]}">${statusLbl[b.status]}</span></td>
+    <td style="white-space:nowrap">
+      <button type="button" class="btn-edit-sm" onclick="openBatchModal(${i})" title="Edit">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg>
+      </button>
+    </td>
+  </tr>`).join('')
+}
+
+// Override renderHarvestLog to include edit/delete
+function renderHarvestLog() {
+  const tbody = document.getElementById('harvest-tbody'); if (!tbody) return
+  if (!HARVEST_LOG.length) {
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--txt3);padding:24px">No harvests logged. Click "Log Harvest" to start.</td></tr>`
+    return
+  }
+  tbody.innerHTML = HARVEST_LOG.map((h, i) => `<tr>
+    <td class="mono">${h.batch}</td>
+    <td class="mono">F${h.flush}</td>
+    <td class="mono">${h.date}</td>
+    <td style="font-family:'DM Mono',monospace;color:var(--g)">${h.kg}</td>
+    <td style="font-family:'DM Mono',monospace;color:${h.be>=80?'var(--g)':h.be>=60?'var(--gold)':'var(--red)'}">${h.be}%</td>
+    <td><span class="badge b-idle">Room ${h.room}</span></td>
+    <td style="color:var(--txt2)">${h.notes}</td>
+    <td style="white-space:nowrap">
+      <button type="button" class="btn-edit-sm" onclick="openHarvestModal(${i})" title="Edit">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg>
+      </button>
+      <button type="button" class="btn-del-sm" onclick="if(confirm('Delete this entry?')){HARVEST_LOG.splice(${i},1);saveData();renderHarvestLog()}" title="Delete">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
+      </button>
+    </td>
+  </tr>`).join('')
+}
+
+// Override renderRoomCards to add edit icon
+function renderRoomCards() {
+  const wrap = document.getElementById('room-cards'); if (!wrap) return
+  wrap.innerHTML = Object.entries(ROOMS).map(([k, r]) => {
+    const ts = getStatus('temp',r.temp), hs = getStatus('humidity',r.humidity), cs = getStatus('co2',r.co2)
+    const overall = [ts,hs,cs].includes('crit') ? 'crit' : [ts,hs,cs].includes('warn') ? 'warn' : 'ok'
+    const badgeMap = {ok:'b-ok',warn:'b-warn',crit:'b-crit'}
+    const lblMap   = {ok:'Optimal',warn:'Warning',crit:'Critical'}
+    return `<div class="room-card ${selectedRoom===k?'sel':''}">
+      <div class="room-head">
+        <div onclick="selectRoom('${k}',null)" style="cursor:pointer;flex:1">
+          <div class="room-name">${r.name}</div>
+          <div class="room-species">${r.species}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span class="badge ${badgeMap[overall]}">${lblMap[overall]}</span>
+          <button type="button" class="btn-edit-sm" onclick="openSensorEdit('${k}')" title="Enter readings">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg>
+          </button>
+          <button type="button" class="btn-edit-sm" onclick="openRoomEdit('${k}')" title="Edit room config">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 010 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 010-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="room-metrics">
+        <div class="room-metric">
+          <span class="rm-val" style="color:${statusColor(ts)}">${r.temp}°</span>
+          <span class="rm-lbl">Temp</span>
+        </div>
+        <div class="room-metric">
+          <span class="rm-val" style="color:${statusColor(hs)}">${r.humidity}%</span>
+          <span class="rm-lbl">Humid</span>
+        </div>
+        <div class="room-metric">
+          <span class="rm-val" style="color:${statusColor(cs)}">${r.co2}</span>
+          <span class="rm-lbl">CO₂ ppm</span>
+        </div>
+      </div>
+    </div>`
+  }).join('')
 }
 
 // ══════════════════════════════════════
 //  INIT
 // ══════════════════════════════════════
 document.addEventListener('DOMContentLoaded', () => {
+  loadData()
   renderRoomCards()
   renderAlerts()
   renderGauges()
@@ -1495,8 +1985,12 @@ document.addEventListener('DOMContentLoaded', () => {
   initCharts()
   updateActivePower()
 
-  // Live updates every 5 seconds
-  setInterval(simulateLiveData, 5000)
+  // Live simulation — skips when manual edits are active (modal open)
+  setInterval(() => {
+    if (!document.getElementById('modal-overlay').classList.contains('open')) {
+      simulateLiveData()
+    }
+  }, 5000)
 })
 </script>
 </body>
