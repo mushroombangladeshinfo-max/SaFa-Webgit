@@ -1796,6 +1796,99 @@ img {
   .how-step { padding: 0; }
 }
 
+/* ── Testimonials Section ── */
+.testi-section {
+  padding: 88px 48px;
+  background: var(--g900);
+  border-top: 1px solid rgba(255,255,255,.06);
+}
+.testi-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
+  max-width: 1100px;
+  margin: 52px auto 0;
+}
+.testi-card {
+  background: var(--g800);
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 14px;
+  padding: 28px 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.testi-card.testi-wide {
+  grid-column: span 2;
+}
+.testi-stars { color: var(--al); font-size: 13px; letter-spacing: 2px; }
+.testi-quote {
+  font-size: 14px;
+  font-weight: 300;
+  color: rgba(245,239,230,.78);
+  line-height: 1.75;
+  flex: 1;
+}
+.testi-quote::before { content: "\201C"; color: var(--al); font-size: 20px; line-height: 0; vertical-align: -4px; margin-right: 2px; }
+.testi-quote::after  { content: "\201D"; color: var(--al); font-size: 20px; line-height: 0; vertical-align: -4px; margin-left: 2px; }
+.testi-author {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-top: 1px solid rgba(255,255,255,.06);
+  padding-top: 14px;
+  margin-top: auto;
+}
+.testi-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(196,154,60,.15);
+  border: 1px solid rgba(196,154,60,.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--fb);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--al);
+  flex-shrink: 0;
+}
+.testi-name {
+  font-family: var(--fb);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--c);
+}
+.testi-meta {
+  font-family: var(--fl);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: .08em;
+  color: rgba(245,239,230,.4);
+  margin-top: 2px;
+}
+.testi-tag {
+  margin-left: auto;
+  font-family: var(--fl);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 20px;
+  background: rgba(196,154,60,.1);
+  border: 1px solid rgba(196,154,60,.2);
+  color: var(--al);
+  flex-shrink: 0;
+}
+.testi-tag.b2b { background: rgba(95,207,128,.08); border-color: rgba(95,207,128,.2); color: #5fcf80; }
+@media (max-width: 900px) {
+  .testi-section { padding: 64px 24px; }
+  .testi-grid { grid-template-columns: 1fr; }
+  .testi-card.testi-wide { grid-column: span 1; }
+}
+
 /* ── Vision responsive ── */
 @media (max-width: 1100px) {
   .vision { padding: 76px 36px; }
