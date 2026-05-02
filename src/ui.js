@@ -27,7 +27,6 @@ import {
   getCart,
   saveCart,
   addToCart,
-  updateQuantity,
   getCartCount,
 } from './cart.js';
 
@@ -162,40 +161,13 @@ export function renderCartDrawer() {
       </div>
     </div>`;
 
-  /* ── Coupon input ── */
+  /* ── Coupon note — applied at checkout ── */
   const couponHTML = `
-    <div style="margin-top:20px;padding-top:18px;
-                border-top:1px solid rgba(255,255,255,0.06);">
-      <div style="display:flex;gap:8px;">
-        <input
-          type="text"
-          id="cartCoupon"
-          placeholder="Coupon code"
-          style="flex:1;background:rgba(255,255,255,0.03);
-                 border:1px solid rgba(255,255,255,0.08);
-                 border-radius:4px;padding:10px 12px;
-                 color:#f5efe6;font-size:12px;
-                 font-family:'DM Sans',sans-serif;
-                 outline:none;transition:border 0.2s;"
-          onfocus="this.style.borderColor='rgba(196,154,60,0.4)'"
-          onblur="this.style.borderColor='rgba(255,255,255,0.08)'"
-        >
-        <button
-          onclick="window.applyCoupon()"
-          style="background:rgba(184,92,56,0.12);color:#d0724f;
-                 border:1px solid rgba(184,92,56,0.28);
-                 border-radius:4px;padding:0 16px;
-                 font-size:10px;font-weight:700;
-                 font-family:'Syne',sans-serif;
-                 text-transform:uppercase;letter-spacing:0.1em;
-                 cursor:pointer;transition:all 0.2s;white-space:nowrap;"
-          onmouseover="this.style.background='rgba(184,92,56,0.22)'"
-          onmouseout="this.style.background='rgba(184,92,56,0.12)'"
-        >Apply</button>
-      </div>
-      <p id="couponMsg"
-         style="font-size:11px;margin-top:8px;display:none;
-                font-weight:500;letter-spacing:0.04em;"></p>
+    <div style="margin-top:16px;padding-top:16px;
+                border-top:1px solid rgba(255,255,255,0.06);
+                font-size:11px;color:rgba(245,239,230,0.5);
+                text-align:center;line-height:1.6;">
+      🏷️ কুপন কোড চেকআউটে দিন
     </div>`;
 
   container.innerHTML = progressHTML + itemsHTML + couponHTML;
