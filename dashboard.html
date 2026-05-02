@@ -1,0 +1,1503 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>IoT Farm Dashboard — SaFa Naturals</title>
+<link rel="icon" type="image/png" href="/favicon.png"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Syne:wght@600;700;800&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#07100a;--panel:#0d1a0e;--panel2:#111f13;--panel3:#162018;
+  --border:rgba(82,183,136,.13);--border2:rgba(82,183,136,.26);
+  --g:#52b788;--g2:#2d6a4f;--gdim:rgba(82,183,136,.1);--gdim2:rgba(82,183,136,.18);
+  --gold:#c9a84c;--golddim:rgba(201,168,76,.12);
+  --red:#e05252;--reddim:rgba(224,82,82,.12);
+  --blue:#60a5fa;--bluedim:rgba(96,165,250,.1);
+  --txt:#cce8d8;--txt2:rgba(204,232,216,.55);--txt3:rgba(204,232,216,.3);
+  --sw:220px;--hh:56px;--r:12px;--r2:8px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);display:flex;min-height:100vh;overflow:hidden}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(82,183,136,.25);border-radius:2px}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  width:var(--sw);min-height:100vh;background:var(--panel);
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+  position:fixed;top:0;left:0;bottom:0;z-index:200;
+  transition:transform .25s;
+}
+.sb-logo{
+  padding:18px 16px 14px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;
+}
+.sb-logo-icon{
+  width:34px;height:34px;border-radius:8px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--g2),var(--g));
+  display:flex;align-items:center;justify-content:center;
+}
+.sb-logo-icon svg{width:18px;height:18px;color:#fff}
+.sb-logo-main{font-family:'Syne',sans-serif;font-size:.82rem;font-weight:800;color:var(--txt);display:block;line-height:1.2}
+.sb-logo-sub{font-size:.6rem;color:var(--g);letter-spacing:.6px;text-transform:uppercase}
+.sb-nav{flex:1;padding:10px 8px;display:flex;flex-direction:column;gap:2px;overflow-y:auto}
+.sb-lbl{font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:1.4px;color:var(--txt3);padding:14px 10px 4px}
+.nav-btn{
+  display:flex;align-items:center;gap:9px;
+  padding:9px 10px;border-radius:var(--r2);
+  cursor:pointer;color:var(--txt2);font-size:.82rem;font-weight:500;
+  transition:all .15s;border:1px solid transparent;background:none;width:100%;text-align:left;
+  text-decoration:none;
+}
+.nav-btn svg{width:16px;height:16px;flex-shrink:0}
+.nav-btn:hover{background:var(--gdim);color:var(--txt)}
+.nav-btn.active{background:var(--gdim2);color:var(--g);border-color:var(--border2)}
+.nav-badge{margin-left:auto;background:var(--red);color:#fff;font-size:.6rem;font-weight:700;padding:2px 6px;border-radius:99px;min-width:17px;text-align:center}
+.sb-footer{padding:14px 12px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:8px}
+.live-chip{display:flex;align-items:center;gap:7px;font-size:.72rem;color:var(--txt2)}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--g);flex-shrink:0;animation:livepulse 2.2s infinite}
+@keyframes livepulse{0%,100%{box-shadow:0 0 0 2px rgba(82,183,136,.25)}50%{box-shadow:0 0 0 5px rgba(82,183,136,.06)}}
+.sb-clock{font-family:'DM Mono',monospace;font-size:.72rem;color:var(--txt3)}
+
+/* ── MAIN ── */
+.main{margin-left:var(--sw);flex:1;display:flex;flex-direction:column;height:100vh;overflow:hidden}
+.topbar{
+  height:var(--hh);background:var(--panel);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 22px;gap:12px;flex-shrink:0;
+}
+.topbar-title{font-family:'Syne',sans-serif;font-size:.92rem;font-weight:700;color:var(--txt);flex:1}
+.topbar-meta{font-size:.72rem;color:var(--txt2)}
+.topbar-pill{
+  font-family:'DM Mono',monospace;font-size:.76rem;color:var(--g);
+  background:var(--gdim);border:1px solid var(--border2);
+  padding:4px 11px;border-radius:99px;
+}
+.tb-btn{
+  width:32px;height:32px;background:var(--panel2);border:1px solid var(--border);
+  border-radius:var(--r2);cursor:pointer;display:flex;align-items:center;justify-content:center;
+  color:var(--txt2);transition:all .15s;position:relative;
+}
+.tb-btn:hover{border-color:var(--border2);color:var(--txt)}
+.tb-btn svg{width:14px;height:14px}
+.alert-pip{position:absolute;top:5px;right:5px;width:6px;height:6px;background:var(--red);border-radius:50%;border:1.5px solid var(--panel)}
+.content{flex:1;overflow-y:auto;padding:22px}
+.section{display:none}.section.active{display:block}
+
+/* ── LAYOUT ── */
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px}
+.g2{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:18px}
+.g3-1{display:grid;grid-template-columns:3fr 1fr;gap:14px;margin-bottom:18px}
+.g2-1{display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-bottom:18px}
+.g1-1{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}
+.mb0{margin-bottom:0!important}
+.span2{grid-column:span 2}
+
+/* ── CARD ── */
+.card{background:var(--panel);border:1px solid var(--border);border-radius:var(--r);padding:16px}
+.card-h{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.9px;color:var(--txt3);margin-bottom:12px;display:flex;align-items:center;gap:7px}
+.card-h svg{width:13px;height:13px;color:var(--g)}
+.card-h-right{margin-left:auto;display:flex;align-items:center;gap:6px}
+
+/* ── KPI ── */
+.kpi{background:var(--panel);border:1px solid var(--border);border-radius:var(--r);padding:15px 16px;display:flex;flex-direction:column;gap:6px}
+.kpi-top{display:flex;justify-content:space-between;align-items:flex-start}
+.kpi-lbl{font-size:.63rem;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--txt3)}
+.kpi-ico{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center}
+.kpi-ico svg{width:14px;height:14px}
+.kpi-ico.g{background:var(--gdim);color:var(--g)}
+.kpi-ico.gold{background:var(--golddim);color:var(--gold)}
+.kpi-ico.red{background:var(--reddim);color:var(--red)}
+.kpi-ico.blue{background:var(--bluedim);color:var(--blue)}
+.kpi-val{font-family:'DM Mono',monospace;font-size:1.8rem;font-weight:500;line-height:1;color:var(--txt)}
+.kpi-val.g{color:var(--g)}.kpi-val.gold{color:var(--gold)}.kpi-val.red{color:var(--red)}
+.kpi-sub{font-size:.68rem;color:var(--txt2);display:flex;align-items:center;gap:5px}
+.up{color:var(--g)}.dn{color:var(--red)}
+
+/* ── GAUGE ── */
+.gauge-wrap{display:flex;flex-direction:column;align-items:center;gap:4px}
+.gauge-lbl{font-size:.63rem;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--txt3)}
+.gauge-rng{font-size:.58rem;color:var(--txt3)}
+.gauge-svg .g-track{fill:none;stroke:rgba(82,183,136,.1);stroke-linecap:round}
+.gauge-svg .g-fill{fill:none;stroke-linecap:round;transition:stroke-dashoffset .8s cubic-bezier(.4,0,.2,1),stroke .4s}
+.gauge-val-txt{font-family:'DM Mono',monospace;font-size:13px;dominant-baseline:middle;text-anchor:middle;fill:var(--txt)}
+.gauge-unit-txt{font-size:7px;dominant-baseline:middle;text-anchor:middle;fill:var(--txt2)}
+
+/* ── ROOM CARD ── */
+.room-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--r);padding:14px;cursor:pointer;transition:border-color .2s}
+.room-card:hover,.room-card.sel{border-color:var(--border2)}
+.room-card.sel{background:var(--gdim)}
+.room-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+.room-name{font-family:'Syne',sans-serif;font-size:.88rem;font-weight:700;color:var(--txt)}
+.room-species{font-size:.65rem;color:var(--txt3);margin-top:1px}
+.room-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+.rm-val{font-family:'DM Mono',monospace;font-size:.85rem;font-weight:500;color:var(--txt);display:block;text-align:center}
+.rm-lbl{font-size:.58rem;color:var(--txt3);text-transform:uppercase;text-align:center;display:block;margin-top:1px}
+
+/* ── BADGE ── */
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:.62rem;font-weight:700;padding:3px 8px;border-radius:99px;text-transform:uppercase;letter-spacing:.2px}
+.badge::before{content:'';width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.b-ok{background:rgba(64,145,108,.2);color:#52b788}.b-ok::before{background:#52b788}
+.b-warn{background:var(--golddim);color:var(--gold)}.b-warn::before{background:var(--gold)}
+.b-crit{background:var(--reddim);color:var(--red)}.b-crit::before{background:var(--red)}
+.b-idle{background:rgba(204,232,216,.07);color:var(--txt2)}.b-idle::before{background:var(--txt3)}
+
+/* ── TABLE ── */
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--txt3);padding:7px 12px;text-align:left;border-bottom:1px solid var(--border)}
+.tbl td{padding:10px 12px;font-size:.8rem;color:var(--txt);border-bottom:1px solid rgba(82,183,136,.05)}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:var(--gdim)}
+.tbl .mono{font-family:'DM Mono',monospace;font-size:.75rem}
+
+/* ── PROGRESS ── */
+.prog-bg{height:4px;background:rgba(82,183,136,.1);border-radius:99px;overflow:hidden;width:72px}
+.prog-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--g2),var(--g));transition:width .6s}
+
+/* ── PILL TABS ── */
+.pill-tabs{display:flex;gap:3px;background:var(--panel2);padding:3px;border-radius:var(--r2);border:1px solid var(--border)}
+.ptab{padding:5px 12px;border-radius:6px;border:1px solid transparent;background:none;font-family:'DM Sans',sans-serif;font-size:.75rem;font-weight:600;color:var(--txt2);cursor:pointer;transition:all .15s}
+.ptab.active{background:var(--gdim2);color:var(--g);border-color:var(--border2)}
+.ptab:hover:not(.active){color:var(--txt)}
+
+/* ── ALERT ITEM ── */
+.al-item{display:flex;gap:9px;padding:9px 0;border-bottom:1px solid rgba(82,183,136,.07)}
+.al-item:last-child{border-bottom:none}
+.al-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.al-dot.warn{background:var(--gold)}.al-dot.crit{background:var(--red)}.al-dot.ok{background:var(--g)}
+.al-msg{font-size:.78rem;color:var(--txt);line-height:1.4}
+.al-meta{font-size:.65rem;color:var(--txt3);font-family:'DM Mono',monospace;margin-top:2px}
+
+/* ── EQUIPMENT ── */
+.equip-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;display:flex;align-items:center;gap:12px}
+.equip-ico{width:34px;height:34px;border-radius:var(--r2);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.equip-ico svg{width:16px;height:16px}
+.equip-ico.g{background:var(--gdim);color:var(--g)}.equip-ico.gold{background:var(--golddim);color:var(--gold)}.equip-ico.blue{background:var(--bluedim);color:var(--blue)}.equip-ico.red{background:var(--reddim);color:var(--red)}
+.equip-name{font-size:.8rem;font-weight:600;color:var(--txt)}
+.equip-detail{font-size:.67rem;color:var(--txt2);margin-top:2px}
+.equip-right{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.toggle{width:36px;height:19px;border-radius:99px;border:none;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0}
+.toggle::after{content:'';position:absolute;width:13px;height:13px;border-radius:50%;background:#fff;top:3px;transition:left .2s}
+.toggle.on{background:var(--g)}.toggle.on::after{left:20px}
+.toggle.off{background:rgba(204,232,216,.15)}.toggle.off::after{left:3px}
+.equip-w{font-family:'DM Mono',monospace;font-size:.65rem;color:var(--txt3)}
+
+/* ── SECTION HEADER ── */
+.sh{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px;gap:12px}
+.sh-title{font-family:'Syne',sans-serif;font-size:1.05rem;font-weight:700;color:var(--txt)}
+.sh-sub{font-size:.72rem;color:var(--txt2);margin-top:2px}
+.sh-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+
+/* ── METRIC BOX ── */
+.mbox{background:var(--panel2);border:1px solid var(--border);border-radius:var(--r2);padding:10px 12px}
+.mbox-val{font-family:'DM Mono',monospace;font-size:1.05rem;font-weight:500;color:var(--txt)}
+.mbox-lbl{font-size:.6rem;text-transform:uppercase;letter-spacing:.5px;color:var(--txt3);margin-top:2px}
+.mbox-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+
+/* ── HEATMAP ── */
+.heatmap{display:grid;grid-template-columns:repeat(30,1fr);gap:3px}
+.hm-cell{aspect-ratio:1;border-radius:2px;cursor:pointer;transition:transform .1s;position:relative}
+.hm-cell:hover{transform:scale(1.3);z-index:10}
+.hm-legend{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:.65rem;color:var(--txt3)}
+.hm-grad{width:80px;height:6px;border-radius:3px;background:linear-gradient(90deg,rgba(82,183,136,.1),var(--g))}
+
+/* ── DIVIDER ── */
+.div{height:1px;background:var(--border);margin:14px 0}
+
+/* ── SPARKLINE ── */
+.spark-wrap{height:40px;position:relative}
+
+/* ── RESPONSIVE ── */
+@media(max-width:1280px){.g4{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:900px){.sidebar{transform:translateX(-220px)}.main{margin-left:0}.g4,.g3,.g2,.g3-1,.g2-1,.g1-1{grid-template-columns:1fr}}
+@media(max-width:600px){.g4{grid-template-columns:1fr}}
+
+/* ── FADE ── */
+@keyframes fin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.fin{animation:fin .35s ease both}
+
+/* ── DATA POINTS SECTION ── */
+.mb18{margin-bottom:18px}
+.dp-freq{margin-left:auto;font-size:.62rem;font-weight:600}
+.dp-freq.g{color:var(--g)}.dp-freq.gold{color:var(--gold)}.dp-freq.blue{color:var(--blue)}
+.schema-pre{background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:16px;font-family:'DM Mono',monospace;font-size:.72rem;color:rgba(204,232,216,.75);overflow-x:auto;line-height:1.8;white-space:pre-wrap}
+.btn-copy-sql{font-size:.68rem;font-weight:700;padding:4px 10px;background:var(--gdim2);border:1px solid var(--border2);color:var(--g);border-radius:6px;cursor:pointer}
+.hw-box{background:var(--panel2);border:1px solid var(--border);border-radius:var(--r2);padding:14px}
+.hw-title{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px}
+.hw-title.g{color:var(--g)}.hw-title.gold{color:var(--gold)}.hw-title.blue{color:var(--blue)}
+.hw-list{display:flex;flex-direction:column;gap:7px;font-size:.78rem;color:var(--txt2)}
+.hw-list strong{color:var(--txt);font-weight:600}
+</style>
+</head>
+<body>
+
+<!-- ═══ SIDEBAR ═══ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sb-logo">
+    <div class="sb-logo-icon">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23-.693L5 14.5m14.8.8l1.402 1.402c1 1 .03 2.798-1.414 2.798H4.213c-1.444 0-2.414-1.798-1.414-2.798L4 15.697"/></svg>
+    </div>
+    <div>
+      <span class="sb-logo-main">SaFa Naturals</span>
+      <span class="sb-logo-sub">IoT Farm Control</span>
+    </div>
+  </div>
+
+  <nav class="sb-nav">
+    <div class="sb-lbl">Monitor</div>
+    <button class="nav-btn active" data-sec="overview" onclick="showSection('overview',this)">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Overview
+    </button>
+    <button class="nav-btn" data-sec="environment" onclick="showSection('environment',this)">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9 3v11a3 3 0 006 0V3M9 3h6M9 3H6m12 0h-3"/></svg>
+      Environment
+    </button>
+    <button class="nav-btn" data-sec="production" onclick="showSection('production',this)">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5"/></svg>
+      Production
+    </button>
+
+    <div class="sb-lbl">Analytics</div>
+    <button class="nav-btn" data-sec="analytics" onclick="showSection('analytics',this)">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941"/></svg>
+      Long-run Analytics
+    </button>
+    <button class="nav-btn" data-sec="energy" onclick="showSection('energy',this)">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg>
+      Energy &amp; Equipment
+    </button>
+
+    <button class="nav-btn" data-sec="datapoints" onclick="showSection('datapoints',this)">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 00-1.883 2.542l.857 6a2.25 2.25 0 002.227 1.932H19.05a2.25 2.25 0 002.227-1.932l.857-6a2.25 2.25 0 00-1.883-2.542m-16.5 0V6A2.25 2.25 0 016 3.75h3.879a1.5 1.5 0 011.06.44l2.122 2.12a1.5 1.5 0 001.06.44H18A2.25 2.25 0 0120.25 9v.776"/></svg>
+      Data Points Schema
+    </button>
+
+    <div class="sb-lbl">System</div>
+    <a href="admin.html" class="nav-btn">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349m-16.5 11.65V9.35m0 0a3.001 3.001 0 003.75-.615A2.993 2.993 0 009.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 002.25 1.016c.896 0 1.7-.393 2.25-1.016a3.001 3.001 0 003.75.614m-16.5 0a3.004 3.004 0 01-.621-4.72L4.318 3.44A1.5 1.5 0 015.378 3h13.243a1.5 1.5 0 011.06.44l1.19 1.189a3 3 0 01-.621 4.72m-13.5 8.65h3.75a.75.75 0 00.75-.75V13.5a.75.75 0 00-.75-.75H6.75a.75.75 0 00-.75.75v3.75c0 .415.336.75.75.75z"/></svg>
+      Shop Admin
+    </a>
+    <a href="index.html" class="nav-btn">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"/></svg>
+      Back to Website
+    </a>
+  </nav>
+
+  <div class="sb-footer">
+    <div class="live-chip">
+      <div class="live-dot"></div>
+      <span>Live · Updates every 5s</span>
+    </div>
+    <div class="sb-clock" id="sb-clock">--:--:--</div>
+  </div>
+</aside>
+
+<!-- ═══ MAIN ═══ -->
+<div class="main">
+  <header class="topbar">
+    <div class="topbar-title" id="topbar-title">Farm Overview</div>
+    <div class="topbar-meta" id="topbar-meta">SaFa Naturals IoT Farm · Sirajganj</div>
+    <div class="topbar-pill" id="topbar-clock">--:--</div>
+    <button class="tb-btn" title="Alerts" onclick="showSection('overview',document.querySelector('[data-sec=overview]'))">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"/></svg>
+      <div class="alert-pip" id="alert-pip"></div>
+    </button>
+    <button class="tb-btn" title="Export CSV" onclick="exportCSV()">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
+    </button>
+  </header>
+
+  <div class="content">
+
+    <!-- ══════════════════════════════════
+         SECTION: OVERVIEW
+    ══════════════════════════════════ -->
+    <div class="section active fin" id="section-overview">
+      <div class="sh">
+        <div><div class="sh-title">Farm Overview</div><div class="sh-sub">Real-time status across all grow rooms</div></div>
+        <div class="sh-right"><span id="ov-date" style="font-size:.72rem;color:var(--txt2)"></span></div>
+      </div>
+
+      <!-- KPIs -->
+      <div class="g4">
+        <div class="kpi">
+          <div class="kpi-top"><span class="kpi-lbl">Active Rooms</span><div class="kpi-ico g"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21"/></svg></div></div>
+          <div class="kpi-val g" id="kpi-rooms">3</div>
+          <div class="kpi-sub"><span class="up">↑ 1</span> from last week</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-top"><span class="kpi-lbl">Live Batches</span><div class="kpi-ico g"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z"/></svg></div></div>
+          <div class="kpi-val" id="kpi-batches">4</div>
+          <div class="kpi-sub">2 near harvest</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-top"><span class="kpi-lbl">Today's Yield</span><div class="kpi-ico gold"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z"/></svg></div></div>
+          <div class="kpi-val gold" id="kpi-yield">2.3 kg</div>
+          <div class="kpi-sub"><span class="up">↑ 8%</span> vs yesterday</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-top"><span class="kpi-lbl">Active Alerts</span><div class="kpi-ico red" id="kpi-alert-ico"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/></svg></div></div>
+          <div class="kpi-val red" id="kpi-alerts">2</div>
+          <div class="kpi-sub">1 critical, 1 warning</div>
+        </div>
+      </div>
+
+      <!-- Room cards -->
+      <div class="g3" id="room-cards"></div>
+
+      <!-- Alerts + trend -->
+      <div class="g2-1">
+        <div class="card">
+          <div class="card-h">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/></svg>
+            7-Day Yield (kg)
+          </div>
+          <div style="height:160px"><canvas id="chart-yield-sparkline"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-h">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"/></svg>
+            Active Alerts
+          </div>
+          <div id="alerts-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════
+         SECTION: ENVIRONMENT
+    ══════════════════════════════════ -->
+    <div class="section fin" id="section-environment">
+      <div class="sh">
+        <div><div class="sh-title">Environment Monitor</div><div class="sh-sub">Live sensor readings · auto-refresh every 5s</div></div>
+        <div class="sh-right">
+          <div class="pill-tabs" id="room-tabs">
+            <button class="ptab active" data-room="A" onclick="selectRoom('A',this)">Room A</button>
+            <button class="ptab" data-room="B" onclick="selectRoom('B',this)">Room B</button>
+            <button class="ptab" data-room="C" onclick="selectRoom('C',this)">Room C</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Big gauges -->
+      <div class="g4" id="gauge-row"></div>
+
+      <!-- Current metrics summary -->
+      <div class="card" style="margin-bottom:18px">
+        <div class="card-h">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25A2.25 2.25 0 0113.5 8.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z"/></svg>
+          Current Readings <span id="env-room-label" style="color:var(--g);margin-left:4px">· Room A</span>
+          <div class="card-h-right"><span class="badge b-ok" id="env-status-badge">All OK</span></div>
+        </div>
+        <div class="mbox-grid" id="metric-boxes"></div>
+      </div>
+
+      <!-- Trend charts -->
+      <div class="g1-1">
+        <div class="card">
+          <div class="card-h">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941"/></svg>
+            Temperature &amp; Humidity · 24h
+          </div>
+          <div style="height:180px"><canvas id="chart-th"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-h">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z"/></svg>
+            CO₂ &amp; O₂ Levels · 24h
+          </div>
+          <div style="height:180px"><canvas id="chart-co2"></canvas></div>
+        </div>
+      </div>
+
+      <!-- VPD + Airflow -->
+      <div class="g1-1">
+        <div class="card">
+          <div class="card-h">VPD &amp; Dew Point Trend · 24h</div>
+          <div style="height:160px"><canvas id="chart-vpd"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-h">Optimal Range Reference</div>
+          <div id="optimal-table" style="font-size:.78rem"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════
+         SECTION: PRODUCTION
+    ══════════════════════════════════ -->
+    <div class="section fin" id="section-production">
+      <div class="sh">
+        <div><div class="sh-title">Production Tracker</div><div class="sh-sub">Batch lifecycle · harvest logs · biological efficiency</div></div>
+      </div>
+
+      <!-- Batch table -->
+      <div class="card" style="margin-bottom:18px">
+        <div class="card-h">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/></svg>
+          Active Batches
+        </div>
+        <div style="overflow-x:auto">
+          <table class="tbl" id="batch-table">
+            <thead><tr>
+              <th>Batch ID</th><th>Species</th><th>Room</th><th>Stage</th>
+              <th>Colonisation</th><th>Days In</th><th>Est. Harvest</th><th>Status</th>
+            </tr></thead>
+            <tbody id="batch-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="g1-1">
+        <div class="card">
+          <div class="card-h">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5"/></svg>
+            Yield Per Batch (kg)
+          </div>
+          <div style="height:200px"><canvas id="chart-yield-batch"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-h">Biological Efficiency (%)</div>
+          <div style="height:200px"><canvas id="chart-be"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Harvest log -->
+      <div class="card">
+        <div class="card-h">Recent Harvest Log</div>
+        <div style="overflow-x:auto">
+          <table class="tbl">
+            <thead><tr><th>Batch</th><th>Flush</th><th>Date</th><th>Weight (kg)</th><th>BE%</th><th>Room</th><th>Notes</th></tr></thead>
+            <tbody id="harvest-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════
+         SECTION: ANALYTICS
+    ══════════════════════════════════ -->
+    <div class="section fin" id="section-analytics">
+      <div class="sh">
+        <div><div class="sh-title">Long-run Analytics</div><div class="sh-sub">Historical trends · correlations · performance benchmarks</div></div>
+        <div class="sh-right">
+          <div class="pill-tabs">
+            <button class="ptab active" onclick="setPeriod(30,this)">30d</button>
+            <button class="ptab" onclick="setPeriod(60,this)">60d</button>
+            <button class="ptab" onclick="setPeriod(90,this)">90d</button>
+            <button class="ptab" onclick="setPeriod(180,this)">6m</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Summary KPIs -->
+      <div class="g4" id="analytics-kpis"></div>
+
+      <div class="g1-1">
+        <div class="card">
+          <div class="card-h">Monthly Yield (kg)</div>
+          <div style="height:180px"><canvas id="chart-monthly"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-h">BE% Trend Per Batch</div>
+          <div style="height:180px"><canvas id="chart-be-trend"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Heatmap -->
+      <div class="card" style="margin-bottom:18px">
+        <div class="card-h">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/></svg>
+          30-Day Harvest Heatmap
+        </div>
+        <div class="heatmap" id="heatmap"></div>
+        <div class="hm-legend">
+          <span>Low yield</span>
+          <div class="hm-grad"></div>
+          <span>High yield</span>
+        </div>
+      </div>
+
+      <div class="g2-1">
+        <div class="card">
+          <div class="card-h">Temp vs Yield Correlation</div>
+          <div style="height:200px"><canvas id="chart-scatter"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-h">Contamination Breakdown</div>
+          <div style="height:160px;display:flex;align-items:center;justify-content:center"><canvas id="chart-contam" style="max-width:160px;max-height:160px"></canvas></div>
+          <div id="contam-legend" style="margin-top:10px;font-size:.72rem;display:flex;flex-direction:column;gap:5px"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════
+         SECTION: ENERGY
+    ══════════════════════════════════ -->
+    <div class="section fin" id="section-energy">
+      <div class="sh">
+        <div><div class="sh-title">Energy &amp; Equipment</div><div class="sh-sub">Power monitoring · equipment control · efficiency</div></div>
+      </div>
+
+      <div class="g4">
+        <div class="kpi">
+          <div class="kpi-top"><span class="kpi-lbl">Today (kWh)</span><div class="kpi-ico blue"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg></div></div>
+          <div class="kpi-val" id="kwh-today">18.4</div>
+          <div class="kpi-sub">Projected: <span style="color:var(--txt)">24.2 kWh</span></div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-top"><span class="kpi-lbl">This Month</span><div class="kpi-ico blue"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/></svg></div></div>
+          <div class="kpi-val" id="kwh-month">412</div>
+          <div class="kpi-sub">kWh · <span style="color:var(--txt)">৳ 3,296</span></div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-top"><span class="kpi-lbl">Active Load</span><div class="kpi-ico g"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg></div></div>
+          <div class="kpi-val g" id="active-load">2,037 W</div>
+          <div class="kpi-sub">7 devices active</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-top"><span class="kpi-lbl">Cost / kg</span><div class="kpi-ico gold"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div></div>
+          <div class="kpi-val gold">৳ 18.4</div>
+          <div class="kpi-sub"><span class="up">↓ 6%</span> vs last month</div>
+        </div>
+      </div>
+
+      <!-- Hourly chart -->
+      <div class="card" style="margin-bottom:18px">
+        <div class="card-h">Hourly Power Consumption (W)</div>
+        <div style="height:180px"><canvas id="chart-energy"></canvas></div>
+      </div>
+
+      <!-- Equipment grid -->
+      <div class="card-h" style="margin-bottom:10px">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" style="width:13px;height:13px;color:var(--g)"><path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 004.486-6.336l-3.276 3.277a3.004 3.004 0 01-2.25-2.25l3.276-3.276a4.5 4.5 0 00-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437l1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008z"/></svg>
+        Equipment Status &amp; Control
+      </div>
+      <div class="g3" id="equip-grid"></div>
+    </div>
+
+    <!-- ══════════════════════════════════
+         SECTION: DATA POINTS SCHEMA
+    ══════════════════════════════════ -->
+    <div class="section fin" id="section-datapoints">
+      <div class="sh">
+        <div><div class="sh-title">Data Points &amp; Schema Reference</div><div class="sh-sub">Complete sensor taxonomy · Supabase table schemas · collection frequency</div></div>
+      </div>
+
+      <!-- Category grid -->
+      <div class="g2 mb18">
+
+        <!-- Environmental -->
+        <div class="card">
+          <div class="card-h">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9 3v11a3 3 0 006 0V3"/></svg>
+            Environmental Sensors <span class="dp-freq g">Every 60s</span>
+          </div>
+          <table class="tbl">
+            <thead><tr><th>Parameter</th><th>Unit</th><th>Sensor</th><th>Optimal Range</th><th>Alert Threshold</th></tr></thead>
+            <tbody>
+              <tr><td>Temperature</td><td class="mono">°C</td><td>DHT22 / SHT31</td><td>23 – 27 °C</td><td>&lt;20 or &gt;30</td></tr>
+              <tr><td>Relative Humidity</td><td class="mono">%RH</td><td>DHT22 / SHT31</td><td>85 – 92 %</td><td>&lt;75 or &gt;97</td></tr>
+              <tr><td>CO₂ Concentration</td><td class="mono">ppm</td><td>MH-Z19B / SCD40</td><td>600 – 1,000</td><td>&gt;1,500</td></tr>
+              <tr><td>O₂ Level</td><td class="mono">%</td><td>ME2-O2 / KE-25</td><td>19.8 – 21</td><td>&lt;19.0</td></tr>
+              <tr><td>Airflow / FAE Rate</td><td class="mono">m/s</td><td>SFM3000 / Hot-wire</td><td>0.3 – 0.7</td><td>&lt;0.2</td></tr>
+              <tr><td>VPD (calculated)</td><td class="mono">kPa</td><td>Derived: T + RH</td><td>0.3 – 0.7</td><td>&gt;0.9</td></tr>
+              <tr><td>Light Intensity</td><td class="mono">lux</td><td>BH1750 / TSL2591</td><td>100 – 500</td><td>&gt;1,000</td></tr>
+              <tr><td>Dew Point</td><td class="mono">°C</td><td>Derived: T + RH</td><td>16 – 20</td><td>—</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Substrate & Water -->
+        <div class="card">
+          <div class="card-h">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m0 0C8.689 5.25 6 7.94 6 11.25c0 3.31 2.689 6 6 6s6-2.69 6-6c0-3.31-2.689-6-6-6z"/></svg>
+            Substrate &amp; Water Quality <span class="dp-freq g">Every 5 min</span>
+          </div>
+          <table class="tbl">
+            <thead><tr><th>Parameter</th><th>Unit</th><th>Sensor</th><th>Optimal Range</th><th>Alert Threshold</th></tr></thead>
+            <tbody>
+              <tr><td>Substrate Moisture</td><td class="mono">%</td><td>Capacitive soil probe</td><td>60 – 75 %</td><td>&lt;55 or &gt;85</td></tr>
+              <tr><td>Substrate Temp</td><td class="mono">°C</td><td>DS18B20 probe</td><td>22 – 26 °C</td><td>&gt;28</td></tr>
+              <tr><td>Substrate pH</td><td class="mono">pH</td><td>Atlas EZO-pH</td><td>6.0 – 7.0</td><td>&lt;5.5 or &gt;7.5</td></tr>
+              <tr><td>Water pH (irrigation)</td><td class="mono">pH</td><td>Atlas EZO-pH</td><td>6.0 – 7.0</td><td>&lt;5.8 or &gt;7.5</td></tr>
+              <tr><td>Water EC</td><td class="mono">mS/cm</td><td>Atlas EZO-EC</td><td>0.8 – 2.5</td><td>&gt;3.5</td></tr>
+              <tr><td>Water Temp</td><td class="mono">°C</td><td>DS18B20</td><td>18 – 24 °C</td><td>&gt;28</td></tr>
+              <tr><td>Daily Water Usage</td><td class="mono">L/day</td><td>YF-S201 flow meter</td><td>Target depends on room</td><td>—</td></tr>
+              <tr><td>Dissolved O₂ (water)</td><td class="mono">mg/L</td><td>Atlas EZO-DO</td><td>6 – 9</td><td>&lt;4</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Production KPIs -->
+        <div class="card">
+          <div class="card-h">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3"/></svg>
+            Production &amp; Batch KPIs <span class="dp-freq gold">Per event</span>
+          </div>
+          <table class="tbl">
+            <thead><tr><th>Metric</th><th>Unit</th><th>Collected At</th><th>Notes</th></tr></thead>
+            <tbody>
+              <tr><td>Spawn Run Duration</td><td class="mono">days</td><td>Inoculation → 100% colonisation</td><td>Benchmark: 14–21 days</td></tr>
+              <tr><td>Pin Initiation Date</td><td class="mono">date</td><td>First visible pins</td><td>Days after spawn: 18–25</td></tr>
+              <tr><td>Flush Harvest Weight</td><td class="mono">kg</td><td>Each harvest event</td><td>Track F1, F2, F3 separately</td></tr>
+              <tr><td>Biological Efficiency</td><td class="mono">%</td><td>Post-harvest (each flush)</td><td>BE% = (yield/dry substrate)×100</td></tr>
+              <tr><td>Days to First Harvest</td><td class="mono">days</td><td>Inoculation → F1</td><td>Benchmark: 22–28 days</td></tr>
+              <tr><td>Total Yield / Batch</td><td class="mono">kg</td><td>All flushes summed</td><td>3–4 flushes typical</td></tr>
+              <tr><td>Substrate Dry Weight</td><td class="mono">kg</td><td>Pre-inoculation</td><td>Used to calculate BE%</td></tr>
+              <tr><td>Contamination Rate</td><td class="mono">%</td><td>Per batch inspection</td><td>Target &lt;5% of bags</td></tr>
+              <tr><td>Contamination Type</td><td class="mono">enum</td><td>Visual inspection</td><td>Bacterial / Trichoderma / Mould</td></tr>
+              <tr><td>Spawn Rate Used</td><td class="mono">%</td><td>Inoculation</td><td>Typically 10–20% w/w</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Energy & Equipment -->
+        <div class="card">
+          <div class="card-h">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg>
+            Energy &amp; Equipment <span class="dp-freq blue">Every 15 min</span>
+          </div>
+          <table class="tbl">
+            <thead><tr><th>Parameter</th><th>Unit</th><th>Device</th><th>Notes</th></tr></thead>
+            <tbody>
+              <tr><td>Power Consumption (total)</td><td class="mono">kWh</td><td>Smart energy meter</td><td>Daily + monthly rollup</td></tr>
+              <tr><td>Per-device Power</td><td class="mono">W</td><td>Smart plug / CT clamp</td><td>HVAC, humidifier, fans, UV, sensors</td></tr>
+              <tr><td>Equipment Uptime</td><td class="mono">hrs</td><td>Relay state log</td><td>On/off log per device</td></tr>
+              <tr><td>HVAC Duty Cycle</td><td class="mono">%</td><td>Derived from on/off log</td><td>Target 40–70%</td></tr>
+              <tr><td>Humidifier Cycles/hr</td><td class="mono">count</td><td>Relay log</td><td>Indicates humidity stability</td></tr>
+              <tr><td>Fan Speed</td><td class="mono">RPM</td><td>PWM feedback / tachometer</td><td>Correlates to CO₂ clearance</td></tr>
+              <tr><td>UV Hours</td><td class="mono">hrs</td><td>Run-time counter</td><td>Replace bulb at 8,000 hrs</td></tr>
+              <tr><td>Energy Cost / kg</td><td class="mono">৳/kg</td><td>Calculated</td><td>Total kWh × ৳8 / yield</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Supabase SQL Schema -->
+      <div class="card mb18">
+        <div class="card-h">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 2.625c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125"/></svg>
+          Supabase SQL — Paste this into your Supabase SQL Editor to create all sensor tables
+          <div class="card-h-right">
+            <button type="button" class="btn-copy-sql" onclick="copySchema()">Copy SQL</button>
+          </div>
+        </div>
+        <pre id="schema-sql" class="schema-pre">-- ══════════════════════════════════════════════════════
+-- SaFa Naturals IoT Farm · Supabase Schema
+-- Run in: Supabase Dashboard → SQL Editor → New Query
+-- ══════════════════════════════════════════════════════
+
+-- 1. SENSOR READINGS (60-second interval, per room)
+CREATE TABLE sensor_readings (
+  id           BIGSERIAL PRIMARY KEY,
+  created_at   TIMESTAMPTZ DEFAULT NOW(),
+  room_id      TEXT NOT NULL,           -- 'A', 'B', 'C'
+  temperature  NUMERIC(5,2),            -- °C
+  humidity     NUMERIC(5,2),            -- %RH
+  co2_ppm      INTEGER,                 -- ppm
+  o2_pct       NUMERIC(4,2),            -- %
+  airflow_ms   NUMERIC(4,2),            -- m/s
+  vpd_kpa      NUMERIC(4,3),            -- kPa (calculated)
+  light_lux    INTEGER,                 -- lux
+  dew_point    NUMERIC(5,2)             -- °C (calculated)
+);
+
+-- 2. SUBSTRATE READINGS (5-minute interval, per room)
+CREATE TABLE substrate_readings (
+  id            BIGSERIAL PRIMARY KEY,
+  created_at    TIMESTAMPTZ DEFAULT NOW(),
+  room_id       TEXT NOT NULL,
+  moisture_pct  NUMERIC(5,2),
+  substrate_temp NUMERIC(5,2),
+  substrate_ph  NUMERIC(4,2),
+  water_ph      NUMERIC(4,2),
+  water_ec_ms   NUMERIC(5,3),           -- mS/cm
+  water_temp    NUMERIC(5,2),
+  water_used_l  NUMERIC(7,3)
+);
+
+-- 3. PRODUCTION BATCHES
+CREATE TABLE farm_batches (
+  id              TEXT PRIMARY KEY,      -- e.g. 'BAT-2025-041'
+  created_at      TIMESTAMPTZ DEFAULT NOW(),
+  species         TEXT NOT NULL,
+  room_id         TEXT NOT NULL,
+  inoculation_date DATE NOT NULL,
+  substrate_kg    NUMERIC(6,3),          -- dry weight
+  spawn_pct       NUMERIC(4,1),
+  stage           TEXT DEFAULT 'Inoculated',
+  colonisation_pct INTEGER DEFAULT 0,
+  pin_date        DATE,
+  expected_harvest DATE,
+  status          TEXT DEFAULT 'active', -- active | completed | contaminated
+  notes           TEXT
+);
+
+-- 4. HARVEST EVENTS
+CREATE TABLE harvest_events (
+  id          BIGSERIAL PRIMARY KEY,
+  created_at  TIMESTAMPTZ DEFAULT NOW(),
+  batch_id    TEXT REFERENCES farm_batches(id),
+  flush_num   SMALLINT NOT NULL,
+  harvest_date DATE NOT NULL,
+  yield_kg    NUMERIC(7,3),
+  be_pct      NUMERIC(5,2),             -- biological efficiency
+  room_id     TEXT,
+  notes       TEXT
+);
+
+-- 5. CONTAMINATION LOG
+CREATE TABLE contamination_log (
+  id            BIGSERIAL PRIMARY KEY,
+  created_at    TIMESTAMPTZ DEFAULT NOW(),
+  batch_id      TEXT REFERENCES farm_batches(id),
+  room_id       TEXT,
+  type          TEXT,                    -- Bacterial | Mould | Trichoderma
+  bags_affected INTEGER,
+  total_bags    INTEGER,
+  action_taken  TEXT,
+  resolved      BOOLEAN DEFAULT FALSE
+);
+
+-- 6. ENERGY LOG (15-minute interval)
+CREATE TABLE energy_log (
+  id          BIGSERIAL PRIMARY KEY,
+  created_at  TIMESTAMPTZ DEFAULT NOW(),
+  device_id   TEXT NOT NULL,            -- 'hvac-a', 'humidifier-b', etc.
+  room_id     TEXT,
+  watts       NUMERIC(8,2),
+  is_on       BOOLEAN DEFAULT TRUE,
+  kwh_total   NUMERIC(10,4)
+);
+
+-- 7. ALERT LOG
+CREATE TABLE alert_log (
+  id          BIGSERIAL PRIMARY KEY,
+  created_at  TIMESTAMPTZ DEFAULT NOW(),
+  room_id     TEXT,
+  severity    TEXT NOT NULL,            -- 'ok' | 'warn' | 'crit'
+  parameter   TEXT,
+  value       NUMERIC,
+  threshold   NUMERIC,
+  message     TEXT,
+  resolved_at TIMESTAMPTZ
+);
+
+-- ── INDEXES for time-series queries ──
+CREATE INDEX idx_sensor_room_time   ON sensor_readings (room_id, created_at DESC);
+CREATE INDEX idx_substrate_room     ON substrate_readings (room_id, created_at DESC);
+CREATE INDEX idx_harvest_batch      ON harvest_events (batch_id, flush_num);
+CREATE INDEX idx_energy_device_time ON energy_log (device_id, created_at DESC);
+CREATE INDEX idx_alerts_severity    ON alert_log (severity, created_at DESC);
+
+-- ── ROW LEVEL SECURITY ──
+ALTER TABLE sensor_readings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE farm_batches    ENABLE ROW LEVEL SECURITY;
+ALTER TABLE harvest_events  ENABLE ROW LEVEL SECURITY;
+ALTER TABLE energy_log      ENABLE ROW LEVEL SECURITY;
+ALTER TABLE alert_log       ENABLE ROW LEVEL SECURITY;
+
+-- Allow authenticated users (admin) full access
+CREATE POLICY "admin_all" ON sensor_readings   FOR ALL TO authenticated USING (true);
+CREATE POLICY "admin_all" ON farm_batches      FOR ALL TO authenticated USING (true);
+CREATE POLICY "admin_all" ON harvest_events    FOR ALL TO authenticated USING (true);
+CREATE POLICY "admin_all" ON energy_log        FOR ALL TO authenticated USING (true);
+CREATE POLICY "admin_all" ON alert_log         FOR ALL TO authenticated USING (true);</pre>
+      </div>
+
+      <!-- IoT Hardware Recommendations -->
+      <div class="card">
+        <div class="card-h">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M8.288 15.038a5.25 5.25 0 017.424 0M5.106 11.856c3.807-3.808 9.98-3.808 13.788 0M1.924 8.674c5.565-5.565 14.587-5.565 20.152 0M12.53 18.22l-.53.53-.53-.53a.75.75 0 011.06 0z"/></svg>
+          Recommended Hardware Stack
+        </div>
+        <div class="g3 mb0">
+          <div class="hw-box">
+            <div class="hw-title g">Controller Node</div>
+            <div class="hw-list">
+              <div><strong>ESP32</strong> — main MCU per room, Wi-Fi + BT</div>
+              <div><strong>Raspberry Pi 4</strong> — central gateway + local DB</div>
+              <div><strong>4G LTE dongle</strong> — backup internet for remote farm</div>
+              <div><strong>UPS module</strong> — 12V battery backup for ESP32</div>
+            </div>
+          </div>
+          <div class="hw-box">
+            <div class="hw-title gold">Sensor Modules</div>
+            <div class="hw-list">
+              <div><strong>SHT31</strong> — temperature + humidity (±0.3°C, ±2%)</div>
+              <div><strong>SCD40</strong> — CO₂ (NDIR, ±50ppm), includes T+H</div>
+              <div><strong>BH1750</strong> — light intensity</div>
+              <div><strong>Atlas EZO-pH</strong> — substrate &amp; water pH</div>
+              <div><strong>Atlas EZO-EC</strong> — electrical conductivity</div>
+            </div>
+          </div>
+          <div class="hw-box">
+            <div class="hw-title blue">Control &amp; Actuation</div>
+            <div class="hw-list">
+              <div><strong>4-channel relay</strong> — HVAC, humidifier, fans, UV</div>
+              <div><strong>PWM controller</strong> — variable fan speed</div>
+              <div><strong>PZEM-004T</strong> — AC power monitoring per circuit</div>
+              <div><strong>Supabase Realtime</strong> — push sensor data every 60s</div>
+              <div><strong>Threshold alerts</strong> — POST to Supabase alert_log</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<script>
+// ══════════════════════════════════════
+//  DATA & CONFIGURATION
+// ══════════════════════════════════════
+
+// To connect to real Supabase data, replace the DATA object below
+// with async calls to your Supabase tables:
+//   const { data } = await supabase.from('sensor_readings').select('*').order('created_at',{ascending:false}).limit(288)
+
+const ROOMS = {
+  A: { name:'Room A', species:'Fresh Oyster', temp:24.5, humidity:89, co2:850,  o2:20.2, airflow:0.42, vpd:0.38 },
+  B: { name:'Room B', species:'Dried Batch',  temp:26.1, humidity:92, co2:1150, o2:19.8, airflow:0.31, vpd:0.29 },
+  C: { name:'Room C', species:'Spawn Prep',   temp:23.8, humidity:87, co2:780,  o2:20.5, airflow:0.55, vpd:0.44 },
+}
+
+const OPTIMAL = {
+  temp:     { min:22, max:28, warn_lo:23, warn_hi:27, unit:'°C',  label:'Temperature' },
+  humidity: { min:80, max:95, warn_lo:82, warn_hi:93, unit:'%RH', label:'Humidity' },
+  co2:      { min:400, max:1500, warn_hi:1200, unit:'ppm', label:'CO₂' },
+  o2:       { min:19.5, max:21, warn_lo:19.8, unit:'%',   label:'O₂' },
+  airflow:  { min:0.2, max:1.0, warn_lo:0.25, unit:'m/s', label:'Airflow' },
+  vpd:      { min:0.2, max:0.8, warn_lo:0.25, warn_hi:0.7, unit:'kPa', label:'VPD' },
+}
+
+const ALERTS = [
+  { sev:'crit', room:'B', param:'CO₂',    msg:'CO₂ elevated: 1,150 ppm (threshold 1,000)', time:'14:32' },
+  { sev:'warn', room:'B', param:'Temp',   msg:'Temperature at upper bound: 26.1°C',         time:'14:15' },
+  { sev:'ok',   room:'A', param:'Harvest',msg:'BAT-041 pinning confirmed — Day 22',         time:'09:41' },
+  { sev:'ok',   room:'C', param:'Spawn',  msg:'BAT-043 spawn run complete (100%)',           time:'07:05' },
+]
+
+const BATCHES = [
+  { id:'BAT-2025-041', species:'Oyster (Fresh)', room:'A', stage:'Pinning',     col:100, days:22, est:5,  status:'ok' },
+  { id:'BAT-2025-042', species:'Oyster (Fresh)', room:'B', stage:'Colonising',  col:68,  days:11, est:18, status:'warn' },
+  { id:'BAT-2025-043', species:'Oyster (Dried)', room:'A', stage:'Fruiting',    col:100, days:28, est:2,  status:'ok' },
+  { id:'BAT-2025-044', species:'Spawn Prep',     room:'C', stage:'Inoculated',  col:23,  days:4,  est:32, status:'ok' },
+]
+
+const HARVEST_LOG = [
+  { batch:'BAT-2025-039', flush:2, date:'2025-05-01', kg:1.8, be:72, room:'A', notes:'Slight over-misting' },
+  { batch:'BAT-2025-039', flush:1, date:'2025-04-28', kg:2.3, be:92, room:'A', notes:'—' },
+  { batch:'BAT-2025-038', flush:3, date:'2025-04-22', kg:0.9, be:36, room:'B', notes:'3rd flush as expected' },
+  { batch:'BAT-2025-038', flush:2, date:'2025-04-17', kg:1.6, be:64, room:'B', notes:'—' },
+  { batch:'BAT-2025-038', flush:1, date:'2025-04-12', kg:2.1, be:84, room:'B', notes:'Excellent 1st flush' },
+  { batch:'BAT-2025-037', flush:2, date:'2025-04-05', kg:1.4, be:56, room:'C', notes:'—' },
+  { batch:'BAT-2025-037', flush:1, date:'2025-04-01', kg:2.4, be:96, room:'C', notes:'Best BE% this quarter' },
+]
+
+const EQUIPMENT = [
+  { id:'hvac-a',  name:'HVAC · Room A',      detail:'Cooling + ventilation', w:850, on:true,  ico:'g',    ico_svg:'<path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z"/>'},
+  { id:'hvac-b',  name:'HVAC · Room B',      detail:'Cooling + ventilation', w:850, on:true,  ico:'g',    ico_svg:'<path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z"/>'},
+  { id:'hvac-c',  name:'HVAC · Room C',      detail:'On standby',            w:850, on:false, ico:'g',    ico_svg:'<path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z"/>'},
+  { id:'hum-a',   name:'Humidifier · Room A', detail:'Target RH: 89%',       w:120, on:true,  ico:'blue', ico_svg:'<path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25M9.75 6.75A2.25 2.25 0 007.5 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m2.607 0A3 3 0 009 21a3 3 0 002.75-1.81m2.607-14.44A2.25 2.25 0 0016.5 6.75v.75"/>'},
+  { id:'hum-b',   name:'Humidifier · Room B', detail:'Target RH: 92%',       w:120, on:true,  ico:'blue', ico_svg:'<path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25M9.75 6.75A2.25 2.25 0 007.5 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m2.607 0A3 3 0 009 21a3 3 0 002.75-1.81m2.607-14.44A2.25 2.25 0 0016.5 6.75v.75"/>'},
+  { id:'fans',    name:'Circulation Fans',    detail:'All 6 units active',   w:240, on:true,  ico:'g',    ico_svg:'<path stroke-linecap="round" stroke-linejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75M10.5 21h3M12 15.75V12m0 0l-3-3m3 3l3-3"/>'},
+  { id:'uv',      name:'UV Steriliser',       detail:'Continuous sterilisation', w:45, on:true, ico:'gold', ico_svg:'<path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z"/>'},
+  { id:'sensors', name:'IoT Sensor Array',    detail:'12 nodes online',       w:12, on:true,  ico:'g',    ico_svg:'<path stroke-linecap="round" stroke-linejoin="round" d="M8.288 15.038a5.25 5.25 0 017.424 0M5.106 11.856c3.807-3.808 9.98-3.808 13.788 0M1.924 8.674c5.565-5.565 14.587-5.565 20.152 0M12.53 18.22l-.53.53-.53-.53a.75.75 0 011.06 0z"/>'},
+]
+
+// ── Helpers ──
+function rand(min, max) { return +(min + Math.random() * (max - min)).toFixed(2) }
+function genHistory(base, variance, n=24) {
+  return Array.from({length: n}, (_,i) =>
+    +(base + Math.sin(i*0.45)*variance*0.7 + (Math.random()-0.5)*variance*0.5).toFixed(2)
+  )
+}
+function getStatus(param, val) {
+  const o = OPTIMAL[param]; if (!o) return 'ok'
+  if (o.warn_hi && val > o.warn_hi) return val > o.max ? 'crit' : 'warn'
+  if (o.warn_lo && val < o.warn_lo) return val < o.min ? 'crit' : 'warn'
+  return 'ok'
+}
+function statusColor(s) { return s==='ok' ? 'var(--g)' : s==='warn' ? 'var(--gold)' : 'var(--red)' }
+function gaugeColor(s)  { return s==='ok' ? '#52b788' : s==='warn' ? '#c9a84c' : '#e05252' }
+
+// ══════════════════════════════════════
+//  NAVIGATION
+// ══════════════════════════════════════
+const SECTION_TITLES = {
+  overview:'Farm Overview', environment:'Environment Monitor',
+  production:'Production Tracker', analytics:'Long-run Analytics',
+  energy:'Energy & Equipment', datapoints:'Data Points & Schema'
+}
+
+function copySchema() {
+  const text = document.getElementById('schema-sql').textContent
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = event.target
+    const orig = btn.textContent
+    btn.textContent = 'Copied!'
+    setTimeout(() => btn.textContent = orig, 2000)
+  })
+}
+function showSection(id, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'))
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'))
+  document.getElementById('section-'+id).classList.add('active')
+  if(btn) btn.classList.add('active')
+  document.getElementById('topbar-title').textContent = SECTION_TITLES[id] || id
+}
+
+// ══════════════════════════════════════
+//  CLOCK
+// ══════════════════════════════════════
+function updateClock() {
+  const now = new Date()
+  const t = now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'})
+  const d = now.toLocaleDateString('en-GB',{weekday:'long',year:'numeric',month:'long',day:'numeric'})
+  document.getElementById('sb-clock').textContent = t
+  document.getElementById('topbar-clock').textContent = now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})
+  document.getElementById('ov-date').textContent = d
+}
+setInterval(updateClock, 1000); updateClock()
+
+// ══════════════════════════════════════
+//  SVG GAUGE
+// ══════════════════════════════════════
+const ARC = 2 * Math.PI * 45 * 0.75  // 212.06
+
+function makeGauge(id, label, val, min, max, unit, status) {
+  const pct = Math.max(0, Math.min(1, (val-min)/(max-min)))
+  const offset = ARC * (1-pct)
+  const color = gaugeColor(status)
+  return `
+  <div class="gauge-wrap">
+    <svg class="gauge-svg" width="110" height="110" viewBox="0 0 120 120">
+      <circle cx="60" cy="60" r="45" class="g-track" stroke-width="7"
+        stroke-dasharray="${ARC} 999" transform="rotate(135 60 60)"/>
+      <circle cx="60" cy="60" r="45" class="g-fill" stroke="${color}" stroke-width="7"
+        stroke-dasharray="${ARC} 999" stroke-dashoffset="${offset}"
+        transform="rotate(135 60 60)" id="${id}-arc"/>
+      <text x="60" y="57" class="gauge-val-txt" id="${id}-val">${val}</text>
+      <text x="60" y="70" class="gauge-unit-txt">${unit}</text>
+    </svg>
+    <div class="gauge-lbl">${label}</div>
+    <div class="gauge-rng">${min} – ${max} ${unit}</div>
+  </div>`
+}
+
+function updateGaugeEl(id, val, min, max, status) {
+  const pct = Math.max(0, Math.min(1, (val-min)/(max-min)))
+  const el = document.getElementById(id+'-arc')
+  const valEl = document.getElementById(id+'-val')
+  if (el) { el.style.strokeDashoffset = ARC*(1-pct); el.style.stroke = gaugeColor(status) }
+  if (valEl) valEl.textContent = val
+}
+
+// ══════════════════════════════════════
+//  ROOM OVERVIEW CARDS
+// ══════════════════════════════════════
+function renderRoomCards() {
+  const wrap = document.getElementById('room-cards')
+  wrap.innerHTML = Object.entries(ROOMS).map(([k, r]) => {
+    const ts = getStatus('temp',r.temp), hs = getStatus('humidity',r.humidity), cs = getStatus('co2',r.co2)
+    const overall = [ts,hs,cs].includes('crit') ? 'crit' : [ts,hs,cs].includes('warn') ? 'warn' : 'ok'
+    const badgeMap = {ok:'b-ok',warn:'b-warn',crit:'b-crit'}
+    const lblMap = {ok:'Optimal',warn:'Warning',crit:'Critical'}
+    return `<div class="room-card ${selectedRoom===k?'sel':''}" onclick="selectRoom('${k}',null)">
+      <div class="room-head">
+        <div><div class="room-name">${r.name}</div><div class="room-species">${r.species}</div></div>
+        <span class="badge ${badgeMap[overall]}">${lblMap[overall]}</span>
+      </div>
+      <div class="room-metrics">
+        <div class="room-metric">
+          <span class="rm-val" style="color:${statusColor(ts)}">${r.temp}°</span>
+          <span class="rm-lbl">Temp</span>
+        </div>
+        <div class="room-metric">
+          <span class="rm-val" style="color:${statusColor(hs)}">${r.humidity}%</span>
+          <span class="rm-lbl">Humid</span>
+        </div>
+        <div class="room-metric">
+          <span class="rm-val" style="color:${statusColor(cs)}">${r.co2}</span>
+          <span class="rm-lbl">CO₂ ppm</span>
+        </div>
+      </div>
+    </div>`
+  }).join('')
+}
+
+// ══════════════════════════════════════
+//  ALERTS
+// ══════════════════════════════════════
+function renderAlerts() {
+  const list = document.getElementById('alerts-list')
+  if (!list) return
+  list.innerHTML = ALERTS.map(a => `
+    <div class="al-item">
+      <div class="al-dot ${a.sev}"></div>
+      <div>
+        <div class="al-msg">${a.msg}</div>
+        <div class="al-meta">${a.room} · ${a.param} · ${a.time}</div>
+      </div>
+    </div>`).join('')
+}
+
+// ══════════════════════════════════════
+//  ENVIRONMENT SECTION
+// ══════════════════════════════════════
+let selectedRoom = 'A'
+
+function selectRoom(k, btn) {
+  selectedRoom = k
+  document.querySelectorAll('.ptab').forEach(b => b.classList.remove('active'))
+  if (btn) btn.classList.add('active')
+  else {
+    const t = document.querySelector(`[data-room="${k}"]`)
+    if(t) t.classList.add('active')
+  }
+  renderGauges()
+  renderMetricBoxes()
+  renderRoomCards()
+  updateEnvLabel()
+}
+
+function updateEnvLabel() {
+  const el = document.getElementById('env-room-label')
+  if(el) el.textContent = '· ' + ROOMS[selectedRoom].name
+}
+
+function renderGauges() {
+  const r = ROOMS[selectedRoom]
+  const gaugeData = [
+    { id:'g-temp', label:'Temperature', val:r.temp, min:18, max:35, unit:'°C', param:'temp' },
+    { id:'g-hum',  label:'Humidity',    val:r.humidity, min:60, max:100, unit:'%RH', param:'humidity' },
+    { id:'g-co2',  label:'CO₂',         val:r.co2, min:400, max:2000, unit:'ppm', param:'co2' },
+    { id:'g-o2',   label:'O₂',          val:r.o2, min:18, max:22, unit:'%', param:'o2' },
+  ]
+  const wrap = document.getElementById('gauge-row')
+  wrap.innerHTML = gaugeData.map(g => {
+    const s = getStatus(g.param, g.val)
+    return `<div class="card" style="display:flex;align-items:center;justify-content:center;padding:20px">
+      ${makeGauge(g.id, g.label, g.val, g.min, g.max, g.unit, s)}
+    </div>`
+  }).join('')
+}
+
+function renderMetricBoxes() {
+  const r = ROOMS[selectedRoom]
+  const metrics = [
+    { k:'temp',    val:r.temp,     unit:'°C',  lbl:'Temperature' },
+    { k:'humidity',val:r.humidity, unit:'%RH', lbl:'Humidity' },
+    { k:'co2',     val:r.co2,      unit:'ppm', lbl:'CO₂' },
+    { k:'o2',      val:r.o2,       unit:'%',   lbl:'O₂' },
+    { k:'airflow', val:r.airflow,  unit:'m/s', lbl:'Airflow' },
+    { k:'vpd',     val:r.vpd,      unit:'kPa', lbl:'VPD' },
+  ]
+  const wrap = document.getElementById('metric-boxes')
+  if (!wrap) return
+  wrap.innerHTML = metrics.map(m => {
+    const s = getStatus(m.k, m.val)
+    const opt = OPTIMAL[m.k]
+    const optRange = opt ? `${opt.min}–${opt.max} ${m.unit}` : '—'
+    return `<div class="mbox">
+      <div class="mbox-val" style="color:${statusColor(s)}">${m.val} <span style="font-size:.65rem;color:var(--txt3)">${m.unit}</span></div>
+      <div class="mbox-lbl">${m.lbl}</div>
+      <div style="font-size:.6rem;color:var(--txt3);margin-top:3px">Opt: ${optRange}</div>
+    </div>`
+  }).join('')
+  // Update status badge
+  const allStatus = metrics.map(m => getStatus(m.k, m.val))
+  const overall = allStatus.includes('crit') ? 'crit' : allStatus.includes('warn') ? 'warn' : 'ok'
+  const badge = document.getElementById('env-status-badge')
+  if (badge) {
+    badge.className = `badge ${overall==='ok'?'b-ok':overall==='warn'?'b-warn':'b-crit'}`
+    badge.textContent = overall==='ok' ? 'All Optimal' : overall==='warn' ? 'Warning' : 'Critical'
+  }
+}
+
+function renderOptimalTable() {
+  const wrap = document.getElementById('optimal-table')
+  if (!wrap) return
+  wrap.innerHTML = `<table class="tbl">
+    <thead><tr><th>Parameter</th><th>Optimal Range</th><th>Warning</th><th>Unit</th></tr></thead>
+    <tbody>
+      <tr><td>Temperature</td><td>23 – 27</td><td>&lt; 22 or &gt; 28</td><td>°C</td></tr>
+      <tr><td>Humidity</td><td>85 – 92</td><td>&lt; 80 or &gt; 95</td><td>%RH</td></tr>
+      <tr><td>CO₂</td><td>600 – 1,000</td><td>&gt; 1,200</td><td>ppm</td></tr>
+      <tr><td>O₂</td><td>19.8 – 21</td><td>&lt; 19.5</td><td>%</td></tr>
+      <tr><td>Airflow</td><td>0.3 – 0.7</td><td>&lt; 0.2</td><td>m/s</td></tr>
+      <tr><td>VPD</td><td>0.3 – 0.7</td><td>&gt; 0.8</td><td>kPa</td></tr>
+      <tr><td>Substrate pH</td><td>6.0 – 7.0</td><td>&lt; 5.5 or &gt; 7.5</td><td>pH</td></tr>
+      <tr><td>Water EC</td><td>1.0 – 2.5</td><td>&gt; 3.0</td><td>mS/cm</td></tr>
+    </tbody>
+  </table>`
+}
+
+// ══════════════════════════════════════
+//  PRODUCTION
+// ══════════════════════════════════════
+function renderBatchTable() {
+  const tbody = document.getElementById('batch-tbody'); if(!tbody) return
+  const statusMap = {ok:'b-ok',warn:'b-warn',crit:'b-crit'}
+  const statusLbl = {ok:'On Track',warn:'Monitor',crit:'Action'}
+  tbody.innerHTML = BATCHES.map(b => `<tr>
+    <td class="mono">${b.id}</td>
+    <td>${b.species}</td>
+    <td><span class="badge b-idle">Room ${b.room}</span></td>
+    <td><span class="badge b-ok">${b.stage}</span></td>
+    <td>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="prog-bg"><div class="prog-fill" style="width:${b.col}%"></div></div>
+        <span style="font-family:'DM Mono',monospace;font-size:.72rem">${b.col}%</span>
+      </div>
+    </td>
+    <td class="mono">${b.days}d</td>
+    <td class="mono" style="color:var(--gold)">${b.est}d</td>
+    <td><span class="badge ${statusMap[b.status]}">${statusLbl[b.status]}</span></td>
+  </tr>`).join('')
+}
+
+function renderHarvestLog() {
+  const tbody = document.getElementById('harvest-tbody'); if(!tbody) return
+  tbody.innerHTML = HARVEST_LOG.map(h => `<tr>
+    <td class="mono">${h.batch}</td>
+    <td class="mono">F${h.flush}</td>
+    <td class="mono">${h.date}</td>
+    <td style="font-family:'DM Mono',monospace;color:var(--g)">${h.kg}</td>
+    <td style="font-family:'DM Mono',monospace;color:${h.be>=80?'var(--g)':h.be>=60?'var(--gold)':'var(--red)'}">${h.be}%</td>
+    <td><span class="badge b-idle">Room ${h.room}</span></td>
+    <td style="color:var(--txt2)">${h.notes}</td>
+  </tr>`).join('')
+}
+
+// ══════════════════════════════════════
+//  ANALYTICS KPIs
+// ══════════════════════════════════════
+function renderAnalyticsKPIs() {
+  const wrap = document.getElementById('analytics-kpis'); if(!wrap) return
+  const data = [
+    { lbl:'Total Yield',    val:'42.8 kg',  sub:'Last 30 days',         cls:'g' },
+    { lbl:'Avg BE%',        val:'78.4%',    sub:'↑ 4.2% vs prior period', cls:'' },
+    { lbl:'Contamination',  val:'3.2%',     sub:'↓ 1.1% vs prior period', cls:'gold' },
+    { lbl:'Batches Done',   val:'12',       sub:'5 fresh · 4 dried · 3 powder', cls:'' },
+  ]
+  wrap.innerHTML = data.map(d => `<div class="kpi">
+    <span class="kpi-lbl">${d.lbl}</span>
+    <div class="kpi-val ${d.cls}">${d.val}</div>
+    <div class="kpi-sub">${d.sub}</div>
+  </div>`).join('')
+}
+
+// ══════════════════════════════════════
+//  HEATMAP
+// ══════════════════════════════════════
+function renderHeatmap() {
+  const wrap = document.getElementById('heatmap'); if(!wrap) return
+  const vals = Array.from({length:30}, () => Math.random())
+  wrap.innerHTML = vals.map((v,i) => {
+    const alpha = 0.08 + v * 0.82
+    const tooltip = `Day ${i+1}: ${(v*3+0.5).toFixed(2)} kg`
+    return `<div class="hm-cell" title="${tooltip}"
+      style="background:rgba(82,183,136,${alpha})"></div>`
+  }).join('')
+}
+
+// ══════════════════════════════════════
+//  EQUIPMENT
+// ══════════════════════════════════════
+function renderEquipment() {
+  const wrap = document.getElementById('equip-grid'); if(!wrap) return
+  wrap.innerHTML = EQUIPMENT.map(e => `
+    <div class="equip-card">
+      <div class="equip-ico ${e.ico}">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">${e.ico_svg}</svg>
+      </div>
+      <div style="min-width:0;flex:1">
+        <div class="equip-name">${e.name}</div>
+        <div class="equip-detail">${e.detail}</div>
+      </div>
+      <div class="equip-right">
+        <button class="toggle ${e.on?'on':'off'}" id="eq-${e.id}"
+          onclick="toggleEquip('${e.id}',this)" title="${e.on?'Turn off':'Turn on'}"></button>
+        <div class="equip-w">${e.on ? e.w+' W' : 'Off'}</div>
+      </div>
+    </div>`).join('')
+}
+
+function toggleEquip(id, btn) {
+  const eq = EQUIPMENT.find(e => e.id === id); if(!eq) return
+  eq.on = !eq.on
+  btn.className = 'toggle ' + (eq.on ? 'on' : 'off')
+  btn.nextElementSibling.textContent = eq.on ? eq.w+' W' : 'Off'
+  updateActivePower()
+}
+
+function updateActivePower() {
+  const total = EQUIPMENT.filter(e => e.on).reduce((s,e) => s+e.w, 0)
+  const el = document.getElementById('active-load')
+  if(el) el.textContent = total.toLocaleString() + ' W'
+}
+
+// ══════════════════════════════════════
+//  CHART DEFAULTS
+// ══════════════════════════════════════
+Chart.defaults.color = 'rgba(204,232,216,.45)'
+Chart.defaults.borderColor = 'rgba(82,183,136,.1)'
+Chart.defaults.font.family = "'DM Sans', sans-serif"
+Chart.defaults.font.size = 11
+
+const hours24 = Array.from({length:24},(_,i) => `${String(i).padStart(2,'0')}:00`)
+
+function lineChartOpts(opts={}) {
+  return {
+    responsive:true, maintainAspectRatio:false,
+    interaction:{ mode:'index', intersect:false },
+    plugins:{ legend:{ display: opts.legend ?? false, labels:{ color:'rgba(204,232,216,.6)', boxWidth:10, padding:14 } }, tooltip:{ backgroundColor:'rgba(13,26,14,.95)', borderColor:'rgba(82,183,136,.3)', borderWidth:1 } },
+    scales:{
+      x:{ grid:{ color:'rgba(82,183,136,.07)' }, ticks:{ color:'rgba(204,232,216,.4)', maxTicksLimit:8 } },
+      y:{ grid:{ color:'rgba(82,183,136,.07)' }, ticks:{ color:'rgba(204,232,216,.4)' }, ...( opts.y || {} ) },
+      ...(opts.y2 ? { y2:{ position:'right', grid:{ drawOnChartArea:false }, ticks:{ color:'rgba(204,232,216,.4)' }, ...opts.y2 } } : {}),
+    }
+  }
+}
+
+// ══════════════════════════════════════
+//  CHARTS
+// ══════════════════════════════════════
+let charts = {}
+
+function initCharts() {
+  // 7-day yield sparkline
+  const yields7 = [1.8, 2.2, 1.6, 2.4, 2.1, 1.9, 2.3]
+  charts.yieldSpark = new Chart(document.getElementById('chart-yield-sparkline'), {
+    type:'bar',
+    data:{
+      labels:['Mon','Tue','Wed','Thu','Fri','Sat','Today'],
+      datasets:[{ data:yields7, backgroundColor:'rgba(82,183,136,.35)', borderColor:'#52b788', borderWidth:1.5, borderRadius:4 }]
+    },
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false} },
+      scales:{ x:{grid:{display:false},ticks:{color:'rgba(204,232,216,.4)'}}, y:{grid:{color:'rgba(82,183,136,.07)'},ticks:{color:'rgba(204,232,216,.4)'}} } }
+  })
+
+  // Temp + Humidity 24h
+  const tData = genHistory(ROOMS[selectedRoom].temp, 1.5)
+  const hData = genHistory(ROOMS[selectedRoom].humidity, 3)
+  charts.th = new Chart(document.getElementById('chart-th'), {
+    type:'line',
+    data:{
+      labels:hours24,
+      datasets:[
+        { label:'Temp (°C)', data:tData, borderColor:'#52b788', backgroundColor:'rgba(82,183,136,.08)', fill:true, tension:.35, pointRadius:0, borderWidth:2, yAxisID:'y' },
+        { label:'Humidity (%)', data:hData, borderColor:'#c9a84c', backgroundColor:'rgba(201,168,76,.06)', fill:true, tension:.35, pointRadius:0, borderWidth:1.5, yAxisID:'y2' },
+      ]
+    },
+    options:{ ...lineChartOpts({ legend:true, y:{ title:{display:true,text:'°C',color:'rgba(204,232,216,.4)'} }, y2:{ title:{display:true,text:'%RH',color:'rgba(204,232,216,.4)'} } }) }
+  })
+
+  // CO2 + O2 24h
+  const co2Data = genHistory(ROOMS[selectedRoom].co2, 120)
+  const o2Data = genHistory(ROOMS[selectedRoom].o2, 0.3)
+  charts.co2 = new Chart(document.getElementById('chart-co2'), {
+    type:'line',
+    data:{
+      labels:hours24,
+      datasets:[
+        { label:'CO₂ (ppm)', data:co2Data, borderColor:'#e05252', backgroundColor:'rgba(224,82,82,.08)', fill:true, tension:.35, pointRadius:0, borderWidth:2, yAxisID:'y' },
+        { label:'O₂ (%)',    data:o2Data,  borderColor:'#60a5fa', backgroundColor:'rgba(96,165,250,.06)', fill:true, tension:.35, pointRadius:0, borderWidth:1.5, yAxisID:'y2' },
+      ]
+    },
+    options:{ ...lineChartOpts({ legend:true, y:{}, y2:{} }) }
+  })
+
+  // VPD 24h
+  const vpdData = genHistory(ROOMS[selectedRoom].vpd, 0.08)
+  const dewData = genHistory(18.5, 1.2)
+  charts.vpd = new Chart(document.getElementById('chart-vpd'), {
+    type:'line',
+    data:{
+      labels:hours24,
+      datasets:[
+        { label:'VPD (kPa)', data:vpdData, borderColor:'#52b788', backgroundColor:'rgba(82,183,136,.1)', fill:true, tension:.35, pointRadius:0, borderWidth:2 },
+        { label:'Dew Pt (°C)',data:dewData,borderColor:'#60a5fa', backgroundColor:'transparent', tension:.35, pointRadius:0, borderWidth:1.5, borderDash:[4,3] },
+      ]
+    },
+    options:{ ...lineChartOpts({legend:true}) }
+  })
+
+  // Yield per batch
+  const batchLabels = HARVEST_LOG.map(h => h.batch.slice(-3)+' F'+h.flush)
+  const batchYield  = HARVEST_LOG.map(h => h.kg)
+  charts.yieldBatch = new Chart(document.getElementById('chart-yield-batch'), {
+    type:'bar',
+    data:{
+      labels:batchLabels,
+      datasets:[{ label:'Yield (kg)', data:batchYield, backgroundColor:'rgba(82,183,136,.3)', borderColor:'#52b788', borderWidth:1.5, borderRadius:4 }]
+    },
+    options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false} },
+      scales:{ x:{grid:{color:'rgba(82,183,136,.07)'},ticks:{color:'rgba(204,232,216,.4)'}}, y:{grid:{display:false},ticks:{color:'rgba(204,232,216,.4)'}} } }
+  })
+
+  // BE% trend
+  const beData = HARVEST_LOG.map(h => h.be)
+  charts.be = new Chart(document.getElementById('chart-be'), {
+    type:'line',
+    data:{
+      labels:batchLabels,
+      datasets:[{ label:'BE%', data:beData, borderColor:'#c9a84c', backgroundColor:'rgba(201,168,76,.1)', fill:true, tension:.35, pointRadius:4, pointBackgroundColor:'#c9a84c', borderWidth:2 }]
+    },
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false} },
+      scales:{ x:{grid:{display:false},ticks:{color:'rgba(204,232,216,.4)'}}, y:{min:0,max:100,grid:{color:'rgba(82,183,136,.07)'},ticks:{color:'rgba(204,232,216,.4)'}} } }
+  })
+
+  // Monthly yield
+  const months = ['Nov','Dec','Jan','Feb','Mar','Apr']
+  const monthYield = [28.4, 31.2, 24.6, 35.8, 38.1, 42.8]
+  charts.monthly = new Chart(document.getElementById('chart-monthly'), {
+    type:'line',
+    data:{
+      labels:months,
+      datasets:[{ label:'Monthly Yield (kg)', data:monthYield, borderColor:'#52b788', backgroundColor:'rgba(82,183,136,.12)', fill:true, tension:.4, pointRadius:4, pointBackgroundColor:'#52b788', borderWidth:2 }]
+    },
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false} },
+      scales:{ x:{grid:{display:false},ticks:{color:'rgba(204,232,216,.4)'}}, y:{grid:{color:'rgba(82,183,136,.07)'},ticks:{color:'rgba(204,232,216,.4)'}} } }
+  })
+
+  // BE% trend long
+  const beMonths = [68,72,74,71,77,79,82,78,84,88,83,92]
+  const beLabels = ['Oct','Nov','Dec','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep'].slice(-12)
+  charts.beTrend = new Chart(document.getElementById('chart-be-trend'), {
+    type:'line',
+    data:{
+      labels:beLabels,
+      datasets:[{ data:beMonths, borderColor:'#c9a84c', backgroundColor:'rgba(201,168,76,.1)', fill:true, tension:.4, pointRadius:3, pointBackgroundColor:'#c9a84c', borderWidth:2 }]
+    },
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false} },
+      scales:{ x:{grid:{display:false},ticks:{color:'rgba(204,232,216,.4)'}}, y:{min:50,max:100,grid:{color:'rgba(82,183,136,.07)'},ticks:{color:'rgba(204,232,216,.4)',callback:v=>v+'%'}} } }
+  })
+
+  // Scatter: temp vs yield
+  const scatterData = Array.from({length:25},() => ({ x:rand(22,28), y:rand(1.2,2.8) }))
+  charts.scatter = new Chart(document.getElementById('chart-scatter'), {
+    type:'scatter',
+    data:{ datasets:[{ label:'Batch Yield', data:scatterData, backgroundColor:'rgba(82,183,136,.5)', borderColor:'#52b788', pointRadius:5 }] },
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label:c=>`${c.parsed.x}°C → ${c.parsed.y}kg` } } },
+      scales:{ x:{ title:{display:true,text:'Avg Temp (°C)',color:'rgba(204,232,216,.4)'},grid:{color:'rgba(82,183,136,.07)'},ticks:{color:'rgba(204,232,216,.4)'} },
+               y:{ title:{display:true,text:'Yield (kg)',color:'rgba(204,232,216,.4)'},grid:{color:'rgba(82,183,136,.07)'},ticks:{color:'rgba(204,232,216,.4)'} } } }
+  })
+
+  // Contamination donut
+  charts.contam = new Chart(document.getElementById('chart-contam'), {
+    type:'doughnut',
+    data:{
+      labels:['Bacterial','Mould','Trichoderma','None'],
+      datasets:[{ data:[8,5,3,84], backgroundColor:['rgba(224,82,82,.7)','rgba(201,168,76,.7)','rgba(96,165,250,.7)','rgba(82,183,136,.3)'], borderWidth:0, hoverOffset:4 }]
+    },
+    options:{ responsive:true, maintainAspectRatio:false, cutout:'72%',
+      plugins:{ legend:{display:false}, tooltip:{ backgroundColor:'rgba(13,26,14,.95)', borderColor:'rgba(82,183,136,.3)', borderWidth:1 } } }
+  })
+  const cLegend = document.getElementById('contam-legend')
+  if(cLegend) {
+    cLegend.innerHTML = [['Bacterial','rgba(224,82,82,.7)','8%'],['Mould','rgba(201,168,76,.7)','5%'],['Trichoderma','rgba(96,165,250,.7)','3%'],['Clean','rgba(82,183,136,.6)','84%']]
+      .map(([l,c,v]) => `<div style="display:flex;align-items:center;gap:7px"><span style="width:9px;height:9px;border-radius:2px;background:${c};flex-shrink:0"></span><span style="color:var(--txt2)">${l}</span><span style="margin-left:auto;font-family:'DM Mono',monospace;color:var(--txt)">${v}</span></div>`).join('')
+  }
+
+  // Energy hourly
+  const energyData = genHistory(2100, 400)
+  charts.energy = new Chart(document.getElementById('chart-energy'), {
+    type:'line',
+    data:{
+      labels:hours24,
+      datasets:[{ data:energyData, borderColor:'#60a5fa', backgroundColor:'rgba(96,165,250,.1)', fill:true, tension:.35, pointRadius:0, borderWidth:2 }]
+    },
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false} },
+      scales:{ x:{grid:{color:'rgba(82,183,136,.07)'},ticks:{color:'rgba(204,232,216,.4)',maxTicksLimit:8}}, y:{grid:{color:'rgba(82,183,136,.07)'},ticks:{color:'rgba(204,232,216,.4)',callback:v=>v+'W'}} } }
+  })
+}
+
+// ══════════════════════════════════════
+//  LIVE DATA SIMULATION (replace with Supabase queries)
+// ══════════════════════════════════════
+function simulateLiveData() {
+  Object.keys(ROOMS).forEach(k => {
+    const r = ROOMS[k]
+    r.temp     = +(r.temp     + (Math.random()-0.5)*0.3).toFixed(1)
+    r.humidity = +(r.humidity + (Math.random()-0.5)*0.8).toFixed(1)
+    r.co2      = +(r.co2      + (Math.random()-0.5)*30).toFixed(0)
+    r.o2       = +(r.o2       + (Math.random()-0.5)*0.05).toFixed(2)
+    r.vpd      = +(r.vpd      + (Math.random()-0.5)*0.02).toFixed(2)
+    r.airflow  = +(r.airflow  + (Math.random()-0.5)*0.02).toFixed(2)
+    // Clamp
+    r.temp     = Math.max(20, Math.min(32, r.temp))
+    r.humidity = Math.max(70, Math.min(98, r.humidity))
+    r.co2      = Math.max(400, Math.min(1800, r.co2))
+    r.o2       = Math.max(18.5, Math.min(21.5, r.o2))
+  })
+  // Update live UI
+  renderRoomCards()
+  renderGauges()
+  renderMetricBoxes()
+}
+
+// ══════════════════════════════════════
+//  EXPORT CSV
+// ══════════════════════════════════════
+function exportCSV() {
+  const now = new Date().toISOString().slice(0,19).replace('T',' ')
+  const rows = [['Timestamp','Room','Temperature (°C)','Humidity (%RH)','CO2 (ppm)','O2 (%)','Airflow (m/s)','VPD (kPa)']]
+  Object.entries(ROOMS).forEach(([k,r]) => {
+    rows.push([now, 'Room '+k, r.temp, r.humidity, r.co2, r.o2, r.airflow, r.vpd])
+  })
+  const csv = rows.map(r => r.join(',')).join('\n')
+  const a = document.createElement('a')
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv)
+  a.download = `safa-farm-export-${Date.now()}.csv`
+  a.click()
+}
+
+// ══════════════════════════════════════
+//  PERIOD SELECTOR
+// ══════════════════════════════════════
+function setPeriod(days, btn) {
+  document.querySelectorAll('#section-analytics .ptab').forEach(b => b.classList.remove('active'))
+  btn.classList.add('active')
+  // In production: re-fetch data for the selected period from Supabase
+}
+
+// ══════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  renderRoomCards()
+  renderAlerts()
+  renderGauges()
+  renderMetricBoxes()
+  renderOptimalTable()
+  renderBatchTable()
+  renderHarvestLog()
+  renderAnalyticsKPIs()
+  renderHeatmap()
+  renderEquipment()
+  initCharts()
+  updateActivePower()
+
+  // Live updates every 5 seconds
+  setInterval(simulateLiveData, 5000)
+})
+</script>
+</body>
+</html>
