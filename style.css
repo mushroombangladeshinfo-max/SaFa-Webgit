@@ -1723,6 +1723,61 @@ img {
   .iot-callout { flex-direction: column; gap: 12px; padding: 22px 20px; }
 }
 
+/* ── Fear / Problem Callout Section ── */
+.fear-section {
+  padding: 72px 48px;
+  background: rgba(184,92,56,.04);
+  border-top: 1px solid rgba(184,92,56,.12);
+  border-bottom: 1px solid rgba(184,92,56,.12);
+}
+.fear-section .products-header { margin-bottom: 44px; }
+.fear-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
+  max-width: 960px;
+  margin: 0 auto 44px;
+}
+.fear-item {
+  background: rgba(184,92,56,.06);
+  border: 1px solid rgba(184,92,56,.14);
+  border-radius: 12px;
+  padding: 26px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.fear-emoji { font-size: 24px; }
+.fear-item-title {
+  font-family: var(--fb);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--c);
+}
+.fear-item-body {
+  font-size: 13px;
+  font-weight: 300;
+  color: rgba(245,239,230,.6);
+  line-height: 1.65;
+}
+.fear-bridge {
+  max-width: 620px;
+  margin: 0 auto;
+  text-align: center;
+}
+.fear-bridge-text {
+  font-size: 15px;
+  font-weight: 300;
+  color: rgba(245,239,230,.65);
+  line-height: 1.7;
+  margin-bottom: 20px;
+}
+.fear-bridge-text strong { color: var(--c); font-weight: 600; }
+@media (max-width: 768px) {
+  .fear-section { padding: 56px 24px; }
+  .fear-grid { grid-template-columns: 1fr; gap: 14px; }
+}
+
 /* ── How to Order Section ── */
 .how-section {
   padding: 88px 48px;
