@@ -32,7 +32,6 @@ import {
 } from './cart.js';
 import {
   renderCartDrawer,
-  openCartDrawer,
   toggleCart,
   applyCoupon,
   initCart,
@@ -56,7 +55,7 @@ import {
 
 /* Cart actions — called from cart drawer HTML (onclick attrs) */
 window.addToCart       = addToCart;
-window.updateQuantity  = updateQuantity;
+window.updateQuantity  = (id, delta) => { updateQuantity(id, delta); renderCartDrawer(); };
 window.toggleCart      = toggleCart;
 window.applyCoupon     = applyCoupon;
 
