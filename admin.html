@@ -129,7 +129,10 @@
     /* Top bar */
     .topbar { background:var(--g800); border-bottom:1px solid rgba(255,255,255,.06); padding:0 32px; height:60px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:200; }
     .topbar-left { display:flex; align-items:center; gap:14px; }
-    .topbar-logo { font-family:'Cormorant Garamond',serif; font-size:20px; font-weight:300; color:var(--c); text-decoration:none; }
+    .topbar-logo { display:flex; flex-direction:column; align-items:center; text-decoration:none; padding:6px 16px; border:1px solid rgba(255,255,255,.1); border-radius:100px; background:rgba(255,255,255,.03); transition:background .2s, transform .2s; }
+    .topbar-logo:hover { background:rgba(255,255,255,.08); transform:translateY(-1px); }
+    .tl-main { font-family:'Syne',sans-serif; font-size:18px; font-weight:700; color:var(--c); line-height:1; }
+    .tl-sub  { font-family:'Syne',sans-serif; font-size:7px; font-weight:700; letter-spacing:.22em; text-transform:uppercase; color:var(--al); }
     .topbar-pill { font-family:'Syne',sans-serif; font-size:8px; font-weight:700; letter-spacing:.18em; text-transform:uppercase; color:var(--a); background:rgba(196,154,60,.1); border:1px solid rgba(196,154,60,.2); border-radius:20px; padding:3px 10px; }
     .topbar-right { display:flex; align-items:center; gap:12px; }
     .topbar-admin-email { font-size:12px; color:rgba(245,239,230,.45); font-family:'Syne',sans-serif; font-size:9px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; }
@@ -173,6 +176,24 @@
     .filter-sep { width:1px; height:32px; background:rgba(255,255,255,.08); flex-shrink:0; }
     .f-clear-btn { font-family:'Syne',sans-serif; font-size:9px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:rgba(245,239,230,.38); background:none; border:none; cursor:pointer; padding:6px 4px; transition:color .2s; }
     .f-clear-btn:hover { color:var(--tl); }
+    .f-label { font-size:11px; color:rgba(245,239,230,.38); white-space:nowrap; letter-spacing:.04em; }
+    .f-preset-btn { font-family:'DM Sans',sans-serif; font-size:11px; font-weight:600; padding:7px 11px; border-radius:5px; cursor:pointer; border:1px solid rgba(255,255,255,.09); background:rgba(255,255,255,.03); color:rgba(245,239,230,.55); transition:all .15s; white-space:nowrap; }
+    .f-preset-btn:hover { border-color:rgba(196,154,60,.35); color:var(--al); background:rgba(196,154,60,.06); }
+    .f-preset-btn.active { border-color:rgba(196,154,60,.5); color:var(--al); background:rgba(196,154,60,.11); }
+    .f-narrow { width:100px; }
+    .filter-bar-2 { margin-top:-8px; }
+    .charts-row-last { margin-bottom:0; }
+    .chart-card-flex { flex:1; }
+    .an-ret-strip { display:flex; gap:32px; padding:12px 0; align-items:center; }
+    .an-ret-item { text-align:center; }
+    .an-ret-val { font-family:'Cormorant Garamond',serif; font-size:28px; font-weight:300; color:var(--al); line-height:1; }
+    .an-ret-val.green { color:#5fcf80; }
+    .an-top-tbl { width:100%; border-collapse:collapse; font-size:12px; }
+    .an-top-tbl td { padding:6px 0; border-bottom:1px solid rgba(255,255,255,.05); color:rgba(245,239,230,.75); }
+    .an-top-tbl tr:last-child td { border-bottom:none; }
+    .an-top-tbl .td-name { color:var(--c); font-weight:500; }
+    .an-top-tbl .td-amt  { text-align:right; }
+    .an-top-empty { color:rgba(245,239,230,.35); padding:20px 0; }
     .f-action-btn { font-family:'Syne',sans-serif; font-size:9px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; padding:9px 16px; border-radius:5px; cursor:pointer; transition:all .2s; border:1px solid rgba(255,255,255,.1); background:rgba(255,255,255,.03); color:rgba(245,239,230,.65); display:inline-flex; align-items:center; gap:6px; }
     .f-action-btn:hover { border-color:rgba(255,255,255,.25); color:var(--c); background:rgba(255,255,255,.06); }
     .f-action-btn:disabled { opacity:.5; cursor:not-allowed; }
@@ -563,7 +584,10 @@
     <!-- Top bar -->
     <header class="topbar">
       <div class="topbar-left">
-        <a href="index.html" class="topbar-logo">SaFa</a>
+        <a href="index.html" class="topbar-logo">
+          <span class="tl-main">SaFa</span>
+          <span class="tl-sub">Naturals</span>
+        </a>
         <span class="topbar-pill">Admin</span>
       </div>
       <div class="topbar-right">
@@ -655,6 +679,25 @@
           <option value="returned">Returned</option>
         </select>
         <button type="button" class="f-clear-btn" id="clear-filters-btn">✕ Clear</button>
+      </div>
+
+      <!-- Filter row 2: presets + sort + value range -->
+      <div class="filter-bar filter-bar-2">
+        <span class="f-label">Quick:</span>
+        <button type="button" class="f-preset-btn" id="preset-today"     onclick="setPreset('today')">Today</button>
+        <button type="button" class="f-preset-btn" id="preset-yesterday" onclick="setPreset('yesterday')">Yesterday</button>
+        <button type="button" class="f-preset-btn" id="preset-week"      onclick="setPreset('week')">This Week</button>
+        <button type="button" class="f-preset-btn" id="preset-month"     onclick="setPreset('month')">This Month</button>
+        <div class="filter-sep"></div>
+        <select id="filter-sort" class="f-select">
+          <option value="created_at|0">Newest First</option>
+          <option value="created_at|1">Oldest First</option>
+          <option value="total_amount|0">Highest Value</option>
+          <option value="total_amount|1">Lowest Value</option>
+        </select>
+        <input type="number" id="filter-min" class="f-search f-narrow" placeholder="Min ৳" min="0">
+        <span class="filter-date-sep">–</span>
+        <input type="number" id="filter-max" class="f-search f-narrow" placeholder="Max ৳" min="0">
         <div class="filter-sep"></div>
         <button type="button" class="f-action-btn ml-auto" id="export-btn">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -914,6 +957,45 @@
           </div>
         </div>
 
+        <!-- Charts row 3 -->
+        <div class="charts-row">
+          <div class="chart-card">
+            <div class="chart-title">Revenue by District (Top 10)</div>
+            <div class="chart-wrap"><canvas id="chart-district"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">Revenue per Product</div>
+            <div class="chart-wrap"><canvas id="chart-prod-rev"></canvas></div>
+          </div>
+        </div>
+
+        <!-- Bottom stats strip -->
+        <div class="charts-row charts-row-last">
+          <div class="chart-card chart-card-flex">
+            <div class="chart-title">Repeat vs New Customers</div>
+            <div class="an-ret-strip">
+              <div class="an-ret-item">
+                <div class="an-ret-val" id="an-repeat-count">—</div>
+                <div class="stat-card-sub">Repeat buyers (2+ orders)</div>
+              </div>
+              <div class="an-ret-item">
+                <div class="an-ret-val" id="an-new-count">—</div>
+                <div class="stat-card-sub">New customers (1 order)</div>
+              </div>
+              <div class="an-ret-item">
+                <div class="an-ret-val green" id="an-retention">—</div>
+                <div class="stat-card-sub">Retention rate</div>
+              </div>
+            </div>
+          </div>
+          <div class="chart-card chart-card-flex">
+            <div class="chart-title">Top Customers by Spend (Period)</div>
+            <table class="an-top-tbl" id="an-top-customers">
+              <tr><td class="an-top-empty">Loading…</td></tr>
+            </table>
+          </div>
+        </div>
+
       </div><!-- /panel-analytics -->
 
       <!-- ═══════════════ PRODUCTS PANEL ═══════════════ -->
@@ -1006,7 +1088,18 @@
         <div class="cust-toolbar">
           <div class="cust-headline">Customers <em>&amp; History</em></div>
           <input type="text" id="cust-search" class="f-search wide"
-                 placeholder="Search name or phone…" oninput="filterCustomers(this.value)">
+                 placeholder="Search name or phone…" oninput="filterCustomers()">
+          <select id="cust-sort" class="f-select" onchange="sortCustomers(this.value)">
+            <option value="spent">Highest Spend</option>
+            <option value="orders">Most Orders</option>
+            <option value="recent">Most Recent</option>
+            <option value="name">Name A–Z</option>
+          </select>
+          <select id="cust-type" class="f-select" onchange="filterCustomerType(this.value)">
+            <option value="all">All Customers</option>
+            <option value="repeat">Repeat (2+ orders)</option>
+            <option value="new">New (1 order)</option>
+          </select>
           <button type="button" class="f-action-btn" id="cust-export-btn" onclick="exportCustomers()">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             Export CSV
@@ -1087,7 +1180,7 @@
     const PAGE_SIZE   = 20;
 
     /* ── State ── */
-    const S = { page:1, search:'', dateFrom:'', dateTo:'', statusFilter:'', totalCount:0, orders:[], realtimeSub:null };
+    const S = { page:1, search:'', dateFrom:'', dateTo:'', statusFilter:'', sortField:'created_at', sortAsc:false, minAmt:'', maxAmt:'', totalCount:0, orders:[], realtimeSub:null };
 
     /* ── Formatters ── */
     const fmt    = n  => '৳' + (n||0).toLocaleString('en-BD');
@@ -1389,11 +1482,13 @@
       const from = (S.page - 1) * PAGE_SIZE;
       const to   = from + PAGE_SIZE - 1;
 
-      let q = supabase.from('orders').select('*',{count:'exact'}).order('created_at',{ascending:false}).range(from,to);
+      let q = supabase.from('orders').select('*',{count:'exact'}).order(S.sortField,{ascending:S.sortAsc}).range(from,to);
       if (S.search)       q = q.or(`customer_phone.ilike.%${S.search}%,customer_name.ilike.%${S.search}%`);
       if (S.dateFrom)     q = q.gte('created_at', new Date(S.dateFrom+'T00:00:00').toISOString());
       if (S.dateTo)       q = q.lte('created_at', new Date(S.dateTo+'T23:59:59.999').toISOString());
       if (S.statusFilter) q = q.eq('status', S.statusFilter);
+      if (S.minAmt)       q = q.gte('total_amount', Number(S.minAmt));
+      if (S.maxAmt)       q = q.lte('total_amount', Number(S.maxAmt));
 
       const { data:orders, error, count } = await q;
 
@@ -1540,13 +1635,50 @@
     document.getElementById('filter-status').addEventListener('change',    e => { S.statusFilter = e.target.value; S.page = 1; fetchOrders(); });
 
     document.getElementById('clear-filters-btn').addEventListener('click', () => {
-      document.getElementById('search-input').value    = '';
-      document.getElementById('filter-date-from').value = '';
-      document.getElementById('filter-date-to').value   = '';
-      document.getElementById('filter-status').value    = '';
-      S.search = ''; S.dateFrom = ''; S.dateTo = ''; S.statusFilter = ''; S.page = 1;
+      ['search-input','filter-date-from','filter-date-to','filter-status','filter-min','filter-max'].forEach(id => {
+        const el = document.getElementById(id); if (el) el.value = '';
+      });
+      document.getElementById('filter-sort').value = 'created_at|0';
+      document.querySelectorAll('.f-preset-btn').forEach(b => b.classList.remove('active'));
+      Object.assign(S, { search:'', dateFrom:'', dateTo:'', statusFilter:'', sortField:'created_at', sortAsc:false, minAmt:'', maxAmt:'', page:1 });
       fetchOrders();
     });
+
+    /* ── New filter listeners ── */
+    document.getElementById('filter-sort').addEventListener('change', e => {
+      const [field, asc] = e.target.value.split('|');
+      S.sortField = field; S.sortAsc = asc === '1'; S.page = 1; fetchOrders();
+    });
+    let amtTimer;
+    document.getElementById('filter-min').addEventListener('input', e => {
+      clearTimeout(amtTimer); amtTimer = setTimeout(() => { S.minAmt = e.target.value; S.page = 1; fetchOrders(); }, 400);
+    });
+    document.getElementById('filter-max').addEventListener('input', e => {
+      clearTimeout(amtTimer); amtTimer = setTimeout(() => { S.maxAmt = e.target.value; S.page = 1; fetchOrders(); }, 400);
+    });
+
+    /* ── Quick date presets ── */
+    window.setPreset = function(key) {
+      const now = new Date();
+      let from, to = now.toISOString().slice(0,10);
+      if (key === 'today') {
+        from = to;
+      } else if (key === 'yesterday') {
+        const y = new Date(now); y.setDate(y.getDate()-1);
+        from = to = y.toISOString().slice(0,10);
+      } else if (key === 'week') {
+        const dow = now.getDay();
+        const mon = new Date(now); mon.setDate(mon.getDate() - (dow===0?6:dow-1));
+        from = mon.toISOString().slice(0,10);
+      } else if (key === 'month') {
+        from = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-01`;
+      }
+      document.getElementById('filter-date-from').value = from;
+      document.getElementById('filter-date-to').value   = to;
+      document.querySelectorAll('.f-preset-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(`preset-${key}`)?.classList.add('active');
+      S.dateFrom = from; S.dateTo = to; S.page = 1; fetchOrders();
+    };
 
     /* ── Export CSV ── */
     document.getElementById('export-btn').addEventListener('click', async () => {
@@ -1554,11 +1686,13 @@
       const orig = btn.innerHTML;
       btn.innerHTML = 'Exporting...'; btn.disabled = true;
       try {
-        let q = supabase.from('orders').select('*').order('created_at',{ascending:false});
+        let q = supabase.from('orders').select('*').order(S.sortField,{ascending:S.sortAsc});
         if (S.search)       q = q.or(`customer_phone.ilike.%${S.search}%,customer_name.ilike.%${S.search}%`);
         if (S.dateFrom)     q = q.gte('created_at', new Date(S.dateFrom+'T00:00:00').toISOString());
         if (S.dateTo)       q = q.lte('created_at', new Date(S.dateTo+'T23:59:59.999').toISOString());
         if (S.statusFilter) q = q.eq('status', S.statusFilter);
+        if (S.minAmt)       q = q.gte('total_amount', Number(S.minAmt));
+        if (S.maxAmt)       q = q.lte('total_amount', Number(S.maxAmt));
         const { data, error } = await q;
         if (error) throw error;
         if (!data?.length) { toast('No orders to export.', 'error'); return; }
@@ -2044,6 +2178,90 @@
         }
       });
 
+      /* ── District breakdown ── */
+      const distRevMap = {};
+      currActive.forEach(o => {
+        const d = (o.district || 'Unknown').trim();
+        distRevMap[d] = (distRevMap[d] || 0) + (o.total_amount || 0);
+      });
+      const distSorted = Object.entries(distRevMap).sort((a,b) => b[1]-a[1]).slice(0,10);
+      mkChart('chart-district', {
+        type: 'bar',
+        data: {
+          labels: distSorted.map(([d]) => d),
+          datasets: [{ label:'Revenue (৳)', data: distSorted.map(([,v]) => v),
+            backgroundColor:'rgba(196,154,60,.45)', borderColor:'rgba(196,154,60,.9)',
+            borderWidth:1, borderRadius:3 }]
+        },
+        options: {
+          indexAxis:'y', responsive:true, maintainAspectRatio:false,
+          plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label: ctx => ' ৳'+ctx.parsed.x.toLocaleString() } } },
+          scales: {
+            x:{ grid:commonGrid, ticks:{ callback: v => '৳'+(v>=1000?(v/1000).toFixed(0)+'k':v) } },
+            y:{ grid:{ display:false } }
+          }
+        }
+      });
+
+      /* ── Product revenue ── */
+      const prodRevMap = {};
+      currActive.forEach(o => {
+        (o.items || []).forEach(item => {
+          const name = item.name || 'Unknown';
+          prodRevMap[name] = (prodRevMap[name] || 0) + ((item.price||0) * (item.qty||1));
+        });
+      });
+      const prodRevSorted = Object.entries(prodRevMap).sort((a,b) => b[1]-a[1]).slice(0,6);
+      mkChart('chart-prod-rev', {
+        type: 'bar',
+        data: {
+          labels: prodRevSorted.map(([n]) => n),
+          datasets: [{ label:'Revenue (৳)', data: prodRevSorted.map(([,v]) => v),
+            backgroundColor:'rgba(95,207,128,.4)', borderColor:'rgba(95,207,128,.85)',
+            borderWidth:1, borderRadius:3 }]
+        },
+        options: {
+          indexAxis:'y', responsive:true, maintainAspectRatio:false,
+          plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label: ctx => ' ৳'+ctx.parsed.x.toLocaleString() } } },
+          scales: {
+            x:{ grid:commonGrid, ticks:{ callback: v => '৳'+(v>=1000?(v/1000).toFixed(0)+'k':v) } },
+            y:{ grid:{ display:false } }
+          }
+        }
+      });
+
+      /* ── Retention ── */
+      const phoneOrders = {};
+      currActive.forEach(o => {
+        const p = o.customer_phone || 'unknown';
+        phoneOrders[p] = (phoneOrders[p] || 0) + 1;
+      });
+      const repeatCount = Object.values(phoneOrders).filter(n => n >= 2).length;
+      const newCount    = Object.values(phoneOrders).filter(n => n === 1).length;
+      const retention   = customers ? Math.round((repeatCount / customers) * 100) : 0;
+      const setEl = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+      setEl('an-repeat-count', repeatCount);
+      setEl('an-new-count',    newCount);
+      setEl('an-retention',    retention + '%');
+
+      /* ── Top customers ── */
+      const custMap = {};
+      currActive.forEach(o => {
+        const p = o.customer_phone || 'unknown';
+        if (!custMap[p]) custMap[p] = { name: o.customer_name || '—', spent: 0 };
+        custMap[p].spent += o.total_amount || 0;
+      });
+      const topCusts = Object.values(custMap).sort((a,b) => b.spent-a.spent).slice(0,8);
+      const tbl = document.getElementById('an-top-customers');
+      if (tbl) {
+        tbl.innerHTML = topCusts.length
+          ? topCusts.map((c,i) => `<tr>
+              <td class="td-name">${i+1}. ${c.name}</td>
+              <td class="td-amt">${fmt(c.spent)}</td>
+            </tr>`).join('')
+          : `<tr><td class="an-top-empty">No data for this period</td></tr>`;
+      }
+
       _analyticsLoaded = true;
     }
 
@@ -2359,14 +2577,43 @@
       mainRow.classList.toggle('expanded', !isOpen);
     };
 
-    window.filterCustomers = function(q) {
-      const term = q.trim().toLowerCase();
-      if (!term) { renderCustomers(_allCustomers); return; }
-      renderCustomers(_allCustomers.filter(c =>
+    /* ── Customer sort / filter state ── */
+    let _custSortKey  = 'spent';
+    let _custTypeKey  = 'all';
+
+    function getFilteredCustomers() {
+      const term = (document.getElementById('cust-search')?.value || '').trim().toLowerCase();
+      let list = _allCustomers;
+      /* Type filter */
+      if (_custTypeKey === 'repeat') list = list.filter(c => c.orders.length >= 2);
+      else if (_custTypeKey === 'new') list = list.filter(c => c.orders.length === 1);
+      /* Search */
+      if (term) list = list.filter(c =>
         c.name.toLowerCase().includes(term) ||
         c.phone.includes(term) ||
         (c.district || '').toLowerCase().includes(term)
-      ));
+      );
+      /* Sort */
+      const sorted = [...list];
+      if (_custSortKey === 'spent')  sorted.sort((a,b) => b.totalSpent - a.totalSpent);
+      if (_custSortKey === 'orders') sorted.sort((a,b) => b.orders.length - a.orders.length);
+      if (_custSortKey === 'recent') sorted.sort((a,b) => new Date(b.orders[0]?.created_at||0) - new Date(a.orders[0]?.created_at||0));
+      if (_custSortKey === 'name')   sorted.sort((a,b) => a.name.localeCompare(b.name));
+      return sorted;
+    }
+
+    window.filterCustomers = function() {
+      renderCustomers(getFilteredCustomers());
+    };
+
+    window.sortCustomers = function(key) {
+      _custSortKey = key;
+      renderCustomers(getFilteredCustomers());
+    };
+
+    window.filterCustomerType = function(key) {
+      _custTypeKey = key;
+      renderCustomers(getFilteredCustomers());
     };
 
     window.exportCustomers = function() {
