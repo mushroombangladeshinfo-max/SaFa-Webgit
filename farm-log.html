@@ -1,0 +1,1315 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Daily Farm Log — SaFa Naturals</title>
+<link rel="icon" type="image/png" href="/favicon.png"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300&family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Hind+Siliguri:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+/* ══ Root variables (same as admin) ══ */
+:root{
+  --g900:#060e09;--g800:#0e1a13;--g700:#121f16;--g600:#172518;
+  --c:#f5efe6;--al:#d9b254;--tl:#d0724f;--a:#c49a3c;
+  --border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.13);
+  --green:#5fcf80;--green-dim:rgba(95,207,128,.1);
+  --red:#e05252;--red-dim:rgba(224,82,82,.1);
+  --gold-dim:rgba(217,178,84,.1);
+  --r:10px;--r2:6px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:14px}
+body{font-family:'DM Sans',sans-serif;background:var(--g900);color:var(--c);min-height:100vh;overflow-x:hidden}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:2px}
+
+/* ══ TOPBAR ══ */
+.fl-topbar{
+  height:58px;background:var(--g800);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 20px;gap:14px;
+  position:sticky;top:0;z-index:200;
+}
+.fl-logo{display:flex;flex-direction:column;align-items:center;text-decoration:none;padding:5px 14px;border:1px solid rgba(255,255,255,.1);border-radius:100px;background:rgba(255,255,255,.03);transition:background .2s;flex-shrink:0}
+.fl-logo:hover{background:rgba(255,255,255,.07)}
+.fl-logo-m{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:var(--c);line-height:1}
+.fl-logo-s{font-family:'Syne',sans-serif;font-size:6.5px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--al)}
+.fl-sep{width:1px;height:22px;background:var(--border);flex-shrink:0}
+.fl-topbar-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--c);flex:1;white-space:nowrap}
+.fl-date-wrap{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.fl-date-input{background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:var(--r2);padding:7px 12px;color:var(--c);font-family:'DM Mono',monospace;font-size:12px;outline:none;cursor:pointer;transition:border-color .2s;color-scheme:dark}
+.fl-date-input:focus{border-color:rgba(196,154,60,.4)}
+.fl-date-input::-webkit-calendar-picker-indicator{filter:invert(.7) sepia(1) saturate(2) hue-rotate(3deg);cursor:pointer;opacity:.6}
+.fl-autosave{font-size:11px;color:rgba(245,239,230,.35);display:flex;align-items:center;gap:5px;white-space:nowrap}
+.fl-autosave-dot{width:6px;height:6px;border-radius:50%;background:rgba(95,207,128,.5);flex-shrink:0}
+.fl-autosave-dot.saving{background:var(--al);animation:blink .8s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.fl-btn{font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:8px 14px;border-radius:var(--r2);cursor:pointer;border:1px solid var(--border);background:rgba(255,255,255,.03);color:rgba(245,239,230,.55);transition:all .2s;white-space:nowrap}
+.fl-btn:hover{border-color:var(--border2);color:var(--c);background:rgba(255,255,255,.07)}
+.fl-btn-submit{background:rgba(95,207,128,.12);border-color:rgba(95,207,128,.3);color:var(--green);padding:8px 18px}
+.fl-btn-submit:hover{background:rgba(95,207,128,.2);border-color:rgba(95,207,128,.5);color:var(--green)}
+.fl-btn-submit:disabled{opacity:.4;cursor:not-allowed}
+.back-link{font-size:11px;color:rgba(245,239,230,.38);text-decoration:none;display:flex;align-items:center;gap:5px;transition:color .2s;flex-shrink:0}
+.back-link:hover{color:rgba(245,239,230,.7)}
+.back-link svg{width:13px;height:13px}
+
+/* ══ LAYOUT ══ */
+.fl-layout{display:grid;grid-template-columns:190px 1fr 240px;min-height:calc(100vh - 58px)}
+
+/* ══ LEFT NAV ══ */
+.fl-nav{background:var(--g800);border-right:1px solid var(--border);padding:16px 8px;position:sticky;top:58px;height:calc(100vh - 58px);overflow-y:auto;display:flex;flex-direction:column;gap:3px}
+.fl-nav-sec{font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:rgba(245,239,230,.25);padding:14px 10px 4px}
+.fl-nav-btn{display:flex;align-items:center;gap:8px;width:100%;padding:9px 10px;border:1px solid transparent;border-radius:var(--r2);background:none;cursor:pointer;color:rgba(245,239,230,.5);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;text-align:left;transition:all .15s}
+.fl-nav-btn:hover{background:rgba(255,255,255,.04);color:var(--c)}
+.fl-nav-btn.active{background:rgba(217,178,84,.08);border-color:rgba(217,178,84,.2);color:var(--al)}
+.fl-nav-btn .nav-icon{font-size:14px;width:20px;text-align:center;flex-shrink:0}
+.fl-nav-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.1);margin-left:auto;flex-shrink:0;transition:background .2s}
+.fl-nav-dot.done{background:var(--green)}
+.fl-nav-dot.partial{background:var(--al)}
+
+/* ══ MAIN FORM ══ */
+.fl-main{padding:20px 24px;display:flex;flex-direction:column;gap:20px;overflow-y:auto;max-height:calc(100vh - 58px)}
+
+/* ══ SECTION CARD ══ */
+.fl-sec{background:var(--g800);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.fl-sec-header{padding:16px 20px;display:flex;align-items:center;gap:12px;cursor:pointer;user-select:none;border-bottom:1px solid transparent;transition:border-color .2s}
+.fl-sec.open .fl-sec-header{border-bottom-color:var(--border)}
+.fl-sec-icon{font-size:18px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:8px;background:rgba(255,255,255,.04);flex-shrink:0}
+.fl-sec-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--c)}
+.fl-sec-sub{font-size:11px;color:rgba(245,239,230,.38);margin-top:1px}
+.fl-sec-chevron{margin-left:auto;color:rgba(245,239,230,.3);transition:transform .25s;flex-shrink:0}
+.fl-sec.open .fl-sec-chevron{transform:rotate(180deg)}
+.fl-sec-badge{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:2px 8px;border-radius:99px;flex-shrink:0}
+.fl-sec-badge.complete{background:rgba(95,207,128,.12);border:1px solid rgba(95,207,128,.25);color:var(--green)}
+.fl-sec-badge.partial{background:var(--gold-dim);border:1px solid rgba(217,178,84,.25);color:var(--al)}
+.fl-sec-body{display:none;padding:20px}
+.fl-sec.open .fl-sec-body{display:block}
+
+/* ══ FORM FIELDS ══ */
+.fl-grid{display:grid;gap:14px;margin-bottom:16px}
+.fl-grid-2{grid-template-columns:1fr 1fr}
+.fl-grid-3{grid-template-columns:1fr 1fr 1fr}
+.fl-grid-4{grid-template-columns:1fr 1fr 1fr 1fr}
+.fl-grid-1{grid-template-columns:1fr}
+.fl-field{display:flex;flex-direction:column;gap:4px}
+.fl-label{font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:rgba(245,239,230,.4)}
+.fl-label em{font-style:normal;color:rgba(217,178,84,.7);margin-left:3px}
+.fl-input{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:var(--r2);padding:9px 12px;color:var(--c);font-family:'DM Mono',monospace;font-size:13px;outline:none;width:100%;transition:border-color .2s,background .2s;-webkit-appearance:none;appearance:none}
+.fl-input:focus{border-color:rgba(196,154,60,.4);background:rgba(255,255,255,.06)}
+.fl-input::placeholder{color:rgba(245,239,230,.2)}
+.fl-input[type="number"]::-webkit-inner-spin-button{opacity:.4}
+.fl-select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' fill='none' stroke='rgba(245,239,230,0.3)' stroke-width='2'%3E%3Cpath d='M2 4l4 4 4-4'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
+.fl-select option{background:var(--g800)}
+.fl-textarea{resize:vertical;min-height:72px;font-family:'Hind Siliguri',sans-serif;font-size:13px;line-height:1.6}
+.fl-hint{font-size:10px;color:rgba(245,239,230,.28);margin-top:2px;line-height:1.4}
+.fl-calc{font-size:11px;color:var(--al);font-family:'DM Mono',monospace;margin-top:3px;font-weight:500}
+
+/* ══ DIVIDER ══ */
+.fl-divider{height:1px;background:var(--border);margin:16px 0}
+.fl-sub-title{font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:rgba(245,239,230,.35);margin-bottom:12px}
+
+/* ══ TOGGLE ROW ══ */
+.fl-toggle-row{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.fl-toggle-label{font-size:12px;font-weight:600;color:rgba(245,239,230,.65)}
+.fl-toggle{position:relative;display:inline-block;width:36px;height:20px;cursor:pointer;flex-shrink:0}
+.fl-toggle input{opacity:0;width:0;height:0;position:absolute}
+.fl-toggle-slider{position:absolute;inset:0;border-radius:10px;background:rgba(255,255,255,.1);transition:background .2s}
+.fl-toggle-slider::after{content:'';position:absolute;left:3px;top:3px;width:14px;height:14px;border-radius:50%;background:#fff;transition:left .2s}
+.fl-toggle input:checked + .fl-toggle-slider{background:var(--green)}
+.fl-toggle input:checked + .fl-toggle-slider::after{left:19px}
+.fl-conditional{display:none}
+.fl-conditional.show{display:block}
+
+/* ══ CHECKBOX GROUP ══ */
+.fl-check-group{display:flex;gap:10px;flex-wrap:wrap}
+.fl-check-label{display:flex;align-items:center;gap:6px;font-size:12px;color:rgba(245,239,230,.65);cursor:pointer;padding:6px 12px;border:1px solid var(--border);border-radius:var(--r2);transition:all .15s}
+.fl-check-label:hover{border-color:var(--border2);color:var(--c)}
+.fl-check-label input{accent-color:var(--green)}
+.fl-check-label:has(input:checked){border-color:rgba(95,207,128,.3);background:rgba(95,207,128,.07);color:var(--green)}
+
+/* ══ METRIC PILL ══ */
+.fl-metric-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.fl-metric{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:var(--r2);padding:8px 12px;display:flex;flex-direction:column;gap:2px;min-width:100px}
+.fl-metric-val{font-family:'DM Mono',monospace;font-size:16px;font-weight:500;color:var(--c)}
+.fl-metric-val.green{color:var(--green)}
+.fl-metric-val.gold{color:var(--al)}
+.fl-metric-val.red{color:var(--red)}
+.fl-metric-lbl{font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:rgba(245,239,230,.35)}
+
+/* ══ RIGHT SUMMARY ══ */
+.fl-summary{background:var(--g800);border-left:1px solid var(--border);padding:16px;position:sticky;top:58px;height:calc(100vh - 58px);overflow-y:auto;display:flex;flex-direction:column;gap:12px}
+.fl-sum-title{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;color:rgba(245,239,230,.5);letter-spacing:.5px;text-transform:uppercase;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.fl-sum-block{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:var(--r2);padding:12px}
+.fl-sum-block-title{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:rgba(245,239,230,.3);margin-bottom:8px}
+.fl-sum-row{display:flex;justify-content:space-between;align-items:baseline;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.fl-sum-row:last-child{border-bottom:none}
+.fl-sum-key{font-size:11px;color:rgba(245,239,230,.5)}
+.fl-sum-val{font-family:'DM Mono',monospace;font-size:12px;color:var(--c);font-weight:500}
+.fl-sum-val.green{color:var(--green)}
+.fl-sum-val.red{color:var(--red)}
+.fl-sum-val.gold{color:var(--al)}
+.fl-profit-box{background:rgba(95,207,128,.07);border:1px solid rgba(95,207,128,.2);border-radius:var(--r2);padding:14px;text-align:center}
+.fl-profit-label{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:rgba(245,239,230,.4);margin-bottom:4px}
+.fl-profit-val{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:300;color:var(--green)}
+.fl-profit-val.loss{color:var(--red)}
+
+/* ══ LOG HISTORY ══ */
+.fl-history{padding:24px;border-top:1px solid var(--border);background:var(--g900);grid-column:1/-1}
+.fl-history-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px}
+.fl-history-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:var(--c)}
+.fl-tbl{width:100%;border-collapse:collapse}
+.fl-tbl th{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:rgba(245,239,230,.3);padding:8px 12px;text-align:left;border-bottom:1px solid var(--border)}
+.fl-tbl td{padding:10px 12px;font-size:12px;color:rgba(245,239,230,.75);border-bottom:1px solid rgba(255,255,255,.04)}
+.fl-tbl tr:last-child td{border-bottom:none}
+.fl-tbl tr:hover td{background:rgba(255,255,255,.02)}
+.fl-tbl .mono{font-family:'DM Mono',monospace;font-size:11px}
+.fl-tbl .tag{display:inline-flex;padding:2px 7px;border-radius:99px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.3px}
+.tag-green{background:rgba(95,207,128,.12);color:var(--green);border:1px solid rgba(95,207,128,.2)}
+.tag-red{background:var(--red-dim);color:var(--red);border:1px solid rgba(224,82,82,.2)}
+.tag-gold{background:var(--gold-dim);color:var(--al);border:1px solid rgba(217,178,84,.2)}
+
+/* ══ TOAST ══ */
+.fl-toast-stack{position:fixed;bottom:20px;right:20px;display:flex;flex-direction:column;gap:8px;z-index:9999}
+.fl-toast{padding:10px 16px;border-radius:var(--r2);font-size:12px;font-weight:600;display:flex;align-items:center;gap:8px;box-shadow:0 4px 20px rgba(0,0,0,.5);transform:translateX(110%);transition:transform .3s cubic-bezier(.16,1,.3,1);white-space:nowrap}
+.fl-toast.show{transform:translateX(0)}
+.fl-toast.success{background:rgba(95,207,128,.15);border:1px solid rgba(95,207,128,.3);color:var(--green)}
+.fl-toast.error{background:var(--red-dim);border:1px solid rgba(224,82,82,.3);color:var(--red)}
+.fl-toast.info{background:var(--g800);border:1px solid var(--border2);color:rgba(245,239,230,.8)}
+
+/* ══ RESPONSIVE ══ */
+@media(max-width:1100px){.fl-layout{grid-template-columns:160px 1fr 200px}}
+@media(max-width:860px){.fl-layout{grid-template-columns:1fr};.fl-nav{display:none};.fl-summary{position:static;height:auto;border-left:none;border-top:1px solid var(--border)}}
+@media(max-width:640px){.fl-grid-2,.fl-grid-3,.fl-grid-4{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- ══ TOPBAR ══ -->
+<header class="fl-topbar">
+  <a href="admin.html" class="back-link">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+    Admin
+  </a>
+  <div class="fl-sep"></div>
+  <a href="admin.html" class="fl-logo"><span class="fl-logo-m">SaFa</span><span class="fl-logo-s">Naturals</span></a>
+  <span class="fl-topbar-title">দৈনিক ফার্ম লগ</span>
+  <div class="fl-date-wrap">
+    <input type="date" id="log-date" class="fl-date-input" title="লগের তারিখ"/>
+  </div>
+  <div class="fl-autosave" id="autosave-status">
+    <span class="fl-autosave-dot" id="autosave-dot"></span>
+    <span id="autosave-text">Draft</span>
+  </div>
+  <button type="button" class="fl-btn" id="btn-yesterday" title="গতকালের লগ থেকে প্রারম্ভিক মান কপি করুন">গতকাল কপি</button>
+  <button type="button" class="fl-btn" id="btn-clear">পরিষ্কার</button>
+  <button type="button" class="fl-btn fl-btn-submit" id="btn-submit">জমা দিন →</button>
+</header>
+
+<!-- ══ LAYOUT ══ -->
+<div class="fl-layout" id="fl-layout">
+
+  <!-- LEFT NAV -->
+  <aside class="fl-nav" id="fl-nav">
+    <div class="fl-nav-sec">উৎপাদন</div>
+    <button type="button" class="fl-nav-btn active" data-target="sec-harvest">
+      <span class="nav-icon">🍄</span>হার্ভেস্ট<span class="fl-nav-dot" id="dot-harvest"></span>
+    </button>
+    <button type="button" class="fl-nav-btn" data-target="sec-qc">
+      <span class="nav-icon">✅</span>কোয়ালিটি<span class="fl-nav-dot" id="dot-qc"></span>
+    </button>
+    <button type="button" class="fl-nav-btn" data-target="sec-spawn">
+      <span class="nav-icon">🌱</span>স্পন<span class="fl-nav-dot" id="dot-spawn"></span>
+    </button>
+    <button type="button" class="fl-nav-btn" data-target="sec-processing">
+      <span class="nav-icon">⚙️</span>প্রসেসিং<span class="fl-nav-dot" id="dot-processing"></span>
+    </button>
+    <div class="fl-nav-sec">ব্যবসা</div>
+    <button type="button" class="fl-nav-btn" data-target="sec-sales">
+      <span class="nav-icon">📦</span>বিক্রি ও স্টক<span class="fl-nav-dot" id="dot-sales"></span>
+    </button>
+    <button type="button" class="fl-nav-btn" data-target="sec-expenses">
+      <span class="nav-icon">💰</span>দৈনিক খরচ<span class="fl-nav-dot" id="dot-expenses"></span>
+    </button>
+    <div class="fl-nav-sec">অপারেশন</div>
+    <button type="button" class="fl-nav-btn" data-target="sec-operations">
+      <span class="nav-icon">🏭</span>অপারেশন<span class="fl-nav-dot" id="dot-operations"></span>
+    </button>
+    <button type="button" class="fl-nav-btn" data-target="sec-notes">
+      <span class="nav-icon">📝</span>পর্যবেক্ষণ<span class="fl-nav-dot" id="dot-notes"></span>
+    </button>
+  </aside>
+
+  <!-- MAIN FORM -->
+  <main class="fl-main" id="fl-main">
+
+    <!-- ── SECTION 1: HARVEST ── -->
+    <div class="fl-sec open" id="sec-harvest">
+      <div class="fl-sec-header" onclick="toggleSec(this)">
+        <div class="fl-sec-icon">🍄</div>
+        <div><div class="fl-sec-title">হার্ভেস্ট</div><div class="fl-sec-sub">আজকের মোট উৎপাদন — সব পণ্য</div></div>
+        <span class="fl-sec-badge partial" id="badge-harvest">খালি</span>
+        <svg class="fl-sec-chevron" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>
+      </div>
+      <div class="fl-sec-body">
+        <div class="fl-sub-title">তাজা অয়েস্টার মাশরুম</div>
+        <div class="fl-grid fl-grid-3">
+          <div class="fl-field">
+            <label class="fl-label" for="h-fresh-a">গ্রেড A <em>(kg)</em></label>
+            <input type="number" id="h-fresh-a" class="fl-input" placeholder="0.00" min="0" step="0.01"/>
+            <span class="fl-hint">বাজারযোগ্য, সম্পূর্ণ মাশরুম</span>
+          </div>
+          <div class="fl-field">
+            <label class="fl-label" for="h-fresh-b">গ্রেড B <em>(kg)</em></label>
+            <input type="number" id="h-fresh-b" class="fl-input" placeholder="0.00" min="0" step="0.01"/>
+            <span class="fl-hint">ছোট বা সামান্য অসম্পূর্ণ</span>
+          </div>
+          <div class="fl-field">
+            <label class="fl-label" for="h-fresh-rej">বাতিল <em>(kg)</em></label>
+            <input type="number" id="h-fresh-rej" class="fl-input" placeholder="0.00" min="0" step="0.01"/>
+            <span class="fl-hint">QC-তে বাদ পড়া</span>
+          </div>
+        </div>
+        <div class="fl-metric-row">
+          <div class="fl-metric"><div class="fl-metric-val green" id="m-fresh-total">—</div><div class="fl-metric-lbl">মোট তাজা (kg)</div></div>
+          <div class="fl-metric"><div class="fl-metric-val gold" id="m-qc-rate">—</div><div class="fl-metric-lbl">QC পাশ হার</div></div>
+        </div>
+        <div class="fl-divider"></div>
+        <div class="fl-sub-title">প্রসেসড পণ্য (আউটপুট)</div>
+        <div class="fl-grid fl-grid-2">
+          <div class="fl-field">
+            <label class="fl-label" for="h-dried">শুকনো মাশরুম আউটপুট <em>(kg)</em></label>
+            <input type="number" id="h-dried" class="fl-input" placeholder="0.00" min="0" step="0.01"/>
+          </div>
+          <div class="fl-field">
+            <label class="fl-label" for="h-powder">মাশরুম পাউডার আউটপুট <em>(kg)</em></label>
+            <input type="number" id="h-powder" class="fl-input" placeholder="0.00" min="0" step="0.01"/>
+          </div>
+        </div>
+        <div class="fl-divider"></div>
+        <div class="fl-sub-title">হার্ভেস্ট করা রুম</div>
+        <div class="fl-check-group">
+          <label class="fl-check-label"><input type="checkbox" id="h-room-a" value="A"/> রুম A</label>
+          <label class="fl-check-label"><input type="checkbox" id="h-room-b" value="B"/> রুম B</label>
+          <label class="fl-check-label"><input type="checkbox" id="h-room-c" value="C"/> রুম C</label>
+        </div>
+        <div class="fl-divider"></div>
+        <div class="fl-grid fl-grid-2">
+          <div class="fl-field">
+            <label class="fl-label" for="h-primary-batch">প্রাথমিক ব্যাচ</label>
+            <input type="text" id="h-primary-batch" class="fl-input" placeholder="BAT-2025-041"/>
+          </div>
+          <div class="fl-field">
+            <label class="fl-label" for="h-flush-num">ফ্লাশ নম্বর</label>
+            <select id="h-flush-num" class="fl-input fl-select">
+              <option value="">— নির্বাচন করুন</option>
+              <option value="1">১ম ফ্লাশ</option>
+              <option value="2">২য় ফ্লাশ</option>
+              <option value="3">৩য় ফ্লাশ</option>
+              <option value="4">৪র্থ ফ্লাশ</option>
+              <option value="5">৫ম ফ্লাশ+</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SECTION 2: QUALITY CONTROL ── -->
+    <div class="fl-sec" id="sec-qc">
+      <div class="fl-sec-header" onclick="toggleSec(this)">
+        <div class="fl-sec-icon">✅</div>
+        <div><div class="fl-sec-title">কোয়ালিটি নিয়ন্ত্রণ</div><div class="fl-sec-sub">QC পাশ/ফেল, দূষণ ঘটনা</div></div>
+        <span class="fl-sec-badge partial" id="badge-qc">খালি</span>
+        <svg class="fl-sec-chevron" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>
+      </div>
+      <div class="fl-sec-body">
+        <div class="fl-grid fl-grid-3">
+          <div class="fl-field">
+            <label class="fl-label" for="qc-pass">QC পাশ <em>(kg)</em></label>
+            <input type="number" id="qc-pass" class="fl-input" placeholder="0.00" min="0" step="0.01"/>
+          </div>
+          <div class="fl-field">
+            <label class="fl-label" for="qc-fail">QC ফেল <em>(kg)</em></label>
+            <input type="number" id="qc-fail" class="fl-input" placeholder="0.00" min="0" step="0.01"/>
+          </div>
+          <div class="fl-field">
+            <label class="fl-label" for="qc-fail-reason">ফেলের কারণ</label>
+            <select id="qc-fail-reason" class="fl-input fl-select">
+              <option value="">— নির্বাচন করুন</option>
+              <option value="overripe">অতিপরিপক্ব</option>
+              <option value="damaged">ক্ষতিগ্রস্ত</option>
+              <option value="off-colour">রং অস্বাভাবিক</option>
+              <option value="contaminated">দূষিত</option>
+              <option value="undersize">আকারে ছোট</option>
+              <option value="mixed">মিশ্রিত কারণ</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="fl-divider"></div>
+        <div class="fl-toggle-row">
+          <label class="fl-toggle"><input type="checkbox" id="qc-contam-toggle" onchange="toggleConditional('qc-contam-block',this)"/><span class="fl-toggle-slider"></span></label>
+          <span class="fl-toggle-label">আজ দূষণের ঘটনা ছিল?</span>
+        </div>
+        <div class="fl-conditional" id="qc-contam-block">
+          <div class="fl-grid fl-grid-3">
+            <div class="fl-field">
+              <label class="fl-label" for="qc-contam-room">আক্রান্ত রুম</label>
+              <select id="qc-contam-room" class="fl-input fl-select">
+                <option value="">— নির্বাচন</option>
+                <option value="A">রুম A</option>
+                <option value="B">রুম B</option>
+                <option value="C">রুম C</option>
+                <option value="multiple">একাধিক</option>
+              </select>
+            </div>
+            <div class="fl-field">
+              <label class="fl-label" for="qc-contam-type">দূষণের ধরন</label>
+              <select id="qc-contam-type" class="fl-input fl-select">
+                <option value="">— নির্বাচন</option>
+                <option value="bacterial">ব্যাকটেরিয়াল</option>
+                <option value="mould">মোল্ড (ছাতা)</option>
+                <option value="trichoderma">ট্রাইকোডার্মা</option>
+                <option value="unknown">অজানা</option>
+              </select>
+            </div>
+            <div class="fl-field">
+              <label class="fl-label" for="qc-contam-bags">আক্রান্ত ব্যাগ সংখ্যা</label>
+              <input type="number" id="qc-contam-bags" class="fl-input" placeholder="0" min="0" step="1"/>
+            </div>
+          </div>
+          <div class="fl-field" style="margin-top:10px">
+            <label class="fl-label" for="qc-contam-action">ব্যবস্থা নেওয়া হয়েছে</label>
+            <input type="text" id="qc-contam-action" class="fl-input" placeholder="যেমন: ব্যাগ সরানো হয়েছে, রুম জীবাণুমুক্ত করা হয়েছে..."/>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SECTION 3: SPAWN & SUBSTRATE ── -->
+    <div class="fl-sec" id="sec-spawn">
+      <div class="fl-sec-header" onclick="toggleSec(this)">
+        <div class="fl-sec-icon">🌱</div>
+        <div><div class="fl-sec-title">স্পন ও সাবস্ট্রেট</div><div class="fl-sec-sub">কেনা, ব্যবহার, ব্যাগ তৈরি</div></div>
+        <span class="fl-sec-badge partial" id="badge-spawn">খালি</span>
+        <svg class="fl-sec-chevron" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>
+      </div>
+      <div class="fl-sec-body">
+        <div class="fl-toggle-row">
+          <label class="fl-toggle"><input type="checkbox" id="spawn-bought-toggle" onchange="toggleConditional('spawn-bought-block',this)"/><span class="fl-toggle-slider"></span></label>
+          <span class="fl-toggle-label">আজ স্পন কেনা হয়েছে?</span>
+        </div>
+        <div class="fl-conditional" id="spawn-bought-block">
+          <div class="fl-grid fl-grid-3">
+            <div class="fl-field">
+              <label class="fl-label" for="sp-bought-kg">কেনার পরিমাণ <em>(kg)</em></label>
+              <input type="number" id="sp-bought-kg" class="fl-input" placeholder="0.00" min="0" step="0.1" oninput="calcSpawnCost()"/>
+            </div>
+            <div class="fl-field">
+              <label class="fl-label" for="sp-price-per-kg">প্রতি kg মূল্য <em>(৳)</em></label>
+              <input type="number" id="sp-price-per-kg" class="fl-input" placeholder="0" min="0" oninput="calcSpawnCost()"/>
+              <span class="fl-calc" id="spawn-total-cost"></span>
+            </div>
+            <div class="fl-field">
+              <label class="fl-label" for="sp-supplier">সরবরাহকারী</label>
+              <input type="text" id="sp-supplier" class="fl-input" placeholder="সরবরাহকারীর নাম"/>
+            </div>
+          </div>
+          <div class="fl-divider"></div>
+        </div>
+
+        <div class="fl-grid fl-grid-2">
+          <div class="fl-field">
+            <label class="fl-label" for="sp-used-kg">আজ ব্যবহৃত স্পন <em>(kg)</em></label>
+            <input type="number" id="sp-used-kg" class="fl-input" placeholder="0.00" min="0" step="0.1"/>
+          </div>
+          <div class="fl-field">
+            <label class="fl-label" for="sp-substrate-kg">প্রস্তুত সাবস্ট্রেট <em>(kg শুষ্ক)</em></label>
+            <input type="number" id="sp-substrate-kg" class="fl-input" placeholder="0.00" min="0" step="0.1"/>
+          </div>
+        </div>
+        <div class="fl-grid fl-grid-3" style="margin-top:10px">
+          <div class="fl-field">
+            <label class="fl-label" for="sp-substrate-type">সাবস্ট্রেট ধরন</label>
+            <select id="sp-substrate-type" class="fl-input fl-select">
+              <option value="">— নির্বাচন</option>
+              <option value="wheat_straw">গমের খড়</option>
+              <option value="sawdust">করাতের গুঁড়া</option>
+              <option value="rice_straw">ধানের খড়</option>
+              <option value="mixed">মিশ্রিত</option>
+            </select>
+          </div>
+          <div class="fl-field">
+            <label class="fl-label" for="sp-bags-inoculated">টিকা দেওয়া ব্যাগ</label>
+            <input type="number" id="sp-bags-inoculated" class="fl-input" placeholder="0" min="0" step="1"/>
+          </div>
+          <div class="fl-field">
+            <label class="fl-label" for="sp-bags-discarded">বাতিল ব্যাগ</label>
+            <input type="number" id="sp-bags-discarded" class="fl-input" placeholder="0" min="0" step="1"/>
+            <span class="fl-hint">দূষণ বা ব্যর্থতার কারণে</span>
+          </div>
+        </div>
+        <div class="fl-metric-row">
+          <div class="fl-metric"><div class="fl-metric-val" id="m-spawn-rate">—</div><div class="fl-metric-lbl">স্পন রেট</div></div>
+          <div class="fl-metric"><div class="fl-metric-val" id="m-bag-success">—</div><div class="fl-metric-lbl">ব্যাগ সাফল্য হার</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SECTION 4: PROCESSING ── -->
+    <div class="fl-sec" id="sec-processing">
+      <div class="fl-sec-header" onclick="toggleSec(this)">
+        <div class="fl-sec-icon">⚙️</div>
+        <div><div class="fl-sec-title">প্রসেসিং</div><div class="fl-sec-sub">তাজা→শুকনো→পাউডার রূপান্তর</div></div>
+        <span class="fl-sec-badge partial" id="badge-processing">খালি</span>
+        <svg class="fl-sec-chevron" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>
+      </div>
+      <div class="fl-sec-body">
+        <div class="fl-sub-title">তাজা → শুকনো</div>
+        <div class="fl-grid fl-grid-2">
+          <div class="fl-field">
+            <label class="fl-label" for="pr-fresh-in">ড্রায়ারে দেওয়া তাজা মাশরুম <em>(kg)</em></label>
+            <input type="number" id="pr-fresh-in" class="fl-input" placeholder="0.00" min="0" step="0.01" oninput="calcDryYield()"/>
+          </div>
+          <div class="fl-field">
+            <label class="fl-label" for="pr-dried-out">শুকনো মাশরুম পাওয়া গেছে <em>(kg)</em></label>
+            <input type="number" id="pr-dried-out" class="fl-input" placeholder="0.00" min="0" step="0.01" oninput="calcDryYield()"/>
+            <span class="fl-calc" id="dry-yield-pct"></span>
+          </div>
+        </div>
+        <div class="fl-divider"></div>
+        <div class="fl-sub-title">শুকনো → পাউডার</div>
+        <div class="fl-grid fl-grid-2">
+          <div class="fl-field">
+            <label class="fl-label" for="pr-dried-in">গ্রাইন্ডারে দেওয়া শুকনো মাশরুম <em>(kg)</em></label>
+            <input type="number" id="pr-dried-in" class="fl-input" placeholder="0.00" min="0" step="0.01" oninput="calcPowderYield()"/>
+          </div>
+          <div class="fl-field">
+            <label class="fl-label" for="pr-powder-out">পাউডার পাওয়া গেছে <em>(kg)</em></label>
+            <input type="number" id="pr-powder-out" class="fl-input" placeholder="0.00" min="0" step="0.01" oninput="calcPowderYield()"/>
+            <span class="fl-calc" id="powder-yield-pct"></span>
+          </div>
+        </div>
+        <div class="fl-field" style="margin-top:10px">
+          <label class="fl-label" for="pr-notes">প্রসেসিং মন্তব্য</label>
+          <input type="text" id="pr-notes" class="fl-input" placeholder="যন্ত্রপাতির অবস্থা, অস্বাভাবিকতা..."/>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SECTION 5: SALES & STOCK ── -->
+    <div class="fl-sec" id="sec-sales">
+      <div class="fl-sec-header" onclick="toggleSec(this)">
+        <div class="fl-sec-icon">📦</div>
+        <div><div class="fl-sec-title">বিক্রি ও স্টক</div><div class="fl-sec-sub">আজকের বিক্রয়, দিনশেষের মজুদ</div></div>
+        <span class="fl-sec-badge partial" id="badge-sales">খালি</span>
+        <svg class="fl-sec-chevron" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>
+      </div>
+      <div class="fl-sec-body">
+        <div class="fl-sub-title">আজকের বিক্রয়</div>
+        <div class="fl-grid fl-grid-3">
+          <div class="fl-field">
+            <label class="fl-label" for="s-fresh-kg">তাজা বিক্রি <em>(kg)</em></label>
+            <input type="number" id="s-fresh-kg" class="fl-input" placeholder="0.00" min="0" step="0.01" oninput="calcRevenue()"/>
+          </div>
+          <div class="fl-field">
+            <label class="fl-label" for="s-fresh-price">প্রতি kg মূল্য <em>(৳)</em></label>
+            <input type="number" id="s-fresh-price" class="fl-input" placeholder="350" min="0" oninput="calcRevenue()"/>
+          </div>
+          <div class="fl-field">
+            <label class="fl-label">তাজা রাজস্ব</label>
+            <div class="fl-input" style="background:rgba(95,207,128,.05);color:var(--green)" id="s-fresh-rev">৳ 0</div>
+          </div>
+        </div>
+        <div class="fl-grid fl-grid-3" style="margin-top:10px">
+          <div class="fl-field">
+            <label class="fl-label" for="s-dried-kg">শুকনো বিক্রি <em>(kg)</em></label>
+            <input type="number" id="s-dried-kg" class="fl-input" placeholder="0.00" min="0" step="0.01" oninput="calcRevenue()"/>
+          </div>
+          <div class="fl-field">
+            <label class="fl-label" for="s-dried-price">প্রতি kg মূল্য <em>(৳)</em></label>
+            <input type="number" id="s-dried-price" class="fl-input" placeholder="2800" min="0" oninput="calcRevenue()"/>
+          </div>
+          <div class="fl-field">
+            <label class="fl-label">শুকনো রাজস্ব</label>
+            <div class="fl-input" style="background:rgba(95,207,128,.05);color:var(--green)" id="s-dried-rev">৳ 0</div>
+          </div>
+        </div>
+        <div class="fl-grid fl-grid-3" style="margin-top:10px">
+          <div class="fl-field">
+            <label class="fl-label" for="s-powder-kg">পাউডার বিক্রি <em>(kg)</em></label>
+            <input type="number" id="s-powder-kg" class="fl-input" placeholder="0.00" min="0" step="0.01" oninput="calcRevenue()"/>
+          </div>
+          <div class="fl-field">
+            <label class="fl-label" for="s-powder-price">প্রতি kg মূল্য <em>(৳)</em></label>
+            <input type="number" id="s-powder-price" class="fl-input" placeholder="3500" min="0" oninput="calcRevenue()"/>
+          </div>
+          <div class="fl-field">
+            <label class="fl-label">পাউডার রাজস্ব</label>
+            <div class="fl-input" style="background:rgba(95,207,128,.05);color:var(--green)" id="s-powder-rev">৳ 0</div>
+          </div>
+        </div>
+        <div class="fl-grid fl-grid-2" style="margin-top:10px">
+          <div class="fl-field">
+            <label class="fl-label" for="s-orders">পূর্ণ হওয়া অর্ডার</label>
+            <input type="number" id="s-orders" class="fl-input" placeholder="0" min="0" step="1"/>
+          </div>
+          <div class="fl-field">
+            <label class="fl-label" for="s-waste">নষ্ট/নিক্ষিপ্ত <em>(kg)</em></label>
+            <input type="number" id="s-waste" class="fl-input" placeholder="0.00" min="0" step="0.01"/>
+            <span class="fl-hint">বিক্রি না হওয়া বা পচে যাওয়া</span>
+          </div>
+        </div>
+
+        <div class="fl-divider"></div>
+        <div class="fl-toggle-row">
+          <label class="fl-toggle"><input type="checkbox" id="s-b2b-toggle" onchange="toggleConditional('s-b2b-block',this)"/><span class="fl-toggle-slider"></span></label>
+          <span class="fl-toggle-label">আজ B2B অর্ডার ছিল?</span>
+        </div>
+        <div class="fl-conditional" id="s-b2b-block">
+          <div class="fl-grid fl-grid-3">
+            <div class="fl-field">
+              <label class="fl-label" for="s-b2b-name">B2B ক্লায়েন্ট</label>
+              <input type="text" id="s-b2b-name" class="fl-input" placeholder="রেস্টুরেন্ট/ক্যাফে নাম"/>
+            </div>
+            <div class="fl-field">
+              <label class="fl-label" for="s-b2b-qty">পরিমাণ <em>(kg)</em></label>
+              <input type="number" id="s-b2b-qty" class="fl-input" placeholder="0.00" min="0" step="0.01"/>
+            </div>
+            <div class="fl-field">
+              <label class="fl-label" for="s-b2b-value">মূল্য <em>(৳)</em></label>
+              <input type="number" id="s-b2b-value" class="fl-input" placeholder="0" min="0"/>
+            </div>
+          </div>
+          <div class="fl-divider"></div>
+        </div>
+
+        <div class="fl-sub-title">দিনশেষের মজুদ (ক্লোজিং স্টক)</div>
+        <div class="fl-grid fl-grid-3">
+          <div class="fl-field">
+            <label class="fl-label" for="st-fresh">তাজা স্টক <em>(kg)</em></label>
+            <input type="number" id="st-fresh" class="fl-input" placeholder="0.00" min="0" step="0.01"/>
+          </div>
+          <div class="fl-field">
+            <label class="fl-label" for="st-dried">শুকনো স্টক <em>(kg)</em></label>
+            <input type="number" id="st-dried" class="fl-input" placeholder="0.00" min="0" step="0.01"/>
+          </div>
+          <div class="fl-field">
+            <label class="fl-label" for="st-powder">পাউডার স্টক <em>(kg)</em></label>
+            <input type="number" id="st-powder" class="fl-input" placeholder="0.00" min="0" step="0.01"/>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SECTION 6: EXPENSES ── -->
+    <div class="fl-sec" id="sec-expenses">
+      <div class="fl-sec-header" onclick="toggleSec(this)">
+        <div class="fl-sec-icon">💰</div>
+        <div><div class="fl-sec-title">দৈনিক খরচ</div><div class="fl-sec-sub">COGS ও পরিচালন ব্যয়</div></div>
+        <span class="fl-sec-badge partial" id="badge-expenses">খালি</span>
+        <svg class="fl-sec-chevron" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>
+      </div>
+      <div class="fl-sec-body">
+        <div class="fl-grid fl-grid-3">
+          <div class="fl-field">
+            <label class="fl-label" for="ex-spawn">স্পন কেনার খরচ <em>(৳)</em></label>
+            <input type="number" id="ex-spawn" class="fl-input" placeholder="0" min="0" oninput="calcExpenses()"/>
+            <span class="fl-hint">স্পন সেকশন থেকে অটো-ফিল করুন</span>
+          </div>
+          <div class="fl-field">
+            <label class="fl-label" for="ex-substrate">সাবস্ট্রেট / উপকরণ <em>(৳)</em></label>
+            <input type="number" id="ex-substrate" class="fl-input" placeholder="0" min="0" oninput="calcExpenses()"/>
+          </div>
+          <div class="fl-field">
+            <label class="fl-label" for="ex-packaging">প্যাকেজিং <em>(৳)</em></label>
+            <input type="number" id="ex-packaging" class="fl-input" placeholder="0" min="0" oninput="calcExpenses()"/>
+          </div>
+          <div class="fl-field">
+            <label class="fl-label" for="ex-labor">শ্রম মজুরি <em>(৳)</em></label>
+            <input type="number" id="ex-labor" class="fl-input" placeholder="0" min="0" oninput="calcExpenses()"/>
+          </div>
+          <div class="fl-field">
+            <label class="fl-label" for="ex-electricity">বিদ্যুৎ <em>(৳)</em></label>
+            <input type="number" id="ex-electricity" class="fl-input" placeholder="0" min="0" oninput="calcExpenses()"/>
+          </div>
+          <div class="fl-field">
+            <label class="fl-label" for="ex-transport">পরিবহন/ডেলিভারি <em>(৳)</em></label>
+            <input type="number" id="ex-transport" class="fl-input" placeholder="0" min="0" oninput="calcExpenses()"/>
+          </div>
+          <div class="fl-field">
+            <label class="fl-label" for="ex-water">পানি ও ইউটিলিটি <em>(৳)</em></label>
+            <input type="number" id="ex-water" class="fl-input" placeholder="0" min="0" oninput="calcExpenses()"/>
+          </div>
+          <div class="fl-field">
+            <label class="fl-label" for="ex-other">অন্যান্য <em>(৳)</em></label>
+            <input type="number" id="ex-other" class="fl-input" placeholder="0" min="0" oninput="calcExpenses()"/>
+          </div>
+          <div class="fl-field">
+            <label class="fl-label">মোট খরচ</label>
+            <div class="fl-input" style="background:var(--red-dim);color:var(--red)" id="ex-total">৳ 0</div>
+          </div>
+        </div>
+        <div class="fl-field" style="margin-top:10px">
+          <label class="fl-label" for="ex-notes">খরচের মন্তব্য</label>
+          <input type="text" id="ex-notes" class="fl-input" placeholder="অন্যান্য খরচের বিস্তারিত..."/>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SECTION 7: OPERATIONS ── -->
+    <div class="fl-sec" id="sec-operations">
+      <div class="fl-sec-header" onclick="toggleSec(this)">
+        <div class="fl-sec-icon">🏭</div>
+        <div><div class="fl-sec-title">অপারেশন</div><div class="fl-sec-sub">রুম, ব্যাগ, ব্যাচ, কর্মী</div></div>
+        <span class="fl-sec-badge partial" id="badge-operations">খালি</span>
+        <svg class="fl-sec-chevron" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>
+      </div>
+      <div class="fl-sec-body">
+        <div class="fl-grid fl-grid-4">
+          <div class="fl-field">
+            <label class="fl-label" for="op-rooms">সক্রিয় রুম</label>
+            <input type="number" id="op-rooms" class="fl-input" placeholder="0" min="0" max="10" step="1"/>
+          </div>
+          <div class="fl-field">
+            <label class="fl-label" for="op-bags-total">মোট ব্যাগ উৎপাদনে</label>
+            <input type="number" id="op-bags-total" class="fl-input" placeholder="0" min="0" step="1"/>
+          </div>
+          <div class="fl-field">
+            <label class="fl-label" for="op-workers">উপস্থিত কর্মী</label>
+            <input type="number" id="op-workers" class="fl-input" placeholder="0" min="0" step="1"/>
+          </div>
+          <div class="fl-field">
+            <label class="fl-label" for="op-shifts">কাজের শিফট</label>
+            <input type="number" id="op-shifts" class="fl-input" placeholder="0" min="0" max="3" step="1"/>
+          </div>
+          <div class="fl-field">
+            <label class="fl-label" for="op-new-batches">নতুন ব্যাচ শুরু</label>
+            <input type="number" id="op-new-batches" class="fl-input" placeholder="0" min="0" step="1"/>
+          </div>
+          <div class="fl-field">
+            <label class="fl-label" for="op-done-batches">ব্যাচ সম্পন্ন</label>
+            <input type="number" id="op-done-batches" class="fl-input" placeholder="0" min="0" step="1"/>
+          </div>
+          <div class="fl-field">
+            <label class="fl-label" for="op-bags-removed">সরানো ব্যাগ</label>
+            <input type="number" id="op-bags-removed" class="fl-input" placeholder="0" min="0" step="1"/>
+            <span class="fl-hint">দূষণ বা সম্পন্ন</span>
+          </div>
+          <div class="fl-field">
+            <label class="fl-label" for="op-energy-kwh">বিদ্যুৎ ব্যবহার <em>(kWh)</em></label>
+            <input type="number" id="op-energy-kwh" class="fl-input" placeholder="0.0" min="0" step="0.1"/>
+          </div>
+        </div>
+        <div class="fl-divider"></div>
+        <div class="fl-toggle-row">
+          <label class="fl-toggle"><input type="checkbox" id="op-issue-toggle" onchange="toggleConditional('op-issue-block',this)"/><span class="fl-toggle-slider"></span></label>
+          <span class="fl-toggle-label">আজ যন্ত্রপাতির সমস্যা ছিল?</span>
+        </div>
+        <div class="fl-conditional" id="op-issue-block">
+          <div class="fl-field">
+            <label class="fl-label" for="op-issue-desc">সমস্যার বিবরণ</label>
+            <textarea id="op-issue-desc" class="fl-input fl-textarea" placeholder="কোন যন্ত্র, কী সমস্যা, সমাধান করা হয়েছে কিনা..."></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SECTION 8: NOTES ── -->
+    <div class="fl-sec" id="sec-notes">
+      <div class="fl-sec-header" onclick="toggleSec(this)">
+        <div class="fl-sec-icon">📝</div>
+        <div><div class="fl-sec-title">পর্যবেক্ষণ ও পরিকল্পনা</div><div class="fl-sec-sub">দৈনিক মন্তব্য, আবহাওয়া, পরের দিনের পরিকল্পনা</div></div>
+        <span class="fl-sec-badge partial" id="badge-notes">খালি</span>
+        <svg class="fl-sec-chevron" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>
+      </div>
+      <div class="fl-sec-body">
+        <div class="fl-grid fl-grid-2">
+          <div class="fl-field">
+            <label class="fl-label" for="n-weather">আবহাওয়ার অবস্থা</label>
+            <select id="n-weather" class="fl-input fl-select">
+              <option value="">— নির্বাচন</option>
+              <option value="normal">স্বাভাবিক</option>
+              <option value="hot">গরম</option>
+              <option value="rainy">বৃষ্টি</option>
+              <option value="cold">ঠান্ডা</option>
+              <option value="humid">অতিআর্দ্র</option>
+              <option value="stormy">ঝড়</option>
+            </select>
+          </div>
+          <div class="fl-field">
+            <label class="fl-label" for="n-overall-rating">আজকের রেটিং</label>
+            <select id="n-overall-rating" class="fl-input fl-select">
+              <option value="">— নির্বাচন</option>
+              <option value="5">⭐⭐⭐⭐⭐ চমৎকার</option>
+              <option value="4">⭐⭐⭐⭐ ভালো</option>
+              <option value="3">⭐⭐⭐ স্বাভাবিক</option>
+              <option value="2">⭐⭐ খারাপ</option>
+              <option value="1">⭐ খুব খারাপ</option>
+            </select>
+          </div>
+        </div>
+        <div class="fl-field" style="margin-top:10px">
+          <label class="fl-label" for="n-observations">আজকের পর্যবেক্ষণ</label>
+          <textarea id="n-observations" class="fl-input fl-textarea" placeholder="মাশরুমের বৃদ্ধি, রঙ, গন্ধ, অস্বাভাবিক কিছু — যা মনে হয়েছে সব লিখুন..." rows="4"></textarea>
+        </div>
+        <div class="fl-field" style="margin-top:10px">
+          <label class="fl-label" for="n-tomorrow">কাল কী করতে হবে</label>
+          <textarea id="n-tomorrow" class="fl-input fl-textarea" placeholder="কাল হার্ভেস্ট করতে হবে, ব্যাচ চেক করতে হবে, উপকরণ কিনতে হবে..." rows="3"></textarea>
+        </div>
+        <div class="fl-field" style="margin-top:10px">
+          <label class="fl-label" for="n-unusual">অস্বাভাবিক ঘটনা</label>
+          <textarea id="n-unusual" class="fl-input fl-textarea" placeholder="বিদ্যুৎ বিভ্রাট, অনুপস্থিত কর্মী, যন্ত্র বিকল, দর্শনার্থী..."></textarea>
+        </div>
+      </div>
+    </div>
+
+  </main><!-- /fl-main -->
+
+  <!-- RIGHT SUMMARY -->
+  <aside class="fl-summary" id="fl-summary">
+    <div class="fl-sum-title">আজকের সারসংক্ষেপ</div>
+
+    <!-- Net profit box -->
+    <div class="fl-profit-box">
+      <div class="fl-profit-label">নিট লাভ/ক্ষতি</div>
+      <div class="fl-profit-val" id="sum-net">৳ 0</div>
+    </div>
+
+    <!-- Production -->
+    <div class="fl-sum-block">
+      <div class="fl-sum-block-title">উৎপাদন</div>
+      <div class="fl-sum-row"><span class="fl-sum-key">মোট তাজা</span><span class="fl-sum-val green" id="sum-fresh-total">— kg</span></div>
+      <div class="fl-sum-row"><span class="fl-sum-key">শুকনো আউটপুট</span><span class="fl-sum-val" id="sum-dried-out">— kg</span></div>
+      <div class="fl-sum-row"><span class="fl-sum-key">পাউডার আউটপুট</span><span class="fl-sum-val" id="sum-powder-out">— kg</span></div>
+      <div class="fl-sum-row"><span class="fl-sum-key">QC পাশ হার</span><span class="fl-sum-val gold" id="sum-qc">—</span></div>
+    </div>
+
+    <!-- Processing yields -->
+    <div class="fl-sum-block">
+      <div class="fl-sum-block-title">প্রসেসিং ইল্ড</div>
+      <div class="fl-sum-row"><span class="fl-sum-key">ড্রায়িং ইল্ড</span><span class="fl-sum-val" id="sum-dry-yield">—</span></div>
+      <div class="fl-sum-row"><span class="fl-sum-key">পাউডার ইল্ড</span><span class="fl-sum-val" id="sum-powder-yield">—</span></div>
+    </div>
+
+    <!-- Financials -->
+    <div class="fl-sum-block">
+      <div class="fl-sum-block-title">আর্থিক</div>
+      <div class="fl-sum-row"><span class="fl-sum-key">মোট রাজস্ব</span><span class="fl-sum-val green" id="sum-revenue">৳ 0</span></div>
+      <div class="fl-sum-row"><span class="fl-sum-key">মোট খরচ</span><span class="fl-sum-val red" id="sum-expenses">৳ 0</span></div>
+      <div class="fl-sum-row"><span class="fl-sum-key">Revenue/kg</span><span class="fl-sum-val" id="sum-rev-per-kg">—</span></div>
+      <div class="fl-sum-row"><span class="fl-sum-key">Cost/kg</span><span class="fl-sum-val" id="sum-cost-per-kg">—</span></div>
+    </div>
+
+    <!-- Stock -->
+    <div class="fl-sum-block">
+      <div class="fl-sum-block-title">ক্লোজিং স্টক</div>
+      <div class="fl-sum-row"><span class="fl-sum-key">তাজা</span><span class="fl-sum-val" id="sum-st-fresh">— kg</span></div>
+      <div class="fl-sum-row"><span class="fl-sum-key">শুকনো</span><span class="fl-sum-val" id="sum-st-dried">— kg</span></div>
+      <div class="fl-sum-row"><span class="fl-sum-key">পাউডার</span><span class="fl-sum-val" id="sum-st-powder">— kg</span></div>
+    </div>
+
+    <!-- Spawn -->
+    <div class="fl-sum-block">
+      <div class="fl-sum-block-title">স্পন ও অপারেশন</div>
+      <div class="fl-sum-row"><span class="fl-sum-key">ব্যাগ ইনোকুলেটেড</span><span class="fl-sum-val" id="sum-bags-in">—</span></div>
+      <div class="fl-sum-row"><span class="fl-sum-key">মোট ব্যাগ</span><span class="fl-sum-val" id="sum-bags-total">—</span></div>
+      <div class="fl-sum-row"><span class="fl-sum-key">kWh ব্যবহৃত</span><span class="fl-sum-val" id="sum-kwh">—</span></div>
+    </div>
+  </aside>
+
+</div><!-- /fl-layout -->
+
+<!-- LOG HISTORY (full-width) -->
+<div id="fl-history-wrap" style="grid-column:1/-1;padding:24px;border-top:1px solid var(--border)">
+  <div class="fl-history-header">
+    <span class="fl-history-title">সাম্প্রতিক লগ — শেষ ৩০ দিন</span>
+    <div style="display:flex;gap:10px">
+      <button type="button" class="fl-btn" id="btn-export-history">CSV Export</button>
+      <button type="button" class="fl-btn" id="btn-refresh-history">↻ রিফ্রেশ</button>
+    </div>
+  </div>
+  <div style="overflow-x:auto">
+    <table class="fl-tbl" id="history-tbl">
+      <thead><tr>
+        <th>তারিখ</th><th>তাজা (kg)</th><th>শুকনো (kg)</th><th>পাউডার (kg)</th>
+        <th>QC পাশ%</th><th>রাজস্ব (৳)</th><th>খরচ (৳)</th><th>নিট (৳)</th>
+        <th>ব্যাগ</th><th>রেটিং</th><th></th>
+      </tr></thead>
+      <tbody id="history-tbody"><tr><td colspan="11" style="text-align:center;color:rgba(245,239,230,.3);padding:32px">লগ লোড হচ্ছে…</td></tr></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- TOAST STACK -->
+<div class="fl-toast-stack" id="toast-stack"></div>
+
+<!-- ══ SUPABASE SQL SCHEMA REFERENCE (run in Supabase SQL editor) ══
+CREATE TABLE farm_daily_logs (
+  id              BIGSERIAL PRIMARY KEY,
+  log_date        DATE NOT NULL,
+  created_at      TIMESTAMPTZ DEFAULT NOW(),
+  updated_at      TIMESTAMPTZ DEFAULT NOW(),
+  -- Harvest
+  harvest_fresh_a NUMERIC(8,3), harvest_fresh_b NUMERIC(8,3), harvest_fresh_rej NUMERIC(8,3),
+  harvest_dried   NUMERIC(8,3), harvest_powder  NUMERIC(8,3),
+  harvest_rooms   TEXT[], harvest_primary_batch TEXT, harvest_flush_num INT,
+  -- QC
+  qc_pass NUMERIC(8,3), qc_fail NUMERIC(8,3), qc_fail_reason TEXT,
+  contam_event BOOLEAN DEFAULT FALSE, contam_room TEXT, contam_type TEXT,
+  contam_bags INT, contam_action TEXT,
+  -- Spawn
+  spawn_bought_kg NUMERIC(8,3), spawn_price_per_kg NUMERIC(8,2), spawn_supplier TEXT,
+  spawn_used_kg NUMERIC(8,3), substrate_kg NUMERIC(8,3), substrate_type TEXT,
+  bags_inoculated INT, bags_discarded INT,
+  -- Processing
+  pr_fresh_in NUMERIC(8,3), pr_dried_out NUMERIC(8,3),
+  pr_dried_in NUMERIC(8,3), pr_powder_out NUMERIC(8,3), pr_notes TEXT,
+  -- Sales
+  s_fresh_kg NUMERIC(8,3), s_fresh_price NUMERIC(8,2),
+  s_dried_kg NUMERIC(8,3), s_dried_price NUMERIC(8,2),
+  s_powder_kg NUMERIC(8,3), s_powder_price NUMERIC(8,2),
+  s_orders INT, s_waste NUMERIC(8,3),
+  s_b2b_name TEXT, s_b2b_qty NUMERIC(8,3), s_b2b_value NUMERIC(10,2),
+  st_fresh NUMERIC(8,3), st_dried NUMERIC(8,3), st_powder NUMERIC(8,3),
+  -- Expenses
+  ex_spawn NUMERIC(10,2), ex_substrate NUMERIC(10,2), ex_packaging NUMERIC(10,2),
+  ex_labor NUMERIC(10,2), ex_electricity NUMERIC(10,2), ex_transport NUMERIC(10,2),
+  ex_water NUMERIC(10,2), ex_other NUMERIC(10,2), ex_notes TEXT,
+  -- Operations
+  op_rooms INT, op_bags_total INT, op_workers INT, op_shifts INT,
+  op_new_batches INT, op_done_batches INT, op_bags_removed INT,
+  op_energy_kwh NUMERIC(8,2), op_issue BOOLEAN DEFAULT FALSE, op_issue_desc TEXT,
+  -- Notes
+  n_weather TEXT, n_overall_rating INT, n_observations TEXT,
+  n_tomorrow TEXT, n_unusual TEXT,
+  -- Submitted by
+  submitted_by TEXT,
+  UNIQUE(log_date)
+);
+ALTER TABLE farm_daily_logs ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "admin_all" ON farm_daily_logs FOR ALL TO authenticated USING (true);
+-->
+
+<script type="module">
+import { createClient } from '@supabase/supabase-js';
+const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_ANON_KEY
+);
+
+const ADMIN_EMAILS = ['mushroombangladesh.info@gmail.com','quazishab@gmail.com'];
+const STORAGE_KEY  = () => `safa_farmlog_draft_${document.getElementById('log-date').value}`;
+const fmt          = n  => '৳ ' + Math.round(n||0).toLocaleString('en-BD');
+const fmtKg        = n  => n ? (+n).toFixed(2) + ' kg' : '—';
+const pct          = (a, b) => b > 0 ? ((a/b)*100).toFixed(1) + '%' : '—';
+
+/* ── AUTH ── */
+(async () => {
+  const { data:{ session } } = await supabase.auth.getSession();
+  if (!session || !ADMIN_EMAILS.includes(session.user.email)) {
+    window.location.href = 'admin.html';
+  }
+})();
+
+/* ── DATE ── */
+const dateEl = document.getElementById('log-date');
+dateEl.value = new Date().toISOString().slice(0,10);
+dateEl.addEventListener('change', () => { loadDraft(); loadHistory(); });
+
+/* ── TOAST ── */
+function toast(msg, type='info') {
+  const stack = document.getElementById('toast-stack');
+  const el = document.createElement('div');
+  el.className = `fl-toast ${type}`;
+  el.innerHTML = `<span>${msg}</span>`;
+  stack.appendChild(el);
+  requestAnimationFrame(() => el.classList.add('show'));
+  setTimeout(() => { el.classList.remove('show'); setTimeout(() => el.remove(), 350); }, 3000);
+}
+
+/* ── SECTION TOGGLE ── */
+window.toggleSec = function(header) {
+  const sec = header.closest('.fl-sec');
+  sec.classList.toggle('open');
+};
+window.toggleConditional = function(id, checkbox) {
+  document.getElementById(id).classList.toggle('show', checkbox.checked);
+};
+
+/* ── NAV SCROLL ── */
+document.querySelectorAll('.fl-nav-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const target = document.getElementById(btn.dataset.target);
+    if (!target) return;
+    if (!target.classList.contains('open')) target.querySelector('.fl-sec-header').click();
+    target.scrollIntoView({ behavior:'smooth', block:'start' });
+    document.querySelectorAll('.fl-nav-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  });
+});
+
+/* ── LIVE CALCULATIONS ── */
+function n(id) { return parseFloat(document.getElementById(id)?.value) || 0; }
+function set(id, val) { const el=document.getElementById(id); if(el) el.textContent=val; }
+
+function calcAll() {
+  // Harvest totals
+  const freshA = n('h-fresh-a'), freshB = n('h-fresh-b'), freshRej = n('h-fresh-rej');
+  const freshTotal = freshA + freshB + freshRej;
+  const qcPass = freshTotal > 0 ? ((freshA+freshB)/freshTotal*100).toFixed(1)+'%' : '—';
+  set('m-fresh-total', freshTotal > 0 ? freshTotal.toFixed(2)+' kg' : '—');
+  set('m-qc-rate', qcPass);
+  set('sum-fresh-total', fmtKg(freshTotal));
+  set('sum-qc', qcPass);
+  set('sum-dried-out', fmtKg(n('h-dried')));
+  set('sum-powder-out', fmtKg(n('h-powder')));
+
+  // Spawn rate
+  const spUsed = n('sp-used-kg'), subKg = n('sp-substrate-kg');
+  const spawnRate = subKg > 0 ? (spUsed/subKg*100).toFixed(1)+'%' : '—';
+  set('m-spawn-rate', spawnRate);
+  const bagsIno = n('sp-bags-inoculated'), bagsDis = n('sp-bags-discarded');
+  const totalBagsOp = bagsIno + bagsDis;
+  set('m-bag-success', totalBagsOp > 0 ? ((bagsIno/totalBagsOp)*100).toFixed(1)+'%' : '—');
+  set('sum-bags-in', bagsIno || '—');
+
+  // Processing yields
+  const freshIn=n('pr-fresh-in'), driedOut=n('pr-dried-out');
+  const dryYield = freshIn>0 ? (driedOut/freshIn*100).toFixed(1)+'%' : '—';
+  set('dry-yield-pct', freshIn>0 ? `ইল্ড: ${dryYield}` : '');
+  set('sum-dry-yield', dryYield);
+  const driedIn=n('pr-dried-in'), powOut=n('pr-powder-out');
+  const powYield = driedIn>0 ? (powOut/driedIn*100).toFixed(1)+'%' : '—';
+  set('powder-yield-pct', driedIn>0 ? `ইল্ড: ${powYield}` : '');
+  set('sum-powder-yield', powYield);
+
+  // Revenue
+  const revFresh  = n('s-fresh-kg')  * n('s-fresh-price');
+  const revDried  = n('s-dried-kg')  * n('s-dried-price');
+  const revPowder = n('s-powder-kg') * n('s-powder-price');
+  const totalRev  = revFresh + revDried + revPowder;
+  document.getElementById('s-fresh-rev').textContent  = fmt(revFresh);
+  document.getElementById('s-dried-rev').textContent  = fmt(revDried);
+  document.getElementById('s-powder-rev').textContent = fmt(revPowder);
+  set('sum-revenue', fmt(totalRev));
+
+  // Expenses
+  const expFields = ['ex-spawn','ex-substrate','ex-packaging','ex-labor','ex-electricity','ex-transport','ex-water','ex-other'];
+  const totalExp  = expFields.reduce((s,id) => s+n(id), 0);
+  document.getElementById('ex-total').textContent = fmt(totalExp);
+  set('sum-expenses', fmt(totalExp));
+
+  // Net
+  const net = totalRev - totalExp;
+  const netEl = document.getElementById('sum-net');
+  if (netEl) { netEl.textContent = fmt(net); netEl.className = 'fl-profit-val'+(net<0?' loss':''); }
+
+  // Per-kg metrics
+  const totalKgSold = n('s-fresh-kg') + n('s-dried-kg')*10 + n('s-powder-kg')*20; // rough fresh eq.
+  set('sum-rev-per-kg', totalKgSold > 0 ? fmt(totalRev/totalKgSold)+'/kg' : '—');
+  set('sum-cost-per-kg', freshTotal > 0 ? fmt(totalExp/freshTotal)+'/kg' : '—');
+
+  // Stock
+  set('sum-st-fresh',  fmtKg(n('st-fresh')));
+  set('sum-st-dried',  fmtKg(n('st-dried')));
+  set('sum-st-powder', fmtKg(n('st-powder')));
+
+  // Ops
+  set('sum-bags-total', n('op-bags-total') || '—');
+  set('sum-kwh', n('op-energy-kwh') ? n('op-energy-kwh').toFixed(1)+' kWh' : '—');
+
+  updateNavDots();
+  autoSave();
+}
+
+/* Trigger calcAll on any input change */
+window.calcDryYield    = calcAll;
+window.calcPowderYield = calcAll;
+window.calcRevenue     = calcAll;
+window.calcExpenses    = calcAll;
+window.calcSpawnCost   = function() {
+  const total = n('sp-bought-kg') * n('sp-price-per-kg');
+  const el = document.getElementById('spawn-total-cost');
+  if (el) el.textContent = total > 0 ? 'মোট: '+fmt(total) : '';
+  document.getElementById('ex-spawn').value = total > 0 ? total.toFixed(0) : '';
+  calcAll();
+};
+
+document.addEventListener('input', e => {
+  if (e.target.classList.contains('fl-input')) calcAll();
+});
+document.addEventListener('change', e => {
+  if (e.target.classList.contains('fl-input') || e.target.classList.contains('fl-check-label')) calcAll();
+});
+
+/* ── NAV DOTS ── */
+function sectionFilled(secId) {
+  const sec = document.getElementById(secId);
+  if (!sec) return false;
+  const inputs = sec.querySelectorAll('input[type="number"],input[type="text"],select,textarea');
+  let filled = 0;
+  inputs.forEach(i => { if (i.value) filled++; });
+  return { filled, total: inputs.length, done: filled >= Math.ceil(inputs.length * 0.4) };
+}
+function updateNavDots() {
+  const secs = ['harvest','qc','spawn','processing','sales','expenses','operations','notes'];
+  secs.forEach(s => {
+    const d = sectionFilled('sec-'+s);
+    const dot = document.getElementById('dot-'+s);
+    if (!dot) return;
+    if (d.done) { dot.classList.add('done'); dot.classList.remove('partial'); }
+    else if (d.filled > 0) { dot.classList.add('partial'); dot.classList.remove('done'); }
+    else { dot.classList.remove('done','partial'); }
+  });
+}
+
+/* ── AUTOSAVE ── */
+let _saveT;
+function autoSave() {
+  clearTimeout(_saveT);
+  _saveT = setTimeout(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY(), JSON.stringify(collectFormData()));
+      const dot = document.getElementById('autosave-dot');
+      const txt = document.getElementById('autosave-text');
+      if (dot) dot.classList.remove('saving');
+      if (txt) txt.textContent = 'Draft saved';
+    } catch(e) {}
+  }, 800);
+  const dot = document.getElementById('autosave-dot');
+  if (dot) dot.classList.add('saving');
+}
+
+function loadDraft() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY());
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    Object.entries(data).forEach(([id, val]) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      if (el.type === 'checkbox') { el.checked = !!val; toggleConditional(el.dataset.target, el); }
+      else el.value = val ?? '';
+    });
+    calcAll();
+    toast('গতকালের ড্রাফট লোড হয়েছে', 'info');
+  } catch(e) {}
+}
+
+function collectFormData() {
+  const out = {};
+  document.querySelectorAll('.fl-input, input[type="checkbox"]').forEach(el => {
+    if (!el.id) return;
+    out[el.id] = el.type === 'checkbox' ? el.checked : el.value;
+  });
+  return out;
+}
+
+/* ── CLEAR ── */
+document.getElementById('btn-clear').addEventListener('click', () => {
+  if (!confirm('সমস্ত ডেটা মুছে ফেলা হবে। নিশ্চিত?')) return;
+  document.querySelectorAll('.fl-input, input[type="checkbox"]').forEach(el => {
+    if (el.type === 'checkbox') { el.checked = false; }
+    else el.value = '';
+  });
+  document.querySelectorAll('.fl-conditional').forEach(el => el.classList.remove('show'));
+  calcAll();
+  localStorage.removeItem(STORAGE_KEY());
+  toast('ফর্ম পরিষ্কার হয়েছে', 'info');
+});
+
+/* ── COPY YESTERDAY ── */
+document.getElementById('btn-yesterday').addEventListener('click', () => {
+  const today = new Date(dateEl.value);
+  today.setDate(today.getDate()-1);
+  const yd = today.toISOString().slice(0,10);
+  const raw = localStorage.getItem(`safa_farmlog_draft_${yd}`);
+  if (!raw) { toast('গতকালের কোনো ড্রাফট পাওয়া যায়নি', 'error'); return; }
+  const data = JSON.parse(raw);
+  // Only copy ops/spawn defaults, not harvest/sales
+  const opFields = ['sp-price-per-kg','sp-supplier','sp-substrate-type','s-fresh-price','s-dried-price','s-powder-price','op-rooms','op-workers','op-bags-total'];
+  opFields.forEach(id => { const el=document.getElementById(id); if(el&&data[id]) el.value=data[id]; });
+  calcAll();
+  toast('গতকালের মূল্য ও অপারেশন ডেটা কপি হয়েছে', 'success');
+});
+
+/* ── SUBMIT ── */
+document.getElementById('btn-submit').addEventListener('click', async () => {
+  const btn = document.getElementById('btn-submit');
+  const harvestA = n('h-fresh-a');
+  if (!harvestA && !n('h-dried') && !n('h-powder')) {
+    toast('হার্ভেস্ট সেকশনে অন্তত একটি মান দিন', 'error'); return;
+  }
+  btn.disabled = true; btn.textContent = 'জমা হচ্ছে…';
+
+  const rooms = ['A','B','C'].filter(r => document.getElementById('h-room-'+r.toLowerCase())?.checked);
+  const payload = {
+    log_date: dateEl.value,
+    harvest_fresh_a:  n('h-fresh-a') || null,  harvest_fresh_b:  n('h-fresh-b') || null,
+    harvest_fresh_rej:n('h-fresh-rej')|| null, harvest_dried:    n('h-dried')   || null,
+    harvest_powder:   n('h-powder')  || null,  harvest_rooms:    rooms.length ? rooms : null,
+    harvest_primary_batch: document.getElementById('h-primary-batch').value || null,
+    harvest_flush_num:n('h-flush-num') || null,
+    qc_pass:n('qc-pass')||null, qc_fail:n('qc-fail')||null,
+    qc_fail_reason:document.getElementById('qc-fail-reason').value||null,
+    contam_event:document.getElementById('qc-contam-toggle').checked,
+    contam_room:document.getElementById('qc-contam-room').value||null,
+    contam_type:document.getElementById('qc-contam-type').value||null,
+    contam_bags:n('qc-contam-bags')||null,
+    contam_action:document.getElementById('qc-contam-action').value||null,
+    spawn_bought_kg:n('sp-bought-kg')||null,
+    spawn_price_per_kg:n('sp-price-per-kg')||null,
+    spawn_supplier:document.getElementById('sp-supplier').value||null,
+    spawn_used_kg:n('sp-used-kg')||null, substrate_kg:n('sp-substrate-kg')||null,
+    substrate_type:document.getElementById('sp-substrate-type').value||null,
+    bags_inoculated:n('sp-bags-inoculated')||null, bags_discarded:n('sp-bags-discarded')||null,
+    pr_fresh_in:n('pr-fresh-in')||null, pr_dried_out:n('pr-dried-out')||null,
+    pr_dried_in:n('pr-dried-in')||null, pr_powder_out:n('pr-powder-out')||null,
+    pr_notes:document.getElementById('pr-notes').value||null,
+    s_fresh_kg:n('s-fresh-kg')||null, s_fresh_price:n('s-fresh-price')||null,
+    s_dried_kg:n('s-dried-kg')||null, s_dried_price:n('s-dried-price')||null,
+    s_powder_kg:n('s-powder-kg')||null, s_powder_price:n('s-powder-price')||null,
+    s_orders:n('s-orders')||null, s_waste:n('s-waste')||null,
+    s_b2b_name:document.getElementById('s-b2b-name').value||null,
+    s_b2b_qty:n('s-b2b-qty')||null, s_b2b_value:n('s-b2b-value')||null,
+    st_fresh:n('st-fresh')||null, st_dried:n('st-dried')||null, st_powder:n('st-powder')||null,
+    ex_spawn:n('ex-spawn')||null, ex_substrate:n('ex-substrate')||null,
+    ex_packaging:n('ex-packaging')||null, ex_labor:n('ex-labor')||null,
+    ex_electricity:n('ex-electricity')||null, ex_transport:n('ex-transport')||null,
+    ex_water:n('ex-water')||null, ex_other:n('ex-other')||null,
+    ex_notes:document.getElementById('ex-notes').value||null,
+    op_rooms:n('op-rooms')||null, op_bags_total:n('op-bags-total')||null,
+    op_workers:n('op-workers')||null, op_shifts:n('op-shifts')||null,
+    op_new_batches:n('op-new-batches')||null, op_done_batches:n('op-done-batches')||null,
+    op_bags_removed:n('op-bags-removed')||null, op_energy_kwh:n('op-energy-kwh')||null,
+    op_issue:document.getElementById('op-issue-toggle').checked,
+    op_issue_desc:document.getElementById('op-issue-desc').value||null,
+    n_weather:document.getElementById('n-weather').value||null,
+    n_overall_rating:n('n-overall-rating')||null,
+    n_observations:document.getElementById('n-observations').value||null,
+    n_tomorrow:document.getElementById('n-tomorrow').value||null,
+    n_unusual:document.getElementById('n-unusual').value||null,
+  };
+
+  try {
+    const { error } = await supabase.from('farm_daily_logs')
+      .upsert(payload, { onConflict:'log_date' });
+    if (error) throw error;
+    localStorage.removeItem(STORAGE_KEY());
+    toast('লগ সফলভাবে জমা হয়েছে ✓', 'success');
+    document.getElementById('autosave-text').textContent = 'Submitted ✓';
+    loadHistory();
+  } catch(err) {
+    toast('জমা হয়নি: '+err.message, 'error');
+    console.error(err);
+  } finally {
+    btn.disabled = false; btn.textContent = 'জমা দিন →';
+  }
+});
+
+/* ── HISTORY ── */
+async function loadHistory() {
+  const tbody = document.getElementById('history-tbody');
+  tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;color:rgba(245,239,230,.3);padding:24px">লোড হচ্ছে…</td></tr>';
+  try {
+    const { data, error } = await supabase.from('farm_daily_logs')
+      .select('log_date,harvest_fresh_a,harvest_fresh_b,harvest_fresh_rej,harvest_dried,harvest_powder,qc_pass,qc_fail,s_fresh_kg,s_fresh_price,s_dried_kg,s_dried_price,s_powder_kg,s_powder_price,ex_spawn,ex_substrate,ex_packaging,ex_labor,ex_electricity,ex_transport,ex_water,ex_other,op_bags_total,n_overall_rating')
+      .order('log_date',{ascending:false}).limit(30);
+    if (error) throw error;
+    if (!data?.length) { tbody.innerHTML='<tr><td colspan="11" style="text-align:center;color:rgba(245,239,230,.3);padding:32px">কোনো লগ নেই — প্রথম লগ জমা দিন!</td></tr>'; return; }
+    _historyData = data;
+    tbody.innerHTML = data.map(r => {
+      const freshTotal = (r.harvest_fresh_a||0)+(r.harvest_fresh_b||0)+(r.harvest_fresh_rej||0);
+      const qcPct = freshTotal>0 ? (((r.qc_pass||0)/freshTotal)*100).toFixed(0)+'%' : '—';
+      const rev = ((r.s_fresh_kg||0)*(r.s_fresh_price||350)) + ((r.s_dried_kg||0)*(r.s_dried_price||2800)) + ((r.s_powder_kg||0)*(r.s_powder_price||3500));
+      const exp = (r.ex_spawn||0)+(r.ex_substrate||0)+(r.ex_packaging||0)+(r.ex_labor||0)+(r.ex_electricity||0)+(r.ex_transport||0)+(r.ex_water||0)+(r.ex_other||0);
+      const net = rev - exp;
+      const stars = r.n_overall_rating ? '⭐'.repeat(r.n_overall_rating) : '—';
+      return `<tr>
+        <td class="mono">${r.log_date}</td>
+        <td class="mono">${freshTotal.toFixed(2)}</td>
+        <td class="mono">${(r.harvest_dried||0).toFixed(2)}</td>
+        <td class="mono">${(r.harvest_powder||0).toFixed(2)}</td>
+        <td><span class="tag ${parseFloat(qcPct)>=90?'tag-green':parseFloat(qcPct)>=70?'tag-gold':'tag-red'}">${qcPct}</span></td>
+        <td class="mono" style="color:var(--green)">${Math.round(rev).toLocaleString()}</td>
+        <td class="mono" style="color:var(--red)">${Math.round(exp).toLocaleString()}</td>
+        <td class="mono" style="color:${net>=0?'var(--green)':'var(--red)'}">${Math.round(net).toLocaleString()}</td>
+        <td class="mono">${r.op_bags_total||'—'}</td>
+        <td style="font-size:11px">${stars}</td>
+        <td><button type="button" class="fl-btn" style="padding:3px 8px;font-size:8px" onclick="loadLog('${r.log_date}')">লোড</button></td>
+      </tr>`;
+    }).join('');
+  } catch(err) {
+    tbody.innerHTML=`<tr><td colspan="11" style="text-align:center;color:var(--red);padding:24px">ত্রুটি: ${err.message}</td></tr>`;
+  }
+}
+
+window.loadLog = async function(date) {
+  const { data, error } = await supabase.from('farm_daily_logs').select('*').eq('log_date',date).single();
+  if (error||!data) { toast('লগ লোড করা যায়নি', 'error'); return; }
+  dateEl.value = date;
+  const map = {
+    'h-fresh-a':'harvest_fresh_a','h-fresh-b':'harvest_fresh_b','h-fresh-rej':'harvest_fresh_rej',
+    'h-dried':'harvest_dried','h-powder':'harvest_powder','h-primary-batch':'harvest_primary_batch',
+    'h-flush-num':'harvest_flush_num','qc-pass':'qc_pass','qc-fail':'qc_fail',
+    'qc-fail-reason':'qc_fail_reason','qc-contam-room':'contam_room','qc-contam-type':'contam_type',
+    'qc-contam-bags':'contam_bags','qc-contam-action':'contam_action',
+    'sp-bought-kg':'spawn_bought_kg','sp-price-per-kg':'spawn_price_per_kg','sp-supplier':'spawn_supplier',
+    'sp-used-kg':'spawn_used_kg','sp-substrate-kg':'substrate_kg','sp-substrate-type':'substrate_type',
+    'sp-bags-inoculated':'bags_inoculated','sp-bags-discarded':'bags_discarded',
+    'pr-fresh-in':'pr_fresh_in','pr-dried-out':'pr_dried_out','pr-dried-in':'pr_dried_in',
+    'pr-powder-out':'pr_powder_out','pr-notes':'pr_notes',
+    's-fresh-kg':'s_fresh_kg','s-fresh-price':'s_fresh_price','s-dried-kg':'s_dried_kg',
+    's-dried-price':'s_dried_price','s-powder-kg':'s_powder_kg','s-powder-price':'s_powder_price',
+    's-orders':'s_orders','s-waste':'s_waste','s-b2b-name':'s_b2b_name',
+    's-b2b-qty':'s_b2b_qty','s-b2b-value':'s_b2b_value',
+    'st-fresh':'st_fresh','st-dried':'st_dried','st-powder':'st_powder',
+    'ex-spawn':'ex_spawn','ex-substrate':'ex_substrate','ex-packaging':'ex_packaging',
+    'ex-labor':'ex_labor','ex-electricity':'ex_electricity','ex-transport':'ex_transport',
+    'ex-water':'ex_water','ex-other':'ex_other','ex-notes':'ex_notes',
+    'op-rooms':'op_rooms','op-bags-total':'op_bags_total','op-workers':'op_workers',
+    'op-shifts':'op_shifts','op-new-batches':'op_new_batches','op-done-batches':'op_done_batches',
+    'op-bags-removed':'op_bags_removed','op-energy-kwh':'op_energy_kwh','op-issue-desc':'op_issue_desc',
+    'n-weather':'n_weather','n-overall-rating':'n_overall_rating',
+    'n-observations':'n_observations','n-tomorrow':'n_tomorrow','n-unusual':'n_unusual',
+  };
+  Object.entries(map).forEach(([formId, dbCol]) => {
+    const el = document.getElementById(formId);
+    if (el && data[dbCol] != null) el.value = data[dbCol];
+  });
+  if (data.contam_event) { document.getElementById('qc-contam-toggle').checked=true; document.getElementById('qc-contam-block').classList.add('show'); }
+  if (data.op_issue)     { document.getElementById('op-issue-toggle').checked=true;  document.getElementById('op-issue-block').classList.add('show'); }
+  if (data.harvest_rooms) data.harvest_rooms.forEach(r => { const el=document.getElementById('h-room-'+r.toLowerCase()); if(el) el.checked=true; });
+  calcAll();
+  toast(`${date} এর লগ লোড হয়েছে`, 'success');
+  window.scrollTo({ top:0, behavior:'smooth' });
+};
+
+/* ── EXPORT CSV ── */
+let _historyData = [];
+document.getElementById('btn-export-history').addEventListener('click', () => {
+  if (!_historyData.length) { toast('লগ নেই', 'error'); return; }
+  const headers = ['Date','Fresh A (kg)','Fresh B (kg)','Fresh Rej (kg)','Dried (kg)','Powder (kg)','QC Pass (kg)','QC Fail (kg)','Bags','Rating'];
+  const rows = _historyData.map(r => [
+    r.log_date, r.harvest_fresh_a||0, r.harvest_fresh_b||0, r.harvest_fresh_rej||0,
+    r.harvest_dried||0, r.harvest_powder||0, r.qc_pass||0, r.qc_fail||0,
+    r.op_bags_total||0, r.n_overall_rating||''
+  ]);
+  const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+  const a = Object.assign(document.createElement('a'), {
+    href: 'data:text/csv;charset=utf-8,'+encodeURIComponent(csv),
+    download: `safa-farm-log-${new Date().toISOString().slice(0,10)}.csv`
+  });
+  a.click();
+  toast('CSV এক্সপোর্ট হয়েছে', 'success');
+});
+
+document.getElementById('btn-refresh-history').addEventListener('click', loadHistory);
+
+/* ── INIT ── */
+loadDraft();
+loadHistory();
+calcAll();
+</script>
+</body>
+</html>
