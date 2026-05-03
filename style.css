@@ -1595,71 +1595,268 @@ img {
   line-height: 1.8;
 }
 
-/* Vision card grid */
-.vision-grid {
+/* ── Roadmap / Vision Redesign ── */
+.roadmap-wrap {
+  position: relative;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+/* Horizontal connecting line — desktop only */
+.roadmap-line {
+  display: none;
+}
+@media (min-width: 769px) {
+  .roadmap-line {
+    display: block;
+    position: absolute;
+    top: 16px; /* half of dot height 32px */
+    left: calc(12.5% + 2px);
+    right: calc(12.5% + 2px);
+    height: 2px;
+    background: linear-gradient(
+      90deg,
+      rgba(95, 207, 128, 1)    0%,
+      rgba(95, 207, 128, 0.5) 26%,
+      rgba(196, 154, 60, 0.35) 52%,
+      rgba(255, 255, 255, 0.1) 78%
+    );
+    border-radius: 2px;
+  }
+}
+.roadmap-rail {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 14px;
+  gap: 12px;
+  align-items: start;
 }
-.vc {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 6px;
-  padding: 26px 20px;
+.rp {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+/* Timeline dot */
+.rp-dot-wrap {
   position: relative;
-  transition: background 0.2s, border-color 0.2s;
+  z-index: 1;
+  margin-bottom: 18px;
 }
-.vc:hover {
-  background: rgba(255, 255, 255, 0.07);
-  border-color: rgba(255, 255, 255, 0.12);
-}
-/* Live/active card */
-.vc.live { border-color: rgba(95, 207, 128, 0.35); background: rgba(95, 207, 128, 0.08); }
-.vc.live:hover { border-color: rgba(95, 207, 128, 0.45); background: rgba(95, 207, 128, 0.12); }
-
-.vc-icon {
-  font-size: 26px;
-  margin-bottom: 12px;
-  display: inline-flex;
-  width: 42px;
-  height: 42px;
+.rp-dot {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.12);
+  background: var(--g700);
+  display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(196, 154, 60, 0.08);
-  border: 1px solid rgba(196, 154, 60, 0.18);
-  border-radius: 50%;
+  font-family: var(--fl);
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.3);
 }
-.vc h3,
-.vc-heading {
-  font-family: var(--fd);
-  font-size: 20px;
-  font-weight: 300;
-  color: #f5efe6; /* Fully opaque for max readability */
-  margin-bottom: 7px;
-  line-height: 1.2;
+.rp-dot.live {
+  border-color: #5fcf80;
+  background: rgba(95, 207, 128, 0.15);
+  color: #5fcf80;
+  position: relative;
 }
-.vc p {
-  font-size: 13.5px;
-  font-weight: 400;
-  color: rgba(245, 239, 230, 0.88);
-  line-height: 1.65;
-}
-
-/* Status pills */
-.vc-pill {
+.rp-dot.live svg { width: 14px; height: 14px; }
+.rp-dot.live::after {
+  content: '';
   position: absolute;
-  top: 12px;
-  right: 12px;
+  inset: -5px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(95, 207, 128, 0.4);
+  will-change: transform, opacity;
+  animation: rp-pulse 2.8s ease-in-out infinite;
+}
+@keyframes rp-pulse {
+  0%, 100% { transform: scale(1);   opacity: 0.7; }
+  50%       { transform: scale(1.4); opacity: 0; }
+}
+.rp-dot.soon   { border-color: rgba(196, 154, 60, 0.5); color: rgba(196, 154, 60, 0.7); }
+.rp-dot.later  { border-color: rgba(255, 255, 255, 0.15); color: rgba(255, 255, 255, 0.25); }
+/* Phase card */
+.rp-card {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 20px 18px 18px;
+  transition: border-color 0.2s, background 0.2s;
+}
+.rp-card.live {
+  background: rgba(95, 207, 128, 0.06);
+  border-color: rgba(95, 207, 128, 0.28);
+  box-shadow: 0 4px 32px rgba(95, 207, 128, 0.07);
+}
+.rp-card.live:hover {
+  border-color: rgba(95, 207, 128, 0.4);
+  background: rgba(95, 207, 128, 0.09);
+}
+.rp-card:not(.live):hover {
+  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+}
+/* Badge */
+.rp-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   font-family: var(--fl);
   font-size: 9px;
   font-weight: 700;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  padding: 4px 10px;
-  border-radius: 3px;
+  padding: 3px 10px;
+  border-radius: 99px;
+  margin-bottom: 14px;
 }
-.pill-now  { background: rgba(95, 207, 128, 0.14); border: 1px solid rgba(95, 207, 128, 0.28); color: #5fcf80; }
-.pill-soon { background: rgba(196, 154, 60, 0.15); border: 1px solid rgba(196, 154, 60, 0.32); color: var(--al); }
+.rp-badge.live  { background: rgba(95, 207, 128, 0.14); border: 1px solid rgba(95, 207, 128, 0.3); color: #5fcf80; }
+.rp-badge.soon  { background: rgba(196, 154, 60, 0.12); border: 1px solid rgba(196, 154, 60, 0.28); color: var(--al); }
+.rp-badge.later { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: rgba(245, 239, 230, 0.4); }
+.rp-badge .badge-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+/* Icon */
+.rp-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+.rp-icon.live-ico  { background: rgba(95, 207, 128, 0.12); color: #5fcf80; }
+.rp-icon.soon-ico  { background: rgba(196, 154, 60, 0.1);  color: var(--al); }
+.rp-icon.later-ico { background: rgba(255, 255, 255, 0.05); color: rgba(245, 239, 230, 0.35); }
+.rp-icon svg { width: 20px; height: 20px; }
+/* Text */
+.rp-title {
+  font-family: var(--fd);
+  font-size: 17px;
+  font-weight: 400;
+  color: var(--c);
+  line-height: 1.25;
+  margin-bottom: 7px;
+}
+.rp-card:not(.live) .rp-title { color: rgba(245, 239, 230, 0.6); }
+.rp-body {
+  font-size: 13px;
+  color: rgba(245, 239, 230, 0.55);
+  line-height: 1.7;
+  margin-bottom: 14px;
+  font-family: 'Hind Siliguri', sans-serif;
+}
+.rp-card.live .rp-body { color: rgba(245, 239, 230, 0.82); }
+/* Live card feature list */
+.rp-features {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 16px;
+}
+.rp-features li {
+  font-size: 12.5px;
+  color: rgba(245, 239, 230, 0.75);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: 'Hind Siliguri', sans-serif;
+}
+.rp-features li::before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #5fcf80;
+  flex-shrink: 0;
+}
+/* CTAs */
+.rp-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 16px;
+  background: linear-gradient(135deg, rgba(95, 207, 128, 0.2), rgba(95, 207, 128, 0.12));
+  border: 1px solid rgba(95, 207, 128, 0.35);
+  border-radius: 8px;
+  color: #5fcf80;
+  text-decoration: none;
+  font-family: var(--fl);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition: all 0.2s;
+  width: 100%;
+  justify-content: center;
+}
+.rp-cta:hover { background: rgba(95, 207, 128, 0.2); border-color: rgba(95, 207, 128, 0.5); }
+.rp-cta svg { width: 12px; height: 12px; }
+.rp-notify {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  color: rgba(245, 239, 230, 0.35);
+  cursor: pointer;
+  text-decoration: none;
+  transition: color 0.2s;
+  font-family: 'DM Sans', sans-serif;
+}
+.rp-notify:hover { color: var(--al); }
+.rp-notify svg { width: 12px; height: 12px; }
+/* Bottom notify bar */
+.vision-notify-bar {
+  max-width: 1100px;
+  margin: 28px auto 0;
+  background: rgba(196, 154, 60, 0.05);
+  border: 1px solid rgba(196, 154, 60, 0.14);
+  border-radius: 14px;
+  padding: 22px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.vnb-text { font-size: 15px; font-weight: 500; color: rgba(245, 239, 230, 0.75); }
+.vnb-text em { font-style: normal; color: var(--al); }
+.vnb-wa {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 20px;
+  background: rgba(37, 211, 102, 0.12);
+  border: 1px solid rgba(37, 211, 102, 0.28);
+  border-radius: 8px;
+  color: #25d366;
+  text-decoration: none;
+  font-family: var(--fl);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.vnb-wa:hover { background: rgba(37, 211, 102, 0.18); border-color: rgba(37, 211, 102, 0.45); }
+.vnb-wa svg { width: 15px; height: 15px; }
+/* Responsive */
+@media (max-width: 992px) {
+  .roadmap-rail { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 768px) {
+  .roadmap-rail { grid-template-columns: 1fr; }
+  .rp { flex-direction: row; align-items: flex-start; gap: 14px; }
+  .rp-dot-wrap { margin-bottom: 0; flex-shrink: 0; margin-top: 4px; }
+  .rp-card { flex: 1; }
+  .vision-notify-bar { flex-direction: column; align-items: flex-start; padding: 18px 20px; }
+  .roadmap-line { display: none !important; }
+}
 
 /* ── IoT Technology Section ── */
 .iot-section {
