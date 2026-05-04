@@ -9,17 +9,6 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <!-- Auth guard: hides UI until session verified, redirects to admin.html if not admin -->
 <style>html.auth-checking *:not(style) { visibility:hidden !important; }</style>
-<script type="module">
-  import { createClient } from '@supabase/supabase-js';
-  import { requireAdmin }  from '/src/admin-auth.js';
-  document.documentElement.classList.add('auth-checking');
-  (async () => {
-    const sb = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY);
-    const session = await requireAdmin(sb);
-    if (!session) { window.location.replace('admin.html'); }
-    else           { document.documentElement.classList.remove('auth-checking'); }
-  })();
-</script>
 <!-- Toast -->
 <div class="dash-toast" id="dash-toast"></div>
 <!-- Modal -->
@@ -334,6 +323,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);disp
 .hw-list{display:flex;flex-direction:column;gap:7px;font-size:.78rem;color:var(--txt2)}
 .hw-list strong{color:var(--txt);font-weight:600}
 </style>
+  <script type="module" crossorigin src="/assets/dashboard-B0LIWzas.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/index-DshXEMtg.js">
+  <link rel="modulepreload" crossorigin href="/assets/admin-auth-CZb-V-WK.js">
 </head>
 <body>
 
@@ -2108,7 +2100,7 @@ function renderRoomCards() {
 //  OUTDOOR WEATHER (OpenWeatherMap)
 //  Free tier: 60 calls/min — we only call on load + every 30 min
 // ══════════════════════════════════════
-const OWM_KEY = '%VITE_OWM_KEY%'
+const OWM_KEY = ''
 
 async function fetchWeather() {
   if (!OWM_KEY) {

@@ -30,6 +30,8 @@ import {
   getCartCount,
 } from './cart.js';
 
+import { trackAddToCart } from './analytics.js';
+
 
 /* ============================================================
    1. CART DRAWER
@@ -427,6 +429,7 @@ export function initAddToCartButtons() {
 
       /* Add to cart data + open drawer */
       addToCart(name, price, id, unit, image);
+      trackAddToCart(name, price, id);
       renderCartDrawer();
       openCartDrawer();
 

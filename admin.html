@@ -416,6 +416,7 @@
     /* Shared table chevron cell */
     .td-chevron { width:28px; padding:14px 8px 14px 16px; }
     .td-nowrap { white-space:nowrap; }
+    .od-tracking-badge { display:inline-flex; align-items:center; gap:5px; font-family:'Syne',sans-serif; font-size:9px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:#5fcf80; background:rgba(95,207,128,.1); border:1px solid rgba(95,207,128,.25); border-radius:5px; padding:7px 12px; }
 
     /* ══ CUSTOMERS ══ */
     .cust-toolbar { display:flex; align-items:center; gap:12px; margin-bottom:18px; flex-wrap:wrap; }
@@ -1610,6 +1611,16 @@
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
               Print Receipt
             </button>
+            ${o.tracking_code
+              ? `<span class="od-tracking-badge">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                  ${o.tracking_code}
+                </span>`
+              : `<button type="button" class="f-action-btn" onclick="createSteadFastShipment('${o.id}')">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 17H3a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v4"/><circle cx="18" cy="18" r="3"/><circle cx="7" cy="18" r="3"/></svg>
+                  Ship via SteadFast
+                </button>`
+            }
           </div>
         </div>`;
     }
@@ -1805,6 +1816,65 @@
       w.document.close();
       w.focus();
       setTimeout(()=>{ w.print(); w.close(); }, 300);
+    };
+
+    /* ════════════════ STEADFAST COURIER ════════════════ */
+
+    const STEADFAST_KEY    = import.meta.env.VITE_STEADFAST_KEY    || '';
+    const STEADFAST_SECRET = import.meta.env.VITE_STEADFAST_SECRET || '';
+
+    window.createSteadFastShipment = async function(orderId) {
+      if (!STEADFAST_KEY || !STEADFAST_SECRET) {
+        toast('Add VITE_STEADFAST_KEY + VITE_STEADFAST_SECRET to .env first', 'error');
+        return;
+      }
+      const o = S.orders.find(x => x.id === orderId);
+      if (!o) { toast('Order not found', 'error'); return; }
+
+      const btn = document.querySelector(`button[onclick="createSteadFastShipment('${orderId}')"]`);
+      if (btn) { btn.disabled = true; btn.textContent = 'Creating…'; }
+
+      try {
+        /* SteadFast API: https://portal.steadfast.com.bd/api/v1/create_order
+           ⚠ Production note: move this call to a Supabase Edge Function so the
+           API key is never bundled into the client-side JS. */
+        const res = await fetch('https://portal.steadfast.com.bd/api/v1/create_order', {
+          method: 'POST',
+          headers: {
+            'Api-Key':    STEADFAST_KEY,
+            'Secret-Key': STEADFAST_SECRET,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            invoice:           o.order_number,
+            recipient_name:    o.customer_name,
+            recipient_phone:   o.customer_phone,
+            recipient_address: `${o.full_address}, ${o.thana}, ${o.district}`,
+            cod_amount:        o.total_amount,
+            note:              o.special_notes || '',
+          }),
+        });
+
+        if (!res.ok) throw new Error(`SteadFast API error: ${res.status}`);
+        const data = await res.json();
+        const trackingCode = data?.consignment?.tracking_code || data?.tracking_code;
+        if (!trackingCode) throw new Error('No tracking code in response');
+
+        /* Persist tracking code to Supabase order */
+        const { error } = await supabase
+          .from('orders')
+          .update({ tracking_code: trackingCode })
+          .eq('id', orderId);
+        if (error) throw error;
+
+        toast(`Shipment created ✓ — ${trackingCode}`);
+        updateStatus(orderId, 'processing');
+        fetchOrders();
+      } catch (err) {
+        toast(`SteadFast error: ${err.message}`, 'error');
+        console.error('[Admin] SteadFast:', err);
+        if (btn) { btn.disabled = false; btn.textContent = 'Ship via SteadFast'; }
+      }
     };
 
     /* ════════════════ PROMOTIONS ════════════════ */
