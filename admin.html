@@ -415,6 +415,7 @@
     .cust-wa-wrap { margin-top:12px; }
     /* Shared table chevron cell */
     .td-chevron { width:28px; padding:14px 8px 14px 16px; }
+    .td-nowrap { white-space:nowrap; }
 
     /* ══ CUSTOMERS ══ */
     .cust-toolbar { display:flex; align-items:center; gap:12px; margin-bottom:18px; flex-wrap:wrap; }
@@ -2363,7 +2364,7 @@
               <span class="tog-track"><span class="tog-thumb"></span></span>
             </label>
           </td>
-          <td onclick="event.stopPropagation()" style="white-space:nowrap">
+          <td onclick="event.stopPropagation()" class="td-nowrap">
             <button type="button" class="f-action-btn prod-edit-btn"
                     onclick="editProduct('${p.id}')">Edit</button>
             <button type="button" class="f-clear-btn"
