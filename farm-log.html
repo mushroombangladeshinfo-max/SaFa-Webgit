@@ -893,28 +893,45 @@ CREATE TABLE farm_daily_logs (
   UNIQUE(log_date)
 );
 ALTER TABLE farm_daily_logs ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "admin_all" ON farm_daily_logs FOR ALL TO authenticated USING (true);
+-- Replace the broad policy with this admin-only version:
+-- DROP POLICY IF EXISTS "admin_all" ON farm_daily_logs;
+CREATE POLICY "admin_only" ON farm_daily_logs FOR ALL TO authenticated
+  USING (auth.jwt() ->> 'email' = ANY(ARRAY['mushroombangladesh.info@gmail.com','quazishab@gmail.com']))
+  WITH CHECK (auth.jwt() ->> 'email' = ANY(ARRAY['mushroombangladesh.info@gmail.com','quazishab@gmail.com']));
 -->
 
 <script type="module">
 import { createClient } from '@supabase/supabase-js';
+import { ADMIN_EMAILS, requireAdmin } from '/src/admin-auth.js';
+
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
   import.meta.env.VITE_SUPABASE_ANON_KEY
 );
 
-const ADMIN_EMAILS = ['mushroombangladesh.info@gmail.com','quazishab@gmail.com'];
-const STORAGE_KEY  = () => `safa_farmlog_draft_${document.getElementById('log-date').value}`;
-const fmt          = n  => '৳ ' + Math.round(n||0).toLocaleString('en-BD');
-const fmtKg        = n  => n ? (+n).toFixed(2) + ' kg' : '—';
-const pct          = (a, b) => b > 0 ? ((a/b)*100).toFixed(1) + '%' : '—';
+const STORAGE_KEY = () => `safa_farmlog_draft_${document.getElementById('log-date').value}`;
+const DRAFT_TTL_DAYS = 14;
+const fmt  = n => '৳ ' + Math.round(n||0).toLocaleString('en-BD');
+const fmtKg = n => n ? (+n).toFixed(2) + ' kg' : '—';
+const pct   = (a, b) => b > 0 ? ((a/b)*100).toFixed(1) + '%' : '—';
 
 /* ── AUTH ── */
 (async () => {
-  const { data:{ session } } = await supabase.auth.getSession();
-  if (!session || !ADMIN_EMAILS.includes(session.user.email)) {
-    window.location.href = 'admin.html';
-  }
+  const session = await requireAdmin(supabase);
+  if (!session) window.location.href = 'admin.html';
+})();
+
+/* ── DRAFT CLEANUP — remove keys older than DRAFT_TTL_DAYS ── */
+(function cleanOldDrafts() {
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - DRAFT_TTL_DAYS);
+  const cutoffStr = cutoff.toISOString().slice(0, 10);
+  Object.keys(localStorage).forEach(key => {
+    if (key.startsWith('safa_farmlog_draft_')) {
+      const dateStr = key.slice('safa_farmlog_draft_'.length);
+      if (dateStr < cutoffStr) localStorage.removeItem(key);
+    }
+  });
 })();
 
 /* ── DATE ── */
@@ -1041,8 +1058,16 @@ window.calcSpawnCost   = function() {
   calcAll();
 };
 
+/* Debounce: recalc waits 150 ms after the last keystroke — prevents
+   lag on low-end devices when typing through number fields rapidly. */
+let _calcDebounce;
+function scheduleCalc() {
+  clearTimeout(_calcDebounce);
+  _calcDebounce = setTimeout(calcAll, 150);
+}
+
 document.addEventListener('input', e => {
-  if (e.target.classList.contains('fl-input')) calcAll();
+  if (e.target.classList.contains('fl-input')) scheduleCalc();
 });
 document.addEventListener('change', e => {
   if (e.target.classList.contains('fl-input') || e.target.classList.contains('fl-check-label')) calcAll();
@@ -1080,7 +1105,10 @@ function autoSave() {
       const txt = document.getElementById('autosave-text');
       if (dot) dot.classList.remove('saving');
       if (txt) txt.textContent = 'Draft saved';
-    } catch(e) {}
+    } catch(e) {
+      console.error('[FarmLog] autoSave failed (storage full?):', e);
+      toast('ড্রাফট সেভ হয়নি — স্টোরেজ পূর্ণ হতে পারে', 'error');
+    }
   }, 800);
   const dot = document.getElementById('autosave-dot');
   if (dot) dot.classList.add('saving');
@@ -1099,7 +1127,7 @@ function loadDraft() {
     });
     calcAll();
     toast('ড্রাফট লোড হয়েছে', 'info');
-  } catch(e) {}
+  } catch(e) { console.error('[FarmLog] loadDraft failed:', e); }
 }
 
 function collectFormData() {
@@ -1142,9 +1170,12 @@ document.getElementById('btn-yesterday').addEventListener('click', () => {
 /* ── SUBMIT ── */
 document.getElementById('btn-submit').addEventListener('click', async () => {
   const btn = document.getElementById('btn-submit');
-  const harvestA = n('h-fresh-a');
-  if (!harvestA && !n('h-dried') && !n('h-powder')) {
-    toast('হার্ভেস্ট সেকশনে অন্তত একটি মান দিন', 'error'); return;
+  /* Allow zero-harvest days (e.g. expense-only or ops-only logs).
+     Require at least the date to be set (always true) and any one field filled. */
+  const anyData = document.querySelectorAll('.fl-input');
+  const hasAnyValue = Array.from(anyData).some(el => el.value.trim() !== '');
+  if (!hasAnyValue) {
+    toast('কমপক্ষে একটি ক্ষেত্রে মান দিন', 'error'); return;
   }
   btn.disabled = true; btn.textContent = 'জমা হচ্ছে…';
 
