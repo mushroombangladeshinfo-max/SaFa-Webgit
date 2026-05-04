@@ -1088,6 +1088,16 @@ img {
   margin-bottom: 6px;
   line-height: 1;
 }
+.pl-price-orig {
+  opacity: .45;
+  font-size: .65em;
+  font-weight: 400;
+  letter-spacing: .01em;
+  margin-right: 6px;
+}
+.pl-price-disc {
+  color: #e05a2b;
+}
 .pl-meta {
   display: flex;
   justify-content: space-between;

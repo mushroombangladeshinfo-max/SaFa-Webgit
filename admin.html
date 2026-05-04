@@ -382,6 +382,9 @@
     .prod-toolbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; flex-wrap:wrap; gap:12px; }
     .prod-headline { font-family:'Cormorant Garamond',serif; font-size:24px; font-weight:300; color:var(--c); }
     .prod-headline em { font-style:italic; color:var(--al); }
+    .sql-hint { margin-bottom:16px; }
+    .sql-hint summary { cursor:pointer; font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:rgba(245,239,230,.4); }
+    .sql-hint pre { background:rgba(0,0,0,.35); border-radius:6px; padding:12px; font-size:11px; color:#c9c2b8; margin-top:8px; overflow:auto; }
     /* Add/Edit form card */
     .prod-form-card { background:var(--g800); border:1px solid rgba(196,154,60,.2); border-radius:10px; padding:22px 24px; margin-bottom:20px; animation:expand .2s ease; }
     .prod-form-title { font-family:'Syne',sans-serif; font-size:9px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:rgba(196,154,60,.8); margin-bottom:16px; }
@@ -1010,6 +1013,10 @@
           <div class="prod-headline">Products <em>&amp; Inventory</em></div>
           <button type="button" class="f-action-btn green-btn" id="prod-add-btn" onclick="toggleProdForm()">+ Add Product</button>
         </div>
+        <details class="sql-hint">
+          <summary>SQL: Enable Discount Prices ▸</summary>
+          <pre>ALTER TABLE products ADD COLUMN IF NOT EXISTS discount_price numeric(10,2);</pre>
+        </details>
 
         <!-- Add / Edit form -->
         <div id="prod-form-wrap" class="panel-hidden">
@@ -1031,6 +1038,10 @@
               <div class="pf-field">
                 <label for="pf-price">Price (৳)</label>
                 <input type="number" id="pf-price" class="pf-input" placeholder="350" min="0">
+              </div>
+              <div class="pf-field">
+                <label for="pf-discount">Discount Price (৳) <span class="pf-hint">optional — shows as sale price</span></label>
+                <input type="number" id="pf-discount" class="pf-input" placeholder="Leave blank for no sale" min="0">
               </div>
               <div class="pf-field">
                 <label for="pf-unit">Unit / Pack Size</label>
@@ -2321,7 +2332,10 @@
             <div class="cell-sub">${p.name_bn || ''} · ${p.id}</div>
           </td>
           <td>
-            <div class="prod-price-cell">${p.price ? fmt(p.price) : 'TBA'}</div>
+            ${p.discount_price
+              ? `<div class="prod-price-cell"><s style="opacity:.45;font-size:.85em">${fmt(p.price)}</s> <span style="color:#e05a2b">${fmt(p.discount_price)}</span></div>`
+              : `<div class="prod-price-cell">${p.price ? fmt(p.price) : 'TBA'}</div>`
+            }
             <div class="cell-sub">${p.unit || ''}</div>
           </td>
           <td class="cell-sub">${cap(p.category || '')}</td>
@@ -2373,7 +2387,7 @@
       if (!open) {
         _editingProdId = null;
         document.getElementById('prod-form-title').textContent = 'New Product';
-        ['pf-id','pf-name','pf-name-bn','pf-price','pf-unit','pf-inventory','pf-image','pf-desc'].forEach(id => {
+        ['pf-id','pf-name','pf-name-bn','pf-price','pf-discount','pf-unit','pf-inventory','pf-image','pf-desc'].forEach(id => {
           document.getElementById(id).value = '';
         });
         document.getElementById('pf-category').value = 'fresh';
@@ -2396,6 +2410,7 @@
       document.getElementById('pf-name').value      = data.name || '';
       document.getElementById('pf-name-bn').value   = data.name_bn || '';
       document.getElementById('pf-price').value     = data.price ?? '';
+      document.getElementById('pf-discount').value  = data.discount_price ?? '';
       document.getElementById('pf-unit').value      = data.unit || '';
       document.getElementById('pf-category').value  = data.category || 'fresh';
       document.getElementById('pf-inventory').value = data.inventory_count ?? 0;
@@ -2409,19 +2424,24 @@
     };
 
     window.saveProduct = async function() {
-      const id       = document.getElementById('pf-id').value.trim().replace(/\s+/g, '_').toLowerCase();
-      const name     = document.getElementById('pf-name').value.trim();
-      const price    = parseFloat(document.getElementById('pf-price').value) || null;
-      const inv      = parseInt(document.getElementById('pf-inventory').value) || 0;
+      const id            = document.getElementById('pf-id').value.trim().replace(/\s+/g, '_').toLowerCase();
+      const name          = document.getElementById('pf-name').value.trim();
+      const price         = parseFloat(document.getElementById('pf-price').value) || null;
+      const discount_price = parseFloat(document.getElementById('pf-discount').value) || null;
+      const inv           = parseInt(document.getElementById('pf-inventory').value) || 0;
 
       if (!id)   { toast('Product ID is required', 'error'); return; }
       if (!name) { toast('Product name is required', 'error'); return; }
+      if (discount_price && price && discount_price >= price) {
+        toast('Discount price must be lower than regular price', 'error'); return;
+      }
 
       const row = {
         id,
         name,
         name_bn:         document.getElementById('pf-name-bn').value.trim() || null,
         price,
+        discount_price,
         unit:            document.getElementById('pf-unit').value.trim() || null,
         category:        document.getElementById('pf-category').value,
         inventory_count: inv,
