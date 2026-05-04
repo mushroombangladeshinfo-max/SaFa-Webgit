@@ -271,6 +271,36 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);disp
 
 /* ── DATA POINTS SECTION ── */
 .mb18{margin-bottom:18px}
+.mb10{margin-bottom:10px}
+/* Chart canvas containers */
+.ch-160{height:160px}
+.ch-180{height:180px}
+.ch-200{height:200px}
+.ch-contam{height:160px;display:flex;align-items:center;justify-content:center}
+.ch-contam canvas{max-width:160px;max-height:160px}
+/* Table overflow */
+.tbl-scroll{overflow-x:auto}
+/* Env label */
+.env-room-label{color:var(--g);margin-left:4px}
+/* Optimal table size */
+.optimal-tbl-wrap{font-size:.78rem}
+/* Form hint inline display fix */
+.form-hint-inline{display:inline;margin-left:4px}
+/* JS-render helpers */
+.mono-sm{font-family:'DM Mono',monospace;font-size:.72rem}
+.mono-green{font-family:'DM Mono',monospace;color:var(--g)}
+.txt-gold{color:var(--gold)}
+.txt-dim{color:var(--txt2)}
+.unit-lbl{font-size:.65rem;color:var(--txt3)}
+.opt-range{font-size:.6rem;color:var(--txt3);margin-top:3px}
+.flex-gap8{display:flex;align-items:center;gap:8px}
+.kpi-highlight{color:var(--txt)}
+.contam-legend{margin-top:10px;font-size:.72rem;display:flex;flex-direction:column;gap:5px}
+.al-empty{color:var(--txt3);font-size:.78rem}
+.nowrap{white-space:nowrap}
+.flex-gap6{display:flex;align-items:center;gap:6px}
+.rm-card-link{cursor:pointer;flex:1}
+
 .dp-freq{margin-left:auto;font-size:.62rem;font-weight:600}
 .dp-freq.g{color:var(--g)}.dp-freq.gold{color:var(--gold)}.dp-freq.blue{color:var(--blue)}
 .schema-pre{background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:16px;font-family:'DM Mono',monospace;font-size:.72rem;color:rgba(204,232,216,.75);overflow-x:auto;line-height:1.8;white-space:pre-wrap}
@@ -298,30 +328,30 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);disp
 
   <nav class="sb-nav">
     <div class="sb-lbl">Monitor</div>
-    <button class="nav-btn active" data-sec="overview" onclick="showSection('overview',this)">
+    <button type="button" class="nav-btn active" data-sec="overview" onclick="showSection('overview',this)">
       <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
       Overview
     </button>
-    <button class="nav-btn" data-sec="environment" onclick="showSection('environment',this)">
+    <button type="button" class="nav-btn" data-sec="environment" onclick="showSection('environment',this)">
       <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M9 3v11a3 3 0 006 0V3M9 3h6M9 3H6m12 0h-3"/></svg>
       Environment
     </button>
-    <button class="nav-btn" data-sec="production" onclick="showSection('production',this)">
+    <button type="button" class="nav-btn" data-sec="production" onclick="showSection('production',this)">
       <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5"/></svg>
       Production
     </button>
 
     <div class="sb-lbl">Analytics</div>
-    <button class="nav-btn" data-sec="analytics" onclick="showSection('analytics',this)">
+    <button type="button" class="nav-btn" data-sec="analytics" onclick="showSection('analytics',this)">
       <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941"/></svg>
       Long-run Analytics
     </button>
-    <button class="nav-btn" data-sec="energy" onclick="showSection('energy',this)">
+    <button type="button" class="nav-btn" data-sec="energy" onclick="showSection('energy',this)">
       <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg>
       Energy &amp; Equipment
     </button>
 
-    <button class="nav-btn" data-sec="datapoints" onclick="showSection('datapoints',this)">
+    <button type="button" class="nav-btn" data-sec="datapoints" onclick="showSection('datapoints',this)">
       <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 00-1.883 2.542l.857 6a2.25 2.25 0 002.227 1.932H19.05a2.25 2.25 0 002.227-1.932l.857-6a2.25 2.25 0 00-1.883-2.542m-16.5 0V6A2.25 2.25 0 016 3.75h3.879a1.5 1.5 0 011.06.44l2.122 2.12a1.5 1.5 0 001.06.44H18A2.25 2.25 0 0120.25 9v.776"/></svg>
       Data Points Schema
     </button>
@@ -352,11 +382,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);disp
     <div class="topbar-title" id="topbar-title">Farm Overview</div>
     <div class="topbar-meta" id="topbar-meta">SaFa Naturals IoT Farm · Sirajganj</div>
     <div class="topbar-pill" id="topbar-clock">--:--</div>
-    <button class="tb-btn" title="Alerts" onclick="showSection('overview',document.querySelector('[data-sec=overview]'))">
+    <button type="button" class="tb-btn" title="Alerts" onclick="showSection('overview',document.querySelector('[data-sec=overview]'))">
       <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"/></svg>
       <div class="alert-pip" id="alert-pip"></div>
     </button>
-    <button class="tb-btn" title="Export CSV" onclick="exportCSV()">
+    <button type="button" class="tb-btn" title="Export CSV" onclick="exportCSV()">
       <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
     </button>
   </header>
@@ -412,7 +442,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);disp
             <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/></svg>
             7-Day Yield (kg)
           </div>
-          <div style="height:160px"><canvas id="chart-yield-sparkline"></canvas></div>
+          <div class="ch-160"><canvas id="chart-yield-sparkline"></canvas></div>
         </div>
         <div class="card">
           <div class="card-h">
@@ -436,9 +466,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);disp
             Enter Readings
           </button>
           <div class="pill-tabs" id="room-tabs">
-            <button class="ptab active" data-room="A" onclick="selectRoom('A',this)">Room A</button>
-            <button class="ptab" data-room="B" onclick="selectRoom('B',this)">Room B</button>
-            <button class="ptab" data-room="C" onclick="selectRoom('C',this)">Room C</button>
+            <button type="button" class="ptab active" data-room="A" onclick="selectRoom('A',this)">Room A</button>
+            <button type="button" class="ptab" data-room="B" onclick="selectRoom('B',this)">Room B</button>
+            <button type="button" class="ptab" data-room="C" onclick="selectRoom('C',this)">Room C</button>
           </div>
         </div>
       </div>
@@ -447,10 +477,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);disp
       <div class="g4" id="gauge-row"></div>
 
       <!-- Current metrics summary -->
-      <div class="card" style="margin-bottom:18px">
+      <div class="card mb18">
         <div class="card-h">
           <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25A2.25 2.25 0 0113.5 8.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z"/></svg>
-          Current Readings <span id="env-room-label" style="color:var(--g);margin-left:4px">· Room A</span>
+          Current Readings <span id="env-room-label" class="env-room-label">· Room A</span>
           <div class="card-h-right"><span class="badge b-ok" id="env-status-badge">All OK</span></div>
         </div>
         <div class="mbox-grid" id="metric-boxes"></div>
@@ -463,14 +493,14 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);disp
             <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941"/></svg>
             Temperature &amp; Humidity · 24h
           </div>
-          <div style="height:180px"><canvas id="chart-th"></canvas></div>
+          <div class="ch-180"><canvas id="chart-th"></canvas></div>
         </div>
         <div class="card">
           <div class="card-h">
             <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z"/></svg>
             CO₂ &amp; O₂ Levels · 24h
           </div>
-          <div style="height:180px"><canvas id="chart-co2"></canvas></div>
+          <div class="ch-180"><canvas id="chart-co2"></canvas></div>
         </div>
       </div>
 
@@ -478,11 +508,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);disp
       <div class="g1-1">
         <div class="card">
           <div class="card-h">VPD &amp; Dew Point Trend · 24h</div>
-          <div style="height:160px"><canvas id="chart-vpd"></canvas></div>
+          <div class="ch-160"><canvas id="chart-vpd"></canvas></div>
         </div>
         <div class="card">
           <div class="card-h">Optimal Range Reference</div>
-          <div id="optimal-table" style="font-size:.78rem"></div>
+          <div id="optimal-table" class="optimal-tbl-wrap"></div>
         </div>
       </div>
     </div>
@@ -506,12 +536,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);disp
       </div>
 
       <!-- Batch table -->
-      <div class="card" style="margin-bottom:18px">
+      <div class="card mb18">
         <div class="card-h">
           <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/></svg>
           Active Batches
         </div>
-        <div style="overflow-x:auto">
+        <div class="tbl-scroll">
           <table class="tbl" id="batch-table">
             <thead><tr>
               <th>Batch ID</th><th>Species</th><th>Room</th><th>Stage</th>
@@ -528,18 +558,18 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);disp
             <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5"/></svg>
             Yield Per Batch (kg)
           </div>
-          <div style="height:200px"><canvas id="chart-yield-batch"></canvas></div>
+          <div class="ch-200"><canvas id="chart-yield-batch"></canvas></div>
         </div>
         <div class="card">
           <div class="card-h">Biological Efficiency (%)</div>
-          <div style="height:200px"><canvas id="chart-be"></canvas></div>
+          <div class="ch-200"><canvas id="chart-be"></canvas></div>
         </div>
       </div>
 
       <!-- Harvest log -->
       <div class="card">
         <div class="card-h">Recent Harvest Log</div>
-        <div style="overflow-x:auto">
+        <div class="tbl-scroll">
           <table class="tbl">
             <thead><tr><th>Batch</th><th>Flush</th><th>Date</th><th>Weight (kg)</th><th>BE%</th><th>Room</th><th>Notes</th><th></th></tr></thead>
             <tbody id="harvest-tbody"></tbody>
@@ -556,10 +586,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);disp
         <div><div class="sh-title">Long-run Analytics</div><div class="sh-sub">Historical trends · correlations · performance benchmarks</div></div>
         <div class="sh-right">
           <div class="pill-tabs">
-            <button class="ptab active" onclick="setPeriod(30,this)">30d</button>
-            <button class="ptab" onclick="setPeriod(60,this)">60d</button>
-            <button class="ptab" onclick="setPeriod(90,this)">90d</button>
-            <button class="ptab" onclick="setPeriod(180,this)">6m</button>
+            <button type="button" class="ptab active" onclick="setPeriod(30,this)">30d</button>
+            <button type="button" class="ptab" onclick="setPeriod(60,this)">60d</button>
+            <button type="button" class="ptab" onclick="setPeriod(90,this)">90d</button>
+            <button type="button" class="ptab" onclick="setPeriod(180,this)">6m</button>
           </div>
         </div>
       </div>
@@ -570,16 +600,16 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);disp
       <div class="g1-1">
         <div class="card">
           <div class="card-h">Monthly Yield (kg)</div>
-          <div style="height:180px"><canvas id="chart-monthly"></canvas></div>
+          <div class="ch-180"><canvas id="chart-monthly"></canvas></div>
         </div>
         <div class="card">
           <div class="card-h">BE% Trend Per Batch</div>
-          <div style="height:180px"><canvas id="chart-be-trend"></canvas></div>
+          <div class="ch-180"><canvas id="chart-be-trend"></canvas></div>
         </div>
       </div>
 
       <!-- Heatmap -->
-      <div class="card" style="margin-bottom:18px">
+      <div class="card mb18">
         <div class="card-h">
           <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/></svg>
           30-Day Harvest Heatmap
@@ -595,12 +625,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);disp
       <div class="g2-1">
         <div class="card">
           <div class="card-h">Temp vs Yield Correlation</div>
-          <div style="height:200px"><canvas id="chart-scatter"></canvas></div>
+          <div class="ch-200"><canvas id="chart-scatter"></canvas></div>
         </div>
         <div class="card">
           <div class="card-h">Contamination Breakdown</div>
-          <div style="height:160px;display:flex;align-items:center;justify-content:center"><canvas id="chart-contam" style="max-width:160px;max-height:160px"></canvas></div>
-          <div id="contam-legend" style="margin-top:10px;font-size:.72rem;display:flex;flex-direction:column;gap:5px"></div>
+          <div class="ch-contam"><canvas id="chart-contam"></canvas></div>
+          <div id="contam-legend" class="contam-legend"></div>
         </div>
       </div>
     </div>
@@ -617,12 +647,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);disp
         <div class="kpi">
           <div class="kpi-top"><span class="kpi-lbl">Today (kWh)</span><div class="kpi-ico blue"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg></div></div>
           <div class="kpi-val" id="kwh-today">18.4</div>
-          <div class="kpi-sub">Projected: <span style="color:var(--txt)">24.2 kWh</span></div>
+          <div class="kpi-sub">Projected: <span class="kpi-highlight">24.2 kWh</span></div>
         </div>
         <div class="kpi">
           <div class="kpi-top"><span class="kpi-lbl">This Month</span><div class="kpi-ico blue"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/></svg></div></div>
           <div class="kpi-val" id="kwh-month">412</div>
-          <div class="kpi-sub">kWh · <span style="color:var(--txt)">৳ 3,296</span></div>
+          <div class="kpi-sub">kWh · <span class="kpi-highlight">৳ 3,296</span></div>
         </div>
         <div class="kpi">
           <div class="kpi-top"><span class="kpi-lbl">Active Load</span><div class="kpi-ico g"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg></div></div>
@@ -637,13 +667,13 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);disp
       </div>
 
       <!-- Hourly chart -->
-      <div class="card" style="margin-bottom:18px">
+      <div class="card mb18">
         <div class="card-h">Hourly Power Consumption (W)</div>
-        <div style="height:180px"><canvas id="chart-energy"></canvas></div>
+        <div class="ch-180"><canvas id="chart-energy"></canvas></div>
       </div>
 
       <!-- Equipment grid -->
-      <div class="card-h" style="margin-bottom:10px">
+      <div class="card-h mb10">
         <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" style="width:13px;height:13px;color:var(--g)"><path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 004.486-6.336l-3.276 3.277a3.004 3.004 0 01-2.25-2.25l3.276-3.276a4.5 4.5 0 00-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437l1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008z"/></svg>
         Equipment Status &amp; Control
       </div>
@@ -754,7 +784,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);disp
           <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 2.625c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125"/></svg>
           Supabase SQL — Paste this into your Supabase SQL Editor to create all sensor tables
           <div class="card-h-right">
-            <button type="button" class="btn-copy-sql" onclick="copySchema()">Copy SQL</button>
+            <button type="button" class="btn-copy-sql" onclick="copySchema(this)">Copy SQL</button>
           </div>
         </div>
         <pre id="schema-sql" class="schema-pre">-- ══════════════════════════════════════════════════════
@@ -1007,10 +1037,9 @@ const SECTION_TITLES = {
   energy:'Energy & Equipment', datapoints:'Data Points & Schema'
 }
 
-function copySchema() {
+function copySchema(btn) {
   const text = document.getElementById('schema-sql').textContent
   navigator.clipboard.writeText(text).then(() => {
-    const btn = event.target
     const orig = btn.textContent
     btn.textContent = 'Copied!'
     setTimeout(() => btn.textContent = orig, 2000)
@@ -1177,9 +1206,9 @@ function renderMetricBoxes() {
     const opt = OPTIMAL[m.k]
     const optRange = opt ? `${opt.min}–${opt.max} ${m.unit}` : '—'
     return `<div class="mbox">
-      <div class="mbox-val" style="color:${statusColor(s)}">${m.val} <span style="font-size:.65rem;color:var(--txt3)">${m.unit}</span></div>
+      <div class="mbox-val" style="color:${statusColor(s)}">${m.val} <span class="unit-lbl">${m.unit}</span></div>
       <div class="mbox-lbl">${m.lbl}</div>
-      <div style="font-size:.6rem;color:var(--txt3);margin-top:3px">Opt: ${optRange}</div>
+      <div class="opt-range">Opt: ${optRange}</div>
     </div>`
   }).join('')
   // Update status badge
@@ -1223,13 +1252,13 @@ function renderBatchTable() {
     <td><span class="badge b-idle">Room ${b.room}</span></td>
     <td><span class="badge b-ok">${b.stage}</span></td>
     <td>
-      <div style="display:flex;align-items:center;gap:8px">
+      <div class="flex-gap8">
         <div class="prog-bg"><div class="prog-fill" style="width:${b.col}%"></div></div>
-        <span style="font-family:'DM Mono',monospace;font-size:.72rem">${b.col}%</span>
+        <span class="mono-sm">${b.col}%</span>
       </div>
     </td>
     <td class="mono">${b.days}d</td>
-    <td class="mono" style="color:var(--gold)">${b.est}d</td>
+    <td class="mono" class="txt-gold">${b.est}d</td>
     <td><span class="badge ${statusMap[b.status]}">${statusLbl[b.status]}</span></td>
   </tr>`).join('')
 }
@@ -1240,10 +1269,10 @@ function renderHarvestLog() {
     <td class="mono">${h.batch}</td>
     <td class="mono">F${h.flush}</td>
     <td class="mono">${h.date}</td>
-    <td style="font-family:'DM Mono',monospace;color:var(--g)">${h.kg}</td>
+    <td class="mono-green">${h.kg}</td>
     <td style="font-family:'DM Mono',monospace;color:${h.be>=80?'var(--g)':h.be>=60?'var(--gold)':'var(--red)'}">${h.be}%</td>
     <td><span class="badge b-idle">Room ${h.room}</span></td>
-    <td style="color:var(--txt2)">${h.notes}</td>
+    <td class="txt-dim">${h.notes}</td>
   </tr>`).join('')
 }
 
@@ -1294,7 +1323,7 @@ function renderEquipment() {
         <div class="equip-detail">${e.detail}</div>
       </div>
       <div class="equip-right">
-        <button class="toggle ${e.on?'on':'off'}" id="eq-${e.id}"
+        <button type="button" class="toggle ${e.on?'on':'off'}" id="eq-${e.id}"
           onclick="toggleEquip('${e.id}',this)" title="${e.on?'Turn off':'Turn on'}"></button>
         <div class="equip-w">${e.on ? e.w+' W' : 'Off'}</div>
       </div>
@@ -1480,7 +1509,7 @@ function initCharts() {
   const cLegend = document.getElementById('contam-legend')
   if(cLegend) {
     cLegend.innerHTML = [['Bacterial','rgba(224,82,82,.7)','8%'],['Mould','rgba(201,168,76,.7)','5%'],['Trichoderma','rgba(96,165,250,.7)','3%'],['Clean','rgba(82,183,136,.6)','84%']]
-      .map(([l,c,v]) => `<div style="display:flex;align-items:center;gap:7px"><span style="width:9px;height:9px;border-radius:2px;background:${c};flex-shrink:0"></span><span style="color:var(--txt2)">${l}</span><span style="margin-left:auto;font-family:'DM Mono',monospace;color:var(--txt)">${v}</span></div>`).join('')
+      .map(([l,c,v]) => `<div style="display:flex;align-items:center;gap:7px"><span style="width:9px;height:9px;border-radius:2px;background:${c};flex-shrink:0"></span><span class="txt-dim">${l}</span><span style="margin-left:auto;font-family:'DM Mono',monospace;color:var(--txt)">${v}</span></div>`).join('')
   }
 
   // Energy hourly
@@ -1768,7 +1797,7 @@ function openHarvestModal(idx) {
         <select class="form-input" id="f-hroom">${roomOpts}</select></div>
       <div class="form-group"><label class="form-label">Yield (kg)</label>
         <input class="form-input" id="f-hkg" type="number" step="0.01" min="0" placeholder="2.30" value="${h.kg}"/></div>
-      <div class="form-group"><label class="form-label">BE% <span class="form-hint" style="display:inline">yield ÷ dry substrate × 100</span></label>
+      <div class="form-group"><label class="form-label">BE% <span class="form-hint form-hint-inline">yield ÷ dry substrate × 100</span></label>
         <input class="form-input" id="f-hbe" type="number" step="0.1" min="0" max="200" placeholder="85" value="${h.be}"/></div>
     </div>
     <div class="form-group"><label class="form-label">Notes (optional)</label>
@@ -1856,7 +1885,7 @@ function resolveAlert(idx) {
 // Override renderAlerts to add resolve + per-alert edit affordance
 function renderAlerts() {
   const list = document.getElementById('alerts-list'); if (!list) return
-  if (!ALERTS.length) { list.innerHTML = '<div class="al-item" style="color:var(--txt3);font-size:.78rem">No active alerts</div>'; return }
+  if (!ALERTS.length) { list.innerHTML = '<div class="al-item al-empty">No active alerts</div>'; return }
   list.innerHTML = ALERTS.map((a, i) => `
     <div class="al-item">
       <div class="al-dot ${a.sev}"></div>
@@ -1883,15 +1912,15 @@ function renderBatchTable() {
     <td><span class="badge b-idle">Room ${b.room}</span></td>
     <td><span class="badge b-ok">${b.stage}</span></td>
     <td>
-      <div style="display:flex;align-items:center;gap:8px">
+      <div class="flex-gap8">
         <div class="prog-bg"><div class="prog-fill" style="width:${b.col}%"></div></div>
-        <span style="font-family:'DM Mono',monospace;font-size:.72rem">${b.col}%</span>
+        <span class="mono-sm">${b.col}%</span>
       </div>
     </td>
     <td class="mono">${b.days}d</td>
-    <td class="mono" style="color:var(--gold)">${b.est}d</td>
+    <td class="mono" class="txt-gold">${b.est}d</td>
     <td><span class="badge ${statusMap[b.status]}">${statusLbl[b.status]}</span></td>
-    <td style="white-space:nowrap">
+    <td class="nowrap">
       <button type="button" class="btn-edit-sm" onclick="openBatchModal(${i})" title="Edit">
         <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg>
       </button>
@@ -1910,11 +1939,11 @@ function renderHarvestLog() {
     <td class="mono">${h.batch}</td>
     <td class="mono">F${h.flush}</td>
     <td class="mono">${h.date}</td>
-    <td style="font-family:'DM Mono',monospace;color:var(--g)">${h.kg}</td>
+    <td class="mono-green">${h.kg}</td>
     <td style="font-family:'DM Mono',monospace;color:${h.be>=80?'var(--g)':h.be>=60?'var(--gold)':'var(--red)'}">${h.be}%</td>
     <td><span class="badge b-idle">Room ${h.room}</span></td>
-    <td style="color:var(--txt2)">${h.notes}</td>
-    <td style="white-space:nowrap">
+    <td class="txt-dim">${h.notes}</td>
+    <td class="nowrap">
       <button type="button" class="btn-edit-sm" onclick="openHarvestModal(${i})" title="Edit">
         <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg>
       </button>
@@ -1935,11 +1964,11 @@ function renderRoomCards() {
     const lblMap   = {ok:'Optimal',warn:'Warning',crit:'Critical'}
     return `<div class="room-card ${selectedRoom===k?'sel':''}">
       <div class="room-head">
-        <div onclick="selectRoom('${k}',null)" style="cursor:pointer;flex:1">
+        <div onclick="selectRoom('${k}',null)" class="rm-card-link">
           <div class="room-name">${r.name}</div>
           <div class="room-species">${r.species}</div>
         </div>
-        <div style="display:flex;align-items:center;gap:6px">
+        <div class="flex-gap6">
           <span class="badge ${badgeMap[overall]}">${lblMap[overall]}</span>
           <button type="button" class="btn-edit-sm" onclick="openSensorEdit('${k}')" title="Enter readings">
             <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg>
