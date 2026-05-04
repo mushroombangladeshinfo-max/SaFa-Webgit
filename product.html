@@ -1363,6 +1363,41 @@ if (!product) {
     </div>`
 } else {
   renderProduct(product)
+
+  /* Sync live price + discount from Supabase */
+  ;(async () => {
+    try {
+      const { data } = await supabase
+        .from('products')
+        .select('price, discount_price, inventory_count')
+        .eq('id', product.id)
+        .single()
+      if (!data) return
+
+      const effectivePrice = data.discount_price || data.price || product.price
+      product.price = effectivePrice   /* used by doAddToCart closure */
+
+      const priceEl = document.querySelector('.prod-price')
+      if (priceEl && data.price) {
+        if (data.discount_price) {
+          priceEl.innerHTML =
+            `<s style="opacity:.45;font-size:.75em;margin-right:6px">৳${data.price}</s><span style="color:#e05a2b">৳${data.discount_price}</span>`
+        } else {
+          priceEl.textContent = `৳${data.price}`
+        }
+      }
+
+      /* Update sticky bar price */
+      const barPrice = document.querySelector('.sticky-cart-bar-price')
+      if (barPrice) barPrice.textContent = `৳${effectivePrice}`
+
+      /* Reflect stock */
+      if (data.inventory_count === 0) {
+        const addBtn = $('btn-add')
+        if (addBtn) { addBtn.disabled = true; addBtn.textContent = 'Stock নেই' }
+      }
+    } catch { /* silent — static prices remain */ }
+  })()
 }
 </script>
 </body>

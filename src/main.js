@@ -19,6 +19,7 @@
 
 /* ── Module imports ── */
 import { initNav, initHamburger, initSmoothScroll, closeMenu } from './nav.js';
+import { syncProductPrices } from './products.js';
 import { initProductFilters }  from './filters.js';
 import { initFadeObserver }    from './observer.js';
 import {
@@ -108,6 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initFadeObserver();     /* .fi elements fade in on scroll             */
   initAddToCartButtons(); /* Wire data-* add-to-cart buttons            */
   renderItems();          /* checkout.html order summary (no-op elsewhere) */
+  syncProductPrices();    /* Patch prices + stock from Supabase           */
 
   /* Update nav cart dot count on every page load */
   const navDot = document.querySelector('.nav-dot');
