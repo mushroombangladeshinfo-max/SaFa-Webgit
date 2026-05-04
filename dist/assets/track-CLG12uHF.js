@@ -100,7 +100,7 @@ import{c as f}from"./index-DshXEMtg.js";const b=f("https://uiwmerejtrdrykqpumdu.
 
       <div class="actions">
         <a class="btn-wa"
-           href="https://wa.me/8801XXXXXXXXX?text=${k}"
+           href="https://wa.me/8801970099378?text=${k}"
            target="_blank" rel="noopener">
           <svg viewBox="0 0 24 24" fill="currentColor">
             <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15

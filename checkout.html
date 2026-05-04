@@ -977,7 +977,8 @@
   <script type="module" src="/src/main.js"></script>
 
   <script type="module">
-    import { supabase } from '/src/supabase.js';
+    import { supabase }                           from '/src/supabase.js';
+    import { trackBeginCheckout, trackPurchase }  from '/src/analytics.js';
 
     /* ─── Constants ─── */
     const SELLER_PHONE      = '8801970099378';
@@ -1177,6 +1178,9 @@
 
         await saveOrderToSupabase(order, items, userId);
         notifySeller(order, items, total);
+
+        /* GA4: purchase — fires after Supabase confirms the order insert */
+        trackPurchase(orderId, total, Object.entries(cart));
 
         localStorage.setItem('safaCheckout', JSON.stringify({ custName:name, custPhone:phone, custDistrict:district, custThana:thana, custAddress:address }));
         localStorage.removeItem('safaCart');
@@ -1395,6 +1399,13 @@
     function initCheckout() {
       /* Empty cart — redirect immediately */
       const cart = window.getCart ? window.getCart() : {};
+
+      /* GA4: begin_checkout — fires when user reaches checkout with items */
+      if (Object.keys(cart).length) {
+        const total = Object.values(cart).reduce((s, i) => s + i.price * i.qty, 0);
+        trackBeginCheckout(total, Object.entries(cart));
+      }
+
       if (!Object.keys(cart).length) {
         const emptyEl = document.getElementById('emptyCart');
         if (emptyEl) emptyEl.style.display = 'block';

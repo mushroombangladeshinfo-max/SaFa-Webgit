@@ -128,13 +128,18 @@
     /* Top bar */
     .topbar { background:var(--g800); border-bottom:1px solid rgba(255,255,255,.06); padding:0 32px; height:60px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:200; }
     .topbar-left { display:flex; align-items:center; gap:14px; }
-    .topbar-logo { font-family:'Cormorant Garamond',serif; font-size:20px; font-weight:300; color:var(--c); text-decoration:none; }
+    .topbar-logo { display:flex; flex-direction:column; align-items:center; text-decoration:none; padding:6px 16px; border:1px solid rgba(255,255,255,.1); border-radius:100px; background:rgba(255,255,255,.03); transition:background .2s, transform .2s; }
+    .topbar-logo:hover { background:rgba(255,255,255,.08); transform:translateY(-1px); }
+    .tl-main { font-family:'Syne',sans-serif; font-size:18px; font-weight:700; color:var(--c); line-height:1; }
+    .tl-sub  { font-family:'Syne',sans-serif; font-size:7px; font-weight:700; letter-spacing:.22em; text-transform:uppercase; color:var(--al); }
     .topbar-pill { font-family:'Syne',sans-serif; font-size:8px; font-weight:700; letter-spacing:.18em; text-transform:uppercase; color:var(--a); background:rgba(196,154,60,.1); border:1px solid rgba(196,154,60,.2); border-radius:20px; padding:3px 10px; }
     .topbar-right { display:flex; align-items:center; gap:12px; }
-    .topbar-admin-email { font-size:12px; color:rgba(245,239,230,.45); font-family:'Syne',sans-serif; font-size:9px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; }
+    .topbar-admin-email { color:rgba(245,239,230,.45); font-family:'Syne',sans-serif; font-size:9px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; }
     .topbar-dot { width:6px; height:6px; border-radius:50%; background:#5fcf80; flex-shrink:0; }
-    .topbar-logout { font-family:'Syne',sans-serif; font-size:9px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:rgba(245,239,230,.45); background:none; border:1px solid rgba(255,255,255,.1); border-radius:5px; padding:7px 14px; cursor:pointer; transition:all .2s; }
-    .topbar-logout:hover { color:var(--tl); border-color:rgba(184,92,56,.35); background:rgba(184,92,56,.06); }
+    .topbar-btn { font-family:'Syne',sans-serif; font-size:9px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:rgba(245,239,230,.45); background:none; border:1px solid rgba(255,255,255,.1); border-radius:5px; padding:7px 14px; cursor:pointer; transition:all .2s; }
+    .topbar-btn:hover { color:var(--tl); border-color:rgba(184,92,56,.35); background:rgba(184,92,56,.06); }
+    .topbar-btn.active { color:var(--al); border-color:rgba(196,154,60,.4); background:rgba(196,154,60,.12); }
+    .topbar-iot-link { text-decoration:none; display:inline-flex; align-items:center; gap:5px; }
 
     /* Main content area */
     .dash-content { max-width:1280px; margin:0 auto; padding:32px 32px 64px; }
@@ -171,6 +176,24 @@
     .filter-sep { width:1px; height:32px; background:rgba(255,255,255,.08); flex-shrink:0; }
     .f-clear-btn { font-family:'Syne',sans-serif; font-size:9px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:rgba(245,239,230,.38); background:none; border:none; cursor:pointer; padding:6px 4px; transition:color .2s; }
     .f-clear-btn:hover { color:var(--tl); }
+    .f-label { font-size:11px; color:rgba(245,239,230,.38); white-space:nowrap; letter-spacing:.04em; }
+    .f-preset-btn { font-family:'DM Sans',sans-serif; font-size:11px; font-weight:600; padding:7px 11px; border-radius:5px; cursor:pointer; border:1px solid rgba(255,255,255,.09); background:rgba(255,255,255,.03); color:rgba(245,239,230,.55); transition:all .15s; white-space:nowrap; }
+    .f-preset-btn:hover { border-color:rgba(196,154,60,.35); color:var(--al); background:rgba(196,154,60,.06); }
+    .f-preset-btn.active { border-color:rgba(196,154,60,.5); color:var(--al); background:rgba(196,154,60,.11); }
+    .f-narrow { width:100px; }
+    .filter-bar-2 { margin-top:-8px; }
+    .charts-row-last { margin-bottom:0; }
+    .chart-card-flex { flex:1; }
+    .an-ret-strip { display:flex; gap:32px; padding:12px 0; align-items:center; }
+    .an-ret-item { text-align:center; }
+    .an-ret-val { font-family:'Cormorant Garamond',serif; font-size:28px; font-weight:300; color:var(--al); line-height:1; }
+    .an-ret-val.green { color:#5fcf80; }
+    .an-top-tbl { width:100%; border-collapse:collapse; font-size:12px; }
+    .an-top-tbl td { padding:6px 0; border-bottom:1px solid rgba(255,255,255,.05); color:rgba(245,239,230,.75); }
+    .an-top-tbl tr:last-child td { border-bottom:none; }
+    .an-top-tbl .td-name { color:var(--c); font-weight:500; }
+    .an-top-tbl .td-amt  { text-align:right; }
+    .an-top-empty { color:rgba(245,239,230,.35); padding:20px 0; }
     .f-action-btn { font-family:'Syne',sans-serif; font-size:9px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; padding:9px 16px; border-radius:5px; cursor:pointer; transition:all .2s; border:1px solid rgba(255,255,255,.1); background:rgba(255,255,255,.03); color:rgba(245,239,230,.65); display:inline-flex; align-items:center; gap:6px; }
     .f-action-btn:hover { border-color:rgba(255,255,255,.25); color:var(--c); background:rgba(255,255,255,.06); }
     .f-action-btn:disabled { opacity:.5; cursor:not-allowed; }
@@ -237,7 +260,7 @@
 
     /* Pagination */
     .pagination-bar { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 0; }
-    .pagination-info { font-size:12px; color:rgba(245,239,230,.45); font-family:'Syne',sans-serif; font-size:9px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; }
+    .pagination-info { color:rgba(245,239,230,.45); font-family:'Syne',sans-serif; font-size:9px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; }
     .pagination-btns { display:flex; gap:8px; }
     .pg-btn { font-family:'Syne',sans-serif; font-size:9px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; padding:8px 16px; border-radius:5px; cursor:pointer; border:1px solid rgba(255,255,255,.1); background:rgba(255,255,255,.03); color:rgba(245,239,230,.6); transition:all .2s; }
     .pg-btn:hover:not(:disabled) { border-color:rgba(255,255,255,.25); color:var(--c); }
@@ -358,6 +381,9 @@
     .prod-toolbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; flex-wrap:wrap; gap:12px; }
     .prod-headline { font-family:'Cormorant Garamond',serif; font-size:24px; font-weight:300; color:var(--c); }
     .prod-headline em { font-style:italic; color:var(--al); }
+    .sql-hint { margin-bottom:16px; }
+    .sql-hint summary { cursor:pointer; font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:rgba(245,239,230,.4); }
+    .sql-hint pre { background:rgba(0,0,0,.35); border-radius:6px; padding:12px; font-size:11px; color:#c9c2b8; margin-top:8px; overflow:auto; }
     /* Add/Edit form card */
     .prod-form-card { background:var(--g800); border:1px solid rgba(196,154,60,.2); border-radius:10px; padding:22px 24px; margin-bottom:20px; animation:expand .2s ease; }
     .prod-form-title { font-family:'Syne',sans-serif; font-size:9px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:rgba(196,154,60,.8); margin-bottom:16px; }
@@ -380,6 +406,16 @@
     .inv-save-btn { font-family:'Syne',sans-serif; font-size:8px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; padding:5px 10px; border-radius:4px; border:1px solid rgba(196,154,60,.25); background:rgba(196,154,60,.08); color:var(--al); cursor:pointer; transition:all .2s; margin-left:4px; }
     .inv-save-btn:hover { background:rgba(196,154,60,.2); }
     .pf-hint { opacity:.5; font-size:.85em; }
+    /* Compact edit btn in product table */
+    .prod-edit-btn { padding:6px 12px; font-size:8px; }
+    /* Customers order count cell */
+    .cust-order-count { font-family:'Cormorant Garamond',serif; font-size:18px; font-weight:300; }
+    .cust-repeat-label { font-size:11px; color:rgba(245,239,230,.42); margin-top:3px; color:var(--al); }
+    .cust-wa-wrap { margin-top:12px; }
+    /* Shared table chevron cell */
+    .td-chevron { width:28px; padding:14px 8px 14px 16px; }
+    .td-nowrap { white-space:nowrap; }
+    .od-tracking-badge { display:inline-flex; align-items:center; gap:5px; font-family:'Syne',sans-serif; font-size:9px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:#5fcf80; background:rgba(95,207,128,.1); border:1px solid rgba(95,207,128,.25); border-radius:5px; padding:7px 12px; }
 
     /* ══ CUSTOMERS ══ */
     .cust-toolbar { display:flex; align-items:center; gap:12px; margin-bottom:18px; flex-wrap:wrap; }
@@ -413,10 +449,11 @@
       .orders-table th:nth-child(5), .orders-table td:nth-child(5) { display:none; }
     }
   </style>
-  <script type="module" crossorigin src="/assets/admin-7Pe0KiQy.js"></script>
+  <script type="module" crossorigin src="/assets/admin-ls9LFJTi.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/index-DshXEMtg.js">
-  <link rel="modulepreload" crossorigin href="/assets/main-CBq5SoM0.js">
-  <link rel="stylesheet" crossorigin href="/assets/main-BYdBeHY4.css">
+  <link rel="modulepreload" crossorigin href="/assets/supabase-BvQLqbqL.js">
+  <link rel="modulepreload" crossorigin href="/assets/admin-auth-CZb-V-WK.js">
+  <link rel="stylesheet" crossorigin href="/assets/supabase-B8BD_zhT.css">
 </head>
 <body>
 
@@ -565,14 +602,25 @@
     <!-- Top bar -->
     <header class="topbar">
       <div class="topbar-left">
-        <a href="index.html" class="topbar-logo">SaFa</a>
+        <a href="index.html" class="topbar-logo">
+          <span class="tl-main">SaFa</span>
+          <span class="tl-sub">Naturals</span>
+        </a>
         <span class="topbar-pill">Admin</span>
       </div>
       <div class="topbar-right">
         <span class="topbar-last" id="topbar-last"></span>
         <span class="topbar-dot" title="Live"></span>
         <span class="topbar-admin-email" id="topbar-email"></span>
-        <button type="button" class="topbar-logout" id="logout-btn">Log Out</button>
+        <a href="farm-log.html" class="topbar-btn topbar-iot-link">
+          <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg>
+          Farm Log
+        </a>
+        <a href="dashboard.html" class="topbar-btn topbar-iot-link">
+          <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3"/></svg>
+          IoT Dashboard
+        </a>
+        <button type="button" class="topbar-btn" id="logout-btn">Log Out</button>
       </div>
     </header>
 
@@ -653,6 +701,25 @@
           <option value="returned">Returned</option>
         </select>
         <button type="button" class="f-clear-btn" id="clear-filters-btn">✕ Clear</button>
+      </div>
+
+      <!-- Filter row 2: presets + sort + value range -->
+      <div class="filter-bar filter-bar-2">
+        <span class="f-label">Quick:</span>
+        <button type="button" class="f-preset-btn" id="preset-today"     onclick="setPreset('today')">Today</button>
+        <button type="button" class="f-preset-btn" id="preset-yesterday" onclick="setPreset('yesterday')">Yesterday</button>
+        <button type="button" class="f-preset-btn" id="preset-week"      onclick="setPreset('week')">This Week</button>
+        <button type="button" class="f-preset-btn" id="preset-month"     onclick="setPreset('month')">This Month</button>
+        <div class="filter-sep"></div>
+        <select id="filter-sort" class="f-select">
+          <option value="created_at|0">Newest First</option>
+          <option value="created_at|1">Oldest First</option>
+          <option value="total_amount|0">Highest Value</option>
+          <option value="total_amount|1">Lowest Value</option>
+        </select>
+        <input type="number" id="filter-min" class="f-search f-narrow" placeholder="Min ৳" min="0">
+        <span class="filter-date-sep">–</span>
+        <input type="number" id="filter-max" class="f-search f-narrow" placeholder="Max ৳" min="0">
         <div class="filter-sep"></div>
         <button type="button" class="f-action-btn ml-auto" id="export-btn">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -749,7 +816,7 @@
             <div class="qt-val">৳50 off</div>
             <div class="qt-min">Min order: ৳500</div>
             <div class="qt-why">Pushes avg ৳280 → ৳500 basket. Customer gets ৳50 off, you keep ~৳25 margin on product + delivery profit.</div>
-            <button type="button" class="qt-add" onclick="addQuickTier('WELCOME50','fixed',50,500,'৳50 off on orders over ৳500')">+ Add</button>
+            <button type="button" class="qt-add" onclick="addQuickTier('WELCOME50','fixed',50,500,'৳50 off on orders over ৳500',this)">+ Add</button>
           </div>
           <div class="qt">
             <div class="qt-tier">Tier 2 — Loyalty</div>
@@ -757,7 +824,7 @@
             <div class="qt-val">10% off</div>
             <div class="qt-min">Min order: ৳800</div>
             <div class="qt-why">Free delivery already unlocked at ৳700. 10% off drives customers to ৳800+ baskets, effective AOV 3× uplift.</div>
-            <button type="button" class="qt-add" onclick="addQuickTier('SAFA10','percent',10,800,'10% off on orders over ৳800')">+ Add</button>
+            <button type="button" class="qt-add" onclick="addQuickTier('SAFA10','percent',10,800,'10% off on orders over ৳800',this)">+ Add</button>
           </div>
           <div class="qt">
             <div class="qt-tier">Tier 3 — Bulk</div>
@@ -765,7 +832,7 @@
             <div class="qt-val">15% off</div>
             <div class="qt-min">Min order: ৳1,200</div>
             <div class="qt-why">Strong incentive for family or repeat bulk orders. 15% discount at 15% margin is break-even — use for volume only.</div>
-            <button type="button" class="qt-add" onclick="addQuickTier('SAFA15','percent',15,1200,'15% off on bulk orders over ৳1200')">+ Add</button>
+            <button type="button" class="qt-add" onclick="addQuickTier('SAFA15','percent',15,1200,'15% off on bulk orders over ৳1200',this)">+ Add</button>
           </div>
           <div class="qt">
             <div class="qt-tier">Tier 4 — Wholesale</div>
@@ -773,7 +840,7 @@
             <div class="qt-val">20% off</div>
             <div class="qt-min">Min order: ৳2,000</div>
             <div class="qt-why">Corporate/restaurant wholesale. Max AOV pull. Accept thin margin for volume and relationship. Share selectively.</div>
-            <button type="button" class="qt-add" onclick="addQuickTier('MEGA20','percent',20,2000,'20% off on wholesale orders over ৳2000')">+ Add</button>
+            <button type="button" class="qt-add" onclick="addQuickTier('MEGA20','percent',20,2000,'20% off on wholesale orders over ৳2000',this)">+ Add</button>
           </div>
         </div>
 
@@ -912,6 +979,45 @@
           </div>
         </div>
 
+        <!-- Charts row 3 -->
+        <div class="charts-row">
+          <div class="chart-card">
+            <div class="chart-title">Revenue by District (Top 10)</div>
+            <div class="chart-wrap"><canvas id="chart-district"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">Revenue per Product</div>
+            <div class="chart-wrap"><canvas id="chart-prod-rev"></canvas></div>
+          </div>
+        </div>
+
+        <!-- Bottom stats strip -->
+        <div class="charts-row charts-row-last">
+          <div class="chart-card chart-card-flex">
+            <div class="chart-title">Repeat vs New Customers</div>
+            <div class="an-ret-strip">
+              <div class="an-ret-item">
+                <div class="an-ret-val" id="an-repeat-count">—</div>
+                <div class="stat-card-sub">Repeat buyers (2+ orders)</div>
+              </div>
+              <div class="an-ret-item">
+                <div class="an-ret-val" id="an-new-count">—</div>
+                <div class="stat-card-sub">New customers (1 order)</div>
+              </div>
+              <div class="an-ret-item">
+                <div class="an-ret-val green" id="an-retention">—</div>
+                <div class="stat-card-sub">Retention rate</div>
+              </div>
+            </div>
+          </div>
+          <div class="chart-card chart-card-flex">
+            <div class="chart-title">Top Customers by Spend (Period)</div>
+            <table class="an-top-tbl" id="an-top-customers">
+              <tr><td class="an-top-empty">Loading…</td></tr>
+            </table>
+          </div>
+        </div>
+
       </div><!-- /panel-analytics -->
 
       <!-- ═══════════════ PRODUCTS PANEL ═══════════════ -->
@@ -921,6 +1027,10 @@
           <div class="prod-headline">Products <em>&amp; Inventory</em></div>
           <button type="button" class="f-action-btn green-btn" id="prod-add-btn" onclick="toggleProdForm()">+ Add Product</button>
         </div>
+        <details class="sql-hint">
+          <summary>SQL: Enable Discount Prices ▸</summary>
+          <pre>ALTER TABLE products ADD COLUMN IF NOT EXISTS discount_price numeric(10,2);</pre>
+        </details>
 
         <!-- Add / Edit form -->
         <div id="prod-form-wrap" class="panel-hidden">
@@ -942,6 +1052,10 @@
               <div class="pf-field">
                 <label for="pf-price">Price (৳)</label>
                 <input type="number" id="pf-price" class="pf-input" placeholder="350" min="0">
+              </div>
+              <div class="pf-field">
+                <label for="pf-discount">Discount Price (৳) <span class="pf-hint">optional — shows as sale price</span></label>
+                <input type="number" id="pf-discount" class="pf-input" placeholder="Leave blank for no sale" min="0">
               </div>
               <div class="pf-field">
                 <label for="pf-unit">Unit / Pack Size</label>
@@ -1004,7 +1118,18 @@
         <div class="cust-toolbar">
           <div class="cust-headline">Customers <em>&amp; History</em></div>
           <input type="text" id="cust-search" class="f-search wide"
-                 placeholder="Search name or phone…" oninput="filterCustomers(this.value)">
+                 placeholder="Search name or phone…" oninput="filterCustomers()">
+          <select id="cust-sort" class="f-select" onchange="sortCustomers(this.value)">
+            <option value="spent">Highest Spend</option>
+            <option value="orders">Most Orders</option>
+            <option value="recent">Most Recent</option>
+            <option value="name">Name A–Z</option>
+          </select>
+          <select id="cust-type" class="f-select" onchange="filterCustomerType(this.value)">
+            <option value="all">All Customers</option>
+            <option value="repeat">Repeat (2+ orders)</option>
+            <option value="new">New (1 order)</option>
+          </select>
           <button type="button" class="f-action-btn" id="cust-export-btn" onclick="exportCustomers()">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             Export CSV
@@ -1072,5 +1197,15 @@
   <!-- Toast stack -->
   <div class="toast-stack" id="toast-stack"></div>
 
+  <script>
+    // Register the service worker for PWA installability (Desktop & Android)
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/admin-sw.js')
+          .then(registration => console.log('Admin ServiceWorker registered'))
+          .catch(error => console.error('ServiceWorker registration failed:', error));
+      });
+    }
+  </script>
 </body>
 </html>
