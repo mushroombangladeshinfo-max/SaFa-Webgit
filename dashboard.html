@@ -7,6 +7,19 @@
 <link rel="icon" type="image/png" href="/favicon.png"/>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Syne:wght@600;700;800&display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<!-- Auth guard: hides UI until session verified, redirects to admin.html if not admin -->
+<style>html.auth-checking *:not(style) { visibility:hidden !important; }</style>
+<script type="module">
+  import { createClient } from '@supabase/supabase-js';
+  import { requireAdmin }  from '/src/admin-auth.js';
+  document.documentElement.classList.add('auth-checking');
+  (async () => {
+    const sb = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY);
+    const session = await requireAdmin(sb);
+    if (!session) { window.location.replace('admin.html'); }
+    else           { document.documentElement.classList.remove('auth-checking'); }
+  })();
+</script>
 <!-- Toast -->
 <div class="dash-toast" id="dash-toast"></div>
 <!-- Modal -->
@@ -66,8 +79,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);disp
 .nav-badge{margin-left:auto;background:var(--red);color:#fff;font-size:.6rem;font-weight:700;padding:2px 6px;border-radius:99px;min-width:17px;text-align:center}
 .sb-footer{padding:14px 12px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:8px}
 .live-chip{display:flex;align-items:center;gap:7px;font-size:.72rem;color:var(--txt2)}
-.live-dot{width:7px;height:7px;border-radius:50%;background:var(--g);flex-shrink:0;animation:livepulse 2.2s infinite}
-@keyframes livepulse{0%,100%{box-shadow:0 0 0 2px rgba(82,183,136,.25)}50%{box-shadow:0 0 0 5px rgba(82,183,136,.06)}}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--g);flex-shrink:0;position:relative}
+.live-dot::after{content:'';position:absolute;inset:-3px;border-radius:50%;border:1.5px solid var(--g);opacity:0;animation:livepulse 2.2s ease-in-out infinite;will-change:opacity}
+@keyframes livepulse{0%,100%{opacity:0}45%,55%{opacity:.55}}
 .sb-clock{font-family:'DM Mono',monospace;font-size:.72rem;color:var(--txt3)}
 
 /* ── MAIN ── */
@@ -674,7 +688,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);disp
 
       <!-- Equipment grid -->
       <div class="card-h mb10">
-        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" style="width:13px;height:13px;color:var(--g)"><path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 004.486-6.336l-3.276 3.277a3.004 3.004 0 01-2.25-2.25l3.276-3.276a4.5 4.5 0 00-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437l1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008z"/></svg>
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 004.486-6.336l-3.276 3.277a3.004 3.004 0 01-2.25-2.25l3.276-3.276a4.5 4.5 0 00-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437l1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008z"/></svg>
         Equipment Status &amp; Control
       </div>
       <div class="g3" id="equip-grid"></div>
@@ -1206,7 +1220,7 @@ function renderMetricBoxes() {
     const opt = OPTIMAL[m.k]
     const optRange = opt ? `${opt.min}–${opt.max} ${m.unit}` : '—'
     return `<div class="mbox">
-      <div class="mbox-val" style="color:${statusColor(s)}">${m.val} <span class="unit-lbl">${m.unit}</span></div>
+      <div class="mbox-val" id="mbox-${m.k}" style="color:${statusColor(s)}">${m.val} <span class="unit-lbl">${m.unit}</span></div>
       <div class="mbox-lbl">${m.lbl}</div>
       <div class="opt-range">Opt: ${optRange}</div>
     </div>`
@@ -1529,41 +1543,109 @@ function initCharts() {
 // ══════════════════════════════════════
 //  LIVE DATA SIMULATION (replace with Supabase queries)
 // ══════════════════════════════════════
+/* ── Targeted in-place DOM patches — no innerHTML rebuild ── */
+function patchRoomCards() {
+  const badgeMap = {ok:'b-ok', warn:'b-warn', crit:'b-crit'}
+  const lblMap   = {ok:'Optimal', warn:'Warning', crit:'Critical'}
+  Object.entries(ROOMS).forEach(([k, r]) => {
+    const ts = getStatus('temp', r.temp)
+    const hs = getStatus('humidity', r.humidity)
+    const cs = getStatus('co2', r.co2)
+    const overall = [ts,hs,cs].includes('crit')?'crit':[ts,hs,cs].includes('warn')?'warn':'ok'
+    const t = document.getElementById(`rv-${k}-temp`)
+    const h = document.getElementById(`rv-${k}-hum`)
+    const c = document.getElementById(`rv-${k}-co2`)
+    const badge = document.getElementById(`rv-${k}-badge`)
+    if (t) { t.textContent = r.temp + '°'; t.style.color = statusColor(ts) }
+    if (h) { h.textContent = r.humidity + '%'; h.style.color = statusColor(hs) }
+    if (c) { c.textContent = r.co2; c.style.color = statusColor(cs) }
+    if (badge) { badge.className = `badge ${badgeMap[overall]}`; badge.textContent = lblMap[overall] }
+  })
+}
+
+function patchMetricBoxes() {
+  const r = ROOMS[selectedRoom]
+  const metrics = [
+    { k:'temp',    val:r.temp,     unit:'°C'  },
+    { k:'humidity',val:r.humidity, unit:'%RH' },
+    { k:'co2',     val:r.co2,      unit:'ppm' },
+    { k:'o2',      val:r.o2,       unit:'%'   },
+    { k:'airflow', val:r.airflow,  unit:'m/s' },
+    { k:'vpd',     val:r.vpd,      unit:'kPa' },
+  ]
+  metrics.forEach(m => {
+    const s = getStatus(m.k, m.val)
+    const el = document.getElementById('mbox-' + m.k)
+    if (el) {
+      el.style.color = statusColor(s)
+      el.innerHTML = `${m.val} <span class="unit-lbl">${m.unit}</span>`
+    }
+  })
+  const allStatus = metrics.map(m => getStatus(m.k, m.val))
+  const overall = allStatus.includes('crit')?'crit':allStatus.includes('warn')?'warn':'ok'
+  const badge = document.getElementById('env-status-badge')
+  if (badge) {
+    badge.className = `badge ${overall==='ok'?'b-ok':overall==='warn'?'b-warn':'b-crit'}`
+    badge.textContent = overall==='ok' ? 'All Optimal' : overall==='warn' ? 'Warning' : 'Critical'
+  }
+}
+
 function simulateLiveData() {
   Object.keys(ROOMS).forEach(k => {
     const r = ROOMS[k]
-    r.temp     = +(r.temp     + (Math.random()-0.5)*0.3).toFixed(1)
-    r.humidity = +(r.humidity + (Math.random()-0.5)*0.8).toFixed(1)
-    r.co2      = +(r.co2      + (Math.random()-0.5)*30).toFixed(0)
-    r.o2       = +(r.o2       + (Math.random()-0.5)*0.05).toFixed(2)
-    r.vpd      = +(r.vpd      + (Math.random()-0.5)*0.02).toFixed(2)
-    r.airflow  = +(r.airflow  + (Math.random()-0.5)*0.02).toFixed(2)
-    // Clamp
-    r.temp     = Math.max(20, Math.min(32, r.temp))
-    r.humidity = Math.max(70, Math.min(98, r.humidity))
-    r.co2      = Math.max(400, Math.min(1800, r.co2))
-    r.o2       = Math.max(18.5, Math.min(21.5, r.o2))
+    r.temp     = +(Math.max(20,  Math.min(32,   r.temp     + (Math.random()-0.5)*0.3 ))).toFixed(1)
+    r.humidity = +(Math.max(70,  Math.min(98,   r.humidity + (Math.random()-0.5)*0.8 ))).toFixed(1)
+    r.co2      = +(Math.max(400, Math.min(1800, r.co2      + (Math.random()-0.5)*30  ))).toFixed(0)
+    r.o2       = +(Math.max(18.5,Math.min(21.5, r.o2       + (Math.random()-0.5)*0.05))).toFixed(2)
+    r.vpd      = +(Math.max(0.1, Math.min(1.2,  r.vpd      + (Math.random()-0.5)*0.02))).toFixed(2)
+    r.airflow  = +(Math.max(0.1, Math.min(2.0,  r.airflow  + (Math.random()-0.5)*0.02))).toFixed(2)
   })
-  // Update live UI
-  renderRoomCards()
-  renderGauges()
-  renderMetricBoxes()
+  /* Patch only the changed text/colour nodes — no innerHTML rebuild.
+     patchRoomCards updates all 3 cards; gauge + metric patches update
+     the selected room only (same data user is currently viewing). */
+  const sr = ROOMS[selectedRoom]
+  patchRoomCards()
+  updateGaugeEl('g-temp', sr.temp,     18,  35,   getStatus('temp',     sr.temp))
+  updateGaugeEl('g-hum',  sr.humidity, 60,  100,  getStatus('humidity', sr.humidity))
+  updateGaugeEl('g-co2',  sr.co2,      400, 2000, getStatus('co2',      sr.co2))
+  updateGaugeEl('g-o2',   sr.o2,       18,  22,   getStatus('o2',       sr.o2))
+  patchMetricBoxes()
 }
 
 // ══════════════════════════════════════
 //  EXPORT CSV
 // ══════════════════════════════════════
 function exportCSV() {
-  const now = new Date().toISOString().slice(0,19).replace('T',' ')
-  const rows = [['Timestamp','Room','Temperature (°C)','Humidity (%RH)','CO2 (ppm)','O2 (%)','Airflow (m/s)','VPD (kPa)']]
+  const now   = new Date().toISOString().slice(0,19).replace('T',' ')
+  const date  = now.slice(0,10)
+  let csv = ''
+
+  /* ── Section 1: Current sensor snapshot ── */
+  csv += 'SENSOR SNAPSHOT\n'
+  csv += 'Timestamp,Room,Temperature (°C),Humidity (%RH),CO2 (ppm),O2 (%),Airflow (m/s),VPD (kPa)\n'
   Object.entries(ROOMS).forEach(([k,r]) => {
-    rows.push([now, 'Room '+k, r.temp, r.humidity, r.co2, r.o2, r.airflow, r.vpd])
+    csv += [now, `"${r.name}"`, r.temp, r.humidity, r.co2, r.o2, r.airflow, r.vpd].join(',') + '\n'
   })
-  const csv = rows.map(r => r.join(',')).join('\n')
+
+  /* ── Section 2: Active batches ── */
+  csv += '\nBATCHES\n'
+  csv += 'Batch ID,Species,Room,Stage,Colonisation (%),Days In Farm,Est. Days to Harvest,Status\n'
+  BATCHES.forEach(b => {
+    csv += [`"${b.id}"`, `"${b.species}"`, b.room, `"${b.stage}"`, b.col, b.days, b.est, b.status].join(',') + '\n'
+  })
+
+  /* ── Section 3: Harvest log ── */
+  csv += '\nHARVEST LOG\n'
+  csv += 'Batch ID,Flush,Date,Room,Yield (kg),BE%,Notes\n'
+  HARVEST_LOG.forEach(h => {
+    csv += [`"${h.batch}"`, h.flush, h.date, h.room, h.kg, h.be, `"${h.notes||''}"`].join(',') + '\n'
+  })
+
   const a = document.createElement('a')
   a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv)
-  a.download = `safa-farm-export-${Date.now()}.csv`
+  a.download = `safa-farm-export-${date}.csv`
   a.click()
+  showToast('CSV exported — sensor snapshot + batches + harvest log')
 }
 
 // ══════════════════════════════════════
@@ -1578,25 +1660,25 @@ function setPeriod(days, btn) {
 //  LOCALSTORAGE PERSISTENCE
 // ══════════════════════════════════════
 function saveData() {
+  /* Only persist manual entries (batches + harvest).
+     Sensor readings (ROOMS) are volatile simulation data — caching them
+     causes stale readings to appear on reload instead of fresh simulation. */
   try {
-    localStorage.setItem('safa_rooms',   JSON.stringify(ROOMS))
     localStorage.setItem('safa_batches', JSON.stringify(BATCHES))
     localStorage.setItem('safa_harvest', JSON.stringify(HARVEST_LOG))
-    localStorage.setItem('safa_alerts',  JSON.stringify(ALERTS))
-  } catch(e) {}
+  } catch(e) { console.error('[Dashboard] saveData failed (storage full?):', e) }
 }
 
 function loadData() {
   try {
-    const rooms = localStorage.getItem('safa_rooms')
-    if (rooms) Object.assign(ROOMS, JSON.parse(rooms))
     const batches = localStorage.getItem('safa_batches')
     if (batches) { BATCHES.length = 0; BATCHES.push(...JSON.parse(batches)) }
     const harvest = localStorage.getItem('safa_harvest')
     if (harvest) { HARVEST_LOG.length = 0; HARVEST_LOG.push(...JSON.parse(harvest)) }
-    const alerts = localStorage.getItem('safa_alerts')
-    if (alerts) { ALERTS.length = 0; ALERTS.push(...JSON.parse(alerts)) }
-  } catch(e) {}
+  } catch(e) { console.error('[Dashboard] loadData failed:', e) }
+  /* Clean up old keys from when we cached sensor/alert data */
+  localStorage.removeItem('safa_rooms')
+  localStorage.removeItem('safa_alerts')
 }
 
 // ══════════════════════════════════════
@@ -1969,7 +2051,7 @@ function renderRoomCards() {
           <div class="room-species">${r.species}</div>
         </div>
         <div class="flex-gap6">
-          <span class="badge ${badgeMap[overall]}">${lblMap[overall]}</span>
+          <span class="badge ${badgeMap[overall]}" id="rv-${k}-badge">${lblMap[overall]}</span>
           <button type="button" class="btn-edit-sm" onclick="openSensorEdit('${k}')" title="Enter readings">
             <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg>
           </button>
@@ -1980,15 +2062,15 @@ function renderRoomCards() {
       </div>
       <div class="room-metrics">
         <div class="room-metric">
-          <span class="rm-val" style="color:${statusColor(ts)}">${r.temp}°</span>
+          <span class="rm-val" id="rv-${k}-temp" style="color:${statusColor(ts)}">${r.temp}°</span>
           <span class="rm-lbl">Temp</span>
         </div>
         <div class="room-metric">
-          <span class="rm-val" style="color:${statusColor(hs)}">${r.humidity}%</span>
+          <span class="rm-val" id="rv-${k}-hum" style="color:${statusColor(hs)}">${r.humidity}%</span>
           <span class="rm-lbl">Humid</span>
         </div>
         <div class="room-metric">
-          <span class="rm-val" style="color:${statusColor(cs)}">${r.co2}</span>
+          <span class="rm-val" id="rv-${k}-co2" style="color:${statusColor(cs)}">${r.co2}</span>
           <span class="rm-lbl">CO₂ ppm</span>
         </div>
       </div>
