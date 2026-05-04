@@ -135,7 +135,7 @@
     .tl-sub  { font-family:'Syne',sans-serif; font-size:7px; font-weight:700; letter-spacing:.22em; text-transform:uppercase; color:var(--al); }
     .topbar-pill { font-family:'Syne',sans-serif; font-size:8px; font-weight:700; letter-spacing:.18em; text-transform:uppercase; color:var(--a); background:rgba(196,154,60,.1); border:1px solid rgba(196,154,60,.2); border-radius:20px; padding:3px 10px; }
     .topbar-right { display:flex; align-items:center; gap:12px; }
-    .topbar-admin-email { font-size:12px; color:rgba(245,239,230,.45); font-family:'Syne',sans-serif; font-size:9px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; }
+    .topbar-admin-email { color:rgba(245,239,230,.45); font-family:'Syne',sans-serif; font-size:9px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; }
     .topbar-dot { width:6px; height:6px; border-radius:50%; background:#5fcf80; flex-shrink:0; }
     .topbar-btn { font-family:'Syne',sans-serif; font-size:9px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:rgba(245,239,230,.45); background:none; border:1px solid rgba(255,255,255,.1); border-radius:5px; padding:7px 14px; cursor:pointer; transition:all .2s; }
     .topbar-btn:hover { color:var(--tl); border-color:rgba(184,92,56,.35); background:rgba(184,92,56,.06); }
@@ -261,7 +261,7 @@
 
     /* Pagination */
     .pagination-bar { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 0; }
-    .pagination-info { font-size:12px; color:rgba(245,239,230,.45); font-family:'Syne',sans-serif; font-size:9px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; }
+    .pagination-info { color:rgba(245,239,230,.45); font-family:'Syne',sans-serif; font-size:9px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; }
     .pagination-btns { display:flex; gap:8px; }
     .pg-btn { font-family:'Syne',sans-serif; font-size:9px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; padding:8px 16px; border-radius:5px; cursor:pointer; border:1px solid rgba(255,255,255,.1); background:rgba(255,255,255,.03); color:rgba(245,239,230,.6); transition:all .2s; }
     .pg-btn:hover:not(:disabled) { border-color:rgba(255,255,255,.25); color:var(--c); }
@@ -407,6 +407,14 @@
     .inv-save-btn { font-family:'Syne',sans-serif; font-size:8px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; padding:5px 10px; border-radius:4px; border:1px solid rgba(196,154,60,.25); background:rgba(196,154,60,.08); color:var(--al); cursor:pointer; transition:all .2s; margin-left:4px; }
     .inv-save-btn:hover { background:rgba(196,154,60,.2); }
     .pf-hint { opacity:.5; font-size:.85em; }
+    /* Compact edit btn in product table */
+    .prod-edit-btn { padding:6px 12px; font-size:8px; }
+    /* Customers order count cell */
+    .cust-order-count { font-family:'Cormorant Garamond',serif; font-size:18px; font-weight:300; }
+    .cust-repeat-label { font-size:11px; color:rgba(245,239,230,.42); margin-top:3px; color:var(--al); }
+    .cust-wa-wrap { margin-top:12px; }
+    /* Shared table chevron cell */
+    .td-chevron { width:28px; padding:14px 8px 14px 16px; }
 
     /* ══ CUSTOMERS ══ */
     .cust-toolbar { display:flex; align-items:center; gap:12px; margin-bottom:18px; flex-wrap:wrap; }
@@ -802,7 +810,7 @@
             <div class="qt-val">৳50 off</div>
             <div class="qt-min">Min order: ৳500</div>
             <div class="qt-why">Pushes avg ৳280 → ৳500 basket. Customer gets ৳50 off, you keep ~৳25 margin on product + delivery profit.</div>
-            <button type="button" class="qt-add" onclick="addQuickTier('WELCOME50','fixed',50,500,'৳50 off on orders over ৳500')">+ Add</button>
+            <button type="button" class="qt-add" onclick="addQuickTier('WELCOME50','fixed',50,500,'৳50 off on orders over ৳500',this)">+ Add</button>
           </div>
           <div class="qt">
             <div class="qt-tier">Tier 2 — Loyalty</div>
@@ -810,7 +818,7 @@
             <div class="qt-val">10% off</div>
             <div class="qt-min">Min order: ৳800</div>
             <div class="qt-why">Free delivery already unlocked at ৳700. 10% off drives customers to ৳800+ baskets, effective AOV 3× uplift.</div>
-            <button type="button" class="qt-add" onclick="addQuickTier('SAFA10','percent',10,800,'10% off on orders over ৳800')">+ Add</button>
+            <button type="button" class="qt-add" onclick="addQuickTier('SAFA10','percent',10,800,'10% off on orders over ৳800',this)">+ Add</button>
           </div>
           <div class="qt">
             <div class="qt-tier">Tier 3 — Bulk</div>
@@ -818,7 +826,7 @@
             <div class="qt-val">15% off</div>
             <div class="qt-min">Min order: ৳1,200</div>
             <div class="qt-why">Strong incentive for family or repeat bulk orders. 15% discount at 15% margin is break-even — use for volume only.</div>
-            <button type="button" class="qt-add" onclick="addQuickTier('SAFA15','percent',15,1200,'15% off on bulk orders over ৳1200')">+ Add</button>
+            <button type="button" class="qt-add" onclick="addQuickTier('SAFA15','percent',15,1200,'15% off on bulk orders over ৳1200',this)">+ Add</button>
           </div>
           <div class="qt">
             <div class="qt-tier">Tier 4 — Wholesale</div>
@@ -826,7 +834,7 @@
             <div class="qt-val">20% off</div>
             <div class="qt-min">Min order: ৳2,000</div>
             <div class="qt-why">Corporate/restaurant wholesale. Max AOV pull. Accept thin margin for volume and relationship. Share selectively.</div>
-            <button type="button" class="qt-add" onclick="addQuickTier('MEGA20','percent',20,2000,'20% off on wholesale orders over ৳2000')">+ Add</button>
+            <button type="button" class="qt-add" onclick="addQuickTier('MEGA20','percent',20,2000,'20% off on wholesale orders over ৳2000',this)">+ Add</button>
           </div>
         </div>
 
@@ -1541,7 +1549,7 @@
       const newBadge  = isNew ? `<span class="new-badge">NEW</span>` : '';
       return `
         <tr class="order-row" data-id="${o.id}" onclick="toggleRow('${o.id}')">
-          <td style="width:28px;padding:14px 8px 14px 16px;">
+          <td class="td-chevron">
             <svg class="expand-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
           </td>
           <td>
@@ -1898,28 +1906,31 @@
       else toast(active ? 'Coupon activated ✓' : 'Coupon deactivated');
     };
 
-    /* Coupons — delete modal */
-    let _pendingDelId = null;
-    window.openDelModal = function(id, code) {
-      _pendingDelId = id;
-      document.getElementById('del-code-label').textContent = code;
+    /* Delete modal — shared by coupons and products */
+    let _pendingDelId    = null;
+    let _pendingDelTable = 'coupons';
+    window.openDelModal = function(id, label, table = 'coupons') {
+      _pendingDelId    = id;
+      _pendingDelTable = table;
+      document.getElementById('del-code-label').textContent = label;
       document.getElementById('del-modal').classList.add('open');
     };
     window.closeDelModal = function() {
       document.getElementById('del-modal').classList.remove('open');
-      _pendingDelId = null;
+      _pendingDelId    = null;
+      _pendingDelTable = 'coupons';
     };
     window.confirmDelete = async function() {
       if (!_pendingDelId) return;
-      const { error } = await supabase.from('coupons').delete().eq('id', _pendingDelId);
+      const { error } = await supabase.from(_pendingDelTable).delete().eq('id', _pendingDelId);
       closeDelModal();
       if (error) toast('Delete failed', 'error');
+      else if (_pendingDelTable === 'products') { toast('Product deleted'); loadProducts(); }
       else { toast('Coupon deleted'); loadCoupons(); }
     };
 
     /* Coupons — quick tier add */
-    window.addQuickTier = async function(code, type, value, minOrder, desc) {
-      const btn = event.target;
+    window.addQuickTier = async function(code, type, value, minOrder, desc, btn) {
       btn.disabled = true; btn.textContent = '…';
       const { error } = await supabase.from('coupons').insert([{
         code, type, value, min_order: minOrder, description: desc, active: true
@@ -2353,10 +2364,10 @@
             </label>
           </td>
           <td onclick="event.stopPropagation()" style="white-space:nowrap">
-            <button type="button" class="f-action-btn" style="padding:6px 12px;font-size:8px"
+            <button type="button" class="f-action-btn prod-edit-btn"
                     onclick="editProduct('${p.id}')">Edit</button>
             <button type="button" class="f-clear-btn"
-                    onclick="openDelModal('${p.id}','${p.name}')" title="Delete">
+                    onclick="openDelModal('${p.id}','${p.name}','products')" title="Delete">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <polyline points="3 6 5 6 21 6"/>
@@ -2557,7 +2568,7 @@
         const waMsg      = encodeURIComponent(`হ্যালো ${c.name}! 🍄 SaFa Naturals থেকে বলছি।`);
         return `
           <tr class="order-row" data-phone="${c.phone}" onclick="toggleCustRow('${c.phone}')">
-            <td style="width:28px;padding:14px 8px 14px 16px;">
+            <td class="td-chevron">
               <svg class="expand-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
             </td>
             <td>
@@ -2567,8 +2578,8 @@
             <td><span class="cell-phone">${c.phone}</span></td>
             <td class="cell-sub">${c.thana ? c.thana + ', ' : ''}${c.district || '—'}</td>
             <td>
-              <div style="font-size:18px;font-family:'Cormorant Garamond',serif;font-weight:300;">${c.orders.length}</div>
-              ${c.orders.length >= 2 ? '<div class="cell-sub" style="color:var(--al)">Repeat buyer</div>' : ''}
+              <div class="cust-order-count">${c.orders.length}</div>
+              ${c.orders.length >= 2 ? '<div class="cust-repeat-label">Repeat buyer</div>' : ''}
             </td>
             <td><div class="cell-spent">${fmt(c.totalSpent)}</div></td>
             <td class="cell-sub">${lastDate}</td>
@@ -2589,7 +2600,7 @@
                     <span class="status-badge s-${(o.status||'pending').toLowerCase()}">${cap(o.status||'pending')}</span>
                     <div class="cust-order-total">${fmt(o.total_amount)}</div>
                   </div>`).join('')}
-                <div style="margin-top:12px;">
+                <div class="cust-wa-wrap">
                   <a class="f-action-btn green-btn" href="https://wa.me/${SELLER_WA}?text=${waMsg}" target="_blank" rel="noopener">
                     <svg viewBox="0 0 24 24" width="11" height="11" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
                     WhatsApp ${c.name.split(' ')[0]}
