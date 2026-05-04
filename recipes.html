@@ -1332,7 +1332,7 @@
   <div class="cart-drawer" id="cartDrawer">
     <div class="cart-header">
       <h2 class="cart-title">Your Cart</h2>
-      <button class="cart-close"
+      <button type="button" class="cart-close"
               onclick="window.toggleCart()"
               aria-label="Close cart">✕</button>
     </div>
@@ -1344,7 +1344,7 @@
           <div class="cart-banner-info">
             <h4>Fresh Oyster</h4><span>350 ৳</span>
           </div>
-          <san class="cart-banner-add"
+          <button type="button" class="cart-banner-add"
             onclick="window.addToCart('Fresh Oyster Mushrooms',350,'fresh_oyster','1kg')">+</button>
         </div>
         <div class="cart-banner-card">
@@ -1352,7 +1352,7 @@
           <div class="cart-banner-info">
             <h4>Dried Oyster</h4><span>280 ৳</span>
           </div>
-          <button class="cart-banner-add"
+          <button type="button" class="cart-banner-add"
             onclick="window.addToCart('Dried Oyster Mushroom',280,'dried_oyster','100g')">+</button>
         </div>
         <div class="cart-banner-card">
@@ -1360,7 +1360,7 @@
           <div class="cart-banner-info">
             <h4>Mushroom Powder</h4><span>350 ৳</span>
           </div>
-          <button class="cart-banner-add"
+          <button type="button" class="cart-banner-add"
             onclick="window.addToCart('Oyster Mushroom Powder',350,'mushroom_powder','100g')">+</button>
         </div>
       </div>
@@ -1368,7 +1368,7 @@
     <div class="cart-items-container"></div>
     <div class="cart-footer">
       <div class="cart-subtotal"><span>Subtotal</span><span>0 ৳</span></div>
-      <button class="cart-checkout-btn"
+      <button type="button" class="cart-checkout-btn"
               onclick="window.location.href='checkout.html'">
         Proceed to Checkout →
       </button>
@@ -1401,7 +1401,7 @@
           <circle cx="12" cy="7" r="4"></circle>
         </svg>
       </a>
-      <button class="nav-icon"
+      <button type="button" class="nav-icon"
               onclick="window.toggleCart()"
               aria-label="Open cart">
         <svg width="19" height="19" viewBox="0 0 24 24" fill="none"
@@ -1414,7 +1414,7 @@
         <span class="nav-dot"></span>
       </button>
       <a href="index.html#products" class="nav-cta">অর্ডার করুন</a>
-      <button class="hamburger" id="hamburger" aria-label="Menu">
+      <button type="button" class="hamburger" id="hamburger" aria-label="Menu">
         <span></span><span></span><span></span>
       </button>
     </div>
@@ -1450,7 +1450,7 @@
     </p>
     <div class="rp-hero-stats">
       <div class="rp-hero-stat">
-        <span class="rp-hero-stat-val">9</span>
+        <span class="rp-hero-stat-val">14</span>
         <span class="rp-hero-stat-label">Recipes</span>
       </div>
       <div class="rp-hero-stat-div"></div>
@@ -1493,7 +1493,7 @@
           <span class="rp-product-name">Fresh Oyster</span>
           <span class="rp-product-price">350 ৳ · 1kg</span>
         </div>
-        <button class="rp-product-add"
+        <button type="button" class="rp-product-add"
                 onclick="window.addToCart('Fresh Oyster Mushrooms',350,'fresh_oyster','1kg','/SaFa Fresh Oyster Mushroom.png')"
                 aria-label="Add Fresh Oyster to cart">
           <span>Add to Cart</span>
@@ -1511,7 +1511,7 @@
           <span class="rp-product-name">Dried Oyster</span>
           <span class="rp-product-price">280 ৳ · 100g</span>
         </div>
-        <button class="rp-product-add"
+        <button type="button" class="rp-product-add"
                 onclick="window.addToCart('Dried Oyster Mushroom',280,'dried_oyster','100g','/SaFa Dried Oyster Mushroom.png')"
                 aria-label="Add Dried Oyster to cart">
           <span>Add to Cart</span>
@@ -1529,7 +1529,7 @@
           <span class="rp-product-name">Mushroom Powder</span>
           <span class="rp-product-price">350 ৳ · 100g</span>
         </div>
-        <button class="rp-product-add"
+        <button type="button" class="rp-product-add"
                 onclick="window.addToCart('Oyster Mushroom Powder',350,'mushroom_powder','100g','/SaFa Oyster Mushroom Powder.png')"
                 aria-label="Add Mushroom Powder to cart">
           <span>Add to Cart</span>
@@ -1548,7 +1548,7 @@
           <span class="rp-product-name">Button Mushroom</span>
           <span class="rp-product-price">Coming Q4</span>
         </div>
-        <button class="rp-product-add"
+        <button type="button" class="rp-product-add"
                 onclick="window.location.href='index.html#footer'"
                 aria-label="Notify me about Button Mushroom">
           <span>Notify Me</span>
@@ -1567,7 +1567,7 @@
           <span class="rp-product-price">Best Value</span>
         </div>
         <!-- Adds Fresh Oyster + Powder in one click -->
-        <button class="rp-product-add"
+        <button type="button" class="rp-product-add"
                 onclick="window.addToCart('Fresh Oyster Mushrooms',350,'fresh_oyster','1kg','r1.png');
                          window.addToCart('Oyster Mushroom Powder',350,'mushroom_powder','100g','r3.png')"
                 aria-label="Add bundle to cart">
@@ -1587,25 +1587,25 @@
        aria-selected toggled by JS on click.
   ════════════════════════════════════════════════════ -->
   <div class="rp-filters" role="tablist" aria-label="Filter recipes">
-    <button class="rp-filter-btn active"
+    <button type="button" class="rp-filter-btn active"
             data-filter="all"
             role="tab" aria-selected="true">সব রেসিপি</button>
-    <button class="rp-filter-btn"
+    <button type="button" class="rp-filter-btn"
             data-filter="curry"
             role="tab" aria-selected="false">তরকারি</button>
-    <button class="rp-filter-btn"
+    <button type="button" class="rp-filter-btn"
             data-filter="soup"
             role="tab" aria-selected="false">স্যুপ</button>
-    <button class="rp-filter-btn"
+    <button type="button" class="rp-filter-btn"
             data-filter="snack"
             role="tab" aria-selected="false">স্ন্যাক্স</button>
-    <button class="rp-filter-btn"
+    <button type="button" class="rp-filter-btn"
             data-filter="rice"
             role="tab" aria-selected="false">ভাত / বিরিয়ানি</button>
-    <button class="rp-filter-btn"
+    <button type="button" class="rp-filter-btn"
             data-filter="dry"
             role="tab" aria-selected="false">শুকনো রান্না</button>
-    <button class="rp-filter-btn"
+    <button type="button" class="rp-filter-btn"
             data-filter="drink"
             role="tab" aria-selected="false">পানীয়</button>
   </div>
@@ -1674,12 +1674,12 @@
             </div>
           </div>
           <div class="rp-featured-actions">
-            <button class="btn-primary"
+            <button type="button" class="btn-primary"
                     onclick="openRecipe('biryani')">
               রেসিপি দেখুন →
             </button>
             <!-- Quick add — adds the main ingredient to cart -->
-            <button class="btn-ghost-dark btn-quick-add"
+            <button type="button" class="btn-ghost-dark btn-quick-add"
                     onclick="window.addToCart(
                       'Fresh Oyster Mushrooms',350,
                       'fresh_oyster','1kg',
@@ -1729,7 +1729,7 @@
               <span class="rp-meta-label">Rating</span>
             </div>
           </div>
-          <button class="rp-card-btn" onclick="openRecipe('bhuna')">
+          <button type="button" class="rp-card-btn" onclick="openRecipe('bhuna')">
             রেসিপি দেখুন →
           </button>
         </div>
@@ -1772,7 +1772,7 @@
               <span class="rp-meta-label">Rating</span>
             </div>
           </div>
-          <button class="rp-card-btn" onclick="openRecipe('soup')">
+          <button type="button" class="rp-card-btn" onclick="openRecipe('soup')">
             রেসিপি দেখুন →
           </button>
         </div>
@@ -1815,7 +1815,7 @@
               <span class="rp-meta-label">Rating</span>
             </div>
           </div>
-          <button class="rp-card-btn" onclick="openRecipe('chop')">
+          <button type="button" class="rp-card-btn" onclick="openRecipe('chop')">
             রেসিপি দেখুন →
           </button>
         </div>
@@ -1858,7 +1858,7 @@
               <span class="rp-meta-label">Rating</span>
             </div>
           </div>
-          <button class="rp-card-btn" onclick="openRecipe('daal')">
+          <button type="button" class="rp-card-btn" onclick="openRecipe('daal')">
             রেসিপি দেখুন →
           </button>
         </div>
@@ -1901,7 +1901,7 @@
               <span class="rp-meta-label">Rating</span>
             </div>
           </div>
-          <button class="rp-card-btn" onclick="openRecipe('bhaji')">
+          <button type="button" class="rp-card-btn" onclick="openRecipe('bhaji')">
             রেসিপি দেখুন →
           </button>
         </div>
@@ -1944,7 +1944,7 @@
               <span class="rp-meta-label">Rating</span>
             </div>
           </div>
-          <button class="rp-card-btn" onclick="openRecipe('khichuri')">
+          <button type="button" class="rp-card-btn" onclick="openRecipe('khichuri')">
             রেসিপি দেখুন →
           </button>
         </div>
@@ -1987,7 +1987,7 @@
               <span class="rp-meta-label">Rating</span>
             </div>
           </div>
-          <button class="rp-card-btn" onclick="openRecipe('singara')">
+          <button type="button" class="rp-card-btn" onclick="openRecipe('singara')">
             রেসিপি দেখুন →
           </button>
         </div>
@@ -2030,7 +2030,7 @@
               <span class="rp-meta-label">Rating</span>
             </div>
           </div>
-          <button class="rp-card-btn" onclick="openRecipe('smoothie')">
+          <button type="button" class="rp-card-btn" onclick="openRecipe('smoothie')">
             রেসিপি দেখুন →
           </button>
         </div>
@@ -2057,7 +2057,7 @@
             <div class="rp-meta-item"><span class="rp-meta-val">4</span><span class="rp-meta-label">Serves</span></div>
             <div class="rp-meta-item"><span class="rp-meta-val">★4.9</span><span class="rp-meta-label">Rating</span></div>
           </div>
-          <button class="rp-card-btn" onclick="openRecipe('buttermasala')">রেসিপি দেখুন →</button>
+          <button type="button" class="rp-card-btn" onclick="openRecipe('buttermasala')">রেসিপি দেখুন →</button>
         </div>
       </div>
 
@@ -2081,7 +2081,7 @@
             <div class="rp-meta-item"><span class="rp-meta-val">4</span><span class="rp-meta-label">Serves</span></div>
             <div class="rp-meta-item"><span class="rp-meta-val">★4.7</span><span class="rp-meta-label">Rating</span></div>
           </div>
-          <button class="rp-card-btn" onclick="openRecipe('palak')">রেসিপি দেখুন →</button>
+          <button type="button" class="rp-card-btn" onclick="openRecipe('palak')">রেসিপি দেখুন →</button>
         </div>
       </div>
 
@@ -2105,7 +2105,7 @@
             <div class="rp-meta-item"><span class="rp-meta-val">2</span><span class="rp-meta-label">Serves</span></div>
             <div class="rp-meta-item"><span class="rp-meta-val">★4.9</span><span class="rp-meta-label">Rating</span></div>
           </div>
-          <button class="rp-card-btn" onclick="openRecipe('thaibasil')">রেসিপি দেখুন →</button>
+          <button type="button" class="rp-card-btn" onclick="openRecipe('thaibasil')">রেসিপি দেখুন →</button>
         </div>
       </div>
 
@@ -2129,7 +2129,7 @@
             <div class="rp-meta-item"><span class="rp-meta-val">4</span><span class="rp-meta-label">Serves</span></div>
             <div class="rp-meta-item"><span class="rp-meta-val">★4.8</span><span class="rp-meta-label">Rating</span></div>
           </div>
-          <button class="rp-card-btn" onclick="openRecipe('tomkha')">রেসিপি দেখুন →</button>
+          <button type="button" class="rp-card-btn" onclick="openRecipe('tomkha')">রেসিপি দেখুন →</button>
         </div>
       </div>
 
@@ -2153,7 +2153,7 @@
             <div class="rp-meta-item"><span class="rp-meta-val">3</span><span class="rp-meta-label">Serves</span></div>
             <div class="rp-meta-item"><span class="rp-meta-val">★4.8</span><span class="rp-meta-label">Rating</span></div>
           </div>
-          <button class="rp-card-btn" onclick="openRecipe('friedrice')">রেসিপি দেখুন →</button>
+          <button type="button" class="rp-card-btn" onclick="openRecipe('friedrice')">রেসিপি দেখুন →</button>
         </div>
       </div>
 
@@ -2179,7 +2179,7 @@
         <span class="rp-modal-hero-emoji" id="modalEmoji">🍄</span>
         <img id="modalHeroImg" alt="" onerror="this.style.display='none'">
         <span class="rp-modal-category-pill" id="modalCategory"></span>
-        <button class="rp-modal-close"
+        <button type="button" class="rp-modal-close"
                 onclick="closeRecipe()"
                 aria-label="Close recipe">✕</button>
       </div>
@@ -2193,21 +2193,21 @@
 
       <!-- Tab bar -->
       <div class="rp-modal-tabs" role="tablist">
-        <button class="rp-tab-btn active"
+        <button type="button" class="rp-tab-btn active"
                 role="tab" aria-selected="true"
                 aria-controls="panelIngredients"
                 id="tabIngredients"
                 onclick="switchTab('ingredients')">
           🥬 Ingredients
         </button>
-        <button class="rp-tab-btn"
+        <button type="button" class="rp-tab-btn"
                 role="tab" aria-selected="false"
                 aria-controls="panelSteps"
                 id="tabSteps"
                 onclick="switchTab('steps')">
           📋 Steps
         </button>
-        <button class="rp-tab-btn"
+        <button type="button" class="rp-tab-btn"
                 role="tab" aria-selected="false"
                 aria-controls="panelTips"
                 id="tabTips"
@@ -2250,7 +2250,7 @@
         <p class="rp-modal-footer-label" id="modalFooterLabel">
           Ready to cook? <strong>Add the main ingredient to your cart.</strong>
         </p>
-        <button class="rp-modal-add-btn" id="modalAddBtn">
+        <button type="button" class="rp-modal-add-btn" id="modalAddBtn">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
                stroke="currentColor" stroke-width="2"
                stroke-linecap="round" stroke-linejoin="round"
