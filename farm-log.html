@@ -167,6 +167,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--g900);color:var(--c);min-
 .tag-green{background:rgba(95,207,128,.12);color:var(--green);border:1px solid rgba(95,207,128,.2)}
 .tag-red{background:var(--red-dim);color:var(--red);border:1px solid rgba(224,82,82,.2)}
 .tag-gold{background:var(--gold-dim);color:var(--al);border:1px solid rgba(217,178,84,.2)}
+.fl-tbl .col-green{color:var(--green)}
+.fl-tbl .col-red{color:var(--red)}
+.fl-tbl .col-stars{font-size:11px}
+.fl-btn-sm{padding:3px 8px;font-size:8px}
+.fl-tbl-empty{text-align:center;color:rgba(245,239,230,.3);padding:24px}
+.fl-tbl-empty.error{color:var(--red)}
 
 /* ══ TOAST ══ */
 .fl-toast-stack{position:fixed;bottom:20px;right:20px;display:flex;flex-direction:column;gap:8px;z-index:9999}
@@ -347,7 +353,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--g900);color:var(--c);min-
 
         <div class="fl-divider"></div>
         <div class="fl-toggle-row">
-          <label class="fl-toggle"><input type="checkbox" id="qc-contam-toggle" onchange="toggleConditional('qc-contam-block',this)"/><span class="fl-toggle-slider"></span></label>
+          <label class="fl-toggle"><input type="checkbox" id="qc-contam-toggle" data-target="qc-contam-block" onchange="toggleConditional('qc-contam-block',this)"/><span class="fl-toggle-slider"></span></label>
           <span class="fl-toggle-label">আজ দূষণের ঘটনা ছিল?</span>
         </div>
         <div class="fl-conditional" id="qc-contam-block">
@@ -395,7 +401,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--g900);color:var(--c);min-
       </div>
       <div class="fl-sec-body">
         <div class="fl-toggle-row">
-          <label class="fl-toggle"><input type="checkbox" id="spawn-bought-toggle" onchange="toggleConditional('spawn-bought-block',this)"/><span class="fl-toggle-slider"></span></label>
+          <label class="fl-toggle"><input type="checkbox" id="spawn-bought-toggle" data-target="spawn-bought-block" onchange="toggleConditional('spawn-bought-block',this)"/><span class="fl-toggle-slider"></span></label>
           <span class="fl-toggle-label">আজ স্পন কেনা হয়েছে?</span>
         </div>
         <div class="fl-conditional" id="spawn-bought-block">
@@ -702,7 +708,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--g900);color:var(--c);min-
         </div>
         <div class="fl-divider"></div>
         <div class="fl-toggle-row">
-          <label class="fl-toggle"><input type="checkbox" id="op-issue-toggle" onchange="toggleConditional('op-issue-block',this)"/><span class="fl-toggle-slider"></span></label>
+          <label class="fl-toggle"><input type="checkbox" id="op-issue-toggle" data-target="op-issue-block" onchange="toggleConditional('op-issue-block',this)"/><span class="fl-toggle-slider"></span></label>
           <span class="fl-toggle-label">আজ যন্ত্রপাতির সমস্যা ছিল?</span>
         </div>
         <div class="fl-conditional" id="op-issue-block">
@@ -1092,7 +1098,7 @@ function loadDraft() {
       else el.value = val ?? '';
     });
     calcAll();
-    toast('গতকালের ড্রাফট লোড হয়েছে', 'info');
+    toast('ড্রাফট লোড হয়েছে', 'info');
   } catch(e) {}
 }
 
@@ -1210,13 +1216,13 @@ document.getElementById('btn-submit').addEventListener('click', async () => {
 /* ── HISTORY ── */
 async function loadHistory() {
   const tbody = document.getElementById('history-tbody');
-  tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;color:rgba(245,239,230,.3);padding:24px">লোড হচ্ছে…</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="11" class="fl-tbl-empty">লোড হচ্ছে…</td></tr>';
   try {
     const { data, error } = await supabase.from('farm_daily_logs')
       .select('log_date,harvest_fresh_a,harvest_fresh_b,harvest_fresh_rej,harvest_dried,harvest_powder,qc_pass,qc_fail,s_fresh_kg,s_fresh_price,s_dried_kg,s_dried_price,s_powder_kg,s_powder_price,ex_spawn,ex_substrate,ex_packaging,ex_labor,ex_electricity,ex_transport,ex_water,ex_other,op_bags_total,n_overall_rating')
       .order('log_date',{ascending:false}).limit(30);
     if (error) throw error;
-    if (!data?.length) { tbody.innerHTML='<tr><td colspan="11" style="text-align:center;color:rgba(245,239,230,.3);padding:32px">কোনো লগ নেই — প্রথম লগ জমা দিন!</td></tr>'; return; }
+    if (!data?.length) { tbody.innerHTML='<tr><td colspan="11" class="fl-tbl-empty">কোনো লগ নেই — প্রথম লগ জমা দিন!</td></tr>'; return; }
     _historyData = data;
     tbody.innerHTML = data.map(r => {
       const freshTotal = (r.harvest_fresh_a||0)+(r.harvest_fresh_b||0)+(r.harvest_fresh_rej||0);
@@ -1231,16 +1237,16 @@ async function loadHistory() {
         <td class="mono">${(r.harvest_dried||0).toFixed(2)}</td>
         <td class="mono">${(r.harvest_powder||0).toFixed(2)}</td>
         <td><span class="tag ${parseFloat(qcPct)>=90?'tag-green':parseFloat(qcPct)>=70?'tag-gold':'tag-red'}">${qcPct}</span></td>
-        <td class="mono" style="color:var(--green)">${Math.round(rev).toLocaleString()}</td>
-        <td class="mono" style="color:var(--red)">${Math.round(exp).toLocaleString()}</td>
-        <td class="mono" style="color:${net>=0?'var(--green)':'var(--red)'}">${Math.round(net).toLocaleString()}</td>
+        <td class="mono col-green">${Math.round(rev).toLocaleString()}</td>
+        <td class="mono col-red">${Math.round(exp).toLocaleString()}</td>
+        <td class="mono ${net>=0?'col-green':'col-red'}">${Math.round(net).toLocaleString()}</td>
         <td class="mono">${r.op_bags_total||'—'}</td>
-        <td style="font-size:11px">${stars}</td>
-        <td><button type="button" class="fl-btn" style="padding:3px 8px;font-size:8px" onclick="loadLog('${r.log_date}')">লোড</button></td>
+        <td class="col-stars">${stars}</td>
+        <td><button type="button" class="fl-btn fl-btn-sm" onclick="loadLog('${r.log_date}')">লোড</button></td>
       </tr>`;
     }).join('');
   } catch(err) {
-    tbody.innerHTML=`<tr><td colspan="11" style="text-align:center;color:var(--red);padding:24px">ত্রুটি: ${err.message}</td></tr>`;
+    tbody.innerHTML=`<tr><td colspan="11" class="fl-tbl-empty error">ত্রুটি: ${err.message}</td></tr>`;
   }
 }
 
