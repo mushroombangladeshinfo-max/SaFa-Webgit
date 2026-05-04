@@ -2,7 +2,7 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: ['main'] # Change to 'master' if your default branch is master
+    branches: ['main']
 
 permissions:
   contents: read
@@ -13,6 +13,9 @@ concurrency:
   group: 'pages'
   cancel-in-progress: true
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+
 jobs:
   deploy:
     environment:
@@ -22,30 +25,35 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          
+          node-version: 24
+          cache: 'npm'
+
       - name: Install dependencies
-        run: npm install
-        
+        run: npm ci
+
       - name: Build project
         run: npm run build
         env:
-          # Passing your Supabase secrets into the Vite build process
-          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_URL:      ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
-          
+          VITE_GA_ID:             ${{ secrets.VITE_GA_ID }}
+          VITE_GSC_TOKEN:         ${{ secrets.VITE_GSC_TOKEN }}
+          VITE_OWM_KEY:           ${{ secrets.VITE_OWM_KEY }}
+          VITE_STEADFAST_KEY:     ${{ secrets.VITE_STEADFAST_KEY }}
+          VITE_STEADFAST_SECRET:  ${{ secrets.VITE_STEADFAST_SECRET }}
+
       - name: Setup Pages
-        uses: actions/configure-pages@v4
-        
+        uses: actions/configure-pages@v5
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './dist' # Make sure this matches your Vite output folder
-          
+          path: './dist'
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
