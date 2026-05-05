@@ -97,7 +97,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--g900);color:var(--c);min-
 .fl-input{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:var(--r2);padding:9px 12px;color:var(--c);font-family:'DM Mono',monospace;font-size:13px;outline:none;width:100%;transition:border-color .2s,background .2s;-webkit-appearance:none;appearance:none}
 .fl-input:focus{border-color:rgba(196,154,60,.4);background:rgba(255,255,255,.06)}
 .fl-input::placeholder{color:rgba(245,239,230,.2)}
-.fl-input[type="number"]::-webkit-inner-spin-button{opacity:.4}
+.fl-input[type="number"]::-webkit-inner-spin-button,
+.fl-input[type="number"]::-webkit-outer-spin-button{display:none}
+.fl-input[type="number"]{-moz-appearance:textfield;appearance:textfield}
 .fl-select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' fill='none' stroke='rgba(245,239,230,0.3)' stroke-width='2'%3E%3Cpath d='M2 4l4 4 4-4'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
 .fl-select option{background:var(--g800)}
 .fl-textarea{resize:vertical;min-height:72px;font-family:'Hind Siliguri',sans-serif;font-size:13px;line-height:1.6}
@@ -186,6 +188,43 @@ body{font-family:'DM Sans',sans-serif;background:var(--g900);color:var(--c);min-
 @media(max-width:1100px){.fl-layout{grid-template-columns:160px 1fr 200px}}
 @media(max-width:860px){.fl-layout{grid-template-columns:1fr};.fl-nav{display:none};.fl-summary{position:static;height:auto;border-left:none;border-top:1px solid var(--border)}}
 @media(max-width:640px){.fl-grid-2,.fl-grid-3,.fl-grid-4{grid-template-columns:1fr}}
+
+/* ══ UX IMPROVEMENTS ══ */
+/* Readonly calculated display fields — dashed border signals non-editable */
+.fl-readonly{cursor:default;pointer-events:none;border-style:dashed;border-color:rgba(255,255,255,.06)!important}
+/* Section badge: neutral when empty (no modifier class) */
+.fl-sec-badge:not(.complete):not(.partial){background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:rgba(245,239,230,.3)}
+/* Section header keyboard focus */
+.fl-sec-header:focus-visible{outline:2px solid rgba(217,178,84,.4);outline-offset:-2px}
+/* Progress bar in right summary */
+.fl-progress-wrap{padding-bottom:12px;border-bottom:1px solid var(--border)}
+.fl-progress-meta{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px}
+.fl-progress-meta-lbl{font-size:9px;text-transform:uppercase;letter-spacing:.5px;color:rgba(245,239,230,.3)}
+.fl-progress-text{font-family:'DM Mono',monospace;font-size:10px;color:rgba(245,239,230,.35)}
+.fl-progress-bar{height:3px;background:rgba(255,255,255,.08);border-radius:99px;overflow:hidden}
+.fl-progress-fill{height:100%;background:var(--green);border-radius:99px;width:0%;transition:width .4s ease}
+/* Mobile section jump pills — sticky at top of fl-main, hidden on desktop */
+.fl-sec-pills{display:none;gap:6px;overflow-x:auto;padding:10px 24px 12px;scrollbar-width:none;position:sticky;top:0;z-index:10;background:var(--g900);border-bottom:1px solid var(--border);margin:-20px -24px 4px}
+.fl-sec-pills::-webkit-scrollbar{display:none}
+.fl-sec-pill{flex-shrink:0;display:inline-flex;align-items:center;gap:4px;padding:5px 11px;border:1px solid var(--border);border-radius:99px;background:rgba(255,255,255,.03);color:rgba(245,239,230,.45);font-size:11px;font-family:'DM Sans',sans-serif;cursor:pointer;white-space:nowrap;transition:all .15s;-webkit-tap-highlight-color:transparent}
+.fl-sec-pill:active{transform:scale(.96)}
+.fl-sec-pill.pill-partial{border-color:rgba(217,178,84,.3);background:rgba(217,178,84,.06);color:var(--al)}
+.fl-sec-pill.pill-done{border-color:rgba(95,207,128,.3);background:rgba(95,207,128,.06);color:var(--green)}
+/* Mobile sticky bottom summary strip */
+.fl-mini-sum{display:none;position:fixed;bottom:0;left:0;right:0;z-index:200;background:rgba(14,26,19,.97);border-top:1px solid var(--border);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);padding:8px 14px;gap:0;align-items:center}
+.fl-mini-item{display:flex;flex-direction:column;align-items:center;flex:1;gap:1px}
+.fl-mini-val{font-family:'DM Mono',monospace;font-size:12px;font-weight:500;color:var(--c);transition:color .25s}
+.fl-mini-val.green{color:var(--green)}.fl-mini-val.red{color:var(--red)}
+.fl-mini-lbl{font-size:8px;text-transform:uppercase;letter-spacing:.4px;color:rgba(245,239,230,.28)}
+.fl-mini-sep{width:1px;height:30px;background:var(--border);flex-shrink:0}
+.fl-mini-btn{flex-shrink:0;font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:8px 14px;border-radius:var(--r2);border:1px solid rgba(217,178,84,.3);background:rgba(217,178,84,.1);color:var(--al);cursor:pointer;margin-left:12px;-webkit-tap-highlight-color:transparent}
+/* Quick-log trigger */
+.ql-trigger{font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:8px 14px;border-radius:var(--r2);border:1px solid rgba(217,178,84,.3);background:rgba(217,178,84,.1);color:var(--al);cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0}
+.ql-trigger:hover{background:rgba(217,178,84,.2);border-color:rgba(217,178,84,.5)}
+/* Hidden SQL reference block */
+#farm-schema-sql{display:none}
+@media(max-width:860px){.fl-sec-pills{display:flex}.fl-mini-sum{display:flex}body{padding-bottom:62px}}
+@media(max-width:640px){.fl-topbar{gap:8px;padding:0 10px}#autosave-text{display:none}.fl-btn{font-size:8px;padding:6px 9px;letter-spacing:.07em}.fl-date-input{font-size:11px;padding:6px 8px}}
 </style>
 </head>
 <body>
@@ -197,7 +236,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--g900);color:var(--c);min-
     Admin
   </a>
   <div class="fl-sep"></div>
-  <a href="admin.html" class="fl-logo"><span class="fl-logo-m">SaFa</span><span class="fl-logo-s">Naturals</span></a>
   <span class="fl-topbar-title">দৈনিক ফার্ম লগ</span>
   <div class="fl-date-wrap">
     <input type="date" id="log-date" class="fl-date-input" title="লগের তারিখ"/>
@@ -209,6 +247,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--g900);color:var(--c);min-
   <button type="button" class="fl-btn" id="btn-yesterday" title="গতকালের লগ থেকে প্রারম্ভিক মান কপি করুন">গতকাল কপি</button>
   <button type="button" class="fl-btn" id="btn-clear">পরিষ্কার</button>
   <button type="button" class="fl-btn fl-btn-submit" id="btn-submit">জমা দিন →</button>
+  <a href="quick-log.html" class="ql-trigger">⚡ দ্রুত লগ</a>
 </header>
 
 <!-- ══ LAYOUT ══ -->
@@ -248,12 +287,24 @@ body{font-family:'DM Sans',sans-serif;background:var(--g900);color:var(--c);min-
   <!-- MAIN FORM -->
   <main class="fl-main" id="fl-main">
 
+    <!-- MOBILE SECTION PILLS (sticky, ≤860px only) -->
+    <div class="fl-sec-pills" id="fl-sec-pills" role="tablist" aria-label="সেকশনে যান">
+      <button type="button" class="fl-sec-pill" id="pill-harvest"    data-target="sec-harvest">🍄 হার্ভেস্ট</button>
+      <button type="button" class="fl-sec-pill" id="pill-qc"         data-target="sec-qc">✅ কোয়ালিটি</button>
+      <button type="button" class="fl-sec-pill" id="pill-spawn"      data-target="sec-spawn">🌱 স্পন</button>
+      <button type="button" class="fl-sec-pill" id="pill-processing" data-target="sec-processing">⚙️ প্রসেসিং</button>
+      <button type="button" class="fl-sec-pill" id="pill-sales"      data-target="sec-sales">📦 বিক্রি</button>
+      <button type="button" class="fl-sec-pill" id="pill-expenses"   data-target="sec-expenses">💰 খরচ</button>
+      <button type="button" class="fl-sec-pill" id="pill-operations" data-target="sec-operations">🏭 অপারেশন</button>
+      <button type="button" class="fl-sec-pill" id="pill-notes"      data-target="sec-notes">📝 নোট</button>
+    </div>
+
     <!-- ── SECTION 1: HARVEST ── -->
     <div class="fl-sec open" id="sec-harvest">
-      <div class="fl-sec-header" onclick="toggleSec(this)">
+      <div class="fl-sec-header" onclick="toggleSec(this)" tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleSec(this)}">
         <div class="fl-sec-icon">🍄</div>
         <div><div class="fl-sec-title">হার্ভেস্ট</div><div class="fl-sec-sub">আজকের মোট উৎপাদন — সব পণ্য</div></div>
-        <span class="fl-sec-badge partial" id="badge-harvest">খালি</span>
+        <span class="fl-sec-badge" id="badge-harvest">খালি</span>
         <svg class="fl-sec-chevron" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>
       </div>
       <div class="fl-sec-body">
@@ -321,10 +372,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--g900);color:var(--c);min-
 
     <!-- ── SECTION 2: QUALITY CONTROL ── -->
     <div class="fl-sec" id="sec-qc">
-      <div class="fl-sec-header" onclick="toggleSec(this)">
+      <div class="fl-sec-header" onclick="toggleSec(this)" tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleSec(this)}">
         <div class="fl-sec-icon">✅</div>
         <div><div class="fl-sec-title">কোয়ালিটি নিয়ন্ত্রণ</div><div class="fl-sec-sub">QC পাশ/ফেল, দূষণ ঘটনা</div></div>
-        <span class="fl-sec-badge partial" id="badge-qc">খালি</span>
+        <span class="fl-sec-badge" id="badge-qc">খালি</span>
         <svg class="fl-sec-chevron" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>
       </div>
       <div class="fl-sec-body">
@@ -393,10 +444,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--g900);color:var(--c);min-
 
     <!-- ── SECTION 3: SPAWN & SUBSTRATE ── -->
     <div class="fl-sec" id="sec-spawn">
-      <div class="fl-sec-header" onclick="toggleSec(this)">
+      <div class="fl-sec-header" onclick="toggleSec(this)" tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleSec(this)}">
         <div class="fl-sec-icon">🌱</div>
         <div><div class="fl-sec-title">স্পন ও সাবস্ট্রেট</div><div class="fl-sec-sub">কেনা, ব্যবহার, ব্যাগ তৈরি</div></div>
-        <span class="fl-sec-badge partial" id="badge-spawn">খালি</span>
+        <span class="fl-sec-badge" id="badge-spawn">খালি</span>
         <svg class="fl-sec-chevron" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>
       </div>
       <div class="fl-sec-body">
@@ -463,10 +514,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--g900);color:var(--c);min-
 
     <!-- ── SECTION 4: PROCESSING ── -->
     <div class="fl-sec" id="sec-processing">
-      <div class="fl-sec-header" onclick="toggleSec(this)">
+      <div class="fl-sec-header" onclick="toggleSec(this)" tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleSec(this)}">
         <div class="fl-sec-icon">⚙️</div>
         <div><div class="fl-sec-title">প্রসেসিং</div><div class="fl-sec-sub">তাজা→শুকনো→পাউডার রূপান্তর</div></div>
-        <span class="fl-sec-badge partial" id="badge-processing">খালি</span>
+        <span class="fl-sec-badge" id="badge-processing">খালি</span>
         <svg class="fl-sec-chevron" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>
       </div>
       <div class="fl-sec-body">
@@ -504,10 +555,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--g900);color:var(--c);min-
 
     <!-- ── SECTION 5: SALES & STOCK ── -->
     <div class="fl-sec" id="sec-sales">
-      <div class="fl-sec-header" onclick="toggleSec(this)">
+      <div class="fl-sec-header" onclick="toggleSec(this)" tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleSec(this)}">
         <div class="fl-sec-icon">📦</div>
         <div><div class="fl-sec-title">বিক্রি ও স্টক</div><div class="fl-sec-sub">আজকের বিক্রয়, দিনশেষের মজুদ</div></div>
-        <span class="fl-sec-badge partial" id="badge-sales">খালি</span>
+        <span class="fl-sec-badge" id="badge-sales">খালি</span>
         <svg class="fl-sec-chevron" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>
       </div>
       <div class="fl-sec-body">
@@ -523,7 +574,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--g900);color:var(--c);min-
           </div>
           <div class="fl-field">
             <label class="fl-label">তাজা রাজস্ব</label>
-            <div class="fl-input" style="background:rgba(95,207,128,.05);color:var(--green)" id="s-fresh-rev">৳ 0</div>
+            <div class="fl-input fl-readonly" style="background:rgba(95,207,128,.04);color:var(--green)" id="s-fresh-rev">৳ 0</div>
           </div>
         </div>
         <div class="fl-grid fl-grid-3" style="margin-top:10px">
@@ -537,7 +588,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--g900);color:var(--c);min-
           </div>
           <div class="fl-field">
             <label class="fl-label">শুকনো রাজস্ব</label>
-            <div class="fl-input" style="background:rgba(95,207,128,.05);color:var(--green)" id="s-dried-rev">৳ 0</div>
+            <div class="fl-input fl-readonly" style="background:rgba(95,207,128,.04);color:var(--green)" id="s-dried-rev">৳ 0</div>
           </div>
         </div>
         <div class="fl-grid fl-grid-3" style="margin-top:10px">
@@ -551,7 +602,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--g900);color:var(--c);min-
           </div>
           <div class="fl-field">
             <label class="fl-label">পাউডার রাজস্ব</label>
-            <div class="fl-input" style="background:rgba(95,207,128,.05);color:var(--green)" id="s-powder-rev">৳ 0</div>
+            <div class="fl-input fl-readonly" style="background:rgba(95,207,128,.04);color:var(--green)" id="s-powder-rev">৳ 0</div>
           </div>
         </div>
         <div class="fl-grid fl-grid-2" style="margin-top:10px">
@@ -609,10 +660,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--g900);color:var(--c);min-
 
     <!-- ── SECTION 6: EXPENSES ── -->
     <div class="fl-sec" id="sec-expenses">
-      <div class="fl-sec-header" onclick="toggleSec(this)">
+      <div class="fl-sec-header" onclick="toggleSec(this)" tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleSec(this)}">
         <div class="fl-sec-icon">💰</div>
         <div><div class="fl-sec-title">দৈনিক খরচ</div><div class="fl-sec-sub">COGS ও পরিচালন ব্যয়</div></div>
-        <span class="fl-sec-badge partial" id="badge-expenses">খালি</span>
+        <span class="fl-sec-badge" id="badge-expenses">খালি</span>
         <svg class="fl-sec-chevron" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>
       </div>
       <div class="fl-sec-body">
@@ -652,7 +703,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--g900);color:var(--c);min-
           </div>
           <div class="fl-field">
             <label class="fl-label">মোট খরচ</label>
-            <div class="fl-input" style="background:var(--red-dim);color:var(--red)" id="ex-total">৳ 0</div>
+            <div class="fl-input fl-readonly" style="background:var(--red-dim);color:var(--red)" id="ex-total">৳ 0</div>
           </div>
         </div>
         <div class="fl-field" style="margin-top:10px">
@@ -664,10 +715,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--g900);color:var(--c);min-
 
     <!-- ── SECTION 7: OPERATIONS ── -->
     <div class="fl-sec" id="sec-operations">
-      <div class="fl-sec-header" onclick="toggleSec(this)">
+      <div class="fl-sec-header" onclick="toggleSec(this)" tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleSec(this)}">
         <div class="fl-sec-icon">🏭</div>
         <div><div class="fl-sec-title">অপারেশন</div><div class="fl-sec-sub">রুম, ব্যাগ, ব্যাচ, কর্মী</div></div>
-        <span class="fl-sec-badge partial" id="badge-operations">খালি</span>
+        <span class="fl-sec-badge" id="badge-operations">খালি</span>
         <svg class="fl-sec-chevron" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>
       </div>
       <div class="fl-sec-body">
@@ -722,10 +773,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--g900);color:var(--c);min-
 
     <!-- ── SECTION 8: NOTES ── -->
     <div class="fl-sec" id="sec-notes">
-      <div class="fl-sec-header" onclick="toggleSec(this)">
+      <div class="fl-sec-header" onclick="toggleSec(this)" tabindex="0" role="button" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleSec(this)}">
         <div class="fl-sec-icon">📝</div>
         <div><div class="fl-sec-title">পর্যবেক্ষণ ও পরিকল্পনা</div><div class="fl-sec-sub">দৈনিক মন্তব্য, আবহাওয়া, পরের দিনের পরিকল্পনা</div></div>
-        <span class="fl-sec-badge partial" id="badge-notes">খালি</span>
+        <span class="fl-sec-badge" id="badge-notes">খালি</span>
         <svg class="fl-sec-chevron" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>
       </div>
       <div class="fl-sec-body">
@@ -774,6 +825,15 @@ body{font-family:'DM Sans',sans-serif;background:var(--g900);color:var(--c);min-
   <!-- RIGHT SUMMARY -->
   <aside class="fl-summary" id="fl-summary">
     <div class="fl-sum-title">আজকের সারসংক্ষেপ</div>
+
+    <!-- Completion progress -->
+    <div class="fl-progress-wrap">
+      <div class="fl-progress-meta">
+        <span class="fl-progress-meta-lbl">সেকশন পূর্ণতা</span>
+        <span class="fl-progress-text" id="progress-text">0/8</span>
+      </div>
+      <div class="fl-progress-bar"><div class="fl-progress-fill" id="progress-fill"></div></div>
+    </div>
 
     <!-- Net profit box -->
     <div class="fl-profit-box">
@@ -846,8 +906,53 @@ body{font-family:'DM Sans',sans-serif;background:var(--g900);color:var(--c);min-
   </div>
 </div>
 
+<!-- MOBILE STICKY BOTTOM SUMMARY (≤860px) -->
+<div class="fl-mini-sum" id="fl-mini-sum" role="status" aria-live="polite">
+  <div class="fl-mini-item">
+    <span class="fl-mini-val green" id="ms-rev">৳ 0</span>
+    <span class="fl-mini-lbl">রাজস্ব</span>
+  </div>
+  <div class="fl-mini-sep"></div>
+  <div class="fl-mini-item">
+    <span class="fl-mini-val red" id="ms-exp">৳ 0</span>
+    <span class="fl-mini-lbl">খরচ</span>
+  </div>
+  <div class="fl-mini-sep"></div>
+  <div class="fl-mini-item">
+    <span class="fl-mini-val" id="ms-net">৳ 0</span>
+    <span class="fl-mini-lbl">নিট লাভ</span>
+  </div>
+  <a href="quick-log.html" class="fl-mini-btn">⚡ দ্রুত লগ</a>
+</div>
+
 <!-- TOAST STACK -->
 <div class="fl-toast-stack" id="toast-stack"></div>
+
+<!-- SQL for copy button in error state -->
+<pre id="farm-schema-sql">CREATE TABLE IF NOT EXISTS farm_daily_logs (
+  id BIGSERIAL PRIMARY KEY, log_date DATE NOT NULL UNIQUE, created_at TIMESTAMPTZ DEFAULT NOW(), updated_at TIMESTAMPTZ DEFAULT NOW(),
+  harvest_fresh_a NUMERIC(8,3), harvest_fresh_b NUMERIC(8,3), harvest_fresh_rej NUMERIC(8,3),
+  harvest_dried NUMERIC(8,3), harvest_powder NUMERIC(8,3), harvest_rooms TEXT[], harvest_primary_batch TEXT, harvest_flush_num INT,
+  qc_pass NUMERIC(8,3), qc_fail NUMERIC(8,3), qc_fail_reason TEXT,
+  contam_event BOOLEAN DEFAULT FALSE, contam_room TEXT, contam_type TEXT, contam_bags INT, contam_action TEXT,
+  spawn_bought_kg NUMERIC(8,3), spawn_price_per_kg NUMERIC(8,2), spawn_supplier TEXT,
+  spawn_used_kg NUMERIC(8,3), substrate_kg NUMERIC(8,3), substrate_type TEXT, bags_inoculated INT, bags_discarded INT,
+  pr_fresh_in NUMERIC(8,3), pr_dried_out NUMERIC(8,3), pr_dried_in NUMERIC(8,3), pr_powder_out NUMERIC(8,3), pr_notes TEXT,
+  s_fresh_kg NUMERIC(8,3), s_fresh_price NUMERIC(8,2), s_dried_kg NUMERIC(8,3), s_dried_price NUMERIC(8,2),
+  s_powder_kg NUMERIC(8,3), s_powder_price NUMERIC(8,2), s_orders INT, s_waste NUMERIC(8,3),
+  s_b2b_name TEXT, s_b2b_qty NUMERIC(8,3), s_b2b_value NUMERIC(10,2),
+  st_fresh NUMERIC(8,3), st_dried NUMERIC(8,3), st_powder NUMERIC(8,3),
+  ex_spawn NUMERIC(10,2), ex_substrate NUMERIC(10,2), ex_packaging NUMERIC(10,2), ex_labor NUMERIC(10,2),
+  ex_electricity NUMERIC(10,2), ex_transport NUMERIC(10,2), ex_water NUMERIC(10,2), ex_other NUMERIC(10,2), ex_notes TEXT,
+  op_rooms INT, op_bags_total INT, op_workers INT, op_shifts INT,
+  op_new_batches INT, op_done_batches INT, op_bags_removed INT, op_energy_kwh NUMERIC(8,2),
+  op_issue BOOLEAN DEFAULT FALSE, op_issue_desc TEXT,
+  n_weather TEXT, n_overall_rating INT, n_observations TEXT, n_tomorrow TEXT, n_unusual TEXT, submitted_by TEXT
+);
+ALTER TABLE farm_daily_logs ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "admin_only" ON farm_daily_logs FOR ALL TO authenticated
+  USING (auth.jwt() ->> 'email' = ANY(ARRAY['mushroombangladesh.info@gmail.com','quazishab@gmail.com']))
+  WITH CHECK (auth.jwt() ->> 'email' = ANY(ARRAY['mushroombangladesh.info@gmail.com','quazishab@gmail.com']));</pre>
 
 <!-- ══ SUPABASE SQL SCHEMA REFERENCE (run in Supabase SQL editor) ══
 CREATE TABLE farm_daily_logs (
@@ -959,16 +1064,22 @@ window.toggleConditional = function(id, checkbox) {
   document.getElementById(id).classList.toggle('show', checkbox.checked);
 };
 
-/* ── NAV SCROLL ── */
+/* ── NAV SCROLL (desktop sidebar + mobile pills) ── */
+function scrollToSection(id) {
+  const target = document.getElementById(id);
+  if (!target) return;
+  if (!target.classList.contains('open')) target.querySelector('.fl-sec-header').click();
+  target.scrollIntoView({ behavior:'smooth', block:'start' });
+}
 document.querySelectorAll('.fl-nav-btn').forEach(btn => {
   btn.addEventListener('click', () => {
-    const target = document.getElementById(btn.dataset.target);
-    if (!target) return;
-    if (!target.classList.contains('open')) target.querySelector('.fl-sec-header').click();
-    target.scrollIntoView({ behavior:'smooth', block:'start' });
+    scrollToSection(btn.dataset.target);
     document.querySelectorAll('.fl-nav-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
   });
+});
+document.querySelectorAll('.fl-sec-pill').forEach(pill => {
+  pill.addEventListener('click', () => scrollToSection(pill.dataset.target));
 });
 
 /* ── LIVE CALCULATIONS ── */
@@ -1027,6 +1138,14 @@ function calcAll() {
   const netEl = document.getElementById('sum-net');
   if (netEl) { netEl.textContent = fmt(net); netEl.className = 'fl-profit-val'+(net<0?' loss':''); }
 
+  // Mobile mini-summary strip
+  const msRev = document.getElementById('ms-rev');
+  const msExp = document.getElementById('ms-exp');
+  const msNet = document.getElementById('ms-net');
+  if (msRev) msRev.textContent = fmt(totalRev);
+  if (msExp) msExp.textContent = fmt(totalExp);
+  if (msNet) { msNet.textContent = fmt(net); msNet.style.color = net < 0 ? 'var(--red)' : net > 0 ? 'var(--green)' : ''; }
+
   // Per-kg metrics
   const totalKgSold = n('s-fresh-kg') + n('s-dried-kg')*10 + n('s-powder-kg')*20; // rough fresh eq.
   set('sum-rev-per-kg', totalKgSold > 0 ? fmt(totalRev/totalKgSold)+'/kg' : '—');
@@ -1084,14 +1203,31 @@ function sectionFilled(secId) {
 }
 function updateNavDots() {
   const secs = ['harvest','qc','spawn','processing','sales','expenses','operations','notes'];
+  let done = 0;
   secs.forEach(s => {
-    const d = sectionFilled('sec-'+s);
-    const dot = document.getElementById('dot-'+s);
-    if (!dot) return;
-    if (d.done) { dot.classList.add('done'); dot.classList.remove('partial'); }
-    else if (d.filled > 0) { dot.classList.add('partial'); dot.classList.remove('done'); }
-    else { dot.classList.remove('done','partial'); }
+    const d     = sectionFilled('sec-'+s);
+    const dot   = document.getElementById('dot-'+s);
+    const badge = document.getElementById('badge-'+s);
+    const pill  = document.getElementById('pill-'+s);
+    if (d.done) {
+      dot?.classList.add('done');   dot?.classList.remove('partial');
+      if (badge) { badge.className='fl-sec-badge complete'; badge.textContent='সম্পূর্ণ'; }
+      pill?.classList.add('pill-done'); pill?.classList.remove('pill-partial');
+      done++;
+    } else if (d.filled > 0) {
+      dot?.classList.add('partial'); dot?.classList.remove('done');
+      if (badge) { badge.className='fl-sec-badge partial'; badge.textContent='আংশিক'; }
+      pill?.classList.add('pill-partial'); pill?.classList.remove('pill-done');
+    } else {
+      dot?.classList.remove('done','partial');
+      if (badge) { badge.className='fl-sec-badge'; badge.textContent='খালি'; }
+      pill?.classList.remove('pill-done','pill-partial');
+    }
   });
+  const fill = document.getElementById('progress-fill');
+  const text = document.getElementById('progress-text');
+  if (fill) fill.style.width = (done / secs.length * 100) + '%';
+  if (text) text.textContent = done + '/8';
 }
 
 /* ── AUTOSAVE ── */
@@ -1277,7 +1413,14 @@ async function loadHistory() {
       </tr>`;
     }).join('');
   } catch(err) {
-    tbody.innerHTML=`<tr><td colspan="11" class="fl-tbl-empty error">ত্রুটি: ${err.message}</td></tr>`;
+    const missing = err.message?.includes('schema cache') || err.message?.includes('does not exist') || err.message?.includes('relation');
+    tbody.innerHTML = missing
+      ? `<tr><td colspan="11" class="fl-tbl-empty error" style="line-height:2.2">
+          টেবিল তৈরি হয়নি — Supabase SQL Editor-এ নিচের SQL চালান<br>
+          <button type="button" class="fl-btn" style="margin-top:6px" onclick="navigator.clipboard.writeText(document.getElementById('farm-schema-sql').textContent).then(()=>toast('SQL কপি হয়েছে ✓','success'))">📋 SQL কপি করুন</button>
+          <a href="https://supabase.com/dashboard" target="_blank" rel="noopener" class="fl-btn" style="margin-top:6px;margin-left:6px;text-decoration:none">Supabase খুলুন ↗</a>
+        </td></tr>`
+      : `<tr><td colspan="11" class="fl-tbl-empty error">ত্রুটি: ${err.message}</td></tr>`;
   }
 }
 
