@@ -133,16 +133,52 @@
     .tl-main { font-family:'Syne',sans-serif; font-size:18px; font-weight:700; color:var(--c); line-height:1; }
     .tl-sub  { font-family:'Syne',sans-serif; font-size:7px; font-weight:700; letter-spacing:.22em; text-transform:uppercase; color:var(--al); }
     .topbar-pill { font-family:'Syne',sans-serif; font-size:8px; font-weight:700; letter-spacing:.18em; text-transform:uppercase; color:var(--a); background:rgba(196,154,60,.1); border:1px solid rgba(196,154,60,.2); border-radius:20px; padding:3px 10px; }
-    .topbar-right { display:flex; align-items:center; gap:12px; }
-    .topbar-admin-email { color:rgba(245,239,230,.45); font-family:'Syne',sans-serif; font-size:9px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; }
-    .topbar-dot { width:6px; height:6px; border-radius:50%; background:#5fcf80; flex-shrink:0; }
-    .topbar-btn { font-family:'Syne',sans-serif; font-size:9px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:rgba(245,239,230,.45); background:none; border:1px solid rgba(255,255,255,.1); border-radius:5px; padding:7px 14px; cursor:pointer; transition:all .2s; }
-    .topbar-btn:hover { color:var(--tl); border-color:rgba(184,92,56,.35); background:rgba(184,92,56,.06); }
-    .topbar-btn.active { color:var(--al); border-color:rgba(196,154,60,.4); background:rgba(196,154,60,.12); }
-    .topbar-iot-link { text-decoration:none; display:inline-flex; align-items:center; gap:5px; }
+    .topbar-right { display:flex; align-items:center; gap:8px; }
+    .topbar-admin-email { color:rgba(245,239,230,.38); font-family:'DM Mono',monospace; font-size:10px; }
+    .topbar-dot { width:6px; height:6px; border-radius:50%; background:#5fcf80; flex-shrink:0; animation:live-pulse 2.4s ease-in-out infinite; }
+    @keyframes live-pulse { 0%,100%{box-shadow:0 0 0 0 rgba(95,207,128,.5)} 50%{box-shadow:0 0 0 4px rgba(95,207,128,0)} }
+    /* ── Topbar divider ── */
+    .tb-sep { width:1px; height:20px; background:rgba(255,255,255,.08); flex-shrink:0; margin:0 4px; }
+    /* ── Nav links (Farm Log, IoT Dashboard) — borderless ghost style ── */
+    .tb-nav { display:flex; align-items:center; gap:2px; }
+    .tb-nav-link { display:inline-flex; align-items:center; gap:5px; padding:7px 11px; border-radius:6px; font-family:'Syne',sans-serif; font-size:9px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:rgba(245,239,230,.38); text-decoration:none; background:none; border:none; cursor:pointer; transition:color .18s,background .18s; white-space:nowrap; }
+    .tb-nav-link svg { opacity:.4; flex-shrink:0; transition:opacity .18s; }
+    .tb-nav-link:hover { color:var(--c); background:rgba(255,255,255,.06); }
+    .tb-nav-link:hover svg { opacity:.8; }
+    /* ── Quick Log CTA — prominent amber pill ── */
+    .tb-quick { display:inline-flex; align-items:center; gap:6px; padding:7px 14px; border-radius:6px; background:rgba(217,178,84,.13); border:1px solid rgba(217,178,84,.28); color:var(--al); text-decoration:none; transition:all .18s; white-space:nowrap; flex-shrink:0; }
+    .tb-quick:hover { background:rgba(217,178,84,.22); border-color:rgba(217,178,84,.45); transform:translateY(-1px); box-shadow:0 4px 16px rgba(217,178,84,.12); }
+    .tb-quick-icon { font-size:11px; }
+    .tb-quick-label { font-family:'Hind Siliguri',sans-serif; font-size:12px; font-weight:600; letter-spacing:0; }
+    /* ── Log Out — minimal, de-emphasised ── */
+    .tb-logout { display:inline-flex; align-items:center; gap:5px; padding:6px 10px; border-radius:6px; background:none; border:none; color:rgba(245,239,230,.28); font-family:'Syne',sans-serif; font-size:9px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; cursor:pointer; transition:color .18s,background .18s; }
+    .tb-logout:hover { color:var(--red,#e05252); background:rgba(224,82,82,.07); }
+    .tb-logout svg { opacity:.5; flex-shrink:0; }
+    /* Responsive: collapse nav links on mobile, keep CTA + logout */
+    @media(max-width:900px) { .tb-nav,.topbar-last,.topbar-admin-email,.tb-sep:first-of-type { display:none!important; } }
+    /* Keep old class for any stray references */
+    .topbar-btn { font-family:'Syne',sans-serif; font-size:9px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:rgba(245,239,230,.45); background:none; border:1px solid rgba(255,255,255,.1); border-radius:5px; padding:7px 14px; cursor:pointer; transition:all .2s; text-decoration:none; display:inline-flex; align-items:center; gap:5px; }
+    .topbar-btn:hover { color:var(--c); background:rgba(255,255,255,.06); }
 
     /* Main content area */
     .dash-content { max-width:1280px; margin:0 auto; padding:32px 32px 64px; }
+    /* Quick actions banner */
+    .quick-actions-bar { display:grid; grid-template-columns:1.6fr 1fr 1fr; gap:12px; margin-bottom:28px; }
+    .qa-card { display:flex; align-items:center; gap:14px; padding:16px 18px; border-radius:10px; border:1px solid rgba(255,255,255,.08); background:rgba(255,255,255,.03); text-decoration:none; color:var(--c); transition:all .2s; }
+    .qa-card:hover { border-color:rgba(255,255,255,.14); background:rgba(255,255,255,.06); transform:translateY(-2px); }
+    .qa-card.qa-primary { border-color:rgba(217,178,84,.28); background:rgba(217,178,84,.07); }
+    .qa-card.qa-primary:hover { border-color:rgba(217,178,84,.5); background:rgba(217,178,84,.13); box-shadow:0 8px 32px rgba(217,178,84,.1); }
+    .qa-icon { font-size:22px; flex-shrink:0; }
+    .qa-text { flex:1; min-width:0; }
+    .qa-title { font-family:'Syne',sans-serif; font-size:13px; font-weight:700; color:var(--c); }
+    .qa-card.qa-primary .qa-title { color:var(--al); font-family:'Hind Siliguri',sans-serif; font-size:15px; font-weight:600; }
+    .qa-sub { font-size:11px; color:rgba(245,239,230,.35); margin-top:2px; }
+    .qa-arrow { color:rgba(245,239,230,.2); flex-shrink:0; transition:transform .2s,color .2s; }
+    .qa-card:hover .qa-arrow { color:rgba(245,239,230,.6); transform:translateX(3px); }
+    .qa-card.qa-primary .qa-arrow { color:rgba(217,178,84,.4); }
+    .qa-card.qa-primary:hover .qa-arrow { color:var(--al); }
+    @media(max-width:860px) { .quick-actions-bar { grid-template-columns:1fr 1fr; } }
+    @media(max-width:600px) { .quick-actions-bar { grid-template-columns:1fr; } }
 
     /* Page heading */
     .dash-heading { margin-bottom:28px; }
@@ -609,22 +645,38 @@
         <span class="topbar-pill">Admin</span>
       </div>
       <div class="topbar-right">
+        <!-- Status: last login + live dot + email -->
         <span class="topbar-last" id="topbar-last"></span>
         <span class="topbar-dot" title="Live"></span>
         <span class="topbar-admin-email" id="topbar-email"></span>
-        <a href="farm-log.html" class="topbar-btn topbar-iot-link">
-          <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg>
-          Farm Log
+
+        <div class="tb-sep"></div>
+
+        <!-- Secondary nav links -->
+        <nav class="tb-nav" aria-label="Admin tools">
+          <a href="farm-log.html" class="tb-nav-link">
+            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg>
+            Farm Log
+          </a>
+          <a href="dashboard.html" class="tb-nav-link">
+            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3"/></svg>
+            IoT Dashboard
+          </a>
+        </nav>
+
+        <div class="tb-sep"></div>
+
+        <!-- Quick Log CTA — primary mobile action, stands out -->
+        <a href="quick-log.html" class="tb-quick" title="মোবাইলে দ্রুত দৈনিক লগ করুন">
+          <span class="tb-quick-icon">⚡</span>
+          <span class="tb-quick-label">দ্রুত লগ</span>
         </a>
-        <a href="quick-log.html" class="topbar-btn" style="background:rgba(217,178,84,.12);border-color:rgba(217,178,84,.3);color:#d9b254">
-          <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg>
-          দ্রুত লগ
-        </a>
-        <a href="dashboard.html" class="topbar-btn topbar-iot-link">
-          <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3"/></svg>
-          IoT Dashboard
-        </a>
-        <button type="button" class="topbar-btn" id="logout-btn">Log Out</button>
+
+        <!-- Log Out — de-emphasised -->
+        <button type="button" class="tb-logout" id="logout-btn">
+          <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"/></svg>
+          Log Out
+        </button>
       </div>
     </header>
 
@@ -635,6 +687,34 @@
       <div class="dash-heading">
         <h1 class="dash-title">Order <em>Management</em></h1>
         <p class="dash-subtitle" id="dash-subtitle">Loading dashboard...</p>
+      </div>
+
+      <!-- Quick actions banner -->
+      <div class="quick-actions-bar">
+        <a href="quick-log.html" class="qa-card qa-primary">
+          <div class="qa-icon">⚡</div>
+          <div class="qa-text">
+            <div class="qa-title">দ্রুত লগ</div>
+            <div class="qa-sub">Daily farm log — step by step</div>
+          </div>
+          <svg class="qa-arrow" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+        </a>
+        <a href="farm-log.html" class="qa-card">
+          <div class="qa-icon">📋</div>
+          <div class="qa-text">
+            <div class="qa-title">Farm Log</div>
+            <div class="qa-sub">Full detailed entry form</div>
+          </div>
+          <svg class="qa-arrow" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+        </a>
+        <a href="dashboard.html" class="qa-card">
+          <div class="qa-icon">📊</div>
+          <div class="qa-text">
+            <div class="qa-title">IoT Dashboard</div>
+            <div class="qa-sub">Live sensor readings</div>
+          </div>
+          <svg class="qa-arrow" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+        </a>
       </div>
 
       <!-- Stats -->
