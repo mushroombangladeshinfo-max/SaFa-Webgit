@@ -195,7 +195,7 @@ input[type="date"].date-nat::-webkit-calendar-picker-indicator{filter:invert(.7)
 
   <footer id="ftr">
     <div class="ftr-row">
-      <button type="button" class="btn-skip" id="btn-skip">এড়িয়ে যান</button>
+      <button type="button" class="btn-skip" id="btn-skip">Skip করুন</button>
       <button type="button" class="btn-next" id="btn-next">পরবর্তী →</button>
     </div>
   </footer>
@@ -225,17 +225,17 @@ const S = window.S = {
 
 /* ── Step definitions ── */
 const STEPS = [
-  { id:'rooms',      icon:'📅', title:'তারিখ ও রুম',           type:'rooms'  },
-  { id:'harvest',    icon:'🍄', title:'হার্ভেস্ট',             type:'yn', q:'আজ হার্ভেস্ট হয়েছে?'               },
-  { id:'qc',         icon:'✅', title:'কোয়ালিটি নিয়ন্ত্রণ',   type:'yn', q:'কোয়ালিটি তথ্য রেকর্ড করবেন?'     },
-  { id:'spawn',      icon:'🌱', title:'স্পন ও সাবষ্ট্রেট',    type:'yn', q:'স্পন বা সাবষ্ট্রেট কাজ হয়েছে?'  },
-  { id:'processing', icon:'⚙️', title:'প্রসেসিং',             type:'yn', q:'আজ প্রসেসিং হয়েছে?'               },
-  { id:'sales',      icon:'📦', title:'বিক্রয়',               type:'yn', q:'আজ বিক্রি হয়েছে?'                 },
-  { id:'stock',      icon:'📊', title:'ক্লোজিং স্টক',         type:'yn', q:'ক্লোজিং স্টক রেকর্ড করবেন?'      },
-  { id:'expenses',   icon:'💰', title:'দৈনিক খরচ',             type:'yn', q:'আজ কোনো খরচ হয়েছে?'              },
-  { id:'ops',        icon:'🏭', title:'অপারেশন',               type:'yn', q:'অপারেশন তথ্য দিবেন?'              },
-  { id:'notes',      icon:'📝', title:'পর্যবেক্ষণ ও রেটিং',  type:'yn', q:'রেটিং ও মন্তব্য দিবেন?'           },
-  { id:'summary',    icon:'📋', title:'সারসংক্ষেপ',           type:'summary'                                    }
+  { id:'rooms',      icon:'📅', title:'তারিখ ও রুম',         type:'rooms'  },
+  { id:'harvest',    icon:'🍄', title:'Harvest',              type:'yn', q:'আজকে কি Harvest হয়েছে?'              },
+  { id:'qc',         icon:'✅', title:'Quality Check',        type:'yn', q:'আজকের Quality Check দিবেন?'          },
+  { id:'spawn',      icon:'🌱', title:'Spawn ও Substrate',   type:'yn', q:'আজকে কি Spawn বা Substrate কাজ হয়েছে?' },
+  { id:'processing', icon:'⚙️', title:'Processing',          type:'yn', q:'আজকে কি Processing হয়েছে?'           },
+  { id:'sales',      icon:'📦', title:'বিক্রি',              type:'yn', q:'আজকে কি বিক্রি হয়েছে?'              },
+  { id:'stock',      icon:'📊', title:'Closing Stock',       type:'yn', q:'আজকের Closing Stock দিবেন?'           },
+  { id:'expenses',   icon:'💰', title:'খরচের হিসাব',         type:'yn', q:'আজকে কোনো খরচ হয়েছে?'              },
+  { id:'ops',        icon:'🏭', title:'Operations',          type:'yn', q:'আজকের Operation তথ্য দিবেন?'          },
+  { id:'notes',      icon:'📝', title:'নোট ও রেটিং',        type:'yn', q:'আজকের রেটিং ও মন্তব্য দিবেন?'       },
+  { id:'summary',    icon:'📋', title:'Summary',             type:'summary'                                       }
 ];
 const N = STEPS.length;
 
@@ -330,29 +330,29 @@ function formHarvest() {
   return `<div class="cards">
     <div class="sec-lbl">তাজা মাশরুম (kg)</div>
     <div class="cg3">
-      ${sc('h-fresh-a',  'গ্রেড A', 'kg', 0.1, 'h')}
-      ${sc('h-fresh-b',  'গ্রেড B', 'kg', 0.1, 'h')}
-      ${sc('h-fresh-rej','বাতিল',   'kg', 0.1, 'h')}
+      ${sc('h-fresh-a',  'Grade A',  'kg', 0.1, 'h')}
+      ${sc('h-fresh-b',  'Grade B',  'kg', 0.1, 'h')}
+      ${sc('h-fresh-rej','বাতিল',    'kg', 0.1, 'h')}
     </div>
     <div class="tot"><span class="tot-lbl">মোট তাজা</span><span class="tot-val" id="ht-tot">0.00 kg</span></div>
     <div class="divider"></div>
-    <div class="sec-lbl">প্রসেসড আউটপুট (kg)</div>
+    <div class="sec-lbl">প্রসেসড পণ্য (kg)</div>
     <div class="cg2">
-      ${sc('h-dried', 'শুকনো আউটপুট', 'kg', 0.1)}
-      ${sc('h-powder','পাউডার আউটপুট','kg', 0.1)}
+      ${sc('h-dried', 'শুকনো', 'kg', 0.1)}
+      ${sc('h-powder','পাউডার','kg', 0.1)}
     </div>
     <div class="divider"></div>
-    <div class="sec-lbl">ব্যাচ তথ্য</div>
+    <div class="sec-lbl">Batch তথ্য</div>
     <div class="cg2">
       <div class="card">
-        <div class="card-lbl">প্রাথমিক ব্যাচ</div>
+        <div class="card-lbl">Primary Batch</div>
         <input class="ci-txt" type="text" id="f-h-primary-batch" value="${S.d['h-primary-batch']||''}" placeholder="BAT-2025-001" oninput="S.d['h-primary-batch']=this.value"/>
       </div>
       <div class="card">
-        <div class="card-lbl">ফ্লাশ নম্বর</div>
+        <div class="card-lbl">Flush নম্বর</div>
         <select class="sel-inline" id="f-h-flush-num" onchange="S.d['h-flush-num']=this.value">
           <option value="">—</option>
-          ${[1,2,3,4,5].map(i=>`<option value="${i}"${S.d['h-flush-num']==i?' selected':''}>ফ্লাশ ${i}</option>`).join('')}
+          ${[1,2,3,4,5].map(i=>`<option value="${i}"${S.d['h-flush-num']==i?' selected':''}>${i}ম Flush</option>`).join('')}
         </select>
       </div>
     </div>
@@ -361,27 +361,27 @@ function formHarvest() {
 
 function formQC() {
   return `<div class="cards">
-    <div class="sec-lbl">QC ফলাফল (kg)</div>
+    <div class="sec-lbl">Quality Check ফলাফল (kg)</div>
     <div class="cg3">
-      ${sc('qc-pass','QC পাশ','kg',0.1)}
-      ${sc('qc-fail','QC ফেল','kg',0.1)}
+      ${sc('qc-pass','Pass','kg',0.1)}
+      ${sc('qc-fail','Fail','kg',0.1)}
       <div class="card">
-        <div class="card-lbl">ফেলের কারণ</div>
+        <div class="card-lbl">Fail-এর কারণ</div>
         <select class="sel-inline" id="f-qc-fail-reason" onchange="S.d['qc-fail-reason']=this.value">
           <option value="">—</option>
-          ${[['overripe','অতিপরিপক্ব'],['damaged','ক্ষতিগ্রস্ত'],['off-colour','রং অস্বাভাবিক'],['contaminated','দূষিত'],['undersize','আকারে ছোট'],['mixed','মিশ্রিত']].map(([v,l])=>`<option value="${v}"${S.d['qc-fail-reason']===v?' selected':''}>${l}</option>`).join('')}
+          ${[['overripe','বেশি পাকা'],['damaged','ক্ষতিগ্রস্ত'],['off-colour','রং ঠিক নেই'],['contaminated','দূষিত'],['undersize','আকারে ছোট'],['mixed','মিশ্রিত']].map(([v,l])=>`<option value="${v}"${S.d['qc-fail-reason']===v?' selected':''}>${l}</option>`).join('')}
         </select>
       </div>
     </div>
     <div class="divider"></div>
     <div class="tog-row">
-      <span class="tog-lbl">দূষণের ঘটনা ছিল?</span>
+      <span class="tog-lbl">আজকে কি Contamination হয়েছে?</span>
       <label class="tog"><input type="checkbox" id="tog-contam" ${S.tog.contam?'checked':''} onchange="togC('contam',this)"/><span class="tog-track"></span></label>
     </div>
     <div class="cond${S.tog.contam?' show':''}" id="cond-contam">
       <div class="cg3" style="width:100%;max-width:460px">
         <div class="card">
-          <div class="card-lbl">আক্রান্ত রুম</div>
+          <div class="card-lbl">কোন রুম?</div>
           <select class="sel-inline" id="f-qc-contam-room" onchange="S.d['qc-contam-room']=this.value">
             <option value="">—</option>
             <option>A</option><option>B</option><option>C</option>
@@ -389,16 +389,16 @@ function formQC() {
           </select>
         </div>
         <div class="card">
-          <div class="card-lbl">দূষণের ধরন</div>
+          <div class="card-lbl">ধরন</div>
           <select class="sel-inline" id="f-qc-contam-type" onchange="S.d['qc-contam-type']=this.value">
             <option value="">—</option>
-            <option value="bacterial">ব্যাকটেরিয়াল</option>
-            <option value="mould">মোল্ড</option>
-            <option value="trichoderma">ট্রাইকোডার্মা</option>
+            <option value="bacterial">Bacterial</option>
+            <option value="mould">Mould</option>
+            <option value="trichoderma">Trichoderma</option>
             <option value="unknown">অজানা</option>
           </select>
         </div>
-        ${sc('qc-contam-bags','আক্রান্ত ব্যাগ','টি',1)}
+        ${sc('qc-contam-bags','ক্ষতিগ্রস্ত ব্যাগ','টি',1)}
       </div>
     </div>
   </div>`;
@@ -407,7 +407,7 @@ function formQC() {
 function formSpawn() {
   return `<div class="cards">
     <div class="tog-row">
-      <span class="tog-lbl">আজ স্পন কেনা হয়েছে?</span>
+      <span class="tog-lbl">আজকে কি Spawn কেনা হয়েছে?</span>
       <label class="tog"><input type="checkbox" id="tog-spawn" ${S.tog.spawnBought?'checked':''} onchange="togC('spawnBought',this)"/><span class="tog-track"></span></label>
     </div>
     <div class="cond${S.tog.spawnBought?' show':''}" id="cond-spawn">
@@ -415,26 +415,26 @@ function formSpawn() {
         ${sc('sp-bought-kg','পরিমাণ','kg',0.1,'spn')}
         ${sc('sp-price-per-kg','দাম/kg','৳',50,'spn')}
         <div class="card">
-          <div class="card-lbl">সরবরাহকারী</div>
-          <input class="ci-txt" type="text" id="f-sp-supplier" value="${S.d['sp-supplier']||''}" placeholder="নাম" oninput="S.d['sp-supplier']=this.value"/>
+          <div class="card-lbl">Supplier</div>
+          <input class="ci-txt" type="text" id="f-sp-supplier" value="${S.d['sp-supplier']||''}" placeholder="নাম লিখুন" oninput="S.d['sp-supplier']=this.value"/>
         </div>
       </div>
       <div class="tot" id="spn-cost-row" style="display:none">
-        <span class="tot-lbl">স্পন ক্রয় মূল্য</span>
+        <span class="tot-lbl">Spawn কেনার মোট দাম</span>
         <span class="tot-val" id="spn-cost">৳ 0</span>
       </div>
     </div>
     <div class="divider"></div>
     <div class="sec-lbl">আজকের ব্যবহার</div>
     <div class="cg2">
-      ${sc('sp-used-kg','ব্যবহৃত স্পন','kg',0.1)}
-      ${sc('sp-substrate-kg','সাবষ্ট্রেট','kg',0.1)}
+      ${sc('sp-used-kg','Spawn ব্যবহার','kg',0.1)}
+      ${sc('sp-substrate-kg','Substrate','kg',0.1)}
     </div>
     <div class="cg3">
-      ${sc('sp-bags-inoculated','টিকা দেওয়া ব্যাগ','টি',1)}
-      ${sc('sp-bags-discarded','বাতিল ব্যাগ','টি',1)}
+      ${sc('sp-bags-inoculated','Inoculated ব্যাগ','টি',1)}
+      ${sc('sp-bags-discarded','বাদ দেওয়া ব্যাগ','টি',1)}
       <div class="card">
-        <div class="card-lbl">সাবষ্ট্রেট ধরন</div>
+        <div class="card-lbl">Substrate ধরন</div>
         <select class="sel-inline" id="f-sp-substrate-type" onchange="S.d['sp-substrate-type']=this.value">
           <option value="">—</option>
           <option value="wheat_straw">গমের খড়</option>
@@ -451,14 +451,14 @@ function formProcessing() {
   return `<div class="cards">
     <div class="sec-lbl">তাজা → শুকনো</div>
     <div class="cg2">
-      ${sc('pr-fresh-in','ড্রায়ারে দেওয়া','kg',0.1,'proc')}
+      ${sc('pr-fresh-in','Dryer-এ দেওয়া','kg',0.1,'proc')}
       ${sc('pr-dried-out','শুকনো পাওয়া','kg',0.1,'proc')}
     </div>
     <div class="yield-tag" id="dry-yld"></div>
     <div class="divider"></div>
     <div class="sec-lbl">শুকনো → পাউডার</div>
     <div class="cg2">
-      ${sc('pr-dried-in','গ্রাইন্ডারে দেওয়া','kg',0.1,'proc')}
+      ${sc('pr-dried-in','Grinder-এ দেওয়া','kg',0.1,'proc')}
       ${sc('pr-powder-out','পাউডার পাওয়া','kg',0.1,'proc')}
     </div>
     <div class="yield-tag" id="pow-yld"></div>
@@ -476,7 +476,7 @@ function formSales() {
     <div class="cg2">
       ${sc(q,'পরিমাণ','kg',0.1,'sale')}
       <div class="card">
-        <div class="card-lbl">মূল্য / kg (৳)</div>
+        <div class="card-lbl">দাম / kg (৳)</div>
         <div class="ctrl">
           <button type="button" class="cb" onclick="adj('${p}',-${pstep},0)">−</button>
           <input type="number" id="f-${p}" class="ci sm" value="${dv(p)}" step="${pstep}" min="0" inputmode="numeric" oninput="S.d['${p}']=this.value;lc('sale')"/>
@@ -488,20 +488,20 @@ function formSales() {
     </div>`).join('');
   return `<div class="cards">
     ${rows}
-    <div class="tot"><span class="tot-lbl">মোট রাজস্ব</span><span class="tot-val" id="sale-tot">৳ 0</span></div>
+    <div class="tot"><span class="tot-lbl">মোট বিক্রয়</span><span class="tot-val" id="sale-tot">৳ 0</span></div>
     <div class="divider"></div>
     <div class="cg2">
-      ${sc('s-orders','অর্ডার পূর্ণ','টি',1)}
-      ${sc('s-waste','অপচয়/ফেরত','kg',0.1)}
+      ${sc('s-orders','Order পূরণ','টি',1)}
+      ${sc('s-waste','নষ্ট/ফেরত','kg',0.1)}
     </div>
     <div class="tog-row">
-      <span class="tog-lbl">আজ B2B অর্ডার ছিল?</span>
+      <span class="tog-lbl">আজকে কি B2B Order ছিল?</span>
       <label class="tog"><input type="checkbox" id="tog-b2b" ${S.tog.b2b?'checked':''} onchange="togC('b2b',this)"/><span class="tog-track"></span></label>
     </div>
     <div class="cond${S.tog.b2b?' show':''}" id="cond-b2b">
       <div class="cg3" style="width:100%;max-width:460px">
         <div class="card">
-          <div class="card-lbl">B2B ক্লায়েন্ট</div>
+          <div class="card-lbl">B2B Client</div>
           <input class="ci-txt" type="text" id="f-s-b2b-name" value="${S.d['s-b2b-name']||''}" placeholder="রেস্টুরেন্ট…" oninput="S.d['s-b2b-name']=this.value"/>
         </div>
         ${sc('s-b2b-qty','পরিমাণ','kg',0.1)}
@@ -513,7 +513,7 @@ function formSales() {
 
 function formStock() {
   return `<div class="cards">
-    <div class="sec-lbl">দিনশেষের মজুদ (kg)</div>
+    <div class="sec-lbl">দিন শেষের Stock (kg)</div>
     <div class="cg3">
       ${sc('st-fresh','তাজা','kg',0.1)}
       ${sc('st-dried','শুকনো','kg',0.1)}
@@ -524,9 +524,9 @@ function formStock() {
 
 function formExpenses() {
   const ef = [
-    ['ex-spawn','স্পন কেনা'],['ex-substrate','সাবষ্ট্রেট'],
-    ['ex-packaging','প্যাকেজিং'],['ex-labor','শ্রম মজুরি'],
-    ['ex-electricity','বিদ্যুৎ'],['ex-transport','পরিবহন'],
+    ['ex-spawn','Spawn কেনা'],['ex-substrate','Substrate'],
+    ['ex-packaging','Packaging'],['ex-labor','শ্রমিকের মজুরি'],
+    ['ex-electricity','বিদ্যুৎ বিল'],['ex-transport','পরিবহন'],
     ['ex-water','পানি'],['ex-other','অন্যান্য']
   ];
   const rows = [];
@@ -545,45 +545,45 @@ function formExpenses() {
 function formOps() {
   return `<div class="cards">
     <div class="cg4">
-      ${sc('op-rooms',   'সক্রিয় রুম','টি',1)}
+      ${sc('op-rooms',   'Active রুম','টি',1)}
       ${sc('op-bags-total','মোট ব্যাগ','টি',1)}
       ${sc('op-workers', 'কর্মী','জন',1)}
-      ${sc('op-shifts',  'শিফট','টি',1)}
+      ${sc('op-shifts',  'Shift','টি',1)}
     </div>
     <div class="cg4">
-      ${sc('op-new-batches', 'নতুন ব্যাচ','টি',1)}
-      ${sc('op-done-batches','সম্পন্ন','টি',1)}
-      ${sc('op-bags-removed','সরানো ব্যাগ','টি',1)}
+      ${sc('op-new-batches', 'নতুন Batch','টি',1)}
+      ${sc('op-done-batches','শেষ Batch','টি',1)}
+      ${sc('op-bags-removed','বাদ দেওয়া ব্যাগ','টি',1)}
       ${sc('op-energy-kwh',  'বিদ্যুৎ','kWh',0.1)}
     </div>
     <div class="tog-row">
-      <span class="tog-lbl">যন্ত্রপাতির সমস্যা ছিল?</span>
+      <span class="tog-lbl">কোনো Machine-এ সমস্যা ছিল?</span>
       <label class="tog"><input type="checkbox" id="tog-issue" ${S.tog.opIssue?'checked':''} onchange="togC('opIssue',this)"/><span class="tog-track"></span></label>
     </div>
     <div class="cond${S.tog.opIssue?' show':''}" id="cond-issue">
-      <textarea class="txt" id="f-op-issue-desc" rows="3" placeholder="কোন যন্ত্র, কী সমস্যা, সমাধান হয়েছে কিনা…" oninput="S.d['op-issue-desc']=this.value">${S.d['op-issue-desc']||''}</textarea>
+      <textarea class="txt" id="f-op-issue-desc" rows="3" placeholder="কোন machine, কী সমস্যা হয়েছে, ঠিক হয়েছে কিনা…" oninput="S.d['op-issue-desc']=this.value">${S.d['op-issue-desc']||''}</textarea>
     </div>
   </div>`;
 }
 
 function formNotes() {
-  const wOpts = [['','— নির্বাচন'],['normal','স্বাভাবিক'],['hot','গরম'],['rainy','বৃষ্টি'],['cold','ঠান্ডা'],['humid','অতিআর্দ্র'],['stormy','ঝড়']];
+  const wOpts = [['','— বেছে নিন'],['normal','স্বাভাবিক'],['hot','গরম'],['rainy','বৃষ্টি'],['cold','ঠান্ডা'],['humid','বেশি আর্দ্র'],['stormy','ঝড়']];
   const strs  = [1,2,3,4,5].map(i=>`<span class="star${S.rating>=i?' on':''}" data-v="${i}" onclick="setStar(${i})">⭐</span>`).join('');
-  const sLbl  = ['','খুব খারাপ','খারাপ','স্বাভাবিক','ভালো','চমৎকার'];
+  const sLbl  = ['','খুব খারাপ','খারাপ','মোটামুটি','ভালো','অনেক ভালো'];
   return `<div class="cards">
-    <div class="sec-lbl">আবহাওয়া</div>
+    <div class="sec-lbl">আজকের আবহাওয়া</div>
     <select class="sel" id="f-n-weather" onchange="S.d['n-weather']=this.value">
       ${wOpts.map(([v,l])=>`<option value="${v}"${S.d['n-weather']===v?' selected':''}>${l}</option>`).join('')}
     </select>
-    <div class="sec-lbl">আজকের রেটিং</div>
+    <div class="sec-lbl">আজকের দিনটা কেমন ছিল?</div>
     <div class="stars">${strs}</div>
-    <div class="star-lbl" id="star-lbl">${S.rating ? sLbl[S.rating] : 'একটি তারা বেছে নিন'}</div>
-    <div class="sec-lbl">আজকের পর্যবেক্ষণ</div>
-    <textarea class="txt" id="f-n-observations" rows="3" placeholder="মাশরুমের বৃদ্ধি, রঙ, গন্ধ, অস্বাভাবিকতা…" oninput="S.d['n-observations']=this.value">${S.d['n-observations']||''}</textarea>
-    <div class="sec-lbl">কাল কী করতে হবে</div>
-    <textarea class="txt" id="f-n-tomorrow" rows="2" placeholder="হার্ভেস্ট, উপকরণ কেনা, ব্যাচ চেক…" oninput="S.d['n-tomorrow']=this.value">${S.d['n-tomorrow']||''}</textarea>
-    <div class="sec-lbl">অস্বাভাবিক ঘটনা (ঐচ্ছিক)</div>
-    <textarea class="txt" id="f-n-unusual" rows="2" placeholder="বিদ্যুৎ বিভ্রাট, অনুপস্থিত কর্মী…" oninput="S.d['n-unusual']=this.value">${S.d['n-unusual']||''}</textarea>
+    <div class="star-lbl" id="star-lbl">${S.rating ? sLbl[S.rating] : 'একটা তারা বেছে নিন'}</div>
+    <div class="sec-lbl">আজকের মন্তব্য / নোট</div>
+    <textarea class="txt" id="f-n-observations" rows="3" placeholder="মাশরুমের অবস্থা, রঙ, গন্ধ, কোনো অস্বাভাবিক কিছু থাকলে লিখুন…" oninput="S.d['n-observations']=this.value">${S.d['n-observations']||''}</textarea>
+    <div class="sec-lbl">কালকে কী করতে হবে?</div>
+    <textarea class="txt" id="f-n-tomorrow" rows="2" placeholder="Harvest, উপকরণ কেনা, Batch check…" oninput="S.d['n-tomorrow']=this.value">${S.d['n-tomorrow']||''}</textarea>
+    <div class="sec-lbl">অন্য কোনো ঘটনা (optional)</div>
+    <textarea class="txt" id="f-n-unusual" rows="2" placeholder="বিদ্যুৎ বিভ্রাট, কর্মী অনুপস্থিত, কোনো দর্শনার্থী…" oninput="S.d['n-unusual']=this.value">${S.d['n-unusual']||''}</textarea>
   </div>`;
 }
 
@@ -608,12 +608,12 @@ function buildSlide(step) {
       <div class="step-q">${step.title}</div>
       <div class="date-chip" id="date-chip">
         <span class="date-txt" id="date-disp">${date}</span>
-        <span class="date-edit-btn" onclick="editDate()">✏️ পরিবর্তন</span>
+        <span class="date-edit-btn" onclick="editDate()">✏️ বদলান</span>
       </div>
       <input type="date" id="date-nat" class="date-nat" value="${date}" onchange="dateChanged()"/>
-      <div class="step-sub">আজকের হার্ভেস্ট করা রুম নির্বাচন করুন</div>
+      <div class="step-sub">আজকে কোন রুম থেকে Harvest হয়েছে?</div>
       <div class="rooms">${rBtns}</div>
-      <div style="font-size:11px;color:rgba(245,239,230,.22)">একাধিক রুম বেছে নেওয়া যাবে</div>`;
+      <div style="font-size:11px;color:rgba(245,239,230,.22)">একাধিক রুম select করা যাবে</div>`;
   }
 
   /* Summary step */
@@ -628,19 +628,19 @@ function buildSlide(step) {
       ['হার্ভেস্ট রুম', S.rooms.length ? S.rooms.join(', ') : '—',         ''],
       ['মোট তাজা',    freshT>0 ? freshT.toFixed(2)+' kg' : '—',           'g'],
       ['QC পাশ হার',  qcT>0 ? ((dn('qc-pass')/qcT)*100).toFixed(0)+'%':'—','gold'],
-      ['মোট রাজস্ব',  rev>0 ? fmt(rev) : '—',                             'g'],
-      ['মোট খরচ',     exp>0 ? fmt(exp) : '—',                             'r'],
-      ['কর্মী',       dn('op-workers') || '—',                             ''],
-      ['রেটিং',       S.rating ? '⭐'.repeat(S.rating) : '—',              '']
+      ['মোট বিক্রয়', rev>0 ? fmt(rev) : '—',                             'g'],
+      ['মোট খরচ',    exp>0 ? fmt(exp) : '—',                             'r'],
+      ['কর্মী',      dn('op-workers') || '—',                             ''],
+      ['রেটিং',      S.rating ? '⭐'.repeat(S.rating) : '—',              '']
     ].map(([k,v,c])=>`<div class="sum-row"><span class="sum-k">${k}</span><span class="sum-v${c?' '+c:''}">${v}</span></div>`).join('');
     return `
       <div class="step-icon">${step.icon}</div>
       <div class="step-q">${step.title}</div>
-      <div class="step-sub">জমা দেওয়ার আগে একবার দেখুন</div>
+      <div class="step-sub">Submit করার আগে একবার দেখুন</div>
       <div class="sum-rows">
         ${rows}
         <div class="net-box ${net>=0?'pr':'ls'}">
-          <div class="net-lbl">নিট লাভ / ক্ষতি</div>
+          <div class="net-lbl">নিট লাভ / ক্ষতি (আজকের)</div>
           <div class="net-val">${fmt(net)}</div>
         </div>
       </div>`;
@@ -658,8 +658,8 @@ function buildSlide(step) {
       <div class="step-icon">${step.icon}</div>
       <div class="step-q">${step.q}</div>
       <div class="yesno">
-        <button type="button" class="yn yn-y" onclick="ansYes()">✓ হ্যাঁ</button>
-        <button type="button" class="yn yn-n" onclick="ansNo()">✕ না</button>
+        <button type="button" class="yn yn-y" onclick="ansYes()">✓ হ্যাঁ, হয়েছে</button>
+        <button type="button" class="yn yn-n" onclick="ansNo()">✕ না, হয়নি</button>
       </div>`;
   }
   return '';
@@ -681,7 +681,7 @@ function render(dir='next') {
 
   /* Footer */
   const btn = document.getElementById('btn-next');
-  btn.textContent = isLast ? 'জমা দিন ✓' : 'পরবর্তী →';
+  btn.textContent = isLast ? 'Submit করুন ✓' : 'পরবর্তী →';
   btn.className   = 'btn-next' + (isLast ? ' sub' : '');
   btn.disabled    = false;
   /* Hide skip on YES/NO screen and summary; show on form */
@@ -829,7 +829,7 @@ function toast(msg, type='info') {
 async function submit() {
   collect();
   const btn = document.getElementById('btn-next');
-  btn.disabled = true; btn.textContent = 'জমা হচ্ছে…';
+  btn.disabled = true; btn.textContent = 'Submit হচ্ছে…';
 
   const payload = {
     log_date: S.d['log-date'] || new Date().toISOString().slice(0,10),
@@ -875,8 +875,8 @@ async function submit() {
     ok.className = 'slide in-r';
     ok.innerHTML = `<div class="ok-wrap">
       <div class="ok-icon">✅</div>
-      <div class="ok-title">লগ জমা হয়েছে!</div>
-      <div class="ok-sub">সফলভাবে সেভ হয়েছে।<br>অ্যাডমিন প্যানেলে ফিরে যাচ্ছেন…</div>
+      <div class="ok-title">Log জমা হয়েছে!</div>
+      <div class="ok-sub">সফলভাবে save হয়েছে।<br>Admin panel-এ ফিরে যাচ্ছেন…</div>
     </div>`;
     wrap.appendChild(ok);
     requestAnimationFrame(() => requestAnimationFrame(() => ok.classList.remove('in-r')));
@@ -885,7 +885,7 @@ async function submit() {
 
   } catch(err) {
     btn.disabled = false;
-    btn.textContent = 'জমা দিন ✓';
+    btn.textContent = 'আবার চেষ্টা করুন';
     btn.className = 'btn-next sub';
     toast('জমা হয়নি: ' + err.message, 'error');
   }
