@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
+<title>দ্রুত লগ — SaFa Naturals</title>
+<link rel="icon" type="image/png" href="/favicon.png"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&family=Hind+Siliguri:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --g900:#060e09;--g800:#0e1a13;
+  --c:#f5efe6;--al:#d9b254;
+  --border:rgba(255,255,255,.08);--border2:rgba(255,255,255,.14);
+  --green:#5fcf80;--red:#e05252;--red-dim:rgba(224,82,82,.1);
+  --r:10px;--r2:6px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--g900);color:var(--c);overflow:hidden}
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:2px}
+
+/* Shell */
+#app{height:100vh;height:100svh;display:flex;flex-direction:column;max-width:500px;margin:0 auto}
+
+/* Header */
+#hdr{padding:12px 16px;background:var(--g800);border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;gap:12px}
+.hdr-back{background:none;border:none;color:rgba(245,239,230,.4);cursor:pointer;font-size:22px;padding:4px 8px;line-height:1;transition:color .15s;flex-shrink:0}
+.hdr-back:hover,.hdr-back:focus{color:var(--c)}
+.prog-wrap{flex:1;display:flex;flex-direction:column;gap:5px}
+.prog-meta{display:flex;justify-content:space-between;align-items:baseline}
+.prog-title{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;color:var(--c)}
+.prog-count{font-family:'DM Mono',monospace;font-size:10px;color:rgba(245,239,230,.3)}
+.prog-track{height:3px;background:rgba(255,255,255,.08);border-radius:99px;overflow:hidden}
+.prog-bar{height:100%;background:var(--al);border-radius:99px;transition:width .35s ease}
+.hdr-close{font-size:11px;color:rgba(245,239,230,.28);text-decoration:none;padding:6px 4px;flex-shrink:0;line-height:1}
+
+/* Slide container */
+#wrap{flex:1;position:relative;overflow:hidden}
+.slide{position:absolute;inset:0;overflow-y:auto;display:flex;flex-direction:column;align-items:center;padding:28px 20px 24px;gap:16px;text-align:center;transition:transform .24s cubic-bezier(.4,0,.2,1),opacity .24s ease;will-change:transform}
+.slide.in-r{transform:translateX(44px);opacity:0}
+.slide.in-l{transform:translateX(-44px);opacity:0}
+.slide.out-l{transform:translateX(-44px);opacity:0;pointer-events:none}
+.slide.out-r{transform:translateX(44px);opacity:0;pointer-events:none}
+
+/* Step heading */
+.step-icon{font-size:48px;line-height:1}
+.step-q{font-family:'Syne',sans-serif;font-size:22px;font-weight:700;color:var(--c);line-height:1.3;max-width:340px}
+.step-sub{font-size:13px;color:rgba(245,239,230,.38);max-width:300px;line-height:1.5;font-family:'Hind Siliguri',sans-serif}
+
+/* YES / NO */
+.yesno{display:flex;gap:14px;width:100%;max-width:360px}
+.yn{flex:1;padding:20px 16px;border-radius:14px;border:2px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);cursor:pointer;font-family:'Syne',sans-serif;font-size:17px;font-weight:700;color:rgba(245,239,230,.5);transition:all .16s;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
+.yn:active{transform:scale(.94)}
+.yn-y:hover,.yn-y:focus{border-color:var(--green);background:rgba(95,207,128,.13);color:var(--green)}
+.yn-n:hover,.yn-n:focus{border-color:var(--red);background:var(--red-dim);color:var(--red)}
+
+/* Section label */
+.sec-lbl{font-size:9px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:rgba(245,239,230,.28);width:100%;max-width:460px;text-align:left}
+.divider{height:1px;background:rgba(255,255,255,.07);width:100%;max-width:460px}
+
+/* Card grid */
+.cards{display:flex;flex-direction:column;gap:10px;width:100%;max-width:460px}
+.cg2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.cg3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.cg4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px}
+@media(max-width:420px){.cg4{grid-template-columns:1fr 1fr}.cg3{grid-template-columns:1fr 1fr}}
+.card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:10px;padding:12px 8px 9px;text-align:center;transition:border-color .2s}
+.card:focus-within{border-color:rgba(196,154,60,.4);background:rgba(255,255,255,.06)}
+.card-lbl{font-size:8px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:rgba(245,239,230,.3);margin-bottom:7px}
+.card-unit{font-size:8px;color:rgba(245,239,230,.22);margin-top:4px}
+.card-tag{font-family:'DM Mono',monospace;font-size:10px;color:var(--green);margin-top:3px;min-height:14px}
+
+/* Stepper control */
+.ctrl{display:flex;align-items:center;gap:2px}
+.cb{width:34px;height:34px;border:1px solid rgba(255,255,255,.1);border-radius:7px;background:rgba(255,255,255,.04);color:rgba(245,239,230,.6);font-size:18px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .13s;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;line-height:1}
+.cb:active{background:rgba(255,255,255,.12);transform:scale(.91)}
+.ci{flex:1;background:none;border:none;color:var(--c);font-family:'DM Mono',monospace;font-size:18px;font-weight:500;text-align:center;outline:none;width:100%;min-width:0;-moz-appearance:textfield;appearance:textfield}
+.ci::-webkit-inner-spin-button,.ci::-webkit-outer-spin-button{display:none}
+.ci.sm{font-size:14px}
+
+/* Room cards */
+.rooms{display:flex;gap:10px;width:100%;max-width:360px}
+.rc{flex:1;padding:18px 8px 14px;border:2px solid rgba(255,255,255,.09);border-radius:12px;background:rgba(255,255,255,.03);cursor:pointer;text-align:center;transition:all .18s;-webkit-tap-highlight-color:transparent}
+.rc:active{transform:scale(.94)}
+.rc.sel{border-color:var(--green);background:rgba(95,207,128,.09)}
+.rc-letter{font-family:'Syne',sans-serif;font-size:30px;font-weight:800;color:rgba(245,239,230,.18);transition:color .18s}
+.rc.sel .rc-letter{color:var(--green)}
+.rc-name{font-size:9px;text-transform:uppercase;letter-spacing:.5px;color:rgba(245,239,230,.18);margin-top:4px;transition:color .18s}
+.rc.sel .rc-name{color:rgba(95,207,128,.6)}
+
+/* Date chip */
+.date-chip{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:13px 18px;width:100%;max-width:360px}
+.date-txt{font-family:'DM Mono',monospace;font-size:17px;flex:1;text-align:center}
+.date-edit-btn{font-size:10px;font-weight:700;letter-spacing:.3px;text-transform:uppercase;color:var(--al);cursor:pointer;padding:5px 10px;border:1px solid rgba(217,178,84,.3);border-radius:4px;background:rgba(217,178,84,.08);font-family:'Syne',sans-serif;white-space:nowrap}
+input[type="date"].date-nat{background:rgba(255,255,255,.06);border:1px solid rgba(196,154,60,.35);border-radius:10px;padding:13px 18px;color:var(--c);font-family:'DM Mono',monospace;font-size:17px;text-align:center;outline:none;color-scheme:dark;cursor:pointer;width:100%;max-width:360px;display:none}
+input[type="date"].date-nat::-webkit-calendar-picker-indicator{filter:invert(.7) sepia(1) saturate(2);opacity:.6;cursor:pointer}
+
+/* Toggle switch */
+.tog-row{display:flex;align-items:center;gap:12px;width:100%;max-width:460px;padding:3px 0}
+.tog-lbl{font-size:13px;color:rgba(245,239,230,.6);flex:1;text-align:left;font-family:'Hind Siliguri',sans-serif;line-height:1.3}
+.tog{position:relative;width:42px;height:24px;flex-shrink:0;cursor:pointer}
+.tog input{opacity:0;width:0;height:0;position:absolute}
+.tog-track{position:absolute;inset:0;border-radius:12px;background:rgba(255,255,255,.1);transition:background .2s}
+.tog-track::after{content:'';position:absolute;left:4px;top:4px;width:16px;height:16px;border-radius:50%;background:#fff;transition:left .2s}
+.tog input:checked+.tog-track{background:var(--green)}
+.tog input:checked+.tog-track::after{left:22px}
+.cond{display:none;flex-direction:column;gap:10px;align-items:center;width:100%}
+.cond.show{display:flex}
+
+/* Select */
+.sel{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:12px 14px;color:var(--c);font-size:14px;font-family:'Hind Siliguri',sans-serif;width:100%;max-width:460px;outline:none;cursor:pointer;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' fill='none' stroke='rgba(245,239,230,0.3)' stroke-width='2'%3E%3Cpath d='M2 4l4 4 4-4'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 13px center;padding-right:34px}
+.sel option{background:#0e1a13}
+/* Inline select inside card */
+.sel-inline{background:none;border:none;color:var(--c);font-size:12px;font-family:'Hind Siliguri',sans-serif;width:100%;text-align:center;outline:none;cursor:pointer;-webkit-appearance:none;appearance:none;padding:2px 0}
+
+/* Textarea */
+.txt{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:12px 14px;color:var(--c);font-family:'Hind Siliguri',sans-serif;font-size:15px;width:100%;max-width:460px;outline:none;resize:none;min-height:88px;line-height:1.5;transition:border-color .2s}
+.txt:focus{border-color:rgba(196,154,60,.4)}
+.txt::placeholder{color:rgba(245,239,230,.2)}
+
+/* Total rows */
+.tot{background:rgba(95,207,128,.07);border:1px solid rgba(95,207,128,.18);border-radius:8px;padding:10px 14px;display:flex;justify-content:space-between;align-items:baseline;width:100%;max-width:460px}
+.tot-lbl{font-size:11px;color:rgba(245,239,230,.45)}
+.tot-val{font-family:'DM Mono',monospace;font-size:18px;color:var(--green);font-weight:500}
+.tot.exp{background:var(--red-dim);border-color:rgba(224,82,82,.2)}
+.tot.exp .tot-val{color:var(--red)}
+
+/* Stars */
+.stars{display:flex;gap:10px;justify-content:center}
+.star{font-size:36px;cursor:pointer;opacity:.22;transition:opacity .15s,transform .15s;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
+.star.on{opacity:1;transform:scale(1.1)}
+.star:active{transform:scale(.9)}
+.star-lbl{font-size:13px;color:rgba(245,239,230,.4);font-family:'Hind Siliguri',sans-serif;min-height:20px}
+
+/* Yield tag */
+.yield-tag{font-family:'DM Mono',monospace;font-size:11px;color:var(--al);min-height:16px}
+
+/* Summary */
+.sum-rows{display:flex;flex-direction:column;gap:6px;width:100%;max-width:460px;text-align:left}
+.sum-row{display:flex;justify-content:space-between;align-items:center;padding:9px 12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:7px}
+.sum-k{font-size:12px;color:rgba(245,239,230,.45)}
+.sum-v{font-family:'DM Mono',monospace;font-size:13px;color:var(--c);font-weight:500}
+.sum-v.g{color:var(--green)}.sum-v.r{color:var(--red)}.sum-v.gold{color:var(--al)}
+.net-box{border-radius:10px;padding:16px;text-align:center;margin-top:4px;width:100%;max-width:460px;border:1px solid}
+.net-box.pr{background:rgba(95,207,128,.08);border-color:rgba(95,207,128,.2)}
+.net-box.ls{background:var(--red-dim);border-color:rgba(224,82,82,.2)}
+.net-lbl{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:rgba(245,239,230,.4);margin-bottom:4px}
+.net-val{font-size:26px;font-weight:700;font-family:'DM Mono',monospace}
+.net-box.pr .net-val{color:var(--green)}.net-box.ls .net-val{color:var(--red)}
+
+/* Footer */
+#ftr{padding:14px 20px;background:var(--g800);border-top:1px solid var(--border);flex-shrink:0}
+.ftr-row{display:flex;gap:10px}
+.btn-skip{padding:15px 16px;border-radius:var(--r2);border:1px solid var(--border);background:rgba(255,255,255,.03);color:rgba(245,239,230,.32);font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .2s;white-space:nowrap}
+.btn-skip:hover{color:var(--c);background:rgba(255,255,255,.06)}
+.btn-next{flex:1;padding:15px 20px;border-radius:var(--r2);border:1px solid rgba(217,178,84,.3);background:rgba(217,178,84,.13);color:var(--al);font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .2s;-webkit-tap-highlight-color:transparent}
+.btn-next:hover{background:rgba(217,178,84,.22);border-color:rgba(217,178,84,.5)}
+.btn-next.sub{background:rgba(95,207,128,.13);border-color:rgba(95,207,128,.28);color:var(--green)}
+.btn-next.sub:hover{background:rgba(95,207,128,.22)}
+.btn-next:disabled{opacity:.35;cursor:not-allowed}
+
+/* Success */
+.ok-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:40px 24px;text-align:center;flex:1}
+.ok-icon{font-size:72px}
+.ok-title{font-family:'Syne',sans-serif;font-size:26px;font-weight:700;color:var(--green)}
+.ok-sub{font-size:14px;color:rgba(245,239,230,.45);max-width:260px;line-height:1.6;font-family:'Hind Siliguri',sans-serif}
+
+/* Toast */
+.toast-stack{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;gap:8px;z-index:999;pointer-events:none}
+.toast{padding:10px 18px;border-radius:var(--r2);font-size:13px;font-weight:600;box-shadow:0 4px 20px rgba(0,0,0,.5);transform:translateY(8px);opacity:0;transition:all .22s;white-space:nowrap}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.success{background:rgba(95,207,128,.15);border:1px solid rgba(95,207,128,.3);color:var(--green)}
+.toast.error{background:var(--red-dim);border:1px solid rgba(224,82,82,.3);color:var(--red)}
+.toast.info{background:var(--g800);border:1px solid var(--border2);color:rgba(245,239,230,.8)}
+
+/* Text input inside card */
+.ci-txt{background:none;border:none;color:var(--c);font-family:'DM Mono',monospace;font-size:13px;width:100%;text-align:center;outline:none}
+</style>
+</head>
+<body>
+<div id="app">
+  <header id="hdr">
+    <button type="button" class="hdr-back" id="hdr-back" aria-label="আগের ধাপ">‹</button>
+    <div class="prog-wrap">
+      <div class="prog-meta">
+        <span class="prog-title" id="prog-title">দ্রুত লগ</span>
+        <span class="prog-count" id="prog-count">১/১১</span>
+      </div>
+      <div class="prog-track"><div class="prog-bar" id="prog-bar" style="width:9%"></div></div>
+    </div>
+    <a href="admin.html" class="hdr-close" aria-label="বন্ধ করুন">✕</a>
+  </header>
+
+  <div id="wrap"></div>
+
+  <footer id="ftr">
+    <div class="ftr-row">
+      <button type="button" class="btn-skip" id="btn-skip">এড়িয়ে যান</button>
+      <button type="button" class="btn-next" id="btn-next">পরবর্তী →</button>
+    </div>
+  </footer>
+</div>
+
+<div class="toast-stack" id="toast-stack"></div>
+
+<script type="module">
+import { createClient } from '@supabase/supabase-js';
+import { requireAdmin } from '/src/admin-auth.js';
+
+const sb = createClient(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_ANON_KEY
+);
+
+/* ── State (window-exposed so inline oninput handlers can write S.d[...]) ── */
+const S = window.S = {
+  step:      0,
+  d:         {},      // fieldId → value string
+  rooms:     [],      // ['A','B','C']
+  rating:    0,
+  phase:     {},      // stepId → 'form'  (user answered YES)
+  tog:       { contam:false, spawnBought:false, b2b:false, opIssue:false },
+  userEmail: ''
+};
+
+/* ── Step definitions ── */
+const STEPS = [
+  { id:'rooms',      icon:'📅', title:'তারিখ ও রুম',           type:'rooms'  },
+  { id:'harvest',    icon:'🍄', title:'হার্ভেস্ট',             type:'yn', q:'আজ হার্ভেস্ট হয়েছে?'               },
+  { id:'qc',         icon:'✅', title:'কোয়ালিটি নিয়ন্ত্রণ',   type:'yn', q:'কোয়ালিটি তথ্য রেকর্ড করবেন?'     },
+  { id:'spawn',      icon:'🌱', title:'স্পন ও সাবষ্ট্রেট',    type:'yn', q:'স্পন বা সাবষ্ট্রেট কাজ হয়েছে?'  },
+  { id:'processing', icon:'⚙️', title:'প্রসেসিং',             type:'yn', q:'আজ প্রসেসিং হয়েছে?'               },
+  { id:'sales',      icon:'📦', title:'বিক্রয়',               type:'yn', q:'আজ বিক্রি হয়েছে?'                 },
+  { id:'stock',      icon:'📊', title:'ক্লোজিং স্টক',         type:'yn', q:'ক্লোজিং স্টক রেকর্ড করবেন?'      },
+  { id:'expenses',   icon:'💰', title:'দৈনিক খরচ',             type:'yn', q:'আজ কোনো খরচ হয়েছে?'              },
+  { id:'ops',        icon:'🏭', title:'অপারেশন',               type:'yn', q:'অপারেশন তথ্য দিবেন?'              },
+  { id:'notes',      icon:'📝', title:'পর্যবেক্ষণ ও রেটিং',  type:'yn', q:'রেটিং ও মন্তব্য দিবেন?'           },
+  { id:'summary',    icon:'📋', title:'সারসংক্ষেপ',           type:'summary'                                    }
+];
+const N = STEPS.length;
+
+/* ── Helpers ── */
+const fmt  = n => '৳ ' + Math.round(n||0).toLocaleString('en-BD');
+const dn   = id => parseFloat(S.d[id]) || 0;
+const dv   = id => S.d[id] ?? '0';
+// dn2: returns null for unset fields, 0 for explicit zeros (preserves data intent)
+const dn2  = id => { const v = parseFloat(S.d[id]); return isNaN(v) ? null : v; };
+const ds   = id => S.d[id] || null;
+
+/* ── Stepper card builder ── */
+function sc(id, lbl, unit, step=0.1, calc='') {
+  const v   = dv(id);
+  const dec = step < 1 ? 2 : 0;
+  const im  = step < 1 ? 'decimal' : 'numeric';
+  const ev  = calc
+    ? `oninput="S.d['${id}']=this.value;lc('${calc}')"`
+    : `oninput="S.d['${id}']=this.value"`;
+  return `<div class="card">
+    <div class="card-lbl">${lbl}</div>
+    <div class="ctrl">
+      <button type="button" class="cb" onclick="adj('${id}',-${step},${dec})">−</button>
+      <input type="number" id="f-${id}" class="ci" value="${v}" step="${step}" min="0" inputmode="${im}" ${ev}/>
+      <button type="button" class="cb" onclick="adj('${id}',${step},${dec})">+</button>
+    </div>
+    <div class="card-unit">${unit}</div>
+    ${calc ? `<div class="card-tag" id="tag-${id}"></div>` : ''}
+  </div>`;
+}
+
+/* ── Stepper adjust ── */
+window.adj = function(id, delta, dec) {
+  const el = document.getElementById('f-'+id);
+  if (!el) return;
+  const v = Math.max(0, (parseFloat(el.value||0) + delta));
+  el.value = v.toFixed(dec);
+  S.d[id]  = el.value;
+  el.dispatchEvent(new Event('input'));
+};
+
+/* ── Live calc dispatcher ── */
+window.lc = function(calc) {
+  if (calc === 'h')    calcH();
+  if (calc === 'sale') calcSale();
+  if (calc === 'exp')  calcExp();
+  if (calc === 'proc') calcProc();
+  if (calc === 'spn')  calcSpn();
+};
+
+function calcH() {
+  const t = dn('h-fresh-a') + dn('h-fresh-b') + dn('h-fresh-rej');
+  const el = document.getElementById('ht-tot');
+  if (el) el.textContent = t.toFixed(2) + ' kg';
+}
+function calcSale() {
+  const pairs = [['s-fresh-kg','s-fresh-price'],['s-dried-kg','s-dried-price'],['s-powder-kg','s-powder-price']];
+  let tot = 0;
+  pairs.forEach(([q,p]) => {
+    const r = dn(q) * dn(p);
+    tot += r;
+    const t = document.getElementById('tag-'+q);
+    if (t) t.textContent = r > 0 ? '= '+fmt(r) : '';
+  });
+  const el = document.getElementById('sale-tot');
+  if (el) el.textContent = fmt(tot);
+}
+function calcExp() {
+  const ids = ['ex-spawn','ex-substrate','ex-packaging','ex-labor','ex-electricity','ex-transport','ex-water','ex-other'];
+  const tot = ids.reduce((s,id) => s + dn(id), 0);
+  const el  = document.getElementById('exp-tot');
+  if (el) el.textContent = fmt(tot);
+}
+function calcProc() {
+  const fi = dn('pr-fresh-in'), dout = dn('pr-dried-out');
+  const di = dn('pr-dried-in'), pout = dn('pr-powder-out');
+  const d1 = document.getElementById('dry-yld');
+  const d2 = document.getElementById('pow-yld');
+  if (d1) d1.textContent = fi>0 ? 'ড্রাই ইল্ড: '+(dout/fi*100).toFixed(1)+'%' : '';
+  if (d2) d2.textContent = di>0 ? 'পাউডার ইল্ড: '+(pout/di*100).toFixed(1)+'%' : '';
+}
+function calcSpn() {
+  const tot = dn('sp-bought-kg') * dn('sp-price-per-kg');
+  const el  = document.getElementById('spn-cost');
+  const box = document.getElementById('spn-cost-row');
+  if (el)  el.textContent = fmt(tot);
+  if (box) box.style.display = tot > 0 ? 'flex' : 'none';
+}
+
+/* ── Section form builders ── */
+function formHarvest() {
+  return `<div class="cards">
+    <div class="sec-lbl">তাজা মাশরুম (kg)</div>
+    <div class="cg3">
+      ${sc('h-fresh-a',  'গ্রেড A', 'kg', 0.1, 'h')}
+      ${sc('h-fresh-b',  'গ্রেড B', 'kg', 0.1, 'h')}
+      ${sc('h-fresh-rej','বাতিল',   'kg', 0.1, 'h')}
+    </div>
+    <div class="tot"><span class="tot-lbl">মোট তাজা</span><span class="tot-val" id="ht-tot">0.00 kg</span></div>
+    <div class="divider"></div>
+    <div class="sec-lbl">প্রসেসড আউটপুট (kg)</div>
+    <div class="cg2">
+      ${sc('h-dried', 'শুকনো আউটপুট', 'kg', 0.1)}
+      ${sc('h-powder','পাউডার আউটপুট','kg', 0.1)}
+    </div>
+    <div class="divider"></div>
+    <div class="sec-lbl">ব্যাচ তথ্য</div>
+    <div class="cg2">
+      <div class="card">
+        <div class="card-lbl">প্রাথমিক ব্যাচ</div>
+        <input class="ci-txt" type="text" id="f-h-primary-batch" value="${S.d['h-primary-batch']||''}" placeholder="BAT-2025-001" oninput="S.d['h-primary-batch']=this.value"/>
+      </div>
+      <div class="card">
+        <div class="card-lbl">ফ্লাশ নম্বর</div>
+        <select class="sel-inline" id="f-h-flush-num" onchange="S.d['h-flush-num']=this.value">
+          <option value="">—</option>
+          ${[1,2,3,4,5].map(i=>`<option value="${i}"${S.d['h-flush-num']==i?' selected':''}>ফ্লাশ ${i}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+  </div>`;
+}
+
+function formQC() {
+  return `<div class="cards">
+    <div class="sec-lbl">QC ফলাফল (kg)</div>
+    <div class="cg3">
+      ${sc('qc-pass','QC পাশ','kg',0.1)}
+      ${sc('qc-fail','QC ফেল','kg',0.1)}
+      <div class="card">
+        <div class="card-lbl">ফেলের কারণ</div>
+        <select class="sel-inline" id="f-qc-fail-reason" onchange="S.d['qc-fail-reason']=this.value">
+          <option value="">—</option>
+          ${[['overripe','অতিপরিপক্ব'],['damaged','ক্ষতিগ্রস্ত'],['off-colour','রং অস্বাভাবিক'],['contaminated','দূষিত'],['undersize','আকারে ছোট'],['mixed','মিশ্রিত']].map(([v,l])=>`<option value="${v}"${S.d['qc-fail-reason']===v?' selected':''}>${l}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="tog-row">
+      <span class="tog-lbl">দূষণের ঘটনা ছিল?</span>
+      <label class="tog"><input type="checkbox" id="tog-contam" ${S.tog.contam?'checked':''} onchange="togC('contam',this)"/><span class="tog-track"></span></label>
+    </div>
+    <div class="cond${S.tog.contam?' show':''}" id="cond-contam">
+      <div class="cg3" style="width:100%;max-width:460px">
+        <div class="card">
+          <div class="card-lbl">আক্রান্ত রুম</div>
+          <select class="sel-inline" id="f-qc-contam-room" onchange="S.d['qc-contam-room']=this.value">
+            <option value="">—</option>
+            <option>A</option><option>B</option><option>C</option>
+            <option value="multiple">একাধিক</option>
+          </select>
+        </div>
+        <div class="card">
+          <div class="card-lbl">দূষণের ধরন</div>
+          <select class="sel-inline" id="f-qc-contam-type" onchange="S.d['qc-contam-type']=this.value">
+            <option value="">—</option>
+            <option value="bacterial">ব্যাকটেরিয়াল</option>
+            <option value="mould">মোল্ড</option>
+            <option value="trichoderma">ট্রাইকোডার্মা</option>
+            <option value="unknown">অজানা</option>
+          </select>
+        </div>
+        ${sc('qc-contam-bags','আক্রান্ত ব্যাগ','টি',1)}
+      </div>
+    </div>
+  </div>`;
+}
+
+function formSpawn() {
+  return `<div class="cards">
+    <div class="tog-row">
+      <span class="tog-lbl">আজ স্পন কেনা হয়েছে?</span>
+      <label class="tog"><input type="checkbox" id="tog-spawn" ${S.tog.spawnBought?'checked':''} onchange="togC('spawnBought',this)"/><span class="tog-track"></span></label>
+    </div>
+    <div class="cond${S.tog.spawnBought?' show':''}" id="cond-spawn">
+      <div class="cg3" style="width:100%;max-width:460px">
+        ${sc('sp-bought-kg','পরিমাণ','kg',0.1,'spn')}
+        ${sc('sp-price-per-kg','দাম/kg','৳',50,'spn')}
+        <div class="card">
+          <div class="card-lbl">সরবরাহকারী</div>
+          <input class="ci-txt" type="text" id="f-sp-supplier" value="${S.d['sp-supplier']||''}" placeholder="নাম" oninput="S.d['sp-supplier']=this.value"/>
+        </div>
+      </div>
+      <div class="tot" id="spn-cost-row" style="display:none">
+        <span class="tot-lbl">স্পন ক্রয় মূল্য</span>
+        <span class="tot-val" id="spn-cost">৳ 0</span>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="sec-lbl">আজকের ব্যবহার</div>
+    <div class="cg2">
+      ${sc('sp-used-kg','ব্যবহৃত স্পন','kg',0.1)}
+      ${sc('sp-substrate-kg','সাবষ্ট্রেট','kg',0.1)}
+    </div>
+    <div class="cg3">
+      ${sc('sp-bags-inoculated','টিকা দেওয়া ব্যাগ','টি',1)}
+      ${sc('sp-bags-discarded','বাতিল ব্যাগ','টি',1)}
+      <div class="card">
+        <div class="card-lbl">সাবষ্ট্রেট ধরন</div>
+        <select class="sel-inline" id="f-sp-substrate-type" onchange="S.d['sp-substrate-type']=this.value">
+          <option value="">—</option>
+          <option value="wheat_straw">গমের খড়</option>
+          <option value="sawdust">করাতের গুঁড়া</option>
+          <option value="rice_straw">ধানের খড়</option>
+          <option value="mixed">মিশ্রিত</option>
+        </select>
+      </div>
+    </div>
+  </div>`;
+}
+
+function formProcessing() {
+  return `<div class="cards">
+    <div class="sec-lbl">তাজা → শুকনো</div>
+    <div class="cg2">
+      ${sc('pr-fresh-in','ড্রায়ারে দেওয়া','kg',0.1,'proc')}
+      ${sc('pr-dried-out','শুকনো পাওয়া','kg',0.1,'proc')}
+    </div>
+    <div class="yield-tag" id="dry-yld"></div>
+    <div class="divider"></div>
+    <div class="sec-lbl">শুকনো → পাউডার</div>
+    <div class="cg2">
+      ${sc('pr-dried-in','গ্রাইন্ডারে দেওয়া','kg',0.1,'proc')}
+      ${sc('pr-powder-out','পাউডার পাওয়া','kg',0.1,'proc')}
+    </div>
+    <div class="yield-tag" id="pow-yld"></div>
+  </div>`;
+}
+
+function formSales() {
+  const pairs = [
+    ['s-fresh-kg', 's-fresh-price',  'তাজা মাশরুম',   50],
+    ['s-dried-kg', 's-dried-price',  'শুকনো মাশরুম',  100],
+    ['s-powder-kg','s-powder-price', 'মাশরুম পাউডার', 100]
+  ];
+  const rows = pairs.map(([q,p,lbl,pstep]) => `
+    <div class="sec-lbl">${lbl}</div>
+    <div class="cg2">
+      ${sc(q,'পরিমাণ','kg',0.1,'sale')}
+      <div class="card">
+        <div class="card-lbl">মূল্য / kg (৳)</div>
+        <div class="ctrl">
+          <button type="button" class="cb" onclick="adj('${p}',-${pstep},0)">−</button>
+          <input type="number" id="f-${p}" class="ci sm" value="${dv(p)}" step="${pstep}" min="0" inputmode="numeric" oninput="S.d['${p}']=this.value;lc('sale')"/>
+          <button type="button" class="cb" onclick="adj('${p}',${pstep},0)">+</button>
+        </div>
+        <div class="card-unit">৳/kg</div>
+        <div class="card-tag" id="tag-${q}"></div>
+      </div>
+    </div>`).join('');
+  return `<div class="cards">
+    ${rows}
+    <div class="tot"><span class="tot-lbl">মোট রাজস্ব</span><span class="tot-val" id="sale-tot">৳ 0</span></div>
+    <div class="divider"></div>
+    <div class="cg2">
+      ${sc('s-orders','অর্ডার পূর্ণ','টি',1)}
+      ${sc('s-waste','অপচয়/ফেরত','kg',0.1)}
+    </div>
+    <div class="tog-row">
+      <span class="tog-lbl">আজ B2B অর্ডার ছিল?</span>
+      <label class="tog"><input type="checkbox" id="tog-b2b" ${S.tog.b2b?'checked':''} onchange="togC('b2b',this)"/><span class="tog-track"></span></label>
+    </div>
+    <div class="cond${S.tog.b2b?' show':''}" id="cond-b2b">
+      <div class="cg3" style="width:100%;max-width:460px">
+        <div class="card">
+          <div class="card-lbl">B2B ক্লায়েন্ট</div>
+          <input class="ci-txt" type="text" id="f-s-b2b-name" value="${S.d['s-b2b-name']||''}" placeholder="রেস্টুরেন্ট…" oninput="S.d['s-b2b-name']=this.value"/>
+        </div>
+        ${sc('s-b2b-qty','পরিমাণ','kg',0.1)}
+        ${sc('s-b2b-value','মূল্য','৳',100)}
+      </div>
+    </div>
+  </div>`;
+}
+
+function formStock() {
+  return `<div class="cards">
+    <div class="sec-lbl">দিনশেষের মজুদ (kg)</div>
+    <div class="cg3">
+      ${sc('st-fresh','তাজা','kg',0.1)}
+      ${sc('st-dried','শুকনো','kg',0.1)}
+      ${sc('st-powder','পাউডার','kg',0.1)}
+    </div>
+  </div>`;
+}
+
+function formExpenses() {
+  const ef = [
+    ['ex-spawn','স্পন কেনা'],['ex-substrate','সাবষ্ট্রেট'],
+    ['ex-packaging','প্যাকেজিং'],['ex-labor','শ্রম মজুরি'],
+    ['ex-electricity','বিদ্যুৎ'],['ex-transport','পরিবহন'],
+    ['ex-water','পানি'],['ex-other','অন্যান্য']
+  ];
+  const rows = [];
+  for (let i = 0; i < ef.length; i += 2) {
+    rows.push(`<div class="cg2">
+      ${sc(ef[i][0],ef[i][1],'৳',100,'exp')}
+      ${i+1 < ef.length ? sc(ef[i+1][0],ef[i+1][1],'৳',100,'exp') : '<div></div>'}
+    </div>`);
+  }
+  return `<div class="cards">
+    ${rows.join('')}
+    <div class="tot exp"><span class="tot-lbl">মোট খরচ</span><span class="tot-val" id="exp-tot">৳ 0</span></div>
+  </div>`;
+}
+
+function formOps() {
+  return `<div class="cards">
+    <div class="cg4">
+      ${sc('op-rooms',   'সক্রিয় রুম','টি',1)}
+      ${sc('op-bags-total','মোট ব্যাগ','টি',1)}
+      ${sc('op-workers', 'কর্মী','জন',1)}
+      ${sc('op-shifts',  'শিফট','টি',1)}
+    </div>
+    <div class="cg4">
+      ${sc('op-new-batches', 'নতুন ব্যাচ','টি',1)}
+      ${sc('op-done-batches','সম্পন্ন','টি',1)}
+      ${sc('op-bags-removed','সরানো ব্যাগ','টি',1)}
+      ${sc('op-energy-kwh',  'বিদ্যুৎ','kWh',0.1)}
+    </div>
+    <div class="tog-row">
+      <span class="tog-lbl">যন্ত্রপাতির সমস্যা ছিল?</span>
+      <label class="tog"><input type="checkbox" id="tog-issue" ${S.tog.opIssue?'checked':''} onchange="togC('opIssue',this)"/><span class="tog-track"></span></label>
+    </div>
+    <div class="cond${S.tog.opIssue?' show':''}" id="cond-issue">
+      <textarea class="txt" id="f-op-issue-desc" rows="3" placeholder="কোন যন্ত্র, কী সমস্যা, সমাধান হয়েছে কিনা…" oninput="S.d['op-issue-desc']=this.value">${S.d['op-issue-desc']||''}</textarea>
+    </div>
+  </div>`;
+}
+
+function formNotes() {
+  const wOpts = [['','— নির্বাচন'],['normal','স্বাভাবিক'],['hot','গরম'],['rainy','বৃষ্টি'],['cold','ঠান্ডা'],['humid','অতিআর্দ্র'],['stormy','ঝড়']];
+  const strs  = [1,2,3,4,5].map(i=>`<span class="star${S.rating>=i?' on':''}" data-v="${i}" onclick="setStar(${i})">⭐</span>`).join('');
+  const sLbl  = ['','খুব খারাপ','খারাপ','স্বাভাবিক','ভালো','চমৎকার'];
+  return `<div class="cards">
+    <div class="sec-lbl">আবহাওয়া</div>
+    <select class="sel" id="f-n-weather" onchange="S.d['n-weather']=this.value">
+      ${wOpts.map(([v,l])=>`<option value="${v}"${S.d['n-weather']===v?' selected':''}>${l}</option>`).join('')}
+    </select>
+    <div class="sec-lbl">আজকের রেটিং</div>
+    <div class="stars">${strs}</div>
+    <div class="star-lbl" id="star-lbl">${S.rating ? sLbl[S.rating] : 'একটি তারা বেছে নিন'}</div>
+    <div class="sec-lbl">আজকের পর্যবেক্ষণ</div>
+    <textarea class="txt" id="f-n-observations" rows="3" placeholder="মাশরুমের বৃদ্ধি, রঙ, গন্ধ, অস্বাভাবিকতা…" oninput="S.d['n-observations']=this.value">${S.d['n-observations']||''}</textarea>
+    <div class="sec-lbl">কাল কী করতে হবে</div>
+    <textarea class="txt" id="f-n-tomorrow" rows="2" placeholder="হার্ভেস্ট, উপকরণ কেনা, ব্যাচ চেক…" oninput="S.d['n-tomorrow']=this.value">${S.d['n-tomorrow']||''}</textarea>
+    <div class="sec-lbl">অস্বাভাবিক ঘটনা (ঐচ্ছিক)</div>
+    <textarea class="txt" id="f-n-unusual" rows="2" placeholder="বিদ্যুৎ বিভ্রাট, অনুপস্থিত কর্মী…" oninput="S.d['n-unusual']=this.value">${S.d['n-unusual']||''}</textarea>
+  </div>`;
+}
+
+const FORMS = {
+  harvest:formHarvest, qc:formQC, spawn:formSpawn,
+  processing:formProcessing, sales:formSales, stock:formStock,
+  expenses:formExpenses, ops:formOps, notes:formNotes
+};
+
+/* ── Build full slide HTML ── */
+function buildSlide(step) {
+  /* Rooms/date step */
+  if (step.type === 'rooms') {
+    const date  = S.d['log-date'] || new Date().toISOString().slice(0,10);
+    const rBtns = ['A','B','C'].map(r=>`
+      <div class="rc${S.rooms.includes(r)?' sel':''}" id="rc-${r}" onclick="togRoom('${r}')">
+        <div class="rc-letter">${r}</div>
+        <div class="rc-name">রুম ${r}</div>
+      </div>`).join('');
+    return `
+      <div class="step-icon">${step.icon}</div>
+      <div class="step-q">${step.title}</div>
+      <div class="date-chip" id="date-chip">
+        <span class="date-txt" id="date-disp">${date}</span>
+        <span class="date-edit-btn" onclick="editDate()">✏️ পরিবর্তন</span>
+      </div>
+      <input type="date" id="date-nat" class="date-nat" value="${date}" onchange="dateChanged()"/>
+      <div class="step-sub">আজকের হার্ভেস্ট করা রুম নির্বাচন করুন</div>
+      <div class="rooms">${rBtns}</div>
+      <div style="font-size:11px;color:rgba(245,239,230,.22)">একাধিক রুম বেছে নেওয়া যাবে</div>`;
+  }
+
+  /* Summary step */
+  if (step.type === 'summary') {
+    const freshT = dn('h-fresh-a')+dn('h-fresh-b')+dn('h-fresh-rej');
+    const rev    = dn('s-fresh-kg')*dn('s-fresh-price') + dn('s-dried-kg')*dn('s-dried-price') + dn('s-powder-kg')*dn('s-powder-price');
+    const exp    = ['ex-spawn','ex-substrate','ex-packaging','ex-labor','ex-electricity','ex-transport','ex-water','ex-other'].reduce((s,id)=>s+dn(id),0);
+    const net    = rev - exp;
+    const qcT    = dn('qc-pass')+dn('qc-fail');
+    const rows   = [
+      ['তারিখ',       S.d['log-date']||'—',                              ''],
+      ['হার্ভেস্ট রুম', S.rooms.length ? S.rooms.join(', ') : '—',         ''],
+      ['মোট তাজা',    freshT>0 ? freshT.toFixed(2)+' kg' : '—',           'g'],
+      ['QC পাশ হার',  qcT>0 ? ((dn('qc-pass')/qcT)*100).toFixed(0)+'%':'—','gold'],
+      ['মোট রাজস্ব',  rev>0 ? fmt(rev) : '—',                             'g'],
+      ['মোট খরচ',     exp>0 ? fmt(exp) : '—',                             'r'],
+      ['কর্মী',       dn('op-workers') || '—',                             ''],
+      ['রেটিং',       S.rating ? '⭐'.repeat(S.rating) : '—',              '']
+    ].map(([k,v,c])=>`<div class="sum-row"><span class="sum-k">${k}</span><span class="sum-v${c?' '+c:''}">${v}</span></div>`).join('');
+    return `
+      <div class="step-icon">${step.icon}</div>
+      <div class="step-q">${step.title}</div>
+      <div class="step-sub">জমা দেওয়ার আগে একবার দেখুন</div>
+      <div class="sum-rows">
+        ${rows}
+        <div class="net-box ${net>=0?'pr':'ls'}">
+          <div class="net-lbl">নিট লাভ / ক্ষতি</div>
+          <div class="net-val">${fmt(net)}</div>
+        </div>
+      </div>`;
+  }
+
+  /* YES/NO step — show form if already answered YES */
+  if (step.type === 'yn') {
+    if (S.phase[step.id] === 'form') {
+      return `
+        <div class="step-icon">${step.icon}</div>
+        <div class="step-q">${step.title}</div>
+        ${(FORMS[step.id]||(() => ''))()}`;
+    }
+    return `
+      <div class="step-icon">${step.icon}</div>
+      <div class="step-q">${step.q}</div>
+      <div class="yesno">
+        <button type="button" class="yn yn-y" onclick="ansYes()">✓ হ্যাঁ</button>
+        <button type="button" class="yn yn-n" onclick="ansNo()">✕ না</button>
+      </div>`;
+  }
+  return '';
+}
+
+/* ── Render step with slide animation ── */
+function render(dir='next') {
+  const step  = STEPS[S.step];
+  const wrap  = document.getElementById('wrap');
+  const isLast   = S.step === N - 1;
+  const inForm   = step.type === 'yn' && S.phase[step.id] === 'form';
+  const isYNonly = step.type === 'yn' && !inForm;
+
+  /* Header */
+  document.getElementById('prog-title').textContent   = step.title;
+  document.getElementById('prog-count').textContent   = (S.step+1)+'/'+N;
+  document.getElementById('prog-bar').style.width     = ((S.step+1)/N*100)+'%';
+  document.getElementById('hdr-back').style.visibility = S.step===0 ? 'hidden' : '';
+
+  /* Footer */
+  const btn = document.getElementById('btn-next');
+  btn.textContent = isLast ? 'জমা দিন ✓' : 'পরবর্তী →';
+  btn.className   = 'btn-next' + (isLast ? ' sub' : '');
+  btn.disabled    = false;
+  /* Hide skip on YES/NO screen and summary; show on form */
+  document.getElementById('btn-skip').style.display = (isYNonly || step.type === 'summary') ? 'none' : '';
+
+  /* Create new slide */
+  const slide = document.createElement('div');
+  const old   = wrap.querySelector('.slide');
+  // No entrance animation if this is the very first slide
+  slide.className = old ? ('slide ' + (dir === 'back' ? 'in-l' : 'in-r')) : 'slide';
+  slide.innerHTML = buildSlide(step);
+  wrap.appendChild(slide);
+
+  /* Animate out old slide */
+  if (old) {
+    old.classList.add(dir === 'back' ? 'out-r' : 'out-l');
+    setTimeout(() => old.remove(), 260);
+  }
+
+  /* Animate in new slide */
+  requestAnimationFrame(() => requestAnimationFrame(() =>
+    slide.classList.remove('in-r', 'in-l')
+  ));
+
+  /* Post-render calcs */
+  if (step.id === 'harvest' && inForm) calcH();
+  if (step.id === 'sales'   && inForm) calcSale();
+  if (step.id === 'expenses'&& inForm) calcExp();
+  if (step.id === 'processing'&&inForm) calcProc();
+  if (step.id === 'spawn' && inForm && S.tog.spawnBought) calcSpn();
+
+  /* Focus first input after animation */
+  setTimeout(() => {
+    const el = slide.querySelector('input[type="number"],input[type="text"],textarea');
+    if (el) el.focus({ preventScroll: true });
+  }, 280);
+}
+
+/* ── YES/NO handlers ── */
+window.ansYes = function() {
+  S.phase[STEPS[S.step].id] = 'form';
+  render('next');
+};
+window.ansNo = function() {
+  if (S.step < N-1) { S.step++; render('next'); } else submit();
+};
+
+/* ── Navigation ── */
+function goNext() {
+  collect();
+  if (S.step < N-1) { S.step++; render('next'); } else submit();
+}
+function goBack() {
+  collect();
+  const step = STEPS[S.step];
+  // If showing a form after YES, back goes to the YES/NO question — not previous section
+  if (step.type === 'yn' && S.phase[step.id] === 'form') {
+    delete S.phase[step.id];
+    render('back');
+    return;
+  }
+  if (S.step > 0) { S.step--; render('back'); }
+}
+
+/* ── Collect visible field values into S.d ── */
+function collect() {
+  /* All inputs/selects/textareas with id starting "f-" */
+  document.querySelectorAll('.slide:last-child [id^="f-"]').forEach(el => {
+    const id = el.id.slice(2);
+    if (el.tagName === 'SELECT') {
+      if (el.value) S.d[id] = el.value;
+    } else if (el.type === 'checkbox') {
+      /* handled via togC() */
+    } else {
+      S.d[id] = el.value || '0';
+    }
+  });
+
+  /* Date from rooms step */
+  const disp = document.getElementById('date-disp');
+  if (disp) S.d['log-date'] = disp.textContent;
+
+  /* Toggles */
+  const tMap = { contam:'tog-contam', spawnBought:'tog-spawn', b2b:'tog-b2b', opIssue:'tog-issue' };
+  Object.entries(tMap).forEach(([k,id]) => {
+    const el = document.getElementById(id);
+    if (el) S.tog[k] = el.checked;
+  });
+
+  /* Rating */
+  if (S.rating) S.d['n-overall-rating'] = String(S.rating);
+}
+
+/* ── Interactive helpers ── */
+window.togRoom = function(r) {
+  const i = S.rooms.indexOf(r);
+  if (i > -1) S.rooms.splice(i,1); else S.rooms.push(r);
+  const el = document.getElementById('rc-'+r);
+  if (el) el.classList.toggle('sel', S.rooms.includes(r));
+};
+
+window.togC = function(key, el) {
+  S.tog[key] = el.checked;
+  const map = { contam:'cond-contam', spawnBought:'cond-spawn', b2b:'cond-b2b', opIssue:'cond-issue' };
+  const c = document.getElementById(map[key]);
+  if (c) c.classList.toggle('show', el.checked);
+  if (key === 'spawnBought') calcSpn();
+};
+
+window.editDate = function() {
+  document.getElementById('date-chip').style.display = 'none';
+  const n = document.getElementById('date-nat');
+  n.style.display = 'block';
+  n.focus();
+  n.showPicker?.();
+};
+window.dateChanged = function() {
+  const n = document.getElementById('date-nat');
+  S.d['log-date'] = n.value;
+  document.getElementById('date-disp').textContent = n.value;
+  n.style.display  = 'none';
+  document.getElementById('date-chip').style.display = '';
+};
+
+window.setStar = function(v) {
+  S.rating = v;
+  document.querySelectorAll('.star').forEach(s => s.classList.toggle('on', +s.dataset.v <= v));
+  const lbl = ['','খুব খারাপ','খারাপ','স্বাভাবিক','ভালো','চমৎকার'];
+  const el = document.getElementById('star-lbl');
+  if (el) el.textContent = lbl[v];
+};
+
+/* ── Toast ── */
+function toast(msg, type='info') {
+  const stack = document.getElementById('toast-stack');
+  const el    = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.textContent = msg;
+  stack.appendChild(el);
+  requestAnimationFrame(() => el.classList.add('show'));
+  setTimeout(() => { el.classList.remove('show'); setTimeout(() => el.remove(), 300); }, 3000);
+}
+
+/* ── Submit to Supabase ── */
+async function submit() {
+  collect();
+  const btn = document.getElementById('btn-next');
+  btn.disabled = true; btn.textContent = 'জমা হচ্ছে…';
+
+  const payload = {
+    log_date: S.d['log-date'] || new Date().toISOString().slice(0,10),
+    submitted_by: S.userEmail || null,
+    harvest_fresh_a:dn2('h-fresh-a'), harvest_fresh_b:dn2('h-fresh-b'), harvest_fresh_rej:dn2('h-fresh-rej'),
+    harvest_dried:dn2('h-dried'), harvest_powder:dn2('h-powder'),
+    harvest_rooms: S.rooms.length ? S.rooms : null,
+    harvest_primary_batch:ds('h-primary-batch'), harvest_flush_num:dn2('h-flush-num'),
+    qc_pass:dn2('qc-pass'), qc_fail:dn2('qc-fail'), qc_fail_reason:ds('qc-fail-reason'),
+    contam_event:S.tog.contam, contam_room:ds('qc-contam-room'), contam_type:ds('qc-contam-type'), contam_bags:dn2('qc-contam-bags'),
+    spawn_bought_kg:dn2('sp-bought-kg'), spawn_price_per_kg:dn2('sp-price-per-kg'), spawn_supplier:ds('sp-supplier'),
+    spawn_used_kg:dn2('sp-used-kg'), substrate_kg:dn2('sp-substrate-kg'), substrate_type:ds('sp-substrate-type'),
+    bags_inoculated:dn2('sp-bags-inoculated'), bags_discarded:dn2('sp-bags-discarded'),
+    pr_fresh_in:dn2('pr-fresh-in'), pr_dried_out:dn2('pr-dried-out'),
+    pr_dried_in:dn2('pr-dried-in'), pr_powder_out:dn2('pr-powder-out'),
+    s_fresh_kg:dn2('s-fresh-kg'), s_fresh_price:dn2('s-fresh-price'),
+    s_dried_kg:dn2('s-dried-kg'), s_dried_price:dn2('s-dried-price'),
+    s_powder_kg:dn2('s-powder-kg'), s_powder_price:dn2('s-powder-price'),
+    s_orders:dn2('s-orders'), s_waste:dn2('s-waste'),
+    s_b2b_name:ds('s-b2b-name'), s_b2b_qty:dn2('s-b2b-qty'), s_b2b_value:dn2('s-b2b-value'),
+    st_fresh:dn2('st-fresh'), st_dried:dn2('st-dried'), st_powder:dn2('st-powder'),
+    ex_spawn:dn2('ex-spawn'), ex_substrate:dn2('ex-substrate'), ex_packaging:dn2('ex-packaging'),
+    ex_labor:dn2('ex-labor'), ex_electricity:dn2('ex-electricity'), ex_transport:dn2('ex-transport'),
+    ex_water:dn2('ex-water'), ex_other:dn2('ex-other'),
+    op_rooms:dn2('op-rooms'), op_bags_total:dn2('op-bags-total'), op_workers:dn2('op-workers'),
+    op_shifts:dn2('op-shifts'), op_new_batches:dn2('op-new-batches'), op_done_batches:dn2('op-done-batches'),
+    op_bags_removed:dn2('op-bags-removed'), op_energy_kwh:dn2('op-energy-kwh'),
+    op_issue:S.tog.opIssue, op_issue_desc:ds('op-issue-desc'),
+    n_weather:ds('n-weather'), n_overall_rating:dn2('n-overall-rating'),
+    n_observations:ds('n-observations'), n_tomorrow:ds('n-tomorrow'), n_unusual:ds('n-unusual'),
+  };
+
+  try {
+    const { error } = await sb.from('farm_daily_logs').upsert(payload, { onConflict:'log_date' });
+    if (error) throw error;
+
+    /* Success screen */
+    document.getElementById('ftr').style.display = 'none';
+    const wrap = document.getElementById('wrap');
+    const old  = wrap.querySelector('.slide');
+    if (old) old.classList.add('out-l');
+    const ok = document.createElement('div');
+    ok.className = 'slide in-r';
+    ok.innerHTML = `<div class="ok-wrap">
+      <div class="ok-icon">✅</div>
+      <div class="ok-title">লগ জমা হয়েছে!</div>
+      <div class="ok-sub">সফলভাবে সেভ হয়েছে।<br>অ্যাডমিন প্যানেলে ফিরে যাচ্ছেন…</div>
+    </div>`;
+    wrap.appendChild(ok);
+    requestAnimationFrame(() => requestAnimationFrame(() => ok.classList.remove('in-r')));
+    setTimeout(() => old?.remove(), 260);
+    setTimeout(() => window.location.href = 'admin.html', 2800);
+
+  } catch(err) {
+    btn.disabled = false;
+    btn.textContent = 'জমা দিন ✓';
+    btn.className = 'btn-next sub';
+    toast('জমা হয়নি: ' + err.message, 'error');
+  }
+}
+
+/* ── Event listeners ── */
+document.getElementById('btn-next').addEventListener('click', goNext);
+document.getElementById('btn-skip').addEventListener('click', () => {
+  collect();
+  if (S.step < N-1) { S.step++; render('next'); } else submit();
+});
+document.getElementById('hdr-back').addEventListener('click', goBack);
+
+/* Enter key advances (not in textarea/select) */
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA' && e.target.tagName !== 'SELECT') {
+    e.preventDefault();
+    document.getElementById('btn-next').click();
+  }
+});
+
+/* ── Pre-fill prices from last log ── */
+async function prefill() {
+  try {
+    const { data } = await sb.from('farm_daily_logs')
+      .select('s_fresh_price,s_dried_price,s_powder_price')
+      .order('log_date', { ascending:false })
+      .limit(1)
+      .single();
+    if (!data) return;
+    if (data.s_fresh_price)  S.d['s-fresh-price']  = String(data.s_fresh_price);
+    if (data.s_dried_price)  S.d['s-dried-price']  = String(data.s_dried_price);
+    if (data.s_powder_price) S.d['s-powder-price'] = String(data.s_powder_price);
+  } catch(_) { /* silent — defaults already set */ }
+}
+
+/* ── Swipe gesture (horizontal swipe = next/back) ── */
+let _tx = 0, _ty = 0;
+document.getElementById('wrap').addEventListener('touchstart', e => {
+  _tx = e.touches[0].clientX;
+  _ty = e.touches[0].clientY;
+}, { passive: true });
+document.getElementById('wrap').addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - _tx;
+  const dy = Math.abs(e.changedTouches[0].clientY - _ty);
+  if (Math.abs(dx) > 60 && dy < 80) {
+    if (dx < 0) goNext(); else goBack();
+  }
+}, { passive: true });
+
+/* ── Auth guard + Init ── */
+// Show a loading skeleton while auth resolves — prevents flash of unauthenticated UI
+document.getElementById('wrap').innerHTML = `<div class="slide" style="align-items:center;justify-content:center;flex-direction:column;gap:14px">
+  <div style="font-size:40px">🍄</div>
+  <div style="font-size:13px;color:rgba(245,239,230,.3);font-family:'Hind Siliguri',sans-serif">লোড হচ্ছে…</div>
+</div>`;
+document.getElementById('btn-next').disabled = true;
+document.getElementById('btn-skip').style.display = 'none';
+document.getElementById('hdr-back').style.visibility = 'hidden';
+
+(async () => {
+  const session = await requireAdmin(sb);
+  if (!session) { window.location.href = 'admin.html'; return; }
+
+  S.userEmail             = session.user.email;
+  S.d['log-date']         = new Date().toISOString().slice(0,10);
+  S.d['s-fresh-price']    = '350';
+  S.d['s-dried-price']    = '2800';
+  S.d['s-powder-price']   = '3500';
+  await prefill();
+
+  // Clear loading skeleton, then render first step
+  document.getElementById('wrap').innerHTML = '';
+  render('next');
+})();
+</script>
+</body>
+</html>
