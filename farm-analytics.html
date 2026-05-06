@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Farm Analytics — SaFa Naturals</title>
+<link rel="icon" type="image/png" href="/favicon.png"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&family=Cormorant+Garamond:wght@300;600&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root{
+  --g900:#060e09;--g800:#0e1a13;--g700:#121f16;
+  --c:#f5efe6;--al:#d9b254;--a:#c49a3c;
+  --border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.13);
+  --green:#5fcf80;--red:#e05252;--red-dim:rgba(224,82,82,.1);
+  --gold-dim:rgba(217,178,84,.1);--r:10px;--r2:6px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:14px}
+body{font-family:'DM Sans',sans-serif;background:var(--g900);color:var(--c);min-height:100vh}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:2px}
+
+/* ── Topbar ── */
+.topbar{height:58px;background:var(--g800);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 28px;gap:16px;position:sticky;top:0;z-index:100}
+.back-link{font-size:11px;color:rgba(245,239,230,.38);text-decoration:none;display:flex;align-items:center;gap:5px;transition:color .2s;flex-shrink:0}
+.back-link:hover{color:rgba(245,239,230,.75)}
+.back-link svg{width:13px;height:13px}
+.top-sep{width:1px;height:20px;background:var(--border);flex-shrink:0}
+.top-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;flex:1}
+/* Date range pills */
+.range-btns{display:flex;gap:4px;flex-shrink:0}
+.range-btn{font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.1em;padding:6px 12px;border-radius:var(--r2);border:1px solid var(--border);background:none;color:rgba(245,239,230,.4);cursor:pointer;transition:all .15s}
+.range-btn:hover{border-color:var(--border2);color:var(--c)}
+.range-btn.active{background:rgba(217,178,84,.12);border-color:rgba(217,178,84,.3);color:var(--al)}
+/* Export button */
+.export-btn{font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.1em;padding:7px 14px;border-radius:var(--r2);border:1px solid var(--border);background:rgba(255,255,255,.03);color:rgba(245,239,230,.45);cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:5px;white-space:nowrap}
+.export-btn:hover{border-color:var(--border2);color:var(--c);background:rgba(255,255,255,.06)}
+
+/* ── Content ── */
+.content{max-width:1300px;margin:0 auto;padding:28px 28px 60px}
+
+/* ── Metric cards ── */
+.metrics-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+.metric-card{background:var(--g800);border:1px solid var(--border);border-radius:var(--r);padding:18px 20px}
+.metric-lbl{font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:rgba(245,239,230,.35);margin-bottom:8px}
+.metric-val{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:300;color:var(--c);line-height:1;margin-bottom:4px}
+.metric-val.green{color:var(--green)}
+.metric-val.red{color:var(--red)}
+.metric-val.gold{color:var(--al)}
+.metric-sub{font-size:11px;color:rgba(245,239,230,.3)}
+
+/* ── Charts grid ── */
+.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.chart-card{background:var(--g800);border:1px solid var(--border);border-radius:var(--r);padding:20px 22px}
+.chart-title{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;color:var(--c);margin-bottom:4px}
+.chart-sub{font-size:10px;color:rgba(245,239,230,.3);margin-bottom:16px}
+.chart-wrap{position:relative;height:220px}
+.chart-wrap.tall{height:280px}
+
+/* ── Loading / error states ── */
+.state-center{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:60px 24px;text-align:center;grid-column:1/-1}
+.state-icon{font-size:40px}
+.state-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:rgba(245,239,230,.6)}
+.state-sub{font-size:12px;color:rgba(245,239,230,.35);max-width:320px;line-height:1.6}
+.state-btn{font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.1em;padding:8px 16px;border-radius:var(--r2);border:1px solid rgba(217,178,84,.3);background:rgba(217,178,84,.1);color:var(--al);cursor:pointer;margin-top:4px}
+.state-btn:hover{background:rgba(217,178,84,.2)}
+.chart-empty{display:flex;align-items:center;justify-content:center;height:100%;font-size:12px;color:rgba(245,239,230,.25)}
+
+/* Responsive */
+@media(max-width:1000px){.metrics-grid{grid-template-columns:repeat(2,1fr)}.charts-grid{grid-template-columns:1fr}}
+@media(max-width:600px){.metrics-grid{grid-template-columns:1fr 1fr}.topbar{padding:0 16px;gap:10px}.top-title{font-size:12px}.content{padding:18px 16px 40px}}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <a href="admin.html" class="back-link">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+    Admin
+  </a>
+  <div class="top-sep"></div>
+  <div class="top-title">🌿 Farm Analytics</div>
+  <div class="range-btns" id="range-btns">
+    <button type="button" class="range-btn active" data-days="7">7D</button>
+    <button type="button" class="range-btn" data-days="14">14D</button>
+    <button type="button" class="range-btn" data-days="30">30D</button>
+    <button type="button" class="range-btn" data-days="90">90D</button>
+  </div>
+  <button type="button" class="export-btn" id="export-btn">
+    <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
+    Export CSV
+  </button>
+</header>
+
+<div class="content">
+
+  <!-- Metric cards -->
+  <div class="metrics-grid" id="metrics-grid">
+    <div class="metric-card">
+      <div class="metric-lbl">Total Harvest</div>
+      <div class="metric-val green" id="m-harvest">—</div>
+      <div class="metric-sub">fresh mushroom (kg)</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-lbl">Total Revenue</div>
+      <div class="metric-val gold" id="m-revenue">—</div>
+      <div class="metric-sub">from all sales</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-lbl">Net Profit / Loss</div>
+      <div class="metric-val" id="m-net">—</div>
+      <div class="metric-sub">revenue minus expenses</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-lbl">Avg QC Pass Rate</div>
+      <div class="metric-val" id="m-qc">—</div>
+      <div class="metric-sub">quality control average</div>
+    </div>
+  </div>
+
+  <!-- Charts -->
+  <div class="charts-grid" id="charts-grid">
+    <!-- Harvest trend -->
+    <div class="chart-card">
+      <div class="chart-title">Harvest Trend</div>
+      <div class="chart-sub">Daily fresh mushroom output (kg)</div>
+      <div class="chart-wrap"><canvas id="chart-harvest"></canvas></div>
+    </div>
+    <!-- Revenue vs Expenses -->
+    <div class="chart-card">
+      <div class="chart-title">Revenue vs Expenses</div>
+      <div class="chart-sub">Daily financial performance (৳)</div>
+      <div class="chart-wrap"><canvas id="chart-finance"></canvas></div>
+    </div>
+    <!-- QC Pass Rate -->
+    <div class="chart-card">
+      <div class="chart-title">QC Pass Rate</div>
+      <div class="chart-sub">Daily quality control (%) — 80% target line</div>
+      <div class="chart-wrap"><canvas id="chart-qc"></canvas></div>
+    </div>
+    <!-- Product revenue split -->
+    <div class="chart-card">
+      <div class="chart-title">Revenue by Product</div>
+      <div class="chart-sub">Contribution breakdown for selected period</div>
+      <div class="chart-wrap" style="display:flex;align-items:center;justify-content:center">
+        <canvas id="chart-products" style="max-height:220px;max-width:220px"></canvas>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script type="module">
+import { createClient } from '@supabase/supabase-js';
+import { requireAdmin } from '/src/admin-auth.js';
+
+const sb = createClient(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_ANON_KEY
+);
+
+/* ── Auth ── */
+(async () => {
+  const session = await requireAdmin(sb);
+  if (!session) { window.location.href = 'admin.html'; return; }
+  init();
+})();
+
+/* ── State ── */
+let _days = 7;
+let _data = [];
+const charts = {};
+
+/* ── Chart.js global defaults ── */
+Chart.defaults.color = 'rgba(245,239,230,.45)';
+Chart.defaults.borderColor = 'rgba(255,255,255,.07)';
+Chart.defaults.font.family = "'DM Mono', monospace";
+Chart.defaults.font.size = 10;
+
+/* ── Date range buttons ── */
+document.getElementById('range-btns').addEventListener('click', e => {
+  const btn = e.target.closest('.range-btn');
+  if (!btn) return;
+  document.querySelectorAll('.range-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  _days = +btn.dataset.days;
+  load();
+});
+
+/* ── Load data ── */
+async function load() {
+  const from = new Date();
+  from.setDate(from.getDate() - _days + 1);
+  from.setHours(0,0,0,0);
+
+  const { data, error } = await sb
+    .from('farm_daily_logs')
+    .select(`log_date,
+      harvest_fresh_a,harvest_fresh_b,harvest_fresh_rej,
+      harvest_dried,harvest_powder,
+      qc_pass,qc_fail,
+      s_fresh_kg,s_fresh_price,s_dried_kg,s_dried_price,s_powder_kg,s_powder_price,
+      ex_spawn,ex_substrate,ex_packaging,ex_labor,ex_electricity,ex_transport,ex_water,ex_other`)
+    .gte('log_date', from.toISOString().slice(0,10))
+    .order('log_date', { ascending: true });
+
+  if (error) {
+    const isMissing = error.message?.includes('schema cache') || error.message?.includes('does not exist');
+    showError(isMissing);
+    return;
+  }
+
+  _data = data || [];
+  renderMetrics();
+  renderCharts();
+}
+
+/* ── Helpers ── */
+const dn = (r, k) => parseFloat(r?.[k]) || 0;
+const fmt = n => '৳ ' + Math.round(n).toLocaleString('en-BD');
+
+function rowRevenue(r) {
+  return dn(r,'s_fresh_kg')*dn(r,'s_fresh_price') +
+         dn(r,'s_dried_kg')*dn(r,'s_dried_price') +
+         dn(r,'s_powder_kg')*dn(r,'s_powder_price');
+}
+function rowExpenses(r) {
+  return ['ex_spawn','ex_substrate','ex_packaging','ex_labor','ex_electricity','ex_transport','ex_water','ex_other']
+    .reduce((s,k) => s + dn(r,k), 0);
+}
+
+/* ── Metrics ── */
+function renderMetrics() {
+  const totalHarvest = _data.reduce((s,r) => s + dn(r,'harvest_fresh_a') + dn(r,'harvest_fresh_b') + dn(r,'harvest_fresh_rej'), 0);
+  const totalRev     = _data.reduce((s,r) => s + rowRevenue(r), 0);
+  const totalExp     = _data.reduce((s,r) => s + rowExpenses(r), 0);
+  const net          = totalRev - totalExp;
+
+  // QC average
+  const qcDays = _data.filter(r => dn(r,'qc_pass') + dn(r,'qc_fail') > 0);
+  const avgQC  = qcDays.length
+    ? qcDays.reduce((s,r) => {
+        const t = dn(r,'qc_pass') + dn(r,'qc_fail');
+        return s + (t > 0 ? dn(r,'qc_pass')/t*100 : 0);
+      }, 0) / qcDays.length
+    : null;
+
+  setMetric('m-harvest', totalHarvest > 0 ? totalHarvest.toFixed(1)+' kg' : '—', totalHarvest > 0 ? 'green' : '');
+  setMetric('m-revenue', totalRev > 0 ? fmt(totalRev) : '—', 'gold');
+  setMetric('m-net', _data.length > 0 ? fmt(net) : '—', net >= 0 ? 'green' : 'red');
+  setMetric('m-qc', avgQC !== null ? avgQC.toFixed(1)+'%' : '—', avgQC >= 80 ? 'green' : avgQC !== null ? 'red' : '');
+}
+
+function setMetric(id, val, cls) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = val;
+  el.className = 'metric-val' + (cls ? ' '+cls : '');
+}
+
+/* ── Charts ── */
+function renderCharts() {
+  const labels = _data.map(r => r.log_date);
+
+  if (_data.length === 0) {
+    ['chart-harvest','chart-finance','chart-qc','chart-products'].forEach(id => {
+      destroyChart(id);
+      const wrap = document.getElementById(id).parentElement;
+      document.getElementById(id).style.display = 'none';
+      if (!wrap.querySelector('.chart-empty')) {
+        const d = document.createElement('div');
+        d.className = 'chart-empty';
+        d.textContent = 'No data for this period';
+        wrap.appendChild(d);
+      }
+    });
+    return;
+  }
+
+  // ── Harvest trend ──
+  destroyChart('chart-harvest');
+  const freshTotals = _data.map(r => +(dn(r,'harvest_fresh_a') + dn(r,'harvest_fresh_b') + dn(r,'harvest_fresh_rej')).toFixed(2));
+  const gradeA      = _data.map(r => +dn(r,'harvest_fresh_a').toFixed(2));
+  const gradeB      = _data.map(r => +dn(r,'harvest_fresh_b').toFixed(2));
+  charts['chart-harvest'] = new Chart(document.getElementById('chart-harvest'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label:'Total', data:freshTotals, borderColor:'#5fcf80', backgroundColor:'rgba(95,207,128,.08)', fill:true, tension:.35, pointRadius:3, borderWidth:2 },
+        { label:'Grade A', data:gradeA, borderColor:'#d9b254', backgroundColor:'transparent', tension:.35, pointRadius:2, borderWidth:1.5, borderDash:[4,3] },
+        { label:'Grade B', data:gradeB, borderColor:'rgba(245,239,230,.3)', backgroundColor:'transparent', tension:.35, pointRadius:2, borderWidth:1.5, borderDash:[4,3] },
+      ]
+    },
+    options: chartOpts({ yLabel:'kg', prefix:'' })
+  });
+
+  // ── Revenue vs Expenses ──
+  destroyChart('chart-finance');
+  charts['chart-finance'] = new Chart(document.getElementById('chart-finance'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label:'Revenue', data:_data.map(r => +rowRevenue(r).toFixed(0)), backgroundColor:'rgba(95,207,128,.5)', borderColor:'#5fcf80', borderWidth:1, borderRadius:3 },
+        { label:'Expenses', data:_data.map(r => +rowExpenses(r).toFixed(0)), backgroundColor:'rgba(224,82,82,.4)', borderColor:'#e05252', borderWidth:1, borderRadius:3 },
+      ]
+    },
+    options: chartOpts({ yLabel:'৳', prefix:'৳', groupBars:true })
+  });
+
+  // ── QC Pass Rate ──
+  destroyChart('chart-qc');
+  const qcRates = _data.map(r => {
+    const t = dn(r,'qc_pass') + dn(r,'qc_fail');
+    return t > 0 ? +(dn(r,'qc_pass')/t*100).toFixed(1) : null;
+  });
+  charts['chart-qc'] = new Chart(document.getElementById('chart-qc'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label:'QC Pass %', data:qcRates, borderColor:'#d9b254', backgroundColor:'rgba(217,178,84,.08)', fill:true, tension:.3, pointRadius:4, pointBackgroundColor:'#d9b254', borderWidth:2, spanGaps:true },
+        { label:'Target (80%)', data:labels.map(()=>80), borderColor:'rgba(224,82,82,.5)', borderDash:[6,4], borderWidth:1.5, pointRadius:0, fill:false },
+      ]
+    },
+    options: chartOpts({ yLabel:'%', prefix:'', yMax:100, yMin:0 })
+  });
+
+  // ── Revenue by product (donut) ──
+  destroyChart('chart-products');
+  const freshRev   = _data.reduce((s,r) => s + dn(r,'s_fresh_kg')*dn(r,'s_fresh_price'), 0);
+  const driedRev   = _data.reduce((s,r) => s + dn(r,'s_dried_kg')*dn(r,'s_dried_price'), 0);
+  const powderRev  = _data.reduce((s,r) => s + dn(r,'s_powder_kg')*dn(r,'s_powder_price'), 0);
+  const totalProd  = freshRev + driedRev + powderRev;
+  charts['chart-products'] = new Chart(document.getElementById('chart-products'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Fresh Mushroom','Dried Mushroom','Powder'],
+      datasets:[{
+        data: totalProd > 0 ? [freshRev, driedRev, powderRev] : [1,1,1],
+        backgroundColor:['rgba(95,207,128,.7)','rgba(217,178,84,.7)','rgba(196,154,60,.7)'],
+        borderColor:['#5fcf80','#d9b254','#c49a3c'],
+        borderWidth:1.5,
+        hoverOffset:6,
+      }]
+    },
+    options:{
+      cutout:'65%',
+      plugins:{
+        legend:{ position:'bottom', labels:{ color:'rgba(245,239,230,.5)', padding:12, boxWidth:10, font:{size:10} } },
+        tooltip:{
+          callbacks:{
+            label: ctx => {
+              if (totalProd === 0) return ' No data';
+              const pct = (ctx.raw/totalProd*100).toFixed(1);
+              return ` ${fmt(ctx.raw)} (${pct}%)`;
+            }
+          }
+        }
+      }
+    }
+  });
+}
+
+/* ── Chart options factory ── */
+function chartOpts({ yLabel='', prefix='', yMax, yMin, groupBars=false }) {
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { mode:'index', intersect:false },
+    plugins: {
+      legend:{ labels:{ color:'rgba(245,239,230,.45)', boxWidth:10, padding:14, font:{size:10} } },
+      tooltip:{
+        backgroundColor:'rgba(14,26,19,.95)',
+        borderColor:'rgba(255,255,255,.1)',
+        borderWidth:1,
+        padding:10,
+        callbacks:{
+          label: ctx => ` ${ctx.dataset.label}: ${prefix}${typeof ctx.raw === 'number' ? ctx.raw.toLocaleString('en-BD') : '—'}${yLabel === '%' ? '%' : yLabel === 'kg' ? ' kg' : ''}`
+        }
+      }
+    },
+    scales:{
+      x:{ ticks:{maxRotation:45, color:'rgba(245,239,230,.3)', font:{size:9}}, grid:{color:'rgba(255,255,255,.04)'} },
+      y:{ ticks:{color:'rgba(245,239,230,.3)', font:{size:9}, callback:v=>`${prefix}${v.toLocaleString('en-BD')}${yLabel==='%'?'%':yLabel==='kg'?' kg':''}`}, grid:{color:'rgba(255,255,255,.05)'},
+          ...(yMax !== undefined ? {max:yMax} : {}),
+          ...(yMin !== undefined ? {min:yMin} : {}),
+      }
+    },
+    ...(groupBars ? {} : {})
+  };
+}
+
+function destroyChart(id) {
+  if (charts[id]) { charts[id].destroy(); delete charts[id]; }
+  const el = document.getElementById(id);
+  if (el) { el.style.display = ''; const e = el.parentElement?.querySelector('.chart-empty'); if(e) e.remove(); }
+}
+
+/* ── Error state ── */
+function showError(isMissing) {
+  const grid = document.getElementById('charts-grid');
+  if (isMissing) {
+    grid.innerHTML = `<div class="state-center">
+      <div class="state-icon">🌿</div>
+      <div class="state-title">Farm log table not set up yet</div>
+      <div class="state-sub">Go to the Farm Log page, click "📋 SQL কপি করুন" and run it in Supabase SQL Editor. Then submit your first log via Quick Log.</div>
+      <button type="button" class="state-btn" onclick="window.location.href='farm-log.html'">Open Farm Log →</button>
+    </div>`;
+  } else {
+    grid.innerHTML = `<div class="state-center">
+      <div class="state-icon">⚠️</div>
+      <div class="state-title">Could not load data</div>
+      <div class="state-sub">Check your Supabase connection and try again.</div>
+    </div>`;
+  }
+}
+
+/* ── CSV Export ── */
+document.getElementById('export-btn').addEventListener('click', () => {
+  if (!_data.length) { alert('No data to export'); return; }
+  const cols = ['Date','Fresh A','Fresh B','Rejected','Total Fresh','QC Pass','QC Fail','QC%','Revenue','Expenses','Net'];
+  const rows = _data.map(r => {
+    const freshT = dn(r,'harvest_fresh_a')+dn(r,'harvest_fresh_b')+dn(r,'harvest_fresh_rej');
+    const qcT    = dn(r,'qc_pass')+dn(r,'qc_fail');
+    const rev    = rowRevenue(r), exp = rowExpenses(r);
+    return [
+      r.log_date,
+      dn(r,'harvest_fresh_a'), dn(r,'harvest_fresh_b'), dn(r,'harvest_fresh_rej'),
+      freshT.toFixed(2),
+      dn(r,'qc_pass'), dn(r,'qc_fail'),
+      qcT > 0 ? (dn(r,'qc_pass')/qcT*100).toFixed(1)+'%' : '—',
+      Math.round(rev), Math.round(exp), Math.round(rev-exp)
+    ].join(',');
+  });
+  const csv  = [cols.join(','), ...rows].join('\n');
+  const link = Object.assign(document.createElement('a'), {
+    href: 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv),
+    download: `safa-farm-analytics-${_days}d-${new Date().toISOString().slice(0,10)}.csv`
+  });
+  link.click();
+});
+
+/* ── Init ── */
+function init() { load(); }
+</script>
+</body>
+</html>

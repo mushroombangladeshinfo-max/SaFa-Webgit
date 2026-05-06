@@ -11,6 +11,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Syne:wght@600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
 
   <style>
     *, *::before, *::after { box-sizing: border-box; }
@@ -164,7 +166,7 @@
     /* Main content area */
     .dash-content { max-width:1280px; margin:0 auto; padding:32px 32px 64px; }
     /* Quick actions banner */
-    .quick-actions-bar { display:grid; grid-template-columns:1.6fr 1fr 1fr; gap:12px; margin-bottom:28px; }
+    .quick-actions-bar { display:grid; grid-template-columns:1.6fr 1fr 1fr 1fr 1fr; gap:12px; margin-bottom:28px; }
     .qa-card { display:flex; align-items:center; gap:14px; padding:16px 18px; border-radius:10px; border:1px solid rgba(255,255,255,.08); background:rgba(255,255,255,.03); text-decoration:none; color:var(--c); transition:all .2s; }
     .qa-card:hover { border-color:rgba(255,255,255,.14); background:rgba(255,255,255,.06); transform:translateY(-2px); }
     .qa-card.qa-primary { border-color:rgba(217,178,84,.28); background:rgba(217,178,84,.07); }
@@ -178,6 +180,7 @@
     .qa-card:hover .qa-arrow { color:rgba(245,239,230,.6); transform:translateX(3px); }
     .qa-card.qa-primary .qa-arrow { color:rgba(217,178,84,.4); }
     .qa-card.qa-primary:hover .qa-arrow { color:var(--al); }
+    @media(max-width:1100px) { .quick-actions-bar { grid-template-columns:1.6fr 1fr 1fr; } }
     @media(max-width:860px) { .quick-actions-bar { grid-template-columns:1fr 1fr; } }
     @media(max-width:600px) { .quick-actions-bar { grid-template-columns:1fr; } }
 
@@ -658,6 +661,10 @@
             <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3"/></svg>
             IoT Dashboard
           </a>
+          <a href="farm-analytics.html" class="tb-nav-link">
+            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/></svg>
+            Analytics
+          </a>
         </nav>
 
         <div class="tb-sep"></div>
@@ -711,6 +718,33 @@
           </div>
           <svg class="qa-arrow" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
         </a>
+        <a href="farm-analytics.html" class="qa-card">
+          <div class="qa-icon">📈</div>
+          <div class="qa-text">
+            <div class="qa-title">Farm Analytics</div>
+            <div class="qa-sub">Harvest & revenue charts</div>
+          </div>
+          <svg class="qa-arrow" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+        </a>
+        <button type="button" class="qa-card" onclick="window.generateSalesReport()">
+          <div class="qa-icon">📄</div>
+          <div class="qa-text">
+            <div class="qa-title">Sales Report</div>
+            <div class="qa-sub">Monthly PDF export</div>
+          </div>
+          <svg class="qa-arrow" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
+        </button>
+      </div>
+
+      <!-- Push notification enable bar (shown once, until granted) -->
+      <div id="notif-bar" style="display:none;align-items:center;gap:12px;padding:12px 16px;background:rgba(95,207,128,.06);border:1px solid rgba(95,207,128,.18);border-radius:8px;margin-bottom:20px;">
+        <span style="font-size:18px;">🔔</span>
+        <div style="flex:1;">
+          <div style="font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:.1em;color:#5fcf80;">New Order Notifications</div>
+          <div style="font-size:11px;color:rgba(245,239,230,.45);margin-top:2px;">Get instant alerts on this device when a new order arrives.</div>
+        </div>
+        <button type="button" onclick="window.enableNotifications()" style="font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;background:rgba(95,207,128,.15);border:1px solid rgba(95,207,128,.35);color:#5fcf80;border-radius:6px;padding:8px 14px;cursor:pointer;white-space:nowrap;">Enable</button>
+        <button type="button" onclick="document.getElementById('notif-bar').style.display='none'" style="background:none;border:none;color:rgba(245,239,230,.28);cursor:pointer;font-size:16px;line-height:1;padding:0 4px;">&times;</button>
       </div>
 
       <!-- Stats -->
@@ -1726,11 +1760,45 @@
       else { toast(`Status → ${cap(status)}`); fetchStats(); }
     };
 
+    /* ── Push Notifications ── */
+    function initNotifBar() {
+      if (!('Notification' in window)) return;
+      if (Notification.permission === 'default') {
+        document.getElementById('notif-bar').style.display = 'flex';
+      }
+    }
+
+    window.enableNotifications = async function() {
+      if (!('Notification' in window)) { toast('Notifications not supported in this browser', 'error'); return; }
+      const result = await Notification.requestPermission();
+      document.getElementById('notif-bar').style.display = 'none';
+      if (result === 'granted') {
+        toast('Notifications enabled — you\'ll be alerted for new orders');
+      } else {
+        toast('Notifications blocked — enable in browser settings', 'error');
+      }
+    };
+
+    function sendPushNotif(order) {
+      if (Notification.permission !== 'granted') return;
+      const n = new Notification('🛒 New Order — SaFa Naturals', {
+        body: `#${order.order_number} · ${order.customer_name || 'Customer'} · ৳${order.total_amount?.toLocaleString('en') || '?'}`,
+        icon: '/favicon.png',
+        badge: '/favicon.png',
+        tag: `order-${order.id}`,
+        requireInteraction: false,
+      });
+      n.onclick = () => { window.focus(); n.close(); };
+      setTimeout(() => n.close(), 8000);
+    }
+
     /* ── Realtime subscription ── */
     function startRealtime() {
+      initNotifBar();
       S.realtimeSub = supabase.channel('orders-live')
         .on('postgres_changes', { event:'INSERT', schema:'public', table:'orders' }, payload => {
           toast(`New order: #${payload.new.order_number}`, 'info');
+          sendPushNotif(payload.new);
           fetchOrders();
           fetchStats();
         })
@@ -2840,6 +2908,123 @@
       });
       link.click();
       toast(`Exported ${_allCustomers.length} customers`);
+    };
+
+    /* ── Sales Report PDF ── */
+    window.generateSalesReport = async function() {
+      toast('Generating PDF report…', 'info');
+      try {
+        const now   = new Date();
+        const y     = now.getFullYear();
+        const m     = now.getMonth(); // 0-indexed — report is for last complete month
+        const from  = new Date(y, m - 1, 1).toISOString().slice(0, 10);
+        const to    = new Date(y, m, 0).toISOString().slice(0, 10);
+        const monthName = new Date(y, m - 1, 1).toLocaleString('en-GB', { month: 'long', year: 'numeric' });
+
+        const { data: orders, error } = await supabase
+          .from('orders')
+          .select('order_number,customer_name,customer_phone,total_amount,status,created_at,items')
+          .gte('created_at', from + 'T00:00:00')
+          .lte('created_at', to   + 'T23:59:59')
+          .neq('status', 'cancelled')
+          .order('created_at', { ascending: true });
+
+        if (error) throw error;
+        if (!orders?.length) { toast('No orders found for last month', 'error'); return; }
+
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+        const totalRev = orders.reduce((s, o) => s + (o.total_amount || 0), 0);
+        const avgOrder = Math.round(totalRev / orders.length);
+
+        /* Header */
+        doc.setFillColor(6, 13, 9);
+        doc.rect(0, 0, 210, 38, 'F');
+        doc.setTextColor(245, 239, 230);
+        doc.setFontSize(22); doc.setFont('helvetica', 'bold');
+        doc.text('SaFa Naturals', 14, 16);
+        doc.setFontSize(9); doc.setFont('helvetica', 'normal');
+        doc.setTextColor(196, 154, 60);
+        doc.text('ORGANIC MUSHROOM FARM — SIRAJGANJ', 14, 23);
+        doc.setTextColor(245, 239, 230);
+        doc.setFontSize(12); doc.setFont('helvetica', 'bold');
+        doc.text(`Sales Report · ${monthName}`, 14, 33);
+        doc.setFontSize(8); doc.setFont('helvetica', 'normal');
+        doc.setTextColor(180, 180, 180);
+        doc.text(`Generated: ${now.toLocaleString('en-GB')}`, 150, 33);
+
+        /* KPI boxes */
+        const kpis = [
+          { label: 'Total Orders', value: String(orders.length) },
+          { label: 'Total Revenue', value: `BDT ${totalRev.toLocaleString('en')}` },
+          { label: 'Avg Order Value', value: `BDT ${avgOrder.toLocaleString('en')}` },
+        ];
+        kpis.forEach((k, i) => {
+          const x = 14 + i * 62;
+          doc.setFillColor(20, 35, 25);
+          doc.roundedRect(x, 44, 58, 20, 2, 2, 'F');
+          doc.setTextColor(196, 154, 60);
+          doc.setFontSize(7); doc.setFont('helvetica', 'bold');
+          doc.text(k.label.toUpperCase(), x + 4, 51);
+          doc.setTextColor(245, 239, 230);
+          doc.setFontSize(11); doc.setFont('helvetica', 'bold');
+          doc.text(k.value, x + 4, 60);
+        });
+
+        /* Status breakdown */
+        const statusMap = {};
+        orders.forEach(o => { statusMap[o.status] = (statusMap[o.status] || 0) + 1; });
+        let sx = 14 + 3 * 62;
+        const statColors = { delivered:[95,207,128], processing:[196,154,60], pending:[180,180,180] };
+        Object.entries(statusMap).forEach(([s, cnt]) => {
+          if (sx + 38 > 200) return;
+          const col = statColors[s] || [150,150,150];
+          doc.setFillColor(...col.map(v => v * 0.15 + 10));
+          doc.roundedRect(sx, 44, 36, 20, 2, 2, 'F');
+          doc.setTextColor(...col);
+          doc.setFontSize(7); doc.setFont('helvetica', 'bold');
+          doc.text(s.toUpperCase(), sx + 3, 51);
+          doc.setFontSize(13); doc.setFont('helvetica', 'bold');
+          doc.text(String(cnt), sx + 3, 60);
+          sx += 38;
+        });
+
+        /* Table */
+        doc.autoTable({
+          startY: 70,
+          head: [['#', 'Order No.', 'Customer', 'Phone', 'Amount (BDT)', 'Status', 'Date']],
+          body: orders.map((o, i) => [
+            i + 1,
+            o.order_number || '—',
+            (o.customer_name || '—').slice(0, 22),
+            o.customer_phone || '—',
+            (o.total_amount || 0).toLocaleString('en'),
+            (o.status || 'pending').toUpperCase(),
+            new Date(o.created_at).toLocaleDateString('en-GB'),
+          ]),
+          styles: { fontSize: 8, cellPadding: 3, textColor: [220, 210, 195] },
+          headStyles: { fillColor: [14, 26, 19], textColor: [196, 154, 60], fontSize: 8, fontStyle: 'bold' },
+          alternateRowStyles: { fillColor: [12, 22, 15] },
+          bodyStyles: { fillColor: [8, 16, 10] },
+          columnStyles: { 0:{cellWidth:8}, 1:{cellWidth:22}, 4:{halign:'right'}, 5:{cellWidth:22} },
+          margin: { left: 14, right: 14 },
+        });
+
+        /* Footer */
+        const pgs = doc.internal.getNumberOfPages();
+        for (let i = 1; i <= pgs; i++) {
+          doc.setPage(i);
+          doc.setFontSize(7); doc.setTextColor(100, 100, 100); doc.setFont('helvetica', 'normal');
+          doc.text(`SaFa Naturals · Confidential · Page ${i} of ${pgs}`, 14, 290);
+        }
+
+        doc.save(`SaFa_Sales_Report_${monthName.replace(' ','_')}.pdf`);
+        toast(`PDF saved — ${orders.length} orders, BDT ${totalRev.toLocaleString('en')}`);
+      } catch (err) {
+        console.error(err);
+        toast('PDF generation failed: ' + err.message, 'error');
+      }
     };
 
     /* ── Init ── */
