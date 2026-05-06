@@ -951,8 +951,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--g900);color:var(--c);min-
 );
 ALTER TABLE farm_daily_logs ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "admin_only" ON farm_daily_logs FOR ALL TO authenticated
-  USING (auth.jwt() ->> 'email' = ANY(ARRAY['mushroombangladesh.info@gmail.com','quazishab@gmail.com']))
-  WITH CHECK (auth.jwt() ->> 'email' = ANY(ARRAY['mushroombangladesh.info@gmail.com','quazishab@gmail.com']));</pre>
+  USING (auth.jwt() ->> 'email' = ANY(ARRAY['mushroombangladesh.info@gmail.com','quazishaab@gmail.com']))
+  WITH CHECK (auth.jwt() ->> 'email' = ANY(ARRAY['mushroombangladesh.info@gmail.com','quazishaab@gmail.com']));</pre>
 
 <!-- ══ SUPABASE SQL SCHEMA REFERENCE (run in Supabase SQL editor) ══
 CREATE TABLE farm_daily_logs (
@@ -1001,8 +1001,8 @@ ALTER TABLE farm_daily_logs ENABLE ROW LEVEL SECURITY;
 -- Replace the broad policy with this admin-only version:
 -- DROP POLICY IF EXISTS "admin_all" ON farm_daily_logs;
 CREATE POLICY "admin_only" ON farm_daily_logs FOR ALL TO authenticated
-  USING (auth.jwt() ->> 'email' = ANY(ARRAY['mushroombangladesh.info@gmail.com','quazishab@gmail.com']))
-  WITH CHECK (auth.jwt() ->> 'email' = ANY(ARRAY['mushroombangladesh.info@gmail.com','quazishab@gmail.com']));
+  USING (auth.jwt() ->> 'email' = ANY(ARRAY['mushroombangladesh.info@gmail.com','quazishaab@gmail.com']))
+  WITH CHECK (auth.jwt() ->> 'email' = ANY(ARRAY['mushroombangladesh.info@gmail.com','quazishaab@gmail.com']));
 -->
 
 <script type="module">
