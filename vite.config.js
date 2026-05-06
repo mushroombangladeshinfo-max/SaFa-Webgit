@@ -13,7 +13,8 @@ export default defineConfig({
         checkout:  './checkout.html',
         account:   './account.html',
         track:     './track.html',
-        quickLog:  './quick-log.html',
+        quickLog:      './quick-log.html',
+        farmAnalytics: './farm-analytics.html',
       }
     }
   }
