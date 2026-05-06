@@ -2,7 +2,7 @@ import { supabase } from './supabase.js';
 
 const ADMIN_EMAILS = [
   'mushroombangladesh.info@gmail.com',
-  'quazishab@gmail.com',
+  'quazishaab@gmail.com',
 ];
 
 /** Checks auth state, updates nav avatar pill, and shows admin link for master accounts. */

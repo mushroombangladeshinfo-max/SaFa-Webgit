@@ -14,7 +14,7 @@
 
 export const ADMIN_EMAILS = [
   'mushroombangladesh.info@gmail.com',
-  'quazishab@gmail.com',
+  'quazishaab@gmail.com',
 ];
 
 /**

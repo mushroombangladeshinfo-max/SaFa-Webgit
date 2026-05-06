@@ -306,7 +306,7 @@
             <span class="pl-badge red">MOST POPULAR</span>
           </div>
         <img src="SaFa Fresh Oyster Mushroom.png"
-               alt="Fresh Oyster Mushrooms">
+               alt="Fresh Oyster Mushrooms" loading="lazy" width="600" height="600">
         </a>
         <div class="pl-info">
           <div class="pl-tags">
@@ -349,7 +349,7 @@
             <span class="pl-badge gold">LONG SHELF LIFE</span>
           </div>
         <img src="SaFa Dried Oyster Mushroom.png"
-               alt="Dried Oyster Mushroom">
+               alt="Dried Oyster Mushroom" loading="lazy" width="600" height="600">
         </a>
         <div class="pl-info">
           <div class="pl-tags">
@@ -392,7 +392,7 @@
             <span class="pl-badge gold">SUPERFOOD</span>
           </div>
         <img src="SaFa Oyster Mushroom Powder.png"
-               alt="Oyster Mushroom Powder">
+               alt="Oyster Mushroom Powder" loading="lazy" width="600" height="600">
         </a>
         <div class="pl-info">
           <div class="pl-tags">
@@ -437,7 +437,7 @@
           </div>
           <img src="SaFa Fresh Button Mushroom.png"
                alt="Premium Button Mushroom Coming Soon"
-               class="pl-img-dimmed">
+               class="pl-img-dimmed" loading="lazy" width="600" height="600">
         </div>
         <div class="pl-info">
           <div class="pl-tags">
@@ -456,8 +456,9 @@
           </div>
           <div class="pl-unit">250g Pack</div>
 
-          <!-- No add-to-cart — links to footer newsletter signup -->
-          <a href="#footer" class="btn-gold btn-notify">NOTIFY ME</a>
+          <!-- No add-to-cart — links to WhatsApp notify -->
+          <a href="https://wa.me/8801970099378?text=Button%20Mushroom%20launch%20%E2%80%94%20%E0%A6%86%E0%A6%AE%E0%A6%BE%E0%A6%95%E0%A7%87%20%E0%A6%86%E0%A6%97%E0%A7%87%20%E0%A6%9C%E0%A6%BE%E0%A6%A8%E0%A6%BE%E0%A6%AC%E0%A7%87%E0%A6%A8"
+             class="btn-gold btn-notify" target="_blank" rel="noopener noreferrer">NOTIFY ME</a>
         </div>
       </div>
 
@@ -772,7 +773,7 @@
             </div>
             <h3 class="rp-title">মাশরুম —<br>তিনটি রূপে</h3>
             <ul class="rp-features">
-              <li>তাজা অয়েস্টার · ৪৮ ঘণ্টায় ডেলিভারি</li>
+              <li>তাজা অয়েস্টার · ২৪–৪৮ ঘণ্টায় ডেলিভারি</li>
               <li>শুকনো মাশরুম · ৬ মাস সংরক্ষণযোগ্য</li>
               <li>মাশরুম পাউডার · দৈনিক পুষ্টির সহজ সমাধান</li>
             </ul>
@@ -1116,7 +1117,7 @@
             class="f-map-iframe"
             allowfullscreen=""
             loading="lazy"
-            referrerpolicy="no-referrer"
+
             title="SaFa Naturals — Sirajganj, Bangladesh">
           </iframe>
         </div>
@@ -1252,54 +1253,7 @@
   ════════════════════════════════════════════════════ -->
   <script type="module" src="/src/main.js"></script>
 
-  <!-- ════════════════════════════════════════════════════
-       INVENTORY STATUS SCRIPT
-       Fetches stock levels and updates product cards.
-  ════════════════════════════════════════════════════ -->
-  <script type="module">
-    import { supabase } from '/src/supabase.js';
-
-    async function updateStockStatus() {
-      const { data: products, error } = await supabase
-        .from('products')
-        .select('id, inventory_count');
-
-      if (error) {
-        console.error("Error fetching product stock:", error);
-        return;
-      }
-
-      const productCards = document.querySelectorAll('.pl-card[data-id]');
-
-      productCards.forEach(card => {
-        const productId = card.dataset.id;
-        if (!productId) return;
-
-        const product = products.find(p => p.id === productId);
-        if (product && product.inventory_count <= 0) {
-          const btn = card.querySelector('.add-to-cart-btn');
-          const stockEl = card.querySelector('.pl-stock');
-
-          if (btn) {
-            btn.classList.remove('add-to-cart-btn');
-            btn.textContent = 'Notify Me';
-            btn.onclick = () => {
-              window.location.href = `mailto:mushroombangladesh.info@gmail.com?subject=Notify Me: Out of Stock Inquiry for ${btn.dataset.name}`;
-            };
-          }
-          if (stockEl) {
-            stockEl.textContent = 'Out of Stock';
-            stockEl.style.color = 'var(--t)';
-          }
-        }
-      });
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-      // A small delay to ensure other scripts have run
-      setTimeout(updateStockStatus, 150);
-    });
-  </script>
+  <!-- Stock status handled by syncProductPrices() in src/products.js -->
 
   <!-- ── Back to top button ── -->
   <button type="button" class="back-to-top" id="backToTop" aria-label="উপরে ফিরে যান">
@@ -1312,6 +1266,21 @@
 
   <!-- ── FAQ accordion + back-to-top ── -->
   <script>
+    /* Newsletter signup — sends email to WhatsApp since no email backend */
+    document.querySelector('.f-join')?.addEventListener('click', function() {
+      var emailEl = document.querySelector('.f-email');
+      var email   = emailEl ? emailEl.value.trim() : '';
+      if (!email || !email.includes('@')) {
+        if (emailEl) { emailEl.style.outline = '2px solid var(--tl)'; setTimeout(function(){ emailEl.style.outline=''; }, 1800); }
+        return;
+      }
+      var msg = encodeURIComponent('নিউজলেটারে সাবস্ক্রাইব করতে চাই। ইমেইল: ' + email);
+      window.open('https://wa.me/8801970099378?text=' + msg, '_blank', 'noopener');
+      emailEl.value = '';
+      emailEl.placeholder = 'ধন্যবাদ! আপডেট পাবেন।';
+      setTimeout(function(){ emailEl.placeholder = 'আপনার ইমেইল দিন'; }, 4000);
+    });
+
     /* FAQ accordion */
     document.querySelectorAll('.faq-item').forEach(function(item) {
       var btn = item.querySelector('.faq-toggle');
