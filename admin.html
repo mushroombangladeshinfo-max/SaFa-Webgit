@@ -1727,7 +1727,11 @@
             </a>
             <button type="button" class="f-action-btn" onclick="printReceipt('${o.id}')">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-              Print Receipt
+              Print
+            </button>
+            <button type="button" class="f-action-btn" onclick="downloadReceipt('${o.id}')">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Download PDF
             </button>
             ${o.tracking_code
               ? `<span class="od-tracking-badge">
@@ -1968,6 +1972,133 @@
       w.document.close();
       w.focus();
       setTimeout(()=>{ w.print(); w.close(); }, 300);
+    };
+
+    /* ════════════════ RECEIPT PDF ════════════════ */
+    window.downloadReceipt = function(orderId) {
+      const o = S.orders.find(x => x.id === orderId);
+      if (!o) { toast('Order not found', 'error'); return; }
+
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: [80, 220] }); // 80mm thermal width, auto height
+      const W = 80;
+      let y = 0;
+
+      /* ─── helpers ─── */
+      const line  = (x1, y1, x2, y2, w = 0.2) => { doc.setLineWidth(w); doc.line(x1, y1, x2, y2); };
+      const dline = (yy) => { doc.setLineDash([1, 0.8]); line(4, yy, W - 4, yy, 0.15); doc.setLineDash([]); };
+      const ctext = (txt, yy, size = 8, style = 'normal', color = [30, 30, 30]) => {
+        doc.setFontSize(size); doc.setFont('helvetica', style); doc.setTextColor(...color);
+        doc.text(txt, W / 2, yy, { align: 'center' });
+      };
+      const ltext = (txt, yy, size = 8, style = 'normal', color = [30, 30, 30]) => {
+        doc.setFontSize(size); doc.setFont('helvetica', style); doc.setTextColor(...color);
+        doc.text(txt, 4, yy);
+      };
+      const rtext = (txt, yy, size = 8, style = 'normal', color = [30, 30, 30]) => {
+        doc.setFontSize(size); doc.setFont('helvetica', style); doc.setTextColor(...color);
+        doc.text(txt, W - 4, yy, { align: 'right' });
+      };
+      const row2  = (left, right, yy, lBold = false, rBold = false, size = 7.5) => {
+        ltext(left,  yy, size, lBold ? 'bold' : 'normal');
+        rtext(right, yy, size, rBold ? 'bold' : 'normal');
+      };
+
+      /* ─── Header ─── */
+      y += 8;
+      ctext('SaFa Naturals', y, 14, 'bold', [20, 60, 30]);
+      y += 5;
+      ctext('Organic Mushroom Farm · Sirajganj', y, 7, 'normal', [100, 100, 100]);
+      y += 4;
+      ctext('safa.naturals@gmail.com · +8801970099378', y, 6.5, 'normal', [130, 130, 130]);
+      y += 5;
+      line(4, y, W - 4, y, 0.4);
+      y += 5;
+
+      /* ─── Receipt meta ─── */
+      ctext('ORDER RECEIPT', y, 9, 'bold', [20, 60, 30]);
+      y += 5;
+      row2('Order No.', `#${o.order_number}`, y, false, true);
+      y += 4.5;
+      row2('Date', new Date(o.created_at).toLocaleString('en-GB', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }), y);
+      y += 4.5;
+      row2('Status', (o.status || 'pending').toUpperCase(), y, false, true, 7.5);
+      y += 5;
+      dline(y); y += 5;
+
+      /* ─── Customer ─── */
+      ltext('CUSTOMER', y, 7, 'bold', [100, 100, 100]); y += 4;
+      ltext(o.customer_name || '—', y, 8, 'bold'); y += 4.5;
+      ltext(o.customer_phone || '—', y, 7.5); y += 4;
+
+      const addr = [o.full_address, o.thana, o.district].filter(Boolean).join(', ');
+      const addrLines = doc.splitTextToSize(addr, W - 8);
+      doc.setFontSize(7); doc.setFont('helvetica', 'normal'); doc.setTextColor(60, 60, 60);
+      doc.text(addrLines, 4, y);
+      y += addrLines.length * 3.8;
+
+      if (o.special_notes) {
+        y += 2;
+        doc.setFontSize(7); doc.setFont('helvetica', 'italic'); doc.setTextColor(120, 120, 120);
+        const noteLines = doc.splitTextToSize(`Note: ${o.special_notes}`, W - 8);
+        doc.text(noteLines, 4, y);
+        y += noteLines.length * 3.8;
+      }
+      y += 3; dline(y); y += 5;
+
+      /* ─── Items ─── */
+      ltext('ITEMS', y, 7, 'bold', [100, 100, 100]); y += 4;
+      (o.items || []).forEach(item => {
+        const name  = (item.name || 'Item').slice(0, 30);
+        const qty   = item.qty || 1;
+        const price = item.price || 0;
+        const total = `BDT ${(qty * price).toLocaleString('en')}`;
+        ltext(name, y, 7.5, 'normal'); y += 4;
+        ltext(`  ${qty} × BDT ${price.toLocaleString('en')}`, y, 7, 'normal', [100, 100, 100]);
+        rtext(total, y, 7.5, 'normal');
+        y += 4.5;
+      });
+      y += 1; dline(y); y += 5;
+
+      /* ─── Totals ─── */
+      if (o.subtotal && o.subtotal !== o.total_amount) {
+        row2('Subtotal', `BDT ${(o.subtotal || 0).toLocaleString('en')}`, y); y += 4.5;
+      }
+      if (o.discount_amount > 0) {
+        row2(`Discount${o.coupon_code ? ` (${o.coupon_code})` : ''}`, `- BDT ${o.discount_amount.toLocaleString('en')}`, y, false, false, 7.5);
+        y += 4.5;
+      }
+      const delivery = o.delivery_fee === 0 ? 'FREE' : `BDT ${(o.delivery_fee || 0).toLocaleString('en')}`;
+      row2('Delivery', delivery, y); y += 4.5;
+
+      line(4, y, W - 4, y, 0.4); y += 5;
+      row2('TOTAL', `BDT ${(o.total_amount || 0).toLocaleString('en')}`, y, true, true, 10);
+      y += 4.5;
+      row2('Payment', 'Cash on Delivery', y, false, false, 7);
+      y += 6; dline(y); y += 6;
+
+      /* ─── Order number barcode-style ─── */
+      ctext(String(o.order_number).padStart(8, '0'), y, 14, 'bold', [20, 20, 20]);
+      y += 3.5;
+      ctext('KEEP THIS FOR YOUR RECORDS', y, 6, 'normal', [150, 150, 150]);
+      y += 6; dline(y); y += 5;
+
+      /* ─── Footer ─── */
+      ctext('ধন্যবাদ আপনার অর্ডারের জন্য!', y, 8, 'bold', [20, 60, 30]);
+      y += 4.5;
+      ctext('Thank you for choosing SaFa Naturals.', y, 7, 'normal', [80, 80, 80]);
+      y += 3.5;
+      ctext('100% Organic · Sirajganj, Bangladesh', y, 6.5, 'normal', [130, 130, 130]);
+      y += 6;
+
+      /* ─── Resize page to content ─── */
+      const pages = doc.internal.getNumberOfPages();
+      for (let p = 1; p <= pages; p++) {
+        doc.setPage(p);
+      }
+
+      doc.save(`SaFa_Receipt_${o.order_number}.pdf`);
+      toast(`Receipt downloaded — #${o.order_number}`);
     };
 
     /* ════════════════ STEADFAST COURIER ════════════════ */
