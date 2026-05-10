@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 
 export default defineConfig({
   build: {
+    target: 'esnext',
     rollupOptions: {
       input: {
         main:      './index.html',
@@ -15,6 +16,10 @@ export default defineConfig({
         track:     './track.html',
         quickLog:      './quick-log.html',
         farmAnalytics: './farm-analytics.html',
+        expenses:      './expenses.html',
+        pipeline:      './pipeline.html',
+        customers:     './customers.html',
+        products:      './products.html',
       }
     }
   }

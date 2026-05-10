@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Customers — SaFa Naturals Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;}
+    :root{--bg:#060d09;--bg2:#0d1f12;--bg3:#122018;--border:rgba(255,255,255,.07);--c:#f5efe6;--cm:rgba(245,239,230,.6);--cl:rgba(245,239,230,.35);--al:#c49a3c;--green:#5fcf80;--red:#e05a2b;}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--c);min-height:100vh;margin:0;-webkit-font-smoothing:antialiased;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes expand{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+
+    /* ── Page ── */
+    .page{max-width:1280px;margin:0 auto;padding:28px 24px 64px;animation:fadeUp .3s ease;}
+
+    /* ── Header ── */
+    .page-header{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px;}
+    .page-title{font-family:'Syne',sans-serif;font-size:24px;font-weight:700;color:var(--c);margin:0;}
+    .page-title em{font-style:italic;color:var(--al);}
+
+    /* ── Stat strip ── */
+    .stat-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;}
+    @media(max-width:700px){.stat-strip{grid-template-columns:repeat(2,1fr);}}
+    .stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px 18px;}
+    .stat-lbl{font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--cl);margin-bottom:6px;}
+    .stat-val{font-family:'DM Mono',monospace;font-size:22px;font-weight:500;color:var(--c);}
+    .stat-val.green{color:var(--green);}
+
+    /* ── Toolbar ── */
+    .toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:18px;}
+    .f-search{background:var(--bg2);border:1px solid var(--border);border-radius:6px;color:var(--c);font-family:'DM Sans',sans-serif;font-size:13px;padding:9px 13px;outline:none;min-width:220px;}
+    .f-search:focus{border-color:rgba(196,154,60,.4);}
+    .f-select{background:var(--bg2);border:1px solid var(--border);border-radius:6px;color:var(--c);font-family:'DM Sans',sans-serif;font-size:13px;padding:9px 12px;outline:none;cursor:pointer;}
+    .f-action-btn{font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:9px 16px;border-radius:5px;cursor:pointer;transition:all .2s;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.03);color:rgba(245,239,230,.65);display:inline-flex;align-items:center;gap:6px;}
+    .f-action-btn:hover{border-color:rgba(255,255,255,.25);color:var(--c);background:rgba(255,255,255,.06);}
+    .f-action-btn.green-btn{color:var(--green);border-color:rgba(95,207,128,.25);background:rgba(95,207,128,.05);}
+    .f-action-btn.green-btn:hover{background:rgba(95,207,128,.12);border-color:rgba(95,207,128,.5);}
+    .result-count{font-size:12px;color:var(--cl);margin-left:auto;}
+
+    /* ── Table ── */
+    .table-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+    .table-scroll{overflow-x:auto;}
+    table{width:100%;border-collapse:collapse;}
+    th{font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--cl);padding:11px 14px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap;}
+    td{padding:12px 14px;font-size:13px;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:middle;}
+    tr:last-child td{border-bottom:none;}
+    tr.order-row{cursor:pointer;}
+    tr.order-row:hover td{background:rgba(255,255,255,.025);}
+    tr.order-row.expanded td{background:rgba(196,154,60,.04);}
+    .td-chevron{width:32px;padding:12px 8px 12px 14px;}
+    .expand-chevron{display:block;transition:transform .2s;color:rgba(245,239,230,.3);}
+    .order-row.expanded .expand-chevron{transform:rotate(180deg);}
+    .cell-id{font-weight:500;color:var(--c);}
+    .cell-sub{font-size:11px;color:var(--cl);margin-top:2px;}
+    .cell-phone{font-family:'DM Mono',monospace;font-size:12px;}
+    .cell-spent{font-family:'DM Mono',monospace;font-weight:500;color:var(--al);}
+    .cust-order-count{font-family:'DM Mono',monospace;font-size:14px;font-weight:500;}
+    .cust-repeat-label{font-size:9px;font-family:'Syne',sans-serif;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--green);margin-top:2px;}
+    .status-badge{display:inline-flex;padding:3px 8px;border-radius:4px;font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;}
+    .s-pending{background:rgba(196,154,60,.1);color:var(--al);}
+    .s-confirmed,.s-processing{background:rgba(95,207,128,.1);color:var(--green);}
+    .s-shipped{background:rgba(100,140,255,.1);color:#7ba3ff;}
+    .s-delivered{background:rgba(95,207,128,.15);color:var(--green);}
+    .s-cancelled,.s-returned{background:rgba(224,90,43,.1);color:var(--red);}
+
+    /* ── Customer detail panel ── */
+    .cust-orders-row td{padding:0;border-bottom:1px solid rgba(255,255,255,.05);}
+    .cust-orders-panel{padding:16px 20px 20px;background:rgba(255,255,255,.015);animation:expand .2s ease;}
+    .cust-orders-title{font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--cl);margin-bottom:12px;}
+    .cust-order-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:13px;flex-wrap:wrap;gap:8px;}
+    .cust-order-id{font-family:'DM Mono',monospace;font-size:12px;font-weight:500;color:var(--c);}
+    .cust-order-meta{font-size:11px;color:var(--cl);}
+    .cust-order-total{font-family:'DM Mono',monospace;font-weight:500;color:var(--al);}
+    .cust-wa-wrap{margin-top:14px;}
+
+    /* ── Empty ── */
+    .table-empty{text-align:center;padding:48px 20px;}
+    .table-empty-icon{font-size:32px;margin-bottom:10px;}
+    .table-empty-text{font-size:13px;color:var(--cl);}
+
+    /* ── Toast ── */
+    .toast-stack{position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;gap:8px;}
+    @keyframes toastIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+    .toast{display:flex;align-items:center;gap:10px;padding:12px 18px;border-radius:8px;font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;animation:toastIn .3s ease;box-shadow:0 8px 24px rgba(0,0,0,.4);min-width:200px;}
+    .toast.info{background:#122018;border:1px solid rgba(196,154,60,.3);color:var(--al);}
+    .toast.error{background:#1e0d08;border:1px solid rgba(224,90,43,.3);color:var(--red);}
+  </style>
+  <script type="module" crossorigin src="/assets/customers-DWFmFm96.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="/assets/admin-auth-rHatrkP5.js">
+  <link rel="modulepreload" crossorigin href="/assets/admin-nav-BmaD9ZLf.js">
+</head>
+<body>
+
+  <div class="page">
+    <div class="page-header">
+      <h1 class="page-title">Customer <em>Directory</em></h1>
+      <button class="f-action-btn" id="export-btn">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export CSV
+      </button>
+    </div>
+
+    <!-- Stats -->
+    <div class="stat-strip">
+      <div class="stat-card"><div class="stat-lbl">Total Customers</div><div class="stat-val" id="s-total">—</div></div>
+      <div class="stat-card"><div class="stat-lbl">Repeat Buyers</div><div class="stat-val green" id="s-repeat">—</div></div>
+      <div class="stat-card"><div class="stat-lbl">Total Revenue</div><div class="stat-val" id="s-revenue">—</div></div>
+      <div class="stat-card"><div class="stat-lbl">Avg Customer Value</div><div class="stat-val" id="s-aov">—</div></div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <input type="text" class="f-search" id="search-input" placeholder="Search name, phone or district…">
+      <select class="f-select" id="sort-select">
+        <option value="spent">Highest Spend</option>
+        <option value="orders">Most Orders</option>
+        <option value="recent">Most Recent</option>
+        <option value="name">Name A–Z</option>
+      </select>
+      <select class="f-select" id="type-select">
+        <option value="all">All Customers</option>
+        <option value="repeat">Repeat (2+ orders)</option>
+        <option value="new">New (1 order)</option>
+      </select>
+      <span class="result-count" id="result-count"></span>
+    </div>
+
+    <!-- Table -->
+    <div class="table-wrap">
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th></th>
+              <th>Customer</th>
+              <th>Phone</th>
+              <th>Location</th>
+              <th>Orders</th>
+              <th>Total Spent</th>
+              <th>Last Order</th>
+              <th>Last Status</th>
+            </tr>
+          </thead>
+          <tbody id="cust-tbody">
+            <tr><td colspan="8"><div class="table-empty"><div class="table-empty-icon">⏳</div><p class="table-empty-text">Loading customers…</p></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-stack" id="toast-stack"></div>
+
+</body>
+</html>

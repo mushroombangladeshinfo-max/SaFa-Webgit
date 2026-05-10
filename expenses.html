@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Expenses — SaFa Naturals</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;}
+    :root{--bg:#060d09;--bg2:#0d1f12;--bg3:#122018;--border:rgba(255,255,255,.07);--c:#f5efe6;--cm:rgba(245,239,230,.6);--cl:rgba(245,239,230,.35);--al:#c49a3c;--green:#5fcf80;--red:#e05a2b;}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--c);min-height:100vh;margin:0;-webkit-font-smoothing:antialiased;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* ── Topbar ── */
+    .topbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 28px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+    .tb-left{display:flex;align-items:center;gap:16px;}
+    .tb-back{display:inline-flex;align-items:center;gap:6px;color:var(--cl);text-decoration:none;font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;transition:color .2s;}
+    .tb-back:hover{color:var(--c);}
+    .tb-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--c);}
+    .tb-right{display:flex;align-items:center;gap:8px;}
+
+    /* ── Layout ── */
+    .page{max-width:1200px;margin:0 auto;padding:28px 24px 64px;}
+    .page-header{margin-bottom:24px;}
+    .page-title{font-family:'Syne',sans-serif;font-size:22px;font-weight:700;color:var(--c);margin:0 0 4px;}
+    .page-sub{font-size:12px;color:var(--cl);}
+
+    /* ── Tabs ── */
+    .tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:28px;}
+    .tab-btn{padding:10px 20px;background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-1px;font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--cl);cursor:pointer;transition:all .2s;}
+    .tab-btn.active{color:var(--al);border-bottom-color:var(--al);}
+    .tab-panel{display:none;animation:fadeUp .25s ease;}
+    .tab-panel.active{display:block;}
+
+    /* ── KPI cards ── */
+    .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;}
+    @media(max-width:860px){.kpi-grid{grid-template-columns:repeat(2,1fr);}}
+    .kpi{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px 18px;}
+    .kpi-label{font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--cl);margin-bottom:6px;}
+    .kpi-val{font-family:'DM Mono',monospace;font-size:22px;font-weight:500;color:var(--c);}
+    .kpi-val.red{color:var(--red);}
+    .kpi-val.green{color:var(--green);}
+    .kpi-sub{font-size:11px;color:var(--cl);margin-top:4px;}
+
+    /* ── Filter bar ── */
+    .filter-bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:20px;}
+    .filter-select,.filter-input{background:var(--bg2);border:1px solid var(--border);border-radius:6px;color:var(--c);font-family:'DM Sans',sans-serif;font-size:13px;padding:8px 12px;outline:none;}
+    .filter-select:focus,.filter-input:focus{border-color:rgba(196,154,60,.4);}
+    .btn{font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:9px 16px;border-radius:6px;border:1px solid var(--border);background:rgba(255,255,255,.04);color:var(--cl);cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:6px;}
+    .btn:hover{color:var(--c);background:rgba(255,255,255,.08);}
+    .btn.primary{background:rgba(196,154,60,.12);border-color:rgba(196,154,60,.3);color:var(--al);}
+    .btn.primary:hover{background:rgba(196,154,60,.2);border-color:rgba(196,154,60,.5);}
+    .btn.danger{color:var(--red);border-color:rgba(224,90,43,.25);}
+    .btn.danger:hover{background:rgba(224,90,43,.08);}
+
+    /* ── Charts ── */
+    .charts-row{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;margin-bottom:24px;}
+    @media(max-width:760px){.charts-row{grid-template-columns:1fr;}}
+    .chart-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:18px 20px;}
+    .chart-card-title{font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--cl);margin-bottom:14px;}
+    .chart-wrap{position:relative;height:200px;}
+
+    /* ── Table ── */
+    .table-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+    .table-toolbar{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:10px;}
+    .table-title{font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--cl);}
+    table{width:100%;border-collapse:collapse;}
+    th{font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--cl);padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap;}
+    td{padding:11px 14px;font-size:13px;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:middle;}
+    tr:last-child td{border-bottom:none;}
+    tr:hover td{background:rgba(255,255,255,.02);}
+    .cat-badge{display:inline-flex;padding:3px 8px;border-radius:4px;font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;}
+    .cat-spawn{background:rgba(95,207,128,.1);color:var(--green);}
+    .cat-substrate{background:rgba(196,154,60,.1);color:var(--al);}
+    .cat-labor{background:rgba(100,140,255,.1);color:#7ba3ff;}
+    .cat-electricity{background:rgba(255,220,80,.1);color:#ffd84a;}
+    .cat-transport{background:rgba(255,160,80,.1);color:#ffa040;}
+    .cat-packaging{background:rgba(180,100,255,.1);color:#c478ff;}
+    .cat-water{background:rgba(80,200,255,.1);color:#50c8ff;}
+    .cat-other,.cat-equipment,.cat-rent,.cat-repair,.cat-marketing{background:rgba(255,255,255,.06);color:var(--cm);}
+    .empty-state{text-align:center;padding:48px 20px;color:var(--cl);}
+    .empty-icon{font-size:32px;margin-bottom:10px;}
+
+    /* ── Add expense form ── */
+    .form-card{background:var(--bg2);border:1px solid rgba(196,154,60,.2);border-radius:10px;padding:22px 24px;margin-bottom:20px;display:none;animation:fadeUp .2s ease;}
+    .form-card.open{display:block;}
+    .form-title{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--al);margin-bottom:18px;}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+    @media(max-width:640px){.form-grid{grid-template-columns:1fr;}}
+    .form-group{display:flex;flex-direction:column;gap:6px;}
+    .form-group.span2{grid-column:span 2;}
+    .form-group.span3{grid-column:span 3;}
+    label{font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--cl);}
+    input,select,textarea{background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--c);font-family:'DM Sans',sans-serif;font-size:13px;padding:9px 12px;outline:none;width:100%;}
+    input:focus,select:focus,textarea:focus{border-color:rgba(196,154,60,.5);}
+    .form-actions{display:flex;gap:10px;margin-top:16px;}
+
+    /* ── Daily breakdown table ── */
+    .day-cat{font-size:11px;color:var(--cl);}
+    .amount-cell{font-family:'DM Mono',monospace;font-size:13px;text-align:right;}
+    .amount-cell.total{color:var(--red);font-weight:500;}
+    .toast-wrap{position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;gap:8px;}
+    .toast{padding:12px 18px;border-radius:8px;font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;animation:fadeUp .3s ease;}
+    .toast.ok{background:#1a3322;border:1px solid rgba(95,207,128,.3);color:var(--green);}
+    .toast.err{background:#2a1510;border:1px solid rgba(224,90,43,.3);color:var(--red);}
+  </style>
+</head>
+<body>
+
+  <div class="page" style="padding-top:28px;">
+    <div class="page-header">
+      <div class="page-title">Expense <span style="color:var(--al)">Tracker</span></div>
+      <div class="page-sub">Daily farm expenses + one-off capital costs</div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="daily">Daily Farm Expenses</button>
+      <button class="tab-btn" data-tab="oneoff">One-off Expenses</button>
+      <button class="tab-btn" data-tab="summary">P&L Summary</button>
+    </div>
+
+    <!-- ══ TAB: DAILY ══ -->
+    <div class="tab-panel active" id="tab-daily">
+
+      <!-- KPIs -->
+      <div class="kpi-grid">
+        <div class="kpi"><div class="kpi-label">This Month</div><div class="kpi-val red" id="kpi-month">—</div><div class="kpi-sub">Total farm expenses</div></div>
+        <div class="kpi"><div class="kpi-label">This Week</div><div class="kpi-val" id="kpi-week">—</div><div class="kpi-sub">Last 7 days</div></div>
+        <div class="kpi"><div class="kpi-label">Top Category</div><div class="kpi-val" id="kpi-top-cat" style="font-size:16px;">—</div><div class="kpi-sub" id="kpi-top-cat-val"></div></div>
+        <div class="kpi"><div class="kpi-label">Daily Avg</div><div class="kpi-val" id="kpi-avg">—</div><div class="kpi-sub">This month</div></div>
+      </div>
+
+      <!-- Charts -->
+      <div class="charts-row">
+        <div class="chart-card">
+          <div class="chart-card-title">Daily Expense Trend</div>
+          <div class="chart-wrap"><canvas id="chart-trend"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-card-title">By Category</div>
+          <div class="chart-wrap"><canvas id="chart-cat"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Filter -->
+      <div class="filter-bar">
+        <input type="date" class="filter-input" id="daily-from">
+        <input type="date" class="filter-input" id="daily-to">
+        <button class="btn" id="daily-filter-btn">Apply</button>
+        <button class="btn" id="daily-reset-btn">Reset</button>
+      </div>
+
+      <!-- Table -->
+      <div class="table-card">
+        <div class="table-toolbar">
+          <span class="table-title">Daily Log Expenses</span>
+          <span style="font-size:12px;color:var(--cl);" id="daily-count"></span>
+        </div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th style="text-align:right;">Spawn</th>
+                <th style="text-align:right;">Substrate</th>
+                <th style="text-align:right;">Packaging</th>
+                <th style="text-align:right;">Labor</th>
+                <th style="text-align:right;">Electricity</th>
+                <th style="text-align:right;">Transport</th>
+                <th style="text-align:right;">Water</th>
+                <th style="text-align:right;">Other</th>
+                <th style="text-align:right;">Total</th>
+              </tr>
+            </thead>
+            <tbody id="daily-tbody">
+              <tr><td colspan="10"><div class="empty-state"><div class="empty-icon">⏳</div>Loading...</div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ TAB: ONE-OFF ══ -->
+    <div class="tab-panel" id="tab-oneoff">
+
+      <!-- Add form -->
+      <button class="btn primary" id="add-expense-btn" style="margin-bottom:16px;">+ Add Expense</button>
+
+      <div class="form-card" id="add-expense-form">
+        <div class="form-title">Add One-Off Expense</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Date</label>
+            <input type="date" id="oe-date">
+          </div>
+          <div class="form-group">
+            <label>Category</label>
+            <select id="oe-cat">
+              <option value="">Select...</option>
+              <option>Equipment</option>
+              <option>Rent</option>
+              <option>Repair</option>
+              <option>Utilities</option>
+              <option>Marketing</option>
+              <option>Transport</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Amount (৳)</label>
+            <input type="number" id="oe-amount" placeholder="0" min="0">
+          </div>
+          <div class="form-group span2">
+            <label>Description</label>
+            <input type="text" id="oe-desc" placeholder="What was this expense for?">
+          </div>
+          <div class="form-group">
+            <label>Vendor / Supplier</label>
+            <input type="text" id="oe-vendor" placeholder="Optional">
+          </div>
+          <div class="form-group span3">
+            <label>Notes</label>
+            <textarea id="oe-notes" rows="2" placeholder="Any additional notes..."></textarea>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn primary" id="oe-save-btn">Save Expense</button>
+          <button class="btn" id="oe-cancel-btn">Cancel</button>
+        </div>
+      </div>
+
+      <!-- KPIs -->
+      <div class="kpi-grid" style="margin-bottom:20px;">
+        <div class="kpi"><div class="kpi-label">Total This Year</div><div class="kpi-val red" id="oe-total-year">—</div></div>
+        <div class="kpi"><div class="kpi-label">This Month</div><div class="kpi-val" id="oe-total-month">—</div></div>
+        <div class="kpi"><div class="kpi-label">Count</div><div class="kpi-val" id="oe-count">—</div><div class="kpi-sub">Total entries</div></div>
+        <div class="kpi"><div class="kpi-label">Largest</div><div class="kpi-val" id="oe-largest">—</div><div class="kpi-sub" id="oe-largest-desc"></div></div>
+      </div>
+
+      <!-- Table -->
+      <div class="table-card">
+        <div class="table-toolbar">
+          <span class="table-title">One-Off Expenses</span>
+        </div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Category</th>
+                <th>Description</th>
+                <th>Vendor</th>
+                <th style="text-align:right;">Amount</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="oe-tbody">
+              <tr><td colspan="6"><div class="empty-state"><div class="empty-icon">⏳</div>Loading...</div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ TAB: P&L SUMMARY ══ -->
+    <div class="tab-panel" id="tab-summary">
+
+      <div class="filter-bar">
+        <select class="filter-select" id="pl-period">
+          <option value="this_month">This Month</option>
+          <option value="last_month">Last Month</option>
+          <option value="last_3months">Last 3 Months</option>
+          <option value="this_year">This Year</option>
+        </select>
+        <button class="btn" id="pl-load-btn">Load</button>
+      </div>
+
+      <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:24px;">
+        <div class="kpi"><div class="kpi-label">Total Revenue</div><div class="kpi-val green" id="pl-revenue">—</div><div class="kpi-sub">From farm sales</div></div>
+        <div class="kpi"><div class="kpi-label">Total Expenses</div><div class="kpi-val red" id="pl-expenses">—</div><div class="kpi-sub">Daily + one-off</div></div>
+        <div class="kpi"><div class="kpi-label">Net Profit / Loss</div><div class="kpi-val" id="pl-net">—</div><div class="kpi-sub" id="pl-margin"></div></div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-toolbar"><span class="table-title">Expense Breakdown</span></div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead><tr><th>Category</th><th style="text-align:right;">Amount</th><th style="text-align:right;">% of Total</th></tr></thead>
+            <tbody id="pl-tbody">
+              <tr><td colspan="3"><div class="empty-state"><div class="empty-icon">📊</div>Select period and click Load</div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-wrap" id="toast-wrap"></div>
+
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+    import { requireAdmin }  from '/src/admin-auth.js';
+    import { mountAdminNav } from '/src/admin-nav.js';
+
+    const sb = createClient(
+      import.meta.env.VITE_SUPABASE_URL,
+      import.meta.env.VITE_SUPABASE_ANON_KEY
+    );
+
+    /* ── Auth ── */
+    const session = await requireAdmin(sb);
+    if (!session) { window.location.href = 'admin.html'; }
+    const userEmail = session.user.email;
+    mountAdminNav({ page: 'expenses', supabase: sb, email: userEmail });
+
+    /* ── Helpers ── */
+    const fmt  = n => '৳' + (n||0).toLocaleString('en', {minimumFractionDigits:0, maximumFractionDigits:0});
+    const dn   = (r,k) => parseFloat(r?.[k]) || 0;
+    const today = () => new Date().toISOString().slice(0,10);
+    const monthStart = () => { const d=new Date(); d.setDate(1); return d.toISOString().slice(0,10); };
+    const weekStart  = () => { const d=new Date(); d.setDate(d.getDate()-6); return d.toISOString().slice(0,10); };
+
+    const CAT_KEYS = ['ex_spawn','ex_substrate','ex_packaging','ex_labor','ex_electricity','ex_transport','ex_water','ex_other'];
+    const CAT_LABELS = ['Spawn','Substrate','Packaging','Labor','Electricity','Transport','Water','Other'];
+    const CAT_COLORS = ['#5fcf80','#c49a3c','#c478ff','#7ba3ff','#ffd84a','#ffa040','#50c8ff','#aaaaaa'];
+
+    function rowTotal(r) { return CAT_KEYS.reduce((s,k)=>s+dn(r,k),0); }
+
+    function toast(msg, type='ok') {
+      const el = document.createElement('div');
+      el.className = `toast ${type}`;
+      el.textContent = msg;
+      document.getElementById('toast-wrap').appendChild(el);
+      setTimeout(()=>el.remove(), 3500);
+    }
+
+    /* ══ DAILY TAB ══ */
+    let _dailyData = [];
+    let _trendChart, _catChart;
+
+    async function loadDaily(from=monthStart(), to=today()) {
+      document.getElementById('daily-tbody').innerHTML =
+        '<tr><td colspan="10"><div class="empty-state"><div class="empty-icon">⏳</div>Loading...</div></td></tr>';
+
+      const { data, error } = await sb.from('farm_daily_logs')
+        .select(`log_date,${CAT_KEYS.join(',')}`)
+        .gte('log_date', from).lte('log_date', to)
+        .order('log_date', { ascending: false });
+
+      if (error) {
+        document.getElementById('daily-tbody').innerHTML =
+          `<tr><td colspan="10"><div class="empty-state"><div class="empty-icon">⚠️</div>${error.message}</div></td></tr>`;
+        return;
+      }
+
+      _dailyData = data || [];
+      renderDailyKPIs();
+      renderDailyTable();
+      renderDailyCharts(from, to);
+    }
+
+    function renderDailyKPIs() {
+      const monthTotal = _dailyData.reduce((s,r)=>s+rowTotal(r),0);
+      const days = _dailyData.length || 1;
+      document.getElementById('kpi-month').textContent = fmt(monthTotal);
+      document.getElementById('kpi-avg').textContent   = fmt(Math.round(monthTotal/days));
+      document.getElementById('daily-count').textContent = `${_dailyData.length} days`;
+
+      /* Week */
+      const ws = weekStart();
+      const weekRows = _dailyData.filter(r => r.log_date >= ws);
+      document.getElementById('kpi-week').textContent = fmt(weekRows.reduce((s,r)=>s+rowTotal(r),0));
+
+      /* Top category */
+      const catTotals = CAT_KEYS.map((k,i)=>({ label:CAT_LABELS[i], val:_dailyData.reduce((s,r)=>s+dn(r,k),0) }));
+      catTotals.sort((a,b)=>b.val-a.val);
+      document.getElementById('kpi-top-cat').textContent     = catTotals[0]?.label || '—';
+      document.getElementById('kpi-top-cat-val').textContent = fmt(catTotals[0]?.val || 0);
+    }
+
+    function renderDailyTable() {
+      if (!_dailyData.length) {
+        document.getElementById('daily-tbody').innerHTML =
+          '<tr><td colspan="10"><div class="empty-state"><div class="empty-icon">📋</div>No expense logs in this range</div></td></tr>';
+        return;
+      }
+      document.getElementById('daily-tbody').innerHTML = _dailyData.map(r => {
+        const tot = rowTotal(r);
+        return `<tr>
+          <td style="font-family:'DM Mono',monospace;font-size:12px;">${r.log_date}</td>
+          ${CAT_KEYS.map(k=>`<td class="amount-cell">${dn(r,k)>0?fmt(dn(r,k)):'-'}</td>`).join('')}
+          <td class="amount-cell total">${fmt(tot)}</td>
+        </tr>`;
+      }).join('') +
+      `<tr style="background:rgba(255,255,255,.03);">
+        <td style="font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--cl);">TOTAL</td>
+        ${CAT_KEYS.map(k=>`<td class="amount-cell" style="color:var(--al);">${fmt(_dailyData.reduce((s,r)=>s+dn(r,k),0))}</td>`).join('')}
+        <td class="amount-cell total" style="font-size:15px;">${fmt(_dailyData.reduce((s,r)=>s+rowTotal(r),0))}</td>
+      </tr>`;
+    }
+
+    function renderDailyCharts(from, to) {
+      const sorted = [..._dailyData].sort((a,b)=>a.log_date.localeCompare(b.log_date));
+      const labels = sorted.map(r=>r.log_date.slice(5));
+      const vals   = sorted.map(r=>rowTotal(r));
+
+      if (_trendChart) _trendChart.destroy();
+      _trendChart = new Chart(document.getElementById('chart-trend'), {
+        type:'line',
+        data:{ labels, datasets:[{ data:vals, borderColor:'#c49a3c', backgroundColor:'rgba(196,154,60,.08)', fill:true, tension:.3, pointRadius:3, pointBackgroundColor:'#c49a3c' }] },
+        options:{ plugins:{legend:{display:false}}, scales:{ x:{ticks:{color:'#888',font:{size:10}},grid:{color:'rgba(255,255,255,.04)'}}, y:{ticks:{color:'#888',font:{size:10},callback:v=>'৳'+v.toLocaleString()},grid:{color:'rgba(255,255,255,.04)'}} }, responsive:true, maintainAspectRatio:false }
+      });
+
+      const catTotals = CAT_KEYS.map((k,i)=>_dailyData.reduce((s,r)=>s+dn(r,k),0));
+      if (_catChart) _catChart.destroy();
+      _catChart = new Chart(document.getElementById('chart-cat'), {
+        type:'doughnut',
+        data:{ labels:CAT_LABELS, datasets:[{ data:catTotals, backgroundColor:CAT_COLORS, borderWidth:0 }] },
+        options:{ plugins:{legend:{position:'right',labels:{color:'#aaa',font:{size:11},boxWidth:10,padding:8}}}, responsive:true, maintainAspectRatio:false }
+      });
+    }
+
+    document.getElementById('daily-filter-btn').addEventListener('click', () => {
+      const from = document.getElementById('daily-from').value || monthStart();
+      const to   = document.getElementById('daily-to').value   || today();
+      loadDaily(from, to);
+    });
+    document.getElementById('daily-reset-btn').addEventListener('click', () => {
+      document.getElementById('daily-from').value = '';
+      document.getElementById('daily-to').value   = '';
+      loadDaily();
+    });
+
+    /* ══ ONE-OFF TAB ══ */
+    let _oeData = [];
+
+    async function loadOneOff() {
+      const { data, error } = await sb.from('one_off_expenses')
+        .select('*').order('expense_date', { ascending: false });
+      if (error) { toast(error.message, 'err'); return; }
+      _oeData = data || [];
+      renderOEKPIs();
+      renderOETable();
+    }
+
+    function renderOEKPIs() {
+      const yearStart = new Date().getFullYear() + '-01-01';
+      const ms = monthStart();
+      const yearTotal  = _oeData.filter(r=>r.expense_date>=yearStart).reduce((s,r)=>s+(+r.amount||0),0);
+      const monthTotal = _oeData.filter(r=>r.expense_date>=ms).reduce((s,r)=>s+(+r.amount||0),0);
+      const largest    = _oeData.reduce((max,r)=>(+r.amount||0)>(+max.amount||0)?r:max, {amount:0});
+      document.getElementById('oe-total-year').textContent  = fmt(yearTotal);
+      document.getElementById('oe-total-month').textContent = fmt(monthTotal);
+      document.getElementById('oe-count').textContent       = _oeData.length;
+      document.getElementById('oe-largest').textContent     = fmt(+largest.amount||0);
+      document.getElementById('oe-largest-desc').textContent= largest.description||'';
+    }
+
+    function renderOETable() {
+      if (!_oeData.length) {
+        document.getElementById('oe-tbody').innerHTML =
+          '<tr><td colspan="6"><div class="empty-state"><div class="empty-icon">💰</div>No one-off expenses yet</div></td></tr>';
+        return;
+      }
+      document.getElementById('oe-tbody').innerHTML = _oeData.map(r => `
+        <tr>
+          <td style="font-family:'DM Mono',monospace;font-size:12px;">${r.expense_date}</td>
+          <td><span class="cat-badge cat-${(r.category||'other').toLowerCase()}">${r.category||'Other'}</span></td>
+          <td>${r.description||'—'}</td>
+          <td style="color:var(--cl);font-size:12px;">${r.vendor||'—'}</td>
+          <td class="amount-cell total">${fmt(+r.amount||0)}</td>
+          <td><button class="btn danger" onclick="window.deleteOE(${r.id})">Delete</button></td>
+        </tr>`).join('');
+    }
+
+    /* Add expense */
+    document.getElementById('add-expense-btn').addEventListener('click', () => {
+      const f = document.getElementById('add-expense-form');
+      f.classList.toggle('open');
+      document.getElementById('oe-date').value = today();
+    });
+    document.getElementById('oe-cancel-btn').addEventListener('click', () => {
+      document.getElementById('add-expense-form').classList.remove('open');
+    });
+    document.getElementById('oe-save-btn').addEventListener('click', async () => {
+      const cat    = document.getElementById('oe-cat').value;
+      const desc   = document.getElementById('oe-desc').value.trim();
+      const amount = parseFloat(document.getElementById('oe-amount').value);
+      const date   = document.getElementById('oe-date').value || today();
+      if (!cat || !desc || isNaN(amount) || amount <= 0) { toast('Fill in category, description and amount', 'err'); return; }
+      const { error } = await sb.from('one_off_expenses').insert([{
+        expense_date: date,
+        category:    cat,
+        description: desc,
+        amount,
+        vendor:      document.getElementById('oe-vendor').value.trim() || null,
+        notes:       document.getElementById('oe-notes').value.trim()  || null,
+        added_by:    userEmail,
+      }]);
+      if (error) { toast(error.message, 'err'); return; }
+      toast('Expense saved');
+      document.getElementById('add-expense-form').classList.remove('open');
+      ['oe-cat','oe-desc','oe-amount','oe-vendor','oe-notes'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+      loadOneOff();
+    });
+
+    window.deleteOE = async (id) => {
+      if (!confirm('Delete this expense?')) return;
+      const { error } = await sb.from('one_off_expenses').delete().eq('id', id);
+      if (error) { toast(error.message, 'err'); return; }
+      toast('Deleted');
+      loadOneOff();
+    };
+
+    /* ══ P&L SUMMARY ══ */
+    async function loadPL() {
+      const period = document.getElementById('pl-period').value;
+      const now = new Date();
+      let from, to = today();
+
+      if (period === 'this_month')   { from = monthStart(); }
+      else if (period === 'last_month') {
+        const d = new Date(now.getFullYear(), now.getMonth()-1, 1);
+        from = d.toISOString().slice(0,10);
+        to   = new Date(now.getFullYear(), now.getMonth(), 0).toISOString().slice(0,10);
+      }
+      else if (period === 'last_3months') { const d=new Date(); d.setMonth(d.getMonth()-3); from=d.toISOString().slice(0,10); }
+      else { from = now.getFullYear() + '-01-01'; }
+
+      const [{ data: dailyRows }, { data: oeRows }, { data: salesRows }] = await Promise.all([
+        sb.from('farm_daily_logs').select(CAT_KEYS.join(',')).gte('log_date',from).lte('log_date',to),
+        sb.from('one_off_expenses').select('amount,category').gte('expense_date',from).lte('expense_date',to),
+        sb.from('farm_daily_logs').select('s_fresh_kg,s_fresh_price,s_dried_kg,s_dried_price,s_powder_kg,s_powder_price').gte('log_date',from).lte('log_date',to),
+      ]);
+
+      const dailyExpTotal = (dailyRows||[]).reduce((s,r)=>s+rowTotal(r),0);
+      const oeTotal       = (oeRows||[]).reduce((s,r)=>s+(+r.amount||0),0);
+      const totalExp      = dailyExpTotal + oeTotal;
+      const revenue       = (salesRows||[]).reduce((s,r)=>s+dn(r,'s_fresh_kg')*dn(r,'s_fresh_price')+dn(r,'s_dried_kg')*dn(r,'s_dried_price')+dn(r,'s_powder_kg')*dn(r,'s_powder_price'),0);
+      const net           = revenue - totalExp;
+      const margin        = revenue > 0 ? ((net/revenue)*100).toFixed(1) : 0;
+
+      document.getElementById('pl-revenue').textContent  = fmt(revenue);
+      document.getElementById('pl-expenses').textContent = fmt(totalExp);
+      const netEl = document.getElementById('pl-net');
+      netEl.textContent = fmt(net);
+      netEl.className   = 'kpi-val ' + (net >= 0 ? 'green' : 'red');
+      document.getElementById('pl-margin').textContent   = `${margin}% margin`;
+
+      /* Breakdown table */
+      const cats = [
+        ...CAT_KEYS.map((k,i)=>({ label:'Daily: '+CAT_LABELS[i], val:(dailyRows||[]).reduce((s,r)=>s+dn(r,k),0) })),
+        ...Object.entries((oeRows||[]).reduce((m,r)=>{m[r.category]=(m[r.category]||0)+(+r.amount||0);return m;},{})).map(([k,v])=>({ label:'One-off: '+k, val:v })),
+      ].filter(c=>c.val>0).sort((a,b)=>b.val-a.val);
+
+      document.getElementById('pl-tbody').innerHTML = cats.length ? cats.map(c=>`
+        <tr>
+          <td>${c.label}</td>
+          <td class="amount-cell">${fmt(c.val)}</td>
+          <td class="amount-cell" style="color:var(--cl);">${totalExp>0?((c.val/totalExp)*100).toFixed(1):0}%</td>
+        </tr>`).join('') :
+        '<tr><td colspan="3"><div class="empty-state"><div class="empty-icon">📊</div>No data for this period</div></td></tr>';
+    }
+
+    document.getElementById('pl-load-btn').addEventListener('click', loadPL);
+
+    /* ══ TABS ══ */
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('tab-'+btn.dataset.tab).classList.add('active');
+        if (btn.dataset.tab==='oneoff' && !_oeData.length) loadOneOff();
+        if (btn.dataset.tab==='summary') loadPL();
+      });
+    });
+
+    /* ══ CSV EXPORT ══ */
+    document.getElementById('export-btn').addEventListener('click', () => {
+      const active = document.querySelector('.tab-btn.active').dataset.tab;
+      if (active==='daily') {
+        const rows = [['Date',...CAT_LABELS,'Total'],
+          ..._dailyData.map(r=>[r.log_date,...CAT_KEYS.map(k=>dn(r,k)),rowTotal(r)])];
+        downloadCSV(rows, 'daily_expenses');
+      } else if (active==='oneoff') {
+        const rows = [['Date','Category','Description','Vendor','Amount'],
+          ..._oeData.map(r=>[r.expense_date,r.category,`"${r.description}"`,r.vendor||'',r.amount])];
+        downloadCSV(rows, 'oneoff_expenses');
+      }
+    });
+
+    function downloadCSV(rows, name) {
+      const csv = rows.map(r=>r.join(',')).join('\n');
+      const a = Object.assign(document.createElement('a'), { href:'data:text/csv;charset=utf-8,'+encodeURIComponent(csv), download:`safa_${name}_${today()}.csv` });
+      a.click();
+    }
+
+    /* ── Init ── */
+    document.getElementById('daily-from').value = monthStart();
+    document.getElementById('daily-to').value   = today();
+    loadDaily();
+  </script>
+</body>
+</html>

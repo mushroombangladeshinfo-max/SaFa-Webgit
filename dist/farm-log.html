@@ -226,9 +226,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--g900);color:var(--c);min-
 @media(max-width:860px){.fl-sec-pills{display:flex}.fl-mini-sum{display:flex}body{padding-bottom:62px}}
 @media(max-width:640px){.fl-topbar{gap:8px;padding:0 10px}#autosave-text{display:none}.fl-btn{font-size:8px;padding:6px 9px;letter-spacing:.07em}.fl-date-input{font-size:11px;padding:6px 8px}}
 </style>
-  <script type="module" crossorigin src="/assets/farmLog-DWAS5ySv.js"></script>
-  <link rel="modulepreload" crossorigin href="/assets/index-DshXEMtg.js">
-  <link rel="modulepreload" crossorigin href="/assets/admin-auth-CZb-V-WK.js">
+  <script type="module" crossorigin src="/assets/farmLog-CJjy0aOW.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="/assets/index-B-jIxwbw.js">
+  <link rel="modulepreload" crossorigin href="/assets/admin-auth-rHatrkP5.js">
 </head>
 <body>
 
@@ -954,8 +955,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--g900);color:var(--c);min-
 );
 ALTER TABLE farm_daily_logs ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "admin_only" ON farm_daily_logs FOR ALL TO authenticated
-  USING (auth.jwt() ->> 'email' = ANY(ARRAY['mushroombangladesh.info@gmail.com','quazishab@gmail.com']))
-  WITH CHECK (auth.jwt() ->> 'email' = ANY(ARRAY['mushroombangladesh.info@gmail.com','quazishab@gmail.com']));</pre>
+  USING (auth.jwt() ->> 'email' = ANY(ARRAY['mushroombangladesh.info@gmail.com','quazishaab@gmail.com']))
+  WITH CHECK (auth.jwt() ->> 'email' = ANY(ARRAY['mushroombangladesh.info@gmail.com','quazishaab@gmail.com']));</pre>
 
 <!-- ══ SUPABASE SQL SCHEMA REFERENCE (run in Supabase SQL editor) ══
 CREATE TABLE farm_daily_logs (
@@ -1004,8 +1005,8 @@ ALTER TABLE farm_daily_logs ENABLE ROW LEVEL SECURITY;
 -- Replace the broad policy with this admin-only version:
 -- DROP POLICY IF EXISTS "admin_all" ON farm_daily_logs;
 CREATE POLICY "admin_only" ON farm_daily_logs FOR ALL TO authenticated
-  USING (auth.jwt() ->> 'email' = ANY(ARRAY['mushroombangladesh.info@gmail.com','quazishab@gmail.com']))
-  WITH CHECK (auth.jwt() ->> 'email' = ANY(ARRAY['mushroombangladesh.info@gmail.com','quazishab@gmail.com']));
+  USING (auth.jwt() ->> 'email' = ANY(ARRAY['mushroombangladesh.info@gmail.com','quazishaab@gmail.com']))
+  WITH CHECK (auth.jwt() ->> 'email' = ANY(ARRAY['mushroombangladesh.info@gmail.com','quazishaab@gmail.com']));
 -->
 
 </body>

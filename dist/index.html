@@ -173,12 +173,12 @@
     ]
   }
   </script>
-  <script type="module" crossorigin src="/assets/main-Dhgm3OOJ.js"></script>
-  <link rel="modulepreload" crossorigin href="/assets/index-DshXEMtg.js">
-  <link rel="modulepreload" crossorigin href="/assets/supabase-BvQLqbqL.js">
-  <link rel="modulepreload" crossorigin href="/assets/auth-nav-D0a00vHp.js">
-  <link rel="modulepreload" crossorigin href="/assets/main-aDWQmQQy.js">
-  <link rel="stylesheet" crossorigin href="/assets/supabase-B8BD_zhT.css">
+  <script type="module" crossorigin src="/assets/modulepreload-polyfill-B5Qt9EMX.js"></script>
+  <script type="module" crossorigin src="/assets/index-B-jIxwbw.js"></script>
+  <script type="module" crossorigin src="/assets/supabase-CAmyaeuo.js"></script>
+  <script type="module" crossorigin src="/assets/auth-nav-CJWwtIpL.js"></script>
+  <script type="module" crossorigin src="/assets/main-9U0poTqE.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/supabase-C68sSUdL.css">
 </head>
 <body>
 
@@ -310,7 +310,7 @@
             <span class="pl-badge red">MOST POPULAR</span>
           </div>
         <img src="SaFa Fresh Oyster Mushroom.png"
-               alt="Fresh Oyster Mushrooms">
+               alt="Fresh Oyster Mushrooms" loading="lazy" width="600" height="600">
         </a>
         <div class="pl-info">
           <div class="pl-tags">
@@ -353,7 +353,7 @@
             <span class="pl-badge gold">LONG SHELF LIFE</span>
           </div>
         <img src="SaFa Dried Oyster Mushroom.png"
-               alt="Dried Oyster Mushroom">
+               alt="Dried Oyster Mushroom" loading="lazy" width="600" height="600">
         </a>
         <div class="pl-info">
           <div class="pl-tags">
@@ -396,7 +396,7 @@
             <span class="pl-badge gold">SUPERFOOD</span>
           </div>
         <img src="SaFa Oyster Mushroom Powder.png"
-               alt="Oyster Mushroom Powder">
+               alt="Oyster Mushroom Powder" loading="lazy" width="600" height="600">
         </a>
         <div class="pl-info">
           <div class="pl-tags">
@@ -441,7 +441,7 @@
           </div>
           <img src="SaFa Fresh Button Mushroom.png"
                alt="Premium Button Mushroom Coming Soon"
-               class="pl-img-dimmed">
+               class="pl-img-dimmed" loading="lazy" width="600" height="600">
         </div>
         <div class="pl-info">
           <div class="pl-tags">
@@ -460,8 +460,9 @@
           </div>
           <div class="pl-unit">250g Pack</div>
 
-          <!-- No add-to-cart — links to footer newsletter signup -->
-          <a href="#footer" class="btn-gold btn-notify">NOTIFY ME</a>
+          <!-- No add-to-cart — links to WhatsApp notify -->
+          <a href="https://wa.me/8801970099378?text=Button%20Mushroom%20launch%20%E2%80%94%20%E0%A6%86%E0%A6%AE%E0%A6%BE%E0%A6%95%E0%A7%87%20%E0%A6%86%E0%A6%97%E0%A7%87%20%E0%A6%9C%E0%A6%BE%E0%A6%A8%E0%A6%BE%E0%A6%AC%E0%A7%87%E0%A6%A8"
+             class="btn-gold btn-notify" target="_blank" rel="noopener noreferrer">NOTIFY ME</a>
         </div>
       </div>
 
@@ -776,7 +777,7 @@
             </div>
             <h3 class="rp-title">মাশরুম —<br>তিনটি রূপে</h3>
             <ul class="rp-features">
-              <li>তাজা অয়েস্টার · ৪৮ ঘণ্টায় ডেলিভারি</li>
+              <li>তাজা অয়েস্টার · ২৪–৪৮ ঘণ্টায় ডেলিভারি</li>
               <li>শুকনো মাশরুম · ৬ মাস সংরক্ষণযোগ্য</li>
               <li>মাশরুম পাউডার · দৈনিক পুষ্টির সহজ সমাধান</li>
             </ul>
@@ -1120,7 +1121,7 @@
             class="f-map-iframe"
             allowfullscreen=""
             loading="lazy"
-            referrerpolicy="no-referrer"
+
             title="SaFa Naturals — Sirajganj, Bangladesh">
           </iframe>
         </div>
@@ -1255,10 +1256,7 @@
        Do NOT include both — remove script.js from htdocs.
   ════════════════════════════════════════════════════ -->
 
-  <!-- ════════════════════════════════════════════════════
-       INVENTORY STATUS SCRIPT
-       Fetches stock levels and updates product cards.
-  ════════════════════════════════════════════════════ -->
+  <!-- Stock status handled by syncProductPrices() in src/products.js -->
 
   <!-- ── Back to top button ── -->
   <button type="button" class="back-to-top" id="backToTop" aria-label="উপরে ফিরে যান">
@@ -1271,6 +1269,21 @@
 
   <!-- ── FAQ accordion + back-to-top ── -->
   <script>
+    /* Newsletter signup — sends email to WhatsApp since no email backend */
+    document.querySelector('.f-join')?.addEventListener('click', function() {
+      var emailEl = document.querySelector('.f-email');
+      var email   = emailEl ? emailEl.value.trim() : '';
+      if (!email || !email.includes('@')) {
+        if (emailEl) { emailEl.style.outline = '2px solid var(--tl)'; setTimeout(function(){ emailEl.style.outline=''; }, 1800); }
+        return;
+      }
+      var msg = encodeURIComponent('নিউজলেটারে সাবস্ক্রাইব করতে চাই। ইমেইল: ' + email);
+      window.open('https://wa.me/8801970099378?text=' + msg, '_blank', 'noopener');
+      emailEl.value = '';
+      emailEl.placeholder = 'ধন্যবাদ! আপডেট পাবেন।';
+      setTimeout(function(){ emailEl.placeholder = 'আপনার ইমেইল দিন'; }, 4000);
+    });
+
     /* FAQ accordion */
     document.querySelectorAll('.faq-item').forEach(function(item) {
       var btn = item.querySelector('.faq-toggle');

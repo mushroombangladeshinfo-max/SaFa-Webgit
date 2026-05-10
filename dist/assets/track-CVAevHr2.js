@@ -1,4 +1,4 @@
-import{c as f}from"./index-DshXEMtg.js";const b=f("https://uiwmerejtrdrykqpumdu.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVpd21lcmVqdHJkcnlrcXB1bWR1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3NzQ1MjIsImV4cCI6MjA5MTM1MDUyMn0.bF1GPeGFhAphNFG-E6MfZCrZihT3iTeCFIDi6g3w0n0"),w=[{key:"pending",label:`অর্ডার
+import"./modulepreload-polyfill-B5Qt9EMX.js";import{c as f}from"./index-B-jIxwbw.js";const b=f("https://uiwmerejtrdrykqpumdu.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVpd21lcmVqdHJkcnlrcXB1bWR1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3NzQ1MjIsImV4cCI6MjA5MTM1MDUyMn0.bF1GPeGFhAphNFG-E6MfZCrZihT3iTeCFIDi6g3w0n0"),w=[{key:"pending",label:`অর্ডার
 দেওয়া হয়েছে`,icon:y()},{key:"confirmed",label:`নিশ্চিত
 হয়েছে`,icon:I()},{key:"processing",label:`প্রস্তুত
 হচ্ছে`,icon:M()},{key:"shipped",label:`পাঠানো

@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Products & Coupons — SaFa Naturals Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;}
+    :root{--bg:#060d09;--bg2:#0d1f12;--bg3:#122018;--border:rgba(255,255,255,.07);--c:#f5efe6;--cm:rgba(245,239,230,.6);--cl:rgba(245,239,230,.35);--al:#c49a3c;--green:#5fcf80;--red:#e05a2b;}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--c);min-height:100vh;margin:0;-webkit-font-smoothing:antialiased;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes expand{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* ── Page ── */
+    .page{max-width:1280px;margin:0 auto;padding:28px 24px 64px;animation:fadeUp .3s ease;}
+    .page-title{font-family:'Syne',sans-serif;font-size:24px;font-weight:700;color:var(--c);margin:0 0 4px;}
+    .page-title em{font-style:italic;color:var(--al);}
+
+    /* ── Tabs ── */
+    .tab-row{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:28px;margin-top:20px;}
+    .tab-btn{font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:12px 22px;background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-1px;cursor:pointer;color:var(--cl);display:flex;align-items:center;gap:8px;transition:color .2s,border-color .2s;}
+    .tab-btn:hover{color:rgba(245,239,230,.65);}
+    .tab-btn.active{color:var(--al);border-bottom-color:var(--al);}
+    .panel{display:none;}
+    .panel.active{display:block;animation:fadeUp .25s ease;}
+
+    /* ── Shared button/input styles ── */
+    .f-action-btn{font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:9px 16px;border-radius:5px;cursor:pointer;transition:all .2s;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.03);color:rgba(245,239,230,.65);display:inline-flex;align-items:center;gap:6px;}
+    .f-action-btn:hover{border-color:rgba(255,255,255,.25);color:var(--c);background:rgba(255,255,255,.06);}
+    .f-action-btn:disabled{opacity:.5;cursor:not-allowed;}
+    .f-action-btn.green-btn{color:var(--green);border-color:rgba(95,207,128,.25);background:rgba(95,207,128,.05);}
+    .f-action-btn.green-btn:hover{background:rgba(95,207,128,.12);border-color:rgba(95,207,128,.5);}
+    .f-clear-btn{background:none;border:1px solid rgba(255,255,255,.07);border-radius:5px;color:var(--cl);padding:7px 12px;cursor:pointer;font-size:12px;transition:all .2s;}
+    .f-clear-btn:hover{border-color:rgba(224,90,43,.4);color:var(--red);}
+    .f-input{background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--c);font-family:'DM Sans',sans-serif;font-size:13px;padding:9px 12px;outline:none;width:100%;}
+    .f-input:focus{border-color:rgba(196,154,60,.5);}
+    .f-select{background:var(--bg2);border:1px solid var(--border);border-radius:6px;color:var(--c);font-family:'DM Sans',sans-serif;font-size:13px;padding:9px 12px;outline:none;}
+    .f-search{background:var(--bg2);border:1px solid var(--border);border-radius:6px;color:var(--c);font-family:'DM Sans',sans-serif;font-size:13px;padding:9px 13px;outline:none;}
+    label.fl{font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--cl);display:block;margin-bottom:5px;}
+
+    /* ── Table ── */
+    .table-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+    .table-scroll{overflow-x:auto;}
+    table{width:100%;border-collapse:collapse;}
+    th{font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--cl);padding:11px 14px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap;}
+    td{padding:12px 14px;font-size:13px;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:middle;}
+    tr:last-child td{border-bottom:none;}
+    tr:hover td{background:rgba(255,255,255,.02);}
+    .cell-id{font-weight:500;color:var(--c);}
+    .cell-sub{font-size:11px;color:var(--cl);margin-top:2px;}
+    .cell-total{font-family:'DM Mono',monospace;font-weight:500;color:var(--al);}
+    .table-empty{text-align:center;padding:48px 20px;}
+    .table-empty-icon{font-size:32px;margin-bottom:10px;}
+    .table-empty-text{font-size:13px;color:var(--cl);}
+    .status-badge{display:inline-flex;padding:3px 8px;border-radius:4px;font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;}
+    .s-confirmed{background:rgba(95,207,128,.1);color:var(--green);}
+    .s-processing{background:rgba(100,140,255,.1);color:#7ba3ff;}
+
+    /* ── Product image thumb ── */
+    .prod-img-thumb{width:48px;height:48px;object-fit:cover;border-radius:6px;background:var(--bg3);}
+
+    /* ── Product form ── */
+    .prod-toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:12px;}
+    .prod-headline{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--c);}
+    .prod-headline em{font-style:italic;color:var(--al);}
+    .prod-form-card{background:var(--bg2);border:1px solid rgba(196,154,60,.2);border-radius:10px;padding:22px 24px;margin-bottom:20px;animation:expand .2s ease;}
+    .prod-form-title{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--al);margin-bottom:16px;}
+    .prod-form-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+    @media(max-width:640px){.prod-form-grid{grid-template-columns:1fr;}}
+    .pf-field{display:flex;flex-direction:column;}
+    .pf-field.span2{grid-column:span 2;}
+    .pf-field.span3{grid-column:span 3;}
+    .pf-hint{font-size:10px;color:var(--cl);font-weight:400;}
+    .pf-actions{display:flex;gap:10px;margin-top:16px;}
+    .panel-hidden{display:none;}
+    .inv-input{background:var(--bg3);border:1px solid var(--border);border-radius:4px;color:var(--c);width:65px;padding:5px 8px;font-size:12px;text-align:center;}
+    .inv-save-btn{font-family:'Syne',sans-serif;font-size:8px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;background:rgba(95,207,128,.08);border:1px solid rgba(95,207,128,.25);color:var(--green);border-radius:4px;padding:5px 8px;cursor:pointer;margin-left:4px;transition:all .2s;}
+    .inv-save-btn:hover{background:rgba(95,207,128,.18);}
+    .prod-edit-btn{font-size:8px;padding:6px 10px;}
+    .sql-hint{background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:8px 14px;margin-bottom:16px;font-size:12px;color:var(--cl);}
+    .sql-hint pre{font-family:'DM Mono',monospace;font-size:11px;color:var(--cm);margin:6px 0 0;overflow-x:auto;}
+
+    /* ── Toggle ── */
+    .tog{display:inline-flex;align-items:center;cursor:pointer;}
+    .tog input{position:absolute;opacity:0;width:0;height:0;}
+    .tog-track{width:36px;height:20px;background:rgba(255,255,255,.1);border-radius:10px;position:relative;transition:background .2s;}
+    .tog input:checked + .tog-track{background:rgba(95,207,128,.5);}
+    .tog-thumb{position:absolute;top:2px;left:2px;width:16px;height:16px;background:#fff;border-radius:50%;transition:transform .2s;}
+    .tog input:checked + .tog-track .tog-thumb{transform:translateX(16px);}
+
+    /* ── Promotions ── */
+    .promo-settings-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px;}
+    @media(max-width:760px){.promo-settings-row{grid-template-columns:1fr;}}
+    .promo-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px 18px;}
+    .pc-label{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;color:var(--c);margin-bottom:4px;}
+    .pc-desc{font-size:11px;color:var(--cl);margin-bottom:12px;}
+    .pc-ctrl{display:flex;align-items:center;gap:8px;}
+    .pc-taka{font-family:'DM Mono',monospace;color:var(--al);}
+    .pc-num{background:var(--bg3);border:1px solid var(--border);border-radius:5px;color:var(--c);width:90px;padding:7px 10px;font-family:'DM Mono',monospace;font-size:14px;text-align:center;}
+    .pc-save{font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;background:rgba(196,154,60,.1);border:1px solid rgba(196,154,60,.3);color:var(--al);border-radius:5px;padding:7px 14px;cursor:pointer;transition:all .2s;}
+    .pc-save:hover{background:rgba(196,154,60,.2);}
+    .pc-stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;text-align:center;}
+    .pc-stat-n{font-family:'DM Mono',monospace;font-size:18px;font-weight:500;color:var(--c);}
+    .pc-stat-l{font-size:10px;color:var(--cl);}
+    .pc-stat-sep{width:1px;background:var(--border);}
+    .promo-block-header{display:flex;align-items:flex-start;justify-content:space-between;margin:20px 0 12px;gap:12px;flex-wrap:wrap;}
+    .pb-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--c);}
+    .pb-sub{font-size:11px;color:var(--cl);margin-top:4px;}
+    .quick-tiers{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;}
+    @media(max-width:900px){.quick-tiers{grid-template-columns:repeat(2,1fr);}}
+    @media(max-width:520px){.quick-tiers{grid-template-columns:1fr;}}
+    .qt{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;}
+    .qt-tier{font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--cl);margin-bottom:6px;}
+    .qt-code{font-family:'DM Mono',monospace;font-size:15px;font-weight:500;color:var(--al);margin-bottom:2px;}
+    .qt-val{font-size:12px;color:var(--green);margin-bottom:2px;}
+    .qt-min{font-size:11px;color:var(--cl);margin-bottom:6px;}
+    .qt-why{font-size:11px;color:rgba(245,239,230,.4);margin-bottom:12px;line-height:1.5;}
+    .qt-add{font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;background:rgba(196,154,60,.08);border:1px solid rgba(196,154,60,.25);color:var(--al);border-radius:5px;padding:6px 14px;cursor:pointer;transition:all .2s;width:100%;}
+    .qt-add:hover{background:rgba(196,154,60,.18);}
+    /* Add coupon form */
+    .add-form-hidden{display:none;}
+    .add-form-card{background:var(--bg2);border:1px solid rgba(196,154,60,.15);border-radius:10px;padding:20px 22px;margin-bottom:20px;animation:expand .2s ease;}
+    .af-heading{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--al);margin-bottom:14px;}
+    .add-form-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+    @media(max-width:640px){.add-form-grid{grid-template-columns:1fr;}}
+    .af-field{display:flex;flex-direction:column;gap:5px;}
+    .af-field.af-full{grid-column:1/-1;}
+    .af-field label{font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--cl);}
+    .af-full-w{width:100%;}
+    .af-upper{text-transform:uppercase;}
+    .f-date{}
+    .af-actions{display:flex;gap:10px;margin-top:14px;}
+
+    /* ── Delete modal ── */
+    .del-overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);display:none;align-items:center;justify-content:center;z-index:9998;backdrop-filter:blur(4px);}
+    .del-overlay.open{display:flex;}
+    .del-card{background:var(--bg2);border:1px solid rgba(224,90,43,.3);border-radius:12px;padding:28px 32px;max-width:380px;width:100%;text-align:center;animation:expand .2s ease;}
+    .del-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:var(--c);margin-bottom:10px;}
+    .del-body{font-size:13px;color:var(--cm);line-height:1.6;margin-bottom:20px;}
+    .del-code{color:var(--al);font-family:'DM Mono',monospace;}
+    .del-btns{display:flex;gap:10px;justify-content:center;}
+    .del-yes{font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;background:rgba(224,90,43,.15);border:1px solid rgba(224,90,43,.4);color:var(--red);border-radius:6px;padding:10px 24px;cursor:pointer;transition:all .2s;}
+    .del-yes:hover{background:rgba(224,90,43,.28);}
+    .del-no{font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--cl);border-radius:6px;padding:10px 24px;cursor:pointer;transition:all .2s;}
+    .del-no:hover{border-color:rgba(255,255,255,.25);color:var(--c);}
+
+    /* ── Toast ── */
+    .toast-stack{position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;gap:8px;}
+    @keyframes toastIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+    .toast{display:flex;align-items:center;gap:10px;padding:12px 18px;border-radius:8px;font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;animation:toastIn .3s ease;box-shadow:0 8px 24px rgba(0,0,0,.4);min-width:200px;}
+    .toast.info,.toast.success{background:#122018;border:1px solid rgba(196,154,60,.3);color:var(--al);}
+    .toast.error{background:#1e0d08;border:1px solid rgba(224,90,43,.3);color:var(--red);}
+  </style>
+  <script type="module" crossorigin src="/assets/products-CCdTRMM_.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="/assets/admin-auth-rHatrkP5.js">
+  <link rel="modulepreload" crossorigin href="/assets/admin-nav-BmaD9ZLf.js">
+</head>
+<body>
+
+  <div class="page">
+    <h1 class="page-title">Products <em>&amp; Promotions</em></h1>
+
+    <div class="tab-row">
+      <button type="button" class="tab-btn active" data-tab="products">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+        Products &amp; Inventory
+      </button>
+      <button type="button" class="tab-btn" data-tab="coupons">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+        Coupons &amp; Settings
+      </button>
+    </div>
+
+    <!-- ══ PRODUCTS PANEL ══ -->
+    <div class="panel active" id="panel-products">
+      <div class="prod-toolbar">
+        <div class="prod-headline">Products <em>&amp; Inventory</em></div>
+        <button type="button" class="f-action-btn green-btn" id="prod-add-btn" onclick="window.toggleProdForm()">+ Add Product</button>
+      </div>
+      <details class="sql-hint">
+        <summary>SQL: Enable Discount Prices ▸</summary>
+        <pre>ALTER TABLE products ADD COLUMN IF NOT EXISTS discount_price numeric(10,2);</pre>
+      </details>
+      <div id="prod-form-wrap" class="panel-hidden">
+        <div class="prod-form-card">
+          <div class="prod-form-title" id="prod-form-title">New Product</div>
+          <div class="prod-form-grid">
+            <div class="pf-field"><label class="fl">Product ID <span class="pf-hint">(slug, no spaces)</span></label><input type="text" id="pf-id" class="f-input" placeholder="fresh_oyster" autocomplete="off"></div>
+            <div class="pf-field"><label class="fl">Name (English)</label><input type="text" id="pf-name" class="f-input" placeholder="Fresh Oyster Mushrooms"></div>
+            <div class="pf-field"><label class="fl">Name (Bengali)</label><input type="text" id="pf-name-bn" class="f-input" placeholder="তাজা অয়েস্টার মাশরুম"></div>
+            <div class="pf-field"><label class="fl">Price (৳)</label><input type="number" id="pf-price" class="f-input" placeholder="350" min="0"></div>
+            <div class="pf-field"><label class="fl">Discount Price (৳) <span class="pf-hint">optional</span></label><input type="number" id="pf-discount" class="f-input" placeholder="Leave blank for no sale" min="0"></div>
+            <div class="pf-field"><label class="fl">Unit / Pack Size</label><input type="text" id="pf-unit" class="f-input" placeholder="1 KG Pack"></div>
+            <div class="pf-field"><label class="fl">Category</label><select id="pf-category" class="f-input"><option value="fresh">Fresh</option><option value="dry">Dry / Dried</option><option value="powder">Powder</option><option value="coming">Coming Soon</option></select></div>
+            <div class="pf-field"><label class="fl">Stock Count</label><input type="number" id="pf-inventory" class="f-input" placeholder="100" min="0"></div>
+            <div class="pf-field span2"><label class="fl">Image URL (from /public folder)</label><input type="text" id="pf-image" class="f-input" placeholder="SaFa Fresh Oyster Mushroom.png"></div>
+            <div class="pf-field span3"><label class="fl">Description</label><textarea id="pf-desc" class="f-input" rows="3" placeholder="Product description..."></textarea></div>
+          </div>
+          <div class="pf-actions">
+            <button type="button" class="f-action-btn green-btn" id="prod-save-btn" onclick="window.saveProduct()">Save Product</button>
+            <button type="button" class="f-clear-btn" onclick="window.cancelProdForm()">Cancel</button>
+          </div>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>Image</th><th>Product</th><th>Price</th><th>Category</th><th>Stock</th><th>Active</th><th>Actions</th></tr></thead>
+            <tbody id="prod-tbody"><tr><td colspan="7"><div class="table-empty"><div class="table-empty-icon">⏳</div><p class="table-empty-text">Loading products...</p></div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ COUPONS PANEL ══ -->
+    <div class="panel" id="panel-coupons">
+
+      <!-- Settings -->
+      <div class="promo-settings-row">
+        <div class="promo-card">
+          <div class="pc-label">🚚 Free Delivery Threshold</div>
+          <div class="pc-desc">Orders above this amount get free delivery automatically</div>
+          <div class="pc-ctrl">
+            <span class="pc-taka">৳</span>
+            <input type="number" id="set-fdthreshold" class="pc-num" min="0" step="50" value="700">
+            <button type="button" class="pc-save" onclick="window.saveSetting('free_delivery_threshold','set-fdthreshold')">Save</button>
+          </div>
+        </div>
+        <div class="promo-card">
+          <div class="pc-label">📦 Delivery Fee</div>
+          <div class="pc-desc">Charged on orders below the free delivery threshold</div>
+          <div class="pc-ctrl">
+            <span class="pc-taka">৳</span>
+            <input type="number" id="set-deliveryfee" class="pc-num" min="0" step="10" value="100">
+            <button type="button" class="pc-save" onclick="window.saveSetting('delivery_fee','set-deliveryfee')">Save</button>
+          </div>
+        </div>
+        <div class="promo-card">
+          <div class="pc-label">🏷️ Coupon Performance</div>
+          <div class="pc-stats-grid">
+            <div class="pc-stat"><div class="pc-stat-n" id="cs-active">—</div><div class="pc-stat-l">Active</div></div>
+            <div class="pc-stat-sep"></div>
+            <div class="pc-stat"><div class="pc-stat-n" id="cs-total">—</div><div class="pc-stat-l">Total</div></div>
+            <div class="pc-stat-sep"></div>
+            <div class="pc-stat"><div class="pc-stat-n" id="cs-uses">—</div><div class="pc-stat-l">Uses</div></div>
+            <div class="pc-stat-sep"></div>
+            <div class="pc-stat"><div class="pc-stat-n" id="cs-maxuses">—</div><div class="pc-stat-l">Capped</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AOV Tiers -->
+      <div class="promo-block-header">
+        <div>
+          <div class="pb-title">⚡ Recommended AOV Tiers</div>
+          <div class="pb-sub">Designed for avg order ৳280 · 15% margin. Click + Add to instantly create.</div>
+        </div>
+      </div>
+      <div class="quick-tiers">
+        <div class="qt"><div class="qt-tier">Tier 1 — Starter</div><div class="qt-code">WELCOME50</div><div class="qt-val">৳50 off</div><div class="qt-min">Min: ৳500</div><div class="qt-why">Pushes avg ৳280 → ৳500 basket. Customer gets ৳50 off, you keep ~৳25 margin.</div><button type="button" class="qt-add" onclick="window.addQuickTier('WELCOME50','fixed',50,500,'৳50 off on orders over ৳500',this)">+ Add</button></div>
+        <div class="qt"><div class="qt-tier">Tier 2 — Loyalty</div><div class="qt-code">SAFA10</div><div class="qt-val">10% off</div><div class="qt-min">Min: ৳700</div><div class="qt-why">For repeat buyers. Keeps margins positive on larger baskets above free delivery.</div><button type="button" class="qt-add" onclick="window.addQuickTier('SAFA10','percent',10,700,'10% off on orders over ৳700',this)">+ Add</button></div>
+        <div class="qt"><div class="qt-tier">Tier 3 — Bulk</div><div class="qt-code">SAFA15</div><div class="qt-val">15% off</div><div class="qt-min">Min: ৳1,200</div><div class="qt-why">Strong incentive for family or repeat bulk orders. Use for volume only.</div><button type="button" class="qt-add" onclick="window.addQuickTier('SAFA15','percent',15,1200,'15% off on bulk orders over ৳1200',this)">+ Add</button></div>
+        <div class="qt"><div class="qt-tier">Tier 4 — Wholesale</div><div class="qt-code">MEGA20</div><div class="qt-val">20% off</div><div class="qt-min">Min: ৳2,000</div><div class="qt-why">Corporate/restaurant wholesale. Accept thin margin for volume. Share selectively.</div><button type="button" class="qt-add" onclick="window.addQuickTier('MEGA20','percent',20,2000,'20% off on wholesale orders over ৳2000',this)">+ Add</button></div>
+      </div>
+
+      <!-- Coupons list -->
+      <div class="promo-block-header">
+        <div><div class="pb-title">All Coupons</div></div>
+        <button type="button" class="f-action-btn" id="toggle-add-btn" onclick="window.toggleAddForm()">+ Create Coupon</button>
+      </div>
+
+      <div id="add-coupon-form" class="add-form-hidden">
+        <div class="add-form-card">
+          <div class="af-heading">New Coupon</div>
+          <div class="add-form-grid">
+            <div class="af-field"><label>Code</label><input type="text" id="ac-code" class="f-search af-full-w af-upper" placeholder="SUMMER15" maxlength="24" autocomplete="off"></div>
+            <div class="af-field"><label>Discount Type</label><select id="ac-type" class="f-select af-full-w"><option value="percent">Percent (%)</option><option value="fixed">Fixed (৳)</option></select></div>
+            <div class="af-field"><label>Value</label><input type="number" id="ac-value" class="f-search af-full-w" placeholder="10" min="1"></div>
+            <div class="af-field"><label>Min Order (৳)</label><input type="number" id="ac-min" class="f-search af-full-w" placeholder="0" min="0" value="0"></div>
+            <div class="af-field"><label>Max Uses (blank = ∞)</label><input type="number" id="ac-maxuses" class="f-search af-full-w" placeholder="Unlimited" min="1"></div>
+            <div class="af-field"><label>Expires (blank = never)</label><input type="date" id="ac-expires" class="f-search f-date af-full-w"></div>
+            <div class="af-field af-full"><label>Description (shown to customer)</label><input type="text" id="ac-desc" class="f-search af-full-w" placeholder="10% off your order"></div>
+          </div>
+          <div class="af-actions">
+            <button type="button" class="f-action-btn green-btn" onclick="window.submitCoupon()">Create Coupon</button>
+            <button type="button" class="f-clear-btn" onclick="window.toggleAddForm()">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>Code</th><th>Type</th><th>Discount</th><th>Min Order</th><th>Uses</th><th>Expires</th><th>Active</th><th></th></tr></thead>
+            <tbody id="coupons-tbody"><tr><td colspan="8"><div class="table-empty"><div class="table-empty-icon">⏳</div><p class="table-empty-text">Loading coupons...</p></div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete modal -->
+  <div class="del-overlay" id="del-modal">
+    <div class="del-card">
+      <div class="del-title">Confirm Delete</div>
+      <p class="del-body">This will permanently remove <span class="del-code" id="del-code-label"></span>. This cannot be undone.</p>
+      <div class="del-btns">
+        <button type="button" class="del-yes" onclick="window.confirmDelete()">Delete</button>
+        <button type="button" class="del-no"  onclick="window.closeDelModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-stack" id="toast-stack"></div>
+
+</body>
+</html>

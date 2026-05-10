@@ -674,11 +674,12 @@
       .confirm-title { font-size: 32px; }
     }
   </style>
-  <script type="module" crossorigin src="/assets/checkout-D4WzIQfT.js"></script>
-  <link rel="modulepreload" crossorigin href="/assets/index-DshXEMtg.js">
-  <link rel="modulepreload" crossorigin href="/assets/supabase-BvQLqbqL.js">
-  <link rel="modulepreload" crossorigin href="/assets/main-aDWQmQQy.js">
-  <link rel="stylesheet" crossorigin href="/assets/supabase-B8BD_zhT.css">
+  <script type="module" crossorigin src="/assets/checkout-D0dZn1Nb.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="/assets/index-B-jIxwbw.js">
+  <link rel="modulepreload" crossorigin href="/assets/supabase-CAmyaeuo.js">
+  <link rel="modulepreload" crossorigin href="/assets/main-9U0poTqE.js">
+  <link rel="stylesheet" crossorigin href="/assets/supabase-C68sSUdL.css">
 </head>
 <body>
 
@@ -788,6 +789,13 @@
                 <label for="custPhone">Phone <span aria-hidden="true">*</span></label>
                 <input type="tel" id="custPhone" placeholder="01XXXXXXXXX" autocomplete="tel" maxlength="13" inputmode="numeric" aria-required="true" aria-describedby="custPhone-error">
                 <span class="field-error" id="custPhone-error" role="alert">Valid BD number required (01XXXXXXXXX).</span>
+              </div>
+
+              <!-- Email (optional) -->
+              <div class="form-group">
+                <label for="custEmail">Email <span style="font-weight:400;opacity:.5;">(optional — for order confirmation)</span></label>
+                <input type="email" id="custEmail" placeholder="yourname@email.com" autocomplete="email" aria-describedby="custEmail-hint">
+                <span class="field-hint" id="custEmail-hint" style="font-size:11px;color:var(--fg-muted,#888);margin-top:3px;display:block;">We'll send your receipt here. No spam.</span>
               </div>
 
               <!-- District -->

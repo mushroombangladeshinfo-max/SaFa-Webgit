@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Expenses — SaFa Naturals</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;}
+    :root{--bg:#060d09;--bg2:#0d1f12;--bg3:#122018;--border:rgba(255,255,255,.07);--c:#f5efe6;--cm:rgba(245,239,230,.6);--cl:rgba(245,239,230,.35);--al:#c49a3c;--green:#5fcf80;--red:#e05a2b;}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--c);min-height:100vh;margin:0;-webkit-font-smoothing:antialiased;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* ── Topbar ── */
+    .topbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 28px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+    .tb-left{display:flex;align-items:center;gap:16px;}
+    .tb-back{display:inline-flex;align-items:center;gap:6px;color:var(--cl);text-decoration:none;font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;transition:color .2s;}
+    .tb-back:hover{color:var(--c);}
+    .tb-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--c);}
+    .tb-right{display:flex;align-items:center;gap:8px;}
+
+    /* ── Layout ── */
+    .page{max-width:1200px;margin:0 auto;padding:28px 24px 64px;}
+    .page-header{margin-bottom:24px;}
+    .page-title{font-family:'Syne',sans-serif;font-size:22px;font-weight:700;color:var(--c);margin:0 0 4px;}
+    .page-sub{font-size:12px;color:var(--cl);}
+
+    /* ── Tabs ── */
+    .tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:28px;}
+    .tab-btn{padding:10px 20px;background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-1px;font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--cl);cursor:pointer;transition:all .2s;}
+    .tab-btn.active{color:var(--al);border-bottom-color:var(--al);}
+    .tab-panel{display:none;animation:fadeUp .25s ease;}
+    .tab-panel.active{display:block;}
+
+    /* ── KPI cards ── */
+    .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;}
+    @media(max-width:860px){.kpi-grid{grid-template-columns:repeat(2,1fr);}}
+    .kpi{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px 18px;}
+    .kpi-label{font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--cl);margin-bottom:6px;}
+    .kpi-val{font-family:'DM Mono',monospace;font-size:22px;font-weight:500;color:var(--c);}
+    .kpi-val.red{color:var(--red);}
+    .kpi-val.green{color:var(--green);}
+    .kpi-sub{font-size:11px;color:var(--cl);margin-top:4px;}
+
+    /* ── Filter bar ── */
+    .filter-bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:20px;}
+    .filter-select,.filter-input{background:var(--bg2);border:1px solid var(--border);border-radius:6px;color:var(--c);font-family:'DM Sans',sans-serif;font-size:13px;padding:8px 12px;outline:none;}
+    .filter-select:focus,.filter-input:focus{border-color:rgba(196,154,60,.4);}
+    .btn{font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:9px 16px;border-radius:6px;border:1px solid var(--border);background:rgba(255,255,255,.04);color:var(--cl);cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:6px;}
+    .btn:hover{color:var(--c);background:rgba(255,255,255,.08);}
+    .btn.primary{background:rgba(196,154,60,.12);border-color:rgba(196,154,60,.3);color:var(--al);}
+    .btn.primary:hover{background:rgba(196,154,60,.2);border-color:rgba(196,154,60,.5);}
+    .btn.danger{color:var(--red);border-color:rgba(224,90,43,.25);}
+    .btn.danger:hover{background:rgba(224,90,43,.08);}
+
+    /* ── Charts ── */
+    .charts-row{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;margin-bottom:24px;}
+    @media(max-width:760px){.charts-row{grid-template-columns:1fr;}}
+    .chart-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:18px 20px;}
+    .chart-card-title{font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--cl);margin-bottom:14px;}
+    .chart-wrap{position:relative;height:200px;}
+
+    /* ── Table ── */
+    .table-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+    .table-toolbar{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:10px;}
+    .table-title{font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--cl);}
+    table{width:100%;border-collapse:collapse;}
+    th{font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--cl);padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap;}
+    td{padding:11px 14px;font-size:13px;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:middle;}
+    tr:last-child td{border-bottom:none;}
+    tr:hover td{background:rgba(255,255,255,.02);}
+    .cat-badge{display:inline-flex;padding:3px 8px;border-radius:4px;font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;}
+    .cat-spawn{background:rgba(95,207,128,.1);color:var(--green);}
+    .cat-substrate{background:rgba(196,154,60,.1);color:var(--al);}
+    .cat-labor{background:rgba(100,140,255,.1);color:#7ba3ff;}
+    .cat-electricity{background:rgba(255,220,80,.1);color:#ffd84a;}
+    .cat-transport{background:rgba(255,160,80,.1);color:#ffa040;}
+    .cat-packaging{background:rgba(180,100,255,.1);color:#c478ff;}
+    .cat-water{background:rgba(80,200,255,.1);color:#50c8ff;}
+    .cat-other,.cat-equipment,.cat-rent,.cat-repair,.cat-marketing{background:rgba(255,255,255,.06);color:var(--cm);}
+    .empty-state{text-align:center;padding:48px 20px;color:var(--cl);}
+    .empty-icon{font-size:32px;margin-bottom:10px;}
+
+    /* ── Add expense form ── */
+    .form-card{background:var(--bg2);border:1px solid rgba(196,154,60,.2);border-radius:10px;padding:22px 24px;margin-bottom:20px;display:none;animation:fadeUp .2s ease;}
+    .form-card.open{display:block;}
+    .form-title{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--al);margin-bottom:18px;}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+    @media(max-width:640px){.form-grid{grid-template-columns:1fr;}}
+    .form-group{display:flex;flex-direction:column;gap:6px;}
+    .form-group.span2{grid-column:span 2;}
+    .form-group.span3{grid-column:span 3;}
+    label{font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--cl);}
+    input,select,textarea{background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--c);font-family:'DM Sans',sans-serif;font-size:13px;padding:9px 12px;outline:none;width:100%;}
+    input:focus,select:focus,textarea:focus{border-color:rgba(196,154,60,.5);}
+    .form-actions{display:flex;gap:10px;margin-top:16px;}
+
+    /* ── Daily breakdown table ── */
+    .day-cat{font-size:11px;color:var(--cl);}
+    .amount-cell{font-family:'DM Mono',monospace;font-size:13px;text-align:right;}
+    .amount-cell.total{color:var(--red);font-weight:500;}
+    .toast-wrap{position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;gap:8px;}
+    .toast{padding:12px 18px;border-radius:8px;font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;animation:fadeUp .3s ease;}
+    .toast.ok{background:#1a3322;border:1px solid rgba(95,207,128,.3);color:var(--green);}
+    .toast.err{background:#2a1510;border:1px solid rgba(224,90,43,.3);color:var(--red);}
+  </style>
+  <script type="module" crossorigin src="/assets/expenses-CnZzrxxs.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="/assets/admin-auth-rHatrkP5.js">
+  <link rel="modulepreload" crossorigin href="/assets/admin-nav-BmaD9ZLf.js">
+</head>
+<body>
+
+  <div class="page" style="padding-top:28px;">
+    <div class="page-header">
+      <div class="page-title">Expense <span style="color:var(--al)">Tracker</span></div>
+      <div class="page-sub">Daily farm expenses + one-off capital costs</div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="daily">Daily Farm Expenses</button>
+      <button class="tab-btn" data-tab="oneoff">One-off Expenses</button>
+      <button class="tab-btn" data-tab="summary">P&L Summary</button>
+    </div>
+
+    <!-- ══ TAB: DAILY ══ -->
+    <div class="tab-panel active" id="tab-daily">
+
+      <!-- KPIs -->
+      <div class="kpi-grid">
+        <div class="kpi"><div class="kpi-label">This Month</div><div class="kpi-val red" id="kpi-month">—</div><div class="kpi-sub">Total farm expenses</div></div>
+        <div class="kpi"><div class="kpi-label">This Week</div><div class="kpi-val" id="kpi-week">—</div><div class="kpi-sub">Last 7 days</div></div>
+        <div class="kpi"><div class="kpi-label">Top Category</div><div class="kpi-val" id="kpi-top-cat" style="font-size:16px;">—</div><div class="kpi-sub" id="kpi-top-cat-val"></div></div>
+        <div class="kpi"><div class="kpi-label">Daily Avg</div><div class="kpi-val" id="kpi-avg">—</div><div class="kpi-sub">This month</div></div>
+      </div>
+
+      <!-- Charts -->
+      <div class="charts-row">
+        <div class="chart-card">
+          <div class="chart-card-title">Daily Expense Trend</div>
+          <div class="chart-wrap"><canvas id="chart-trend"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-card-title">By Category</div>
+          <div class="chart-wrap"><canvas id="chart-cat"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Filter -->
+      <div class="filter-bar">
+        <input type="date" class="filter-input" id="daily-from">
+        <input type="date" class="filter-input" id="daily-to">
+        <button class="btn" id="daily-filter-btn">Apply</button>
+        <button class="btn" id="daily-reset-btn">Reset</button>
+      </div>
+
+      <!-- Table -->
+      <div class="table-card">
+        <div class="table-toolbar">
+          <span class="table-title">Daily Log Expenses</span>
+          <span style="font-size:12px;color:var(--cl);" id="daily-count"></span>
+        </div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th style="text-align:right;">Spawn</th>
+                <th style="text-align:right;">Substrate</th>
+                <th style="text-align:right;">Packaging</th>
+                <th style="text-align:right;">Labor</th>
+                <th style="text-align:right;">Electricity</th>
+                <th style="text-align:right;">Transport</th>
+                <th style="text-align:right;">Water</th>
+                <th style="text-align:right;">Other</th>
+                <th style="text-align:right;">Total</th>
+              </tr>
+            </thead>
+            <tbody id="daily-tbody">
+              <tr><td colspan="10"><div class="empty-state"><div class="empty-icon">⏳</div>Loading...</div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ TAB: ONE-OFF ══ -->
+    <div class="tab-panel" id="tab-oneoff">
+
+      <!-- Add form -->
+      <button class="btn primary" id="add-expense-btn" style="margin-bottom:16px;">+ Add Expense</button>
+
+      <div class="form-card" id="add-expense-form">
+        <div class="form-title">Add One-Off Expense</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Date</label>
+            <input type="date" id="oe-date">
+          </div>
+          <div class="form-group">
+            <label>Category</label>
+            <select id="oe-cat">
+              <option value="">Select...</option>
+              <option>Equipment</option>
+              <option>Rent</option>
+              <option>Repair</option>
+              <option>Utilities</option>
+              <option>Marketing</option>
+              <option>Transport</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Amount (৳)</label>
+            <input type="number" id="oe-amount" placeholder="0" min="0">
+          </div>
+          <div class="form-group span2">
+            <label>Description</label>
+            <input type="text" id="oe-desc" placeholder="What was this expense for?">
+          </div>
+          <div class="form-group">
+            <label>Vendor / Supplier</label>
+            <input type="text" id="oe-vendor" placeholder="Optional">
+          </div>
+          <div class="form-group span3">
+            <label>Notes</label>
+            <textarea id="oe-notes" rows="2" placeholder="Any additional notes..."></textarea>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn primary" id="oe-save-btn">Save Expense</button>
+          <button class="btn" id="oe-cancel-btn">Cancel</button>
+        </div>
+      </div>
+
+      <!-- KPIs -->
+      <div class="kpi-grid" style="margin-bottom:20px;">
+        <div class="kpi"><div class="kpi-label">Total This Year</div><div class="kpi-val red" id="oe-total-year">—</div></div>
+        <div class="kpi"><div class="kpi-label">This Month</div><div class="kpi-val" id="oe-total-month">—</div></div>
+        <div class="kpi"><div class="kpi-label">Count</div><div class="kpi-val" id="oe-count">—</div><div class="kpi-sub">Total entries</div></div>
+        <div class="kpi"><div class="kpi-label">Largest</div><div class="kpi-val" id="oe-largest">—</div><div class="kpi-sub" id="oe-largest-desc"></div></div>
+      </div>
+
+      <!-- Table -->
+      <div class="table-card">
+        <div class="table-toolbar">
+          <span class="table-title">One-Off Expenses</span>
+        </div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Category</th>
+                <th>Description</th>
+                <th>Vendor</th>
+                <th style="text-align:right;">Amount</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="oe-tbody">
+              <tr><td colspan="6"><div class="empty-state"><div class="empty-icon">⏳</div>Loading...</div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ TAB: P&L SUMMARY ══ -->
+    <div class="tab-panel" id="tab-summary">
+
+      <div class="filter-bar">
+        <select class="filter-select" id="pl-period">
+          <option value="this_month">This Month</option>
+          <option value="last_month">Last Month</option>
+          <option value="last_3months">Last 3 Months</option>
+          <option value="this_year">This Year</option>
+        </select>
+        <button class="btn" id="pl-load-btn">Load</button>
+      </div>
+
+      <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:24px;">
+        <div class="kpi"><div class="kpi-label">Total Revenue</div><div class="kpi-val green" id="pl-revenue">—</div><div class="kpi-sub">From farm sales</div></div>
+        <div class="kpi"><div class="kpi-label">Total Expenses</div><div class="kpi-val red" id="pl-expenses">—</div><div class="kpi-sub">Daily + one-off</div></div>
+        <div class="kpi"><div class="kpi-label">Net Profit / Loss</div><div class="kpi-val" id="pl-net">—</div><div class="kpi-sub" id="pl-margin"></div></div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-toolbar"><span class="table-title">Expense Breakdown</span></div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead><tr><th>Category</th><th style="text-align:right;">Amount</th><th style="text-align:right;">% of Total</th></tr></thead>
+            <tbody id="pl-tbody">
+              <tr><td colspan="3"><div class="empty-state"><div class="empty-icon">📊</div>Select period and click Load</div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-wrap" id="toast-wrap"></div>
+
+</body>
+</html>

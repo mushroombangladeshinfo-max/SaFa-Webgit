@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>B2B Pipeline — SaFa Naturals</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;}
+    :root{--bg:#060d09;--bg2:#0d1f12;--bg3:#122018;--border:rgba(255,255,255,.07);--c:#f5efe6;--cm:rgba(245,239,230,.6);--cl:rgba(245,239,230,.35);--al:#c49a3c;--green:#5fcf80;--red:#e05a2b;}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--c);min-height:100vh;margin:0;-webkit-font-smoothing:antialiased;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+    /* ── Topbar ── */
+    .topbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 28px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+    .tb-left{display:flex;align-items:center;gap:16px;}
+    .tb-back{display:inline-flex;align-items:center;gap:6px;color:var(--cl);text-decoration:none;font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;transition:color .2s;}
+    .tb-back:hover{color:var(--c);}
+    .tb-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--c);}
+
+    /* ── Layout ── */
+    .page{max-width:1280px;margin:0 auto;padding:28px 24px 64px;}
+    .page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px;}
+    .page-title{font-family:'Syne',sans-serif;font-size:22px;font-weight:700;color:var(--c);margin:0 0 4px;}
+    .page-sub{font-size:12px;color:var(--cl);}
+    .btn{font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:9px 16px;border-radius:6px;border:1px solid var(--border);background:rgba(255,255,255,.04);color:var(--cl);cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:6px;}
+    .btn:hover{color:var(--c);background:rgba(255,255,255,.08);}
+    .btn.primary{background:rgba(196,154,60,.12);border-color:rgba(196,154,60,.3);color:var(--al);}
+    .btn.primary:hover{background:rgba(196,154,60,.2);}
+    .btn.green{background:rgba(95,207,128,.08);border-color:rgba(95,207,128,.25);color:var(--green);}
+    .btn.danger{color:var(--red);border-color:rgba(224,90,43,.2);}
+    .btn.danger:hover{background:rgba(224,90,43,.08);}
+    .btn.sm{padding:6px 10px;font-size:8px;}
+
+    /* ── KPIs ── */
+    .kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:24px;}
+    @media(max-width:900px){.kpi-grid{grid-template-columns:repeat(3,1fr);}}
+    @media(max-width:560px){.kpi-grid{grid-template-columns:repeat(2,1fr);}}
+    .kpi{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;}
+    .kpi-label{font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--cl);margin-bottom:6px;}
+    .kpi-val{font-family:'DM Mono',monospace;font-size:20px;font-weight:500;color:var(--c);}
+    .kpi-val.green{color:var(--green);}
+    .kpi-sub{font-size:11px;color:var(--cl);margin-top:3px;}
+
+    /* ── Filter / toolbar ── */
+    .toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:20px;}
+    .filter-select,.search-input{background:var(--bg2);border:1px solid var(--border);border-radius:6px;color:var(--c);font-family:'DM Sans',sans-serif;font-size:13px;padding:8px 12px;outline:none;}
+    .filter-select:focus,.search-input:focus{border-color:rgba(196,154,60,.4);}
+    .search-input{min-width:200px;}
+
+    /* ── Add / Edit modal ── */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:500;padding:20px;}
+    .modal-overlay.open{display:flex;animation:fadeUp .2s ease;}
+    .modal{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:28px;width:100%;max-width:620px;max-height:90vh;overflow-y:auto;}
+    .modal-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--c);margin-bottom:20px;}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+    @media(max-width:520px){.form-grid{grid-template-columns:1fr;}}
+    .form-group{display:flex;flex-direction:column;gap:6px;}
+    .form-group.span2{grid-column:span 2;}
+    label{font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--cl);}
+    input,select,textarea{background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--c);font-family:'DM Sans',sans-serif;font-size:13px;padding:9px 12px;outline:none;width:100%;}
+    input:focus,select:focus,textarea:focus{border-color:rgba(196,154,60,.5);}
+    .modal-actions{display:flex;gap:10px;margin-top:20px;justify-content:flex-end;}
+
+    /* ── Status badges ── */
+    .status{display:inline-flex;padding:3px 9px;border-radius:20px;font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;}
+    .s-cold{background:rgba(255,255,255,.06);color:var(--cl);}
+    .s-contacted{background:rgba(80,200,255,.1);color:#50c8ff;}
+    .s-interested{background:rgba(196,154,60,.12);color:var(--al);}
+    .s-proposal{background:rgba(180,100,255,.1);color:#c478ff;}
+    .s-won{background:rgba(95,207,128,.12);color:var(--green);}
+    .s-lost{background:rgba(224,90,43,.1);color:var(--red);}
+
+    /* ── Table ── */
+    .table-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+    .table-toolbar{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);}
+    .table-title{font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--cl);}
+    table{width:100%;border-collapse:collapse;}
+    th{font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--cl);padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap;}
+    td{padding:12px 14px;font-size:13px;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:middle;}
+    tr:last-child td{border-bottom:none;}
+    tr:hover td{background:rgba(255,255,255,.02);}
+    .empty-state{text-align:center;padding:48px 20px;color:var(--cl);}
+    .empty-icon{font-size:32px;margin-bottom:10px;}
+    .td-actions{display:flex;gap:6px;align-items:center;}
+    .follow-up-badge{font-size:11px;padding:2px 7px;border-radius:4px;font-family:'DM Mono',monospace;}
+    .follow-up-badge.overdue{background:rgba(224,90,43,.12);color:var(--red);}
+    .follow-up-badge.today{background:rgba(196,154,60,.12);color:var(--al);}
+    .follow-up-badge.upcoming{background:rgba(95,207,128,.08);color:var(--green);}
+    .toast-wrap{position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;gap:8px;}
+    .toast{padding:12px 18px;border-radius:8px;font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;animation:fadeUp .3s ease;}
+    .toast.ok{background:#1a3322;border:1px solid rgba(95,207,128,.3);color:var(--green);}
+    .toast.err{background:#2a1510;border:1px solid rgba(224,90,43,.3);color:var(--red);}
+  </style>
+</head>
+<body>
+
+  <div class="page">
+    <div class="page-header">
+      <div>
+        <div class="page-title">B2B <span style="color:var(--al)">Pipeline</span></div>
+        <div class="page-sub">Restaurants, hotels, cafes, retailers — track every lead</div>
+      </div>
+      <button class="btn primary" id="add-lead-btn">+ Add Lead</button>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpi-grid">
+      <div class="kpi"><div class="kpi-label">Total Leads</div><div class="kpi-val" id="kpi-total">—</div></div>
+      <div class="kpi"><div class="kpi-label">Won</div><div class="kpi-val green" id="kpi-won">—</div><div class="kpi-sub" id="kpi-won-val"></div></div>
+      <div class="kpi"><div class="kpi-label">In Progress</div><div class="kpi-val" id="kpi-active">—</div><div class="kpi-sub">Contacted + Interested + Proposal</div></div>
+      <div class="kpi"><div class="kpi-label">Monthly Potential</div><div class="kpi-val" id="kpi-potential">—</div><div class="kpi-sub">Won accounts</div></div>
+      <div class="kpi"><div class="kpi-label">Follow-ups Due</div><div class="kpi-val" id="kpi-followups" style="color:var(--al);">—</div><div class="kpi-sub">Today or overdue</div></div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <input type="text" class="search-input" id="search-input" placeholder="Search business or contact...">
+      <select class="filter-select" id="filter-status">
+        <option value="">All Statuses</option>
+        <option value="cold">Cold</option>
+        <option value="contacted">Contacted</option>
+        <option value="interested">Interested</option>
+        <option value="proposal">Proposal Sent</option>
+        <option value="won">Won</option>
+        <option value="lost">Lost</option>
+      </select>
+      <select class="filter-select" id="filter-type">
+        <option value="">All Types</option>
+        <option>Restaurant</option>
+        <option>Hotel</option>
+        <option>Cafe</option>
+        <option>Pharmacy</option>
+        <option>Retailer</option>
+        <option>Other</option>
+      </select>
+      <button class="btn" id="export-btn">↓ CSV</button>
+    </div>
+
+    <!-- Table -->
+    <div class="table-card">
+      <div class="table-toolbar">
+        <span class="table-title">Leads</span>
+        <span style="font-size:12px;color:var(--cl);" id="lead-count"></span>
+      </div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Business</th>
+              <th>Contact</th>
+              <th>Type</th>
+              <th>Location</th>
+              <th>Status</th>
+              <th style="text-align:right;">Monthly ৳</th>
+              <th>Follow-up</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="leads-tbody">
+            <tr><td colspan="8"><div class="empty-state"><div class="empty-icon">⏳</div>Loading...</div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add/Edit Modal -->
+  <div class="modal-overlay" id="modal">
+    <div class="modal">
+      <div class="modal-title" id="modal-title">Add New Lead</div>
+      <div class="form-grid">
+        <div class="form-group span2">
+          <label>Business Name *</label>
+          <input type="text" id="f-biz" placeholder="Restaurant / Hotel / Shop name">
+        </div>
+        <div class="form-group">
+          <label>Contact Person</label>
+          <input type="text" id="f-contact" placeholder="Name">
+        </div>
+        <div class="form-group">
+          <label>Phone</label>
+          <input type="tel" id="f-phone" placeholder="01XXXXXXXXX">
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="f-email" placeholder="Optional">
+        </div>
+        <div class="form-group">
+          <label>Business Type</label>
+          <select id="f-type">
+            <option value="">Select...</option>
+            <option>Restaurant</option>
+            <option>Hotel</option>
+            <option>Cafe</option>
+            <option>Pharmacy</option>
+            <option>Retailer</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Location / Area</label>
+          <input type="text" id="f-location" placeholder="e.g. Gulshan, Dhaka">
+        </div>
+        <div class="form-group">
+          <label>District</label>
+          <input type="text" id="f-district" placeholder="e.g. Dhaka">
+        </div>
+        <div class="form-group">
+          <label>Status</label>
+          <select id="f-status">
+            <option value="cold">Cold</option>
+            <option value="contacted">Contacted</option>
+            <option value="interested">Interested</option>
+            <option value="proposal">Proposal Sent</option>
+            <option value="won">Won ✓</option>
+            <option value="lost">Lost ✗</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Monthly Potential (৳)</label>
+          <input type="number" id="f-potential" placeholder="Estimated monthly order value" min="0">
+        </div>
+        <div class="form-group">
+          <label>Last Contact Date</label>
+          <input type="date" id="f-last-contact">
+        </div>
+        <div class="form-group">
+          <label>Next Follow-up Date</label>
+          <input type="date" id="f-followup">
+        </div>
+        <div class="form-group span2">
+          <label>Notes</label>
+          <textarea id="f-notes" rows="3" placeholder="Conversation notes, preferences, objections..."></textarea>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn" id="modal-cancel">Cancel</button>
+        <button class="btn primary" id="modal-save">Save Lead</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-wrap" id="toast-wrap"></div>
+
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+    import { requireAdmin }  from '/src/admin-auth.js';
+    import { mountAdminNav } from '/src/admin-nav.js';
+
+    const sb = createClient(
+      import.meta.env.VITE_SUPABASE_URL,
+      import.meta.env.VITE_SUPABASE_ANON_KEY
+    );
+
+    const session = await requireAdmin(sb);
+    if (!session) { window.location.href = 'admin.html'; }
+    mountAdminNav({ page: 'pipeline', supabase: sb, email: session.user.email });
+    const userEmail = session.user.email;
+
+    const fmt = n => '৳' + (n||0).toLocaleString('en');
+    const today = () => new Date().toISOString().slice(0,10);
+
+    function toast(msg, type='ok') {
+      const el = document.createElement('div');
+      el.className = `toast ${type}`;
+      el.textContent = msg;
+      document.getElementById('toast-wrap').appendChild(el);
+      setTimeout(()=>el.remove(), 3500);
+    }
+
+    /* ── Data ── */
+    let _all = [], _editId = null;
+
+    async function load() {
+      const { data, error } = await sb.from('b2b_pipeline').select('*').order('updated_at', { ascending: false });
+      if (error) { toast(error.message, 'err'); return; }
+      _all = data || [];
+      renderKPIs();
+      renderTable();
+    }
+
+    function renderKPIs() {
+      const won      = _all.filter(r=>r.status==='won');
+      const active   = _all.filter(r=>['contacted','interested','proposal'].includes(r.status));
+      const todayStr = today();
+      const dueFollowups = _all.filter(r=>r.next_followup && r.next_followup<=todayStr && r.status!=='won' && r.status!=='lost');
+      const wonPotential = won.reduce((s,r)=>s+(+r.monthly_potential||0),0);
+
+      document.getElementById('kpi-total').textContent     = _all.length;
+      document.getElementById('kpi-won').textContent       = won.length;
+      document.getElementById('kpi-won-val').textContent   = fmt(wonPotential)+'/mo';
+      document.getElementById('kpi-active').textContent    = active.length;
+      document.getElementById('kpi-potential').textContent = fmt(wonPotential);
+      document.getElementById('kpi-followups').textContent = dueFollowups.length;
+    }
+
+    function filtered() {
+      const search = document.getElementById('search-input').value.toLowerCase();
+      const status = document.getElementById('filter-status').value;
+      const type   = document.getElementById('filter-type').value;
+      return _all.filter(r =>
+        (!search || r.business_name?.toLowerCase().includes(search) || r.contact_name?.toLowerCase().includes(search) || r.phone?.includes(search)) &&
+        (!status || r.status === status) &&
+        (!type   || r.business_type === type)
+      );
+    }
+
+    function followUpBadge(date) {
+      if (!date) return '';
+      const todayStr = today();
+      const cls = date < todayStr ? 'overdue' : date === todayStr ? 'today' : 'upcoming';
+      const label = date < todayStr ? '⚠ '+date : date === todayStr ? '📅 Today' : date;
+      return `<span class="follow-up-badge ${cls}">${label}</span>`;
+    }
+
+    function renderTable() {
+      const rows = filtered();
+      document.getElementById('lead-count').textContent = `${rows.length} lead${rows.length!==1?'s':''}`;
+      if (!rows.length) {
+        document.getElementById('leads-tbody').innerHTML =
+          '<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">🤝</div>No leads found</div></td></tr>';
+        return;
+      }
+      document.getElementById('leads-tbody').innerHTML = rows.map(r => {
+        const waMsg = encodeURIComponent(`হ্যালো ${r.contact_name||r.business_name}! আমি SaFa Naturals থেকে বলছি। আমাদের অর্গানিক মাশরুম সাপ্লাই নিয়ে আলোচনা করতে চাই।`);
+        return `<tr>
+          <td>
+            <div style="font-weight:500;">${r.business_name}</div>
+            ${r.notes?`<div style="font-size:11px;color:var(--cl);margin-top:2px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${r.notes}</div>`:''}
+          </td>
+          <td>
+            <div>${r.contact_name||'—'}</div>
+            ${r.phone?`<div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--cl);">${r.phone}</div>`:''}
+          </td>
+          <td style="color:var(--cl);font-size:12px;">${r.business_type||'—'}</td>
+          <td style="color:var(--cl);font-size:12px;">${[r.location,r.district].filter(Boolean).join(', ')||'—'}</td>
+          <td><span class="status s-${r.status||'cold'}">${r.status||'cold'}</span></td>
+          <td style="text-align:right;font-family:'DM Mono',monospace;">${r.monthly_potential?fmt(+r.monthly_potential):'—'}</td>
+          <td>${followUpBadge(r.next_followup)}</td>
+          <td>
+            <div class="td-actions">
+              ${r.phone?`<a href="https://wa.me/${r.phone.replace(/\D/g,'').replace(/^0/,'880')}?text=${waMsg}" target="_blank" rel="noopener" class="btn green sm">WA</a>`:''}
+              <button class="btn sm" onclick="window.editLead(${r.id})">Edit</button>
+              <button class="btn danger sm" onclick="window.deleteLead(${r.id})">Del</button>
+            </div>
+          </td>
+        </tr>`;
+      }).join('');
+    }
+
+    /* ── Modal ── */
+    function openModal(lead=null) {
+      _editId = lead?.id || null;
+      document.getElementById('modal-title').textContent = lead ? 'Edit Lead' : 'Add New Lead';
+      document.getElementById('f-biz').value          = lead?.business_name  || '';
+      document.getElementById('f-contact').value      = lead?.contact_name   || '';
+      document.getElementById('f-phone').value        = lead?.phone          || '';
+      document.getElementById('f-email').value        = lead?.email          || '';
+      document.getElementById('f-type').value         = lead?.business_type  || '';
+      document.getElementById('f-location').value     = lead?.location       || '';
+      document.getElementById('f-district').value     = lead?.district       || '';
+      document.getElementById('f-status').value       = lead?.status         || 'cold';
+      document.getElementById('f-potential').value    = lead?.monthly_potential || '';
+      document.getElementById('f-last-contact').value = lead?.last_contact   || '';
+      document.getElementById('f-followup').value     = lead?.next_followup  || '';
+      document.getElementById('f-notes').value        = lead?.notes          || '';
+      document.getElementById('modal').classList.add('open');
+    }
+
+    function closeModal() { document.getElementById('modal').classList.remove('open'); _editId=null; }
+
+    document.getElementById('add-lead-btn').addEventListener('click', ()=>openModal());
+    document.getElementById('modal-cancel').addEventListener('click', closeModal);
+    document.getElementById('modal').addEventListener('click', e=>{ if(e.target===e.currentTarget) closeModal(); });
+
+    document.getElementById('modal-save').addEventListener('click', async () => {
+      const biz = document.getElementById('f-biz').value.trim();
+      if (!biz) { toast('Business name is required', 'err'); return; }
+
+      const payload = {
+        business_name:     biz,
+        contact_name:      document.getElementById('f-contact').value.trim()||null,
+        phone:             document.getElementById('f-phone').value.trim()||null,
+        email:             document.getElementById('f-email').value.trim()||null,
+        business_type:     document.getElementById('f-type').value||null,
+        location:          document.getElementById('f-location').value.trim()||null,
+        district:          document.getElementById('f-district').value.trim()||null,
+        status:            document.getElementById('f-status').value||'cold',
+        monthly_potential: parseFloat(document.getElementById('f-potential').value)||null,
+        last_contact:      document.getElementById('f-last-contact').value||null,
+        next_followup:     document.getElementById('f-followup').value||null,
+        notes:             document.getElementById('f-notes').value.trim()||null,
+        added_by:          userEmail,
+      };
+
+      let error;
+      if (_editId) {
+        ({ error } = await sb.from('b2b_pipeline').update(payload).eq('id', _editId));
+      } else {
+        ({ error } = await sb.from('b2b_pipeline').insert([payload]));
+      }
+      if (error) { toast(error.message, 'err'); return; }
+      toast(_editId ? 'Lead updated' : 'Lead added');
+      closeModal();
+      load();
+    });
+
+    window.editLead   = (id) => openModal(_all.find(r=>r.id===id));
+    window.deleteLead = async (id) => {
+      if (!confirm('Delete this lead?')) return;
+      const { error } = await sb.from('b2b_pipeline').delete().eq('id', id);
+      if (error) { toast(error.message, 'err'); return; }
+      toast('Deleted');
+      load();
+    };
+
+    /* ── Filters ── */
+    let searchTimer;
+    document.getElementById('search-input').addEventListener('input', ()=>{ clearTimeout(searchTimer); searchTimer=setTimeout(renderTable,250); });
+    document.getElementById('filter-status').addEventListener('change', renderTable);
+    document.getElementById('filter-type').addEventListener('change', renderTable);
+
+    /* ── CSV Export ── */
+    document.getElementById('export-btn').addEventListener('click', ()=>{
+      const rows = filtered();
+      const csv = [
+        ['Business','Contact','Phone','Type','Location','District','Status','Monthly Potential','Last Contact','Follow-up','Notes'],
+        ...rows.map(r=>[`"${r.business_name}"`,`"${r.contact_name||''}"`,r.phone||'',r.business_type||'',r.location||'',r.district||'',r.status,r.monthly_potential||'',r.last_contact||'',r.next_followup||'',`"${(r.notes||'').replace(/"/g,'""')}"`])
+      ].map(r=>r.join(',')).join('\n');
+      const a = Object.assign(document.createElement('a'),{href:'data:text/csv;charset=utf-8,'+encodeURIComponent(csv),download:`safa_pipeline_${today()}.csv`});
+      a.click();
+    });
+
+    load();
+  </script>
+</body>
+</html>

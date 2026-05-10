@@ -323,9 +323,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);disp
 .hw-list{display:flex;flex-direction:column;gap:7px;font-size:.78rem;color:var(--txt2)}
 .hw-list strong{color:var(--txt);font-weight:600}
 </style>
-  <script type="module" crossorigin src="/assets/dashboard-B0LIWzas.js"></script>
-  <link rel="modulepreload" crossorigin href="/assets/index-DshXEMtg.js">
-  <link rel="modulepreload" crossorigin href="/assets/admin-auth-CZb-V-WK.js">
+  <script type="module" crossorigin src="/assets/dashboard-BFFrncwl.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="/assets/index-B-jIxwbw.js">
+  <link rel="modulepreload" crossorigin href="/assets/admin-auth-rHatrkP5.js">
 </head>
 <body>
 
@@ -2100,7 +2101,7 @@ function renderRoomCards() {
 //  OUTDOOR WEATHER (OpenWeatherMap)
 //  Free tier: 60 calls/min — we only call on load + every 30 min
 // ══════════════════════════════════════
-const OWM_KEY = ''
+const OWM_KEY = '0c81ecbea5bf55551464bb23c206ce51'
 
 async function fetchWeather() {
   if (!OWM_KEY) {
