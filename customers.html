@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Customers — SaFa Naturals Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;}
+    :root{--bg:#060d09;--bg2:#0d1f12;--bg3:#122018;--border:rgba(255,255,255,.07);--c:#f5efe6;--cm:rgba(245,239,230,.6);--cl:rgba(245,239,230,.35);--al:#c49a3c;--green:#5fcf80;--red:#e05a2b;}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--c);min-height:100vh;margin:0;-webkit-font-smoothing:antialiased;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes expand{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+
+    /* ── Page ── */
+    .page{max-width:1280px;margin:0 auto;padding:28px 24px 64px;animation:fadeUp .3s ease;}
+
+    /* ── Header ── */
+    .page-header{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px;}
+    .page-title{font-family:'Syne',sans-serif;font-size:24px;font-weight:700;color:var(--c);margin:0;}
+    .page-title em{font-style:italic;color:var(--al);}
+
+    /* ── Stat strip ── */
+    .stat-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;}
+    @media(max-width:700px){.stat-strip{grid-template-columns:repeat(2,1fr);}}
+    .stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px 18px;}
+    .stat-lbl{font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--cl);margin-bottom:6px;}
+    .stat-val{font-family:'DM Mono',monospace;font-size:22px;font-weight:500;color:var(--c);}
+    .stat-val.green{color:var(--green);}
+
+    /* ── Toolbar ── */
+    .toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:18px;}
+    .f-search{background:var(--bg2);border:1px solid var(--border);border-radius:6px;color:var(--c);font-family:'DM Sans',sans-serif;font-size:13px;padding:9px 13px;outline:none;min-width:220px;}
+    .f-search:focus{border-color:rgba(196,154,60,.4);}
+    .f-select{background:var(--bg2);border:1px solid var(--border);border-radius:6px;color:var(--c);font-family:'DM Sans',sans-serif;font-size:13px;padding:9px 12px;outline:none;cursor:pointer;}
+    .f-action-btn{font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:9px 16px;border-radius:5px;cursor:pointer;transition:all .2s;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.03);color:rgba(245,239,230,.65);display:inline-flex;align-items:center;gap:6px;}
+    .f-action-btn:hover{border-color:rgba(255,255,255,.25);color:var(--c);background:rgba(255,255,255,.06);}
+    .f-action-btn.green-btn{color:var(--green);border-color:rgba(95,207,128,.25);background:rgba(95,207,128,.05);}
+    .f-action-btn.green-btn:hover{background:rgba(95,207,128,.12);border-color:rgba(95,207,128,.5);}
+    .result-count{font-size:12px;color:var(--cl);margin-left:auto;}
+
+    /* ── Table ── */
+    .table-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+    .table-scroll{overflow-x:auto;}
+    table{width:100%;border-collapse:collapse;}
+    th{font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--cl);padding:11px 14px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap;}
+    td{padding:12px 14px;font-size:13px;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:middle;}
+    tr:last-child td{border-bottom:none;}
+    tr.order-row{cursor:pointer;}
+    tr.order-row:hover td{background:rgba(255,255,255,.025);}
+    tr.order-row.expanded td{background:rgba(196,154,60,.04);}
+    .td-chevron{width:32px;padding:12px 8px 12px 14px;}
+    .expand-chevron{display:block;transition:transform .2s;color:rgba(245,239,230,.3);}
+    .order-row.expanded .expand-chevron{transform:rotate(180deg);}
+    .cell-id{font-weight:500;color:var(--c);}
+    .cell-sub{font-size:11px;color:var(--cl);margin-top:2px;}
+    .cell-phone{font-family:'DM Mono',monospace;font-size:12px;}
+    .cell-spent{font-family:'DM Mono',monospace;font-weight:500;color:var(--al);}
+    .cust-order-count{font-family:'DM Mono',monospace;font-size:14px;font-weight:500;}
+    .cust-repeat-label{font-size:9px;font-family:'Syne',sans-serif;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--green);margin-top:2px;}
+    .status-badge{display:inline-flex;padding:3px 8px;border-radius:4px;font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;}
+    .s-pending{background:rgba(196,154,60,.1);color:var(--al);}
+    .s-confirmed,.s-processing{background:rgba(95,207,128,.1);color:var(--green);}
+    .s-shipped{background:rgba(100,140,255,.1);color:#7ba3ff;}
+    .s-delivered{background:rgba(95,207,128,.15);color:var(--green);}
+    .s-cancelled,.s-returned{background:rgba(224,90,43,.1);color:var(--red);}
+
+    /* ── Customer detail panel ── */
+    .cust-orders-row td{padding:0;border-bottom:1px solid rgba(255,255,255,.05);}
+    .cust-orders-panel{padding:16px 20px 20px;background:rgba(255,255,255,.015);animation:expand .2s ease;}
+    .cust-orders-title{font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--cl);margin-bottom:12px;}
+    .cust-order-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:13px;flex-wrap:wrap;gap:8px;}
+    .cust-order-id{font-family:'DM Mono',monospace;font-size:12px;font-weight:500;color:var(--c);}
+    .cust-order-meta{font-size:11px;color:var(--cl);}
+    .cust-order-total{font-family:'DM Mono',monospace;font-weight:500;color:var(--al);}
+    .cust-wa-wrap{margin-top:14px;}
+
+    /* ── Empty ── */
+    .table-empty{text-align:center;padding:48px 20px;}
+    .table-empty-icon{font-size:32px;margin-bottom:10px;}
+    .table-empty-text{font-size:13px;color:var(--cl);}
+
+    /* ── Toast ── */
+    .toast-stack{position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;gap:8px;}
+    @keyframes toastIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+    .toast{display:flex;align-items:center;gap:10px;padding:12px 18px;border-radius:8px;font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;animation:toastIn .3s ease;box-shadow:0 8px 24px rgba(0,0,0,.4);min-width:200px;}
+    .toast.info{background:#122018;border:1px solid rgba(196,154,60,.3);color:var(--al);}
+    .toast.error{background:#1e0d08;border:1px solid rgba(224,90,43,.3);color:var(--red);}
+  </style>
+</head>
+<body>
+
+  <div class="page">
+    <div class="page-header">
+      <h1 class="page-title">Customer <em>Directory</em></h1>
+      <button class="f-action-btn" id="export-btn">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export CSV
+      </button>
+    </div>
+
+    <!-- Stats -->
+    <div class="stat-strip">
+      <div class="stat-card"><div class="stat-lbl">Total Customers</div><div class="stat-val" id="s-total">—</div></div>
+      <div class="stat-card"><div class="stat-lbl">Repeat Buyers</div><div class="stat-val green" id="s-repeat">—</div></div>
+      <div class="stat-card"><div class="stat-lbl">Total Revenue</div><div class="stat-val" id="s-revenue">—</div></div>
+      <div class="stat-card"><div class="stat-lbl">Avg Customer Value</div><div class="stat-val" id="s-aov">—</div></div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <input type="text" class="f-search" id="search-input" placeholder="Search name, phone or district…">
+      <select class="f-select" id="sort-select">
+        <option value="spent">Highest Spend</option>
+        <option value="orders">Most Orders</option>
+        <option value="recent">Most Recent</option>
+        <option value="name">Name A–Z</option>
+      </select>
+      <select class="f-select" id="type-select">
+        <option value="all">All Customers</option>
+        <option value="repeat">Repeat (2+ orders)</option>
+        <option value="new">New (1 order)</option>
+      </select>
+      <span class="result-count" id="result-count"></span>
+    </div>
+
+    <!-- Table -->
+    <div class="table-wrap">
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th></th>
+              <th>Customer</th>
+              <th>Phone</th>
+              <th>Location</th>
+              <th>Orders</th>
+              <th>Total Spent</th>
+              <th>Last Order</th>
+              <th>Last Status</th>
+            </tr>
+          </thead>
+          <tbody id="cust-tbody">
+            <tr><td colspan="8"><div class="table-empty"><div class="table-empty-icon">⏳</div><p class="table-empty-text">Loading customers…</p></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-stack" id="toast-stack"></div>
+
+  <script type="module">
+    import { createClient }             from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+    import { requireAdmin }             from '/src/admin-auth.js';
+    import { mountAdminNav }            from '/src/admin-nav.js';
+
+    const sb = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY);
+
+    const session = await requireAdmin(sb);
+    if (!session) { window.location.href = 'admin.html'; }
+
+    mountAdminNav({ page: 'customers', supabase: sb, email: session.user.email });
+
+    /* ── Helpers ── */
+    const fmt    = n => '৳' + (n||0).toLocaleString('en-BD');
+    const _dayFmt = new Intl.DateTimeFormat('en-GB', { day:'numeric', month:'short', year:'numeric' });
+    const fmtDay = s => _dayFmt.format(new Date(s));
+    const cap    = s => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
+    const SELLER_WA = '8801970099378';
+
+    function toast(msg, type='info') {
+      const el = Object.assign(document.createElement('div'), { className:`toast ${type}`, textContent:msg });
+      document.getElementById('toast-stack').appendChild(el);
+      setTimeout(() => el.remove(), 3500);
+    }
+
+    /* ── State ── */
+    let _all = [], _sortKey = 'spent', _typeKey = 'all';
+
+    /* ── Load ── */
+    async function load() {
+      const { data, error } = await sb.from('orders')
+        .select('id,order_number,customer_name,customer_phone,district,thana,total_amount,status,created_at')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        document.getElementById('cust-tbody').innerHTML =
+          `<tr><td colspan="8"><div class="table-empty"><div class="table-empty-icon">⚠️</div><p class="table-empty-text">${error.message}</p></div></td></tr>`;
+        return;
+      }
+
+      /* Aggregate by phone */
+      const map = {};
+      (data || []).forEach(o => {
+        const phone = o.customer_phone || 'unknown';
+        if (!map[phone]) map[phone] = { phone, name: o.customer_name, district: o.district, thana: o.thana, orders: [], totalSpent: 0 };
+        map[phone].orders.push(o);
+        map[phone].totalSpent += o.total_amount || 0;
+        if (new Date(o.created_at) > new Date(map[phone].orders[0]?.created_at || 0)) {
+          map[phone].name = o.customer_name;
+          map[phone].district = o.district;
+          map[phone].thana = o.thana;
+        }
+      });
+
+      _all = Object.values(map).sort((a, b) => b.totalSpent - a.totalSpent);
+
+      /* Stats */
+      const repeat  = _all.filter(c => c.orders.length >= 2).length;
+      const revenue = _all.reduce((s, c) => s + c.totalSpent, 0);
+      document.getElementById('s-total').textContent   = _all.length;
+      document.getElementById('s-repeat').textContent  = repeat;
+      document.getElementById('s-revenue').textContent = fmt(revenue);
+      document.getElementById('s-aov').textContent     = _all.length ? fmt(Math.round(revenue / _all.length)) : '—';
+
+      render();
+    }
+
+    function filtered() {
+      const term = document.getElementById('search-input').value.trim().toLowerCase();
+      let list = [..._all];
+      if (_typeKey === 'repeat') list = list.filter(c => c.orders.length >= 2);
+      else if (_typeKey === 'new') list = list.filter(c => c.orders.length === 1);
+      if (term) list = list.filter(c =>
+        c.name?.toLowerCase().includes(term) || c.phone.includes(term) || (c.district||'').toLowerCase().includes(term)
+      );
+      if (_sortKey === 'spent')  list.sort((a,b) => b.totalSpent - a.totalSpent);
+      if (_sortKey === 'orders') list.sort((a,b) => b.orders.length - a.orders.length);
+      if (_sortKey === 'recent') list.sort((a,b) => new Date(b.orders[0]?.created_at||0) - new Date(a.orders[0]?.created_at||0));
+      if (_sortKey === 'name')   list.sort((a,b) => (a.name||'').localeCompare(b.name||''));
+      return list;
+    }
+
+    function render() {
+      const list = filtered();
+      document.getElementById('result-count').textContent = `${list.length} customer${list.length !== 1 ? 's' : ''}`;
+
+      if (!list.length) {
+        document.getElementById('cust-tbody').innerHTML =
+          '<tr><td colspan="8"><div class="table-empty"><div class="table-empty-icon">👤</div><p class="table-empty-text">No customers found</p></div></td></tr>';
+        return;
+      }
+
+      document.getElementById('cust-tbody').innerHTML = list.map(c => {
+        const last    = c.orders[0];
+        const sc      = `s-${(last?.status || 'pending').toLowerCase()}`;
+        const waMsg   = encodeURIComponent(`হ্যালো ${c.name}! 🍄 SaFa Naturals থেকে বলছি।`);
+        const safePhone = c.phone.replace(/\+/g, '');
+        return `
+          <tr class="order-row" onclick="window.toggleCust('${safePhone}')">
+            <td class="td-chevron"><svg class="expand-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></td>
+            <td>
+              <div class="cell-id">${c.name || '—'}</div>
+              <div class="cell-sub">${c.orders.length} order${c.orders.length !== 1 ? 's' : ''}</div>
+            </td>
+            <td><span class="cell-phone">${c.phone}</span></td>
+            <td class="cell-sub">${c.thana ? c.thana + ', ' : ''}${c.district || '—'}</td>
+            <td>
+              <div class="cust-order-count">${c.orders.length}</div>
+              ${c.orders.length >= 2 ? '<div class="cust-repeat-label">Repeat buyer</div>' : ''}
+            </td>
+            <td><div class="cell-spent">${fmt(c.totalSpent)}</div></td>
+            <td class="cell-sub">${last ? fmtDay(last.created_at) : '—'}</td>
+            <td><span class="status-badge ${sc}">${cap(last?.status || 'unknown')}</span></td>
+          </tr>
+          <tr id="cust-det-${safePhone}" style="display:none;">
+            <td colspan="8">
+              <div class="cust-orders-panel">
+                <div class="cust-orders-title">Order History · ${c.name}</div>
+                ${c.orders.map(o => `
+                  <div class="cust-order-row">
+                    <div>
+                      <div class="cust-order-id">#${o.order_number}</div>
+                      <div class="cust-order-meta">${fmtDay(o.created_at)}</div>
+                    </div>
+                    <span class="status-badge s-${(o.status||'pending').toLowerCase()}">${cap(o.status||'pending')}</span>
+                    <div class="cust-order-total">${fmt(o.total_amount)}</div>
+                  </div>`).join('')}
+                <div class="cust-wa-wrap">
+                  <a class="f-action-btn green-btn" href="https://wa.me/${SELLER_WA}?text=${waMsg}" target="_blank" rel="noopener">
+                    <svg viewBox="0 0 24 24" width="11" height="11" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+                    WhatsApp ${c.name?.split(' ')[0] || ''}
+                  </a>
+                </div>
+              </div>
+            </td>
+          </tr>`;
+      }).join('');
+    }
+
+    window.toggleCust = (safePhone) => {
+      const det  = document.getElementById(`cust-det-${safePhone}`);
+      const row  = document.querySelector(`tr[onclick="window.toggleCust('${safePhone}')"]`);
+      if (!det) return;
+      const open = det.style.display !== 'none';
+      det.style.display = open ? 'none' : 'table-row';
+      row?.classList.toggle('expanded', !open);
+    };
+
+    /* ── Filters ── */
+    let _st;
+    document.getElementById('search-input').addEventListener('input', () => { clearTimeout(_st); _st = setTimeout(render, 250); });
+    document.getElementById('sort-select').addEventListener('change', e => { _sortKey = e.target.value; render(); });
+    document.getElementById('type-select').addEventListener('change', e => { _typeKey = e.target.value; render(); });
+
+    /* ── Export ── */
+    document.getElementById('export-btn').addEventListener('click', () => {
+      if (!_all.length) { toast('No data to export', 'error'); return; }
+      const rows = [
+        ['Name','Phone','District','Thana','Orders','Total Spent','Last Order','Last Status'],
+        ..._all.map(c => {
+          const last = c.orders[0];
+          return [`"${c.name}"`,`" ${c.phone}"`,`"${c.district||''}"`,`"${c.thana||''}"`,c.orders.length,c.totalSpent,last?fmtDay(last.created_at):'',last?.status||''].join(',');
+        }),
+      ].join('\n');
+      Object.assign(document.createElement('a'), {
+        href: 'data:text/csv;charset=utf-8,' + encodeURIComponent(rows),
+        download: `safa_customers_${new Date().toISOString().slice(0,10)}.csv`,
+      }).click();
+      toast(`Exported ${_all.length} customers`);
+    });
+
+    load();
+  </script>
+</body>
+</html>

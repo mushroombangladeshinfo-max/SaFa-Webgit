@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Farm Analytics — SaFa Naturals</title>
+<link rel="icon" type="image/png" href="/favicon.png"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&family=Cormorant+Garamond:wght@300;600&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root{
+  --g900:#060e09;--g800:#0e1a13;--g700:#121f16;
+  --c:#f5efe6;--al:#d9b254;--a:#c49a3c;
+  --border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.13);
+  --green:#5fcf80;--red:#e05252;--red-dim:rgba(224,82,82,.1);
+  --gold-dim:rgba(217,178,84,.1);--r:10px;--r2:6px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:14px}
+body{font-family:'DM Sans',sans-serif;background:var(--g900);color:var(--c);min-height:100vh}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:2px}
+
+/* ── Topbar ── */
+.topbar{height:58px;background:var(--g800);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 28px;gap:16px;position:sticky;top:0;z-index:100}
+.back-link{font-size:11px;color:rgba(245,239,230,.38);text-decoration:none;display:flex;align-items:center;gap:5px;transition:color .2s;flex-shrink:0}
+.back-link:hover{color:rgba(245,239,230,.75)}
+.back-link svg{width:13px;height:13px}
+.top-sep{width:1px;height:20px;background:var(--border);flex-shrink:0}
+.top-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;flex:1}
+/* Date range pills */
+.range-btns{display:flex;gap:4px;flex-shrink:0}
+.range-btn{font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.1em;padding:6px 12px;border-radius:var(--r2);border:1px solid var(--border);background:none;color:rgba(245,239,230,.4);cursor:pointer;transition:all .15s}
+.range-btn:hover{border-color:var(--border2);color:var(--c)}
+.range-btn.active{background:rgba(217,178,84,.12);border-color:rgba(217,178,84,.3);color:var(--al)}
+/* Export button */
+.export-btn{font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.1em;padding:7px 14px;border-radius:var(--r2);border:1px solid var(--border);background:rgba(255,255,255,.03);color:rgba(245,239,230,.45);cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:5px;white-space:nowrap}
+.export-btn:hover{border-color:var(--border2);color:var(--c);background:rgba(255,255,255,.06)}
+
+/* ── Content ── */
+.content{max-width:1300px;margin:0 auto;padding:28px 28px 60px}
+
+/* ── Metric cards ── */
+.metrics-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+.metric-card{background:var(--g800);border:1px solid var(--border);border-radius:var(--r);padding:18px 20px}
+.metric-lbl{font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:rgba(245,239,230,.35);margin-bottom:8px}
+.metric-val{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:300;color:var(--c);line-height:1;margin-bottom:4px}
+.metric-val.green{color:var(--green)}
+.metric-val.red{color:var(--red)}
+.metric-val.gold{color:var(--al)}
+.metric-sub{font-size:11px;color:rgba(245,239,230,.3)}
+
+/* ── Charts grid ── */
+.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.chart-card{background:var(--g800);border:1px solid var(--border);border-radius:var(--r);padding:20px 22px}
+.chart-title{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;color:var(--c);margin-bottom:4px}
+.chart-sub{font-size:10px;color:rgba(245,239,230,.3);margin-bottom:16px}
+.chart-wrap{position:relative;height:220px}
+.chart-wrap.tall{height:280px}
+
+/* ── Loading / error states ── */
+.state-center{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:60px 24px;text-align:center;grid-column:1/-1}
+.state-icon{font-size:40px}
+.state-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:rgba(245,239,230,.6)}
+.state-sub{font-size:12px;color:rgba(245,239,230,.35);max-width:320px;line-height:1.6}
+.state-btn{font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.1em;padding:8px 16px;border-radius:var(--r2);border:1px solid rgba(217,178,84,.3);background:rgba(217,178,84,.1);color:var(--al);cursor:pointer;margin-top:4px}
+.state-btn:hover{background:rgba(217,178,84,.2)}
+.chart-empty{display:flex;align-items:center;justify-content:center;height:100%;font-size:12px;color:rgba(245,239,230,.25)}
+
+/* Responsive */
+@media(max-width:1000px){.metrics-grid{grid-template-columns:repeat(2,1fr)}.charts-grid{grid-template-columns:1fr}}
+@media(max-width:600px){.metrics-grid{grid-template-columns:1fr 1fr}.topbar{padding:0 16px;gap:10px}.top-title{font-size:12px}.content{padding:18px 16px 40px}}
+</style>
+  <script type="module" crossorigin src="/assets/farmAnalytics-CKj58Cvm.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="/assets/index-B-jIxwbw.js">
+  <link rel="modulepreload" crossorigin href="/assets/admin-auth-rHatrkP5.js">
+</head>
+<body>
+
+<header class="topbar">
+  <a href="admin.html" class="back-link">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+    Admin
+  </a>
+  <div class="top-sep"></div>
+  <div class="top-title">🌿 Farm Analytics</div>
+  <div class="range-btns" id="range-btns">
+    <button type="button" class="range-btn active" data-days="7">7D</button>
+    <button type="button" class="range-btn" data-days="14">14D</button>
+    <button type="button" class="range-btn" data-days="30">30D</button>
+    <button type="button" class="range-btn" data-days="90">90D</button>
+  </div>
+  <button type="button" class="export-btn" id="export-btn">
+    <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
+    Export CSV
+  </button>
+</header>
+
+<div class="content">
+
+  <!-- Metric cards -->
+  <div class="metrics-grid" id="metrics-grid">
+    <div class="metric-card">
+      <div class="metric-lbl">Total Harvest</div>
+      <div class="metric-val green" id="m-harvest">—</div>
+      <div class="metric-sub">fresh mushroom (kg)</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-lbl">Total Revenue</div>
+      <div class="metric-val gold" id="m-revenue">—</div>
+      <div class="metric-sub">from all sales</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-lbl">Net Profit / Loss</div>
+      <div class="metric-val" id="m-net">—</div>
+      <div class="metric-sub">revenue minus expenses</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-lbl">Avg QC Pass Rate</div>
+      <div class="metric-val" id="m-qc">—</div>
+      <div class="metric-sub">quality control average</div>
+    </div>
+  </div>
+
+  <!-- Charts -->
+  <div class="charts-grid" id="charts-grid">
+    <!-- Harvest trend -->
+    <div class="chart-card">
+      <div class="chart-title">Harvest Trend</div>
+      <div class="chart-sub">Daily fresh mushroom output (kg)</div>
+      <div class="chart-wrap"><canvas id="chart-harvest"></canvas></div>
+    </div>
+    <!-- Revenue vs Expenses -->
+    <div class="chart-card">
+      <div class="chart-title">Revenue vs Expenses</div>
+      <div class="chart-sub">Daily financial performance (৳)</div>
+      <div class="chart-wrap"><canvas id="chart-finance"></canvas></div>
+    </div>
+    <!-- QC Pass Rate -->
+    <div class="chart-card">
+      <div class="chart-title">QC Pass Rate</div>
+      <div class="chart-sub">Daily quality control (%) — 80% target line</div>
+      <div class="chart-wrap"><canvas id="chart-qc"></canvas></div>
+    </div>
+    <!-- Product revenue split -->
+    <div class="chart-card">
+      <div class="chart-title">Revenue by Product</div>
+      <div class="chart-sub">Contribution breakdown for selected period</div>
+      <div class="chart-wrap" style="display:flex;align-items:center;justify-content:center">
+        <canvas id="chart-products" style="max-height:220px;max-width:220px"></canvas>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

@@ -166,7 +166,7 @@
     /* Main content area */
     .dash-content { max-width:1280px; margin:0 auto; padding:32px 32px 64px; }
     /* Quick actions banner */
-    .quick-actions-bar { display:grid; grid-template-columns:1.6fr 1fr 1fr 1fr 1fr; gap:12px; margin-bottom:28px; }
+    .quick-actions-bar { display:grid; grid-template-columns:1.6fr 1fr 1fr 1fr 1fr 1fr 1fr; gap:12px; margin-bottom:28px; }
     .qa-card { display:flex; align-items:center; gap:14px; padding:16px 18px; border-radius:10px; border:1px solid rgba(255,255,255,.08); background:rgba(255,255,255,.03); text-decoration:none; color:var(--c); transition:all .2s; }
     .qa-card:hover { border-color:rgba(255,255,255,.14); background:rgba(255,255,255,.06); transform:translateY(-2px); }
     .qa-card.qa-primary { border-color:rgba(217,178,84,.28); background:rgba(217,178,84,.07); }
@@ -180,9 +180,10 @@
     .qa-card:hover .qa-arrow { color:rgba(245,239,230,.6); transform:translateX(3px); }
     .qa-card.qa-primary .qa-arrow { color:rgba(217,178,84,.4); }
     .qa-card.qa-primary:hover .qa-arrow { color:var(--al); }
-    @media(max-width:1100px) { .quick-actions-bar { grid-template-columns:1.6fr 1fr 1fr; } }
-    @media(max-width:860px) { .quick-actions-bar { grid-template-columns:1fr 1fr; } }
-    @media(max-width:600px) { .quick-actions-bar { grid-template-columns:1fr; } }
+    @media(max-width:1300px) { .quick-actions-bar { grid-template-columns:1.6fr 1fr 1fr 1fr; } }
+    @media(max-width:1000px) { .quick-actions-bar { grid-template-columns:1fr 1fr 1fr; } }
+    @media(max-width:700px)  { .quick-actions-bar { grid-template-columns:1fr 1fr; } }
+    @media(max-width:480px)  { .quick-actions-bar { grid-template-columns:1fr; } }
 
     /* Page heading */
     .dash-heading { margin-bottom:28px; }
@@ -653,17 +654,25 @@
 
         <!-- Secondary nav links -->
         <nav class="tb-nav" aria-label="Admin tools">
-          <a href="farm-log.html" class="tb-nav-link">
-            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg>
-            Farm Log
+          <a href="customers.html" class="tb-nav-link">
+            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg>
+            Customers
           </a>
-          <a href="dashboard.html" class="tb-nav-link">
-            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3"/></svg>
-            IoT Dashboard
+          <a href="products.html" class="tb-nav-link">
+            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+            Products
+          </a>
+          <a href="expenses.html" class="tb-nav-link">
+            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            Expenses
+          </a>
+          <a href="pipeline.html" class="tb-nav-link">
+            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"/></svg>
+            Pipeline
           </a>
           <a href="farm-analytics.html" class="tb-nav-link">
-            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/></svg>
-            Analytics
+            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625z"/></svg>
+            Farm
           </a>
         </nav>
 
@@ -734,6 +743,22 @@
           </div>
           <svg class="qa-arrow" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
         </button>
+        <a href="expenses.html" class="qa-card">
+          <div class="qa-icon">💰</div>
+          <div class="qa-text">
+            <div class="qa-title">Expenses</div>
+            <div class="qa-sub">Daily + one-off costs</div>
+          </div>
+          <svg class="qa-arrow" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+        </a>
+        <a href="pipeline.html" class="qa-card">
+          <div class="qa-icon">🤝</div>
+          <div class="qa-text">
+            <div class="qa-title">B2B Pipeline</div>
+            <div class="qa-sub">Customer leads & deals</div>
+          </div>
+          <svg class="qa-arrow" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+        </a>
       </div>
 
       <!-- Push notification enable bar (shown once, until granted) -->
@@ -785,14 +810,14 @@
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
           Analytics
         </button>
-        <button type="button" class="dash-tab" id="tab-products" onclick="switchDashTab('products')">
+        <a href="products.html" class="dash-tab" style="text-decoration:none;">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
-          Products
-        </button>
-        <button type="button" class="dash-tab" id="tab-customers" onclick="switchDashTab('customers')">
+          Products ↗
+        </a>
+        <a href="customers.html" class="dash-tab" style="text-decoration:none;">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
-          Customers
-        </button>
+          Customers ↗
+        </a>
       </div>
 
       <!-- ═══════════════ ORDERS PANEL ═══════════════ -->
