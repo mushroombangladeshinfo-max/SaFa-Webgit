@@ -18,6 +18,7 @@
 ============================================================ */
 
 /* ── Module imports ── */
+import './sentry.js';
 import { initNav, initHamburger, initSmoothScroll, closeMenu } from './nav.js';
 import { syncProductPrices } from './products.js';
 import { initProductFilters }  from './filters.js';
