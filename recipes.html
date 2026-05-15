@@ -796,6 +796,9 @@
       transition: opacity 0.35s cubic-bezier(0.22,1,0.36,1),
                   transform 0.35s cubic-bezier(0.22,1,0.36,1);
     }
+    .rp-modal::-webkit-scrollbar { width: 4px; }
+    .rp-modal::-webkit-scrollbar-track { background: transparent; }
+    .rp-modal::-webkit-scrollbar-thumb { background: rgba(196,154,60,0.2); border-radius: 2px; }
     .rp-modal-overlay.open .rp-modal {
       opacity: 1;
       transform: translateY(0);
