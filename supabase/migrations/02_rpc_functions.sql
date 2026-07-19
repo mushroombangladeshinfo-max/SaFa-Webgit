@@ -37,7 +37,7 @@ BEGIN
     RETURN jsonb_build_object('valid', FALSE, 'message', 'This coupon has expired.');
   END IF;
 
-  IF c.max_uses IS NOT NULL AND c.used_count >= c.max_uses THEN
+  IF c.max_uses IS NOT NULL AND c.uses >= c.max_uses THEN
     RETURN jsonb_build_object('valid', FALSE, 'message', 'This coupon has reached its usage limit.');
   END IF;
 
@@ -62,7 +62,7 @@ GRANT EXECUTE ON FUNCTION public.validate_coupon(TEXT, NUMERIC) TO anon, authent
 
 
 -- ────────────────────────────────────────────────────────────────────────────
--- 1b. Redemption counter — keeps used_count honest without giving the
+-- 1b. Redemption counter — keeps `uses` honest without giving the
 -- browser any write access to coupons. Called by admin panel when an order
 -- is confirmed, or wire it into an order-insert trigger later.
 -- ────────────────────────────────────────────────────────────────────────────
@@ -72,7 +72,7 @@ LANGUAGE sql SECURITY DEFINER
 SET search_path = public
 AS $$
   UPDATE public.coupons
-     SET used_count = used_count + 1
+     SET uses = uses + 1
    WHERE code = UPPER(TRIM(p_code));
 $$;
 

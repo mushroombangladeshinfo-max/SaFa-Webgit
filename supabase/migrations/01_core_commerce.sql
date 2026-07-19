@@ -181,16 +181,17 @@ CREATE POLICY order_items_admin_delete ON public.order_items
 -- counts and margins are never exposed to the browser.
 -- ────────────────────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS public.coupons (
-  code        TEXT PRIMARY KEY,                  -- stored UPPERCASE
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  code        TEXT NOT NULL UNIQUE,               -- stored UPPERCASE
   type        TEXT NOT NULL CHECK (type IN ('percent','fixed')),
   value       NUMERIC(10,2) NOT NULL CHECK (value > 0),
-  min_order   NUMERIC(10,2) NOT NULL DEFAULT 0,  -- minimum subtotal to qualify
-  max_uses    INTEGER,                           -- NULL = unlimited
-  used_count  INTEGER NOT NULL DEFAULT 0,
+  min_order   NUMERIC(10,2) DEFAULT 0,            -- minimum subtotal to qualify
+  max_uses    INTEGER,                            -- NULL = unlimited
+  uses        INTEGER DEFAULT 0,                  -- redemption count so far
   description TEXT,
-  active      BOOLEAN NOT NULL DEFAULT TRUE,
-  expires_at  TIMESTAMPTZ,                       -- NULL = never expires
-  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  active      BOOLEAN DEFAULT TRUE,
+  expires_at  TIMESTAMPTZ,                        -- NULL = never expires
+  created_at  TIMESTAMPTZ DEFAULT NOW()
 );
 
 ALTER TABLE public.coupons ENABLE ROW LEVEL SECURITY;

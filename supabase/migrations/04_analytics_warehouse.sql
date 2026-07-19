@@ -388,10 +388,12 @@ LEFT JOIN (
 ) ads ON ads.month = mo.month;
 
 -- ── 4g. Product performance per month (from normalised line items) ─────────
+-- order_items has no timestamp of its own — items are created at the same
+-- moment as their parent order, so the order's created_at is authoritative.
 CREATE OR REPLACE VIEW public.v_product_month
 WITH (security_invoker = true) AS
 SELECT
-  DATE_TRUNC('month', oi.created_at)::DATE   AS month,
+  DATE_TRUNC('month', o.created_at)::DATE    AS month,
   oi.product_id,
   oi.product_name,
   SUM(oi.quantity)                           AS units_sold,
