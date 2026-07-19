@@ -118,10 +118,44 @@
     .conn-name{font-size:12.5px;color:var(--c);flex:1;}
     .conn-sub{font-size:10px;color:var(--cl);margin-top:2px;}
 
+    /* ── Channel on/off chips — global filter, affects every tab ── */
+    .chips-bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:-8px 0 20px;}
+    .chips-label{font-family:'Syne',sans-serif;font-size:8.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--cl);margin-right:2px;}
+    .chip{display:inline-flex;align-items:center;gap:7px;font-size:12px;padding:7px 13px;border-radius:99px;border:1px solid var(--border);background:rgba(255,255,255,.03);color:var(--cm);cursor:pointer;transition:all .15s;font-family:'DM Sans',sans-serif;}
+    .chip .ch-dot{margin-right:0;}
+    .chip.off{opacity:.38;text-decoration:line-through;}
+    .chip:hover{border-color:rgba(255,255,255,.2);}
+
+    /* ── Attention highlights (status colors + arrow, never color alone) ── */
+    .hl-good{color:var(--green) !important;}
+    .hl-bad{color:var(--red) !important;}
+    .hl-arrow{font-size:10px;margin-left:3px;}
+
+    /* ── Connection card on/off switch ── */
+    .conn-toggle{font-family:'Syne',sans-serif;font-size:8px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:5px 10px;border-radius:99px;border:1px solid var(--border);background:none;color:var(--cl);cursor:pointer;transition:all .15s;}
+    .conn-toggle.on{border-color:rgba(95,207,128,.35);color:var(--green);}
+    .conn.inactive{opacity:.45;}
+
+    /* ── AI Insights panel ── */
+    .ai-output{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:20px 22px;font-size:13.5px;line-height:1.85;color:var(--cm);white-space:pre-wrap;display:none;}
+    .ai-output.visible{display:block;animation:fadeUp .25s ease;}
+    .ai-output strong{color:var(--c);}
+    .ai-status{font-size:12px;color:var(--cl);display:none;align-items:center;gap:8px;margin-bottom:12px;}
+    .ai-status.visible{display:flex;}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .ai-spinner{width:14px;height:14px;border:2px solid rgba(196,154,60,.2);border-top-color:var(--al);border-radius:50%;animation:spin .8s linear infinite;}
+    .ai-note{font-size:11.5px;color:var(--cl);line-height:1.8;margin-top:12px;}
+    .ai-note code{background:rgba(255,255,255,.06);padding:1px 6px;border-radius:4px;font-size:10.5px;}
+
     .toast-wrap{position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;gap:8px;}
     .toast{padding:12px 18px;border-radius:8px;font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;animation:fadeUp .3s ease;}
     .toast.ok{background:#1a3322;border:1px solid rgba(95,207,128,.3);color:var(--green);}
     .toast.err{background:#2a1510;border:1px solid rgba(224,90,43,.3);color:var(--red);}
+
+    /* Utilities (replaces inline styles) */
+    .mb-0{margin-bottom:0;} .mb-16{margin-bottom:16px;} .mt-0{margin-top:0;}
+    .w-280{max-width:280px;}
+    .label-opt{opacity:.5;font-size:8px;text-transform:none;letter-spacing:0;}
 
     @media(max-width:768px){
       input,select{font-size:16px;} /* no iOS zoom */
@@ -153,7 +187,16 @@
       <button type="button" class="tab-btn active" data-tab="overview">Overview</button>
       <button type="button" class="tab-btn" data-tab="channels">Channels</button>
       <button type="button" class="tab-btn" data-tab="pnl">P&amp;L</button>
+      <button type="button" class="tab-btn" data-tab="ai">AI Insights</button>
       <button type="button" class="tab-btn" data-tab="entry">Data Entry</button>
+    </div>
+
+    <!-- Channel on/off — global filter. A channel toggled OFF (e.g. no
+         LinkedIn campaign running) is excluded from every number and chart
+         on this page. Persisted to channel_accounts.active. -->
+    <div class="chips-bar" role="group" aria-label="Channels included in analysis">
+      <span class="chips-label">Channels:</span>
+      <span id="chips-container"></span>
     </div>
 
     <!-- ══ TAB: OVERVIEW ══ -->
@@ -193,7 +236,7 @@
           <div class="chart-card-sub">Revenue by product, selected range</div>
           <div class="chart-wrap"><canvas id="chart-products"></canvas></div>
         </div>
-        <div class="table-card" style="margin-bottom:0;">
+        <div class="table-card mb-0">
           <div class="table-toolbar"><span class="table-title">Orders by District</span></div>
           <div class="scroll-x">
             <table>
@@ -241,7 +284,7 @@
 
     <!-- ══ TAB: P&L ══ -->
     <div class="tab-panel" id="tab-pnl">
-      <div class="chart-card" style="margin-bottom:16px;">
+      <div class="chart-card mb-16">
         <div class="chart-card-title">Revenue vs Total Costs — monthly</div>
         <div class="chart-card-sub">Costs = farm expenses + one-off + ad spend, ৳</div>
         <div class="chart-wrap tall"><canvas id="chart-pnl"></canvas></div>
@@ -259,6 +302,43 @@
           </table>
         </div>
       </div>
+    </div>
+
+    <!-- ══ TAB: AI INSIGHTS ══
+         Sends the loaded analytics summary to a local Ollama model
+         (fully on-device — data never leaves this computer) or any
+         OpenAI-compatible endpoint. Config persists in this browser. -->
+    <div class="tab-panel" id="tab-ai">
+      <div class="form-card">
+        <div class="form-title">AI Analyst — configuration</div>
+        <div class="form-grid">
+          <div class="fg">
+            <label for="ai-provider">Provider</label>
+            <select id="ai-provider">
+              <option value="ollama">Ollama (local, free, private)</option>
+              <option value="openai">OpenAI-compatible API (Groq / Gemini / etc.)</option>
+            </select>
+          </div>
+          <div class="fg"><label for="ai-url">Endpoint URL</label><input type="text" id="ai-url" placeholder="http://localhost:11434"></div>
+          <div class="fg"><label for="ai-model">Model</label><input type="text" id="ai-model" placeholder="llama3.2"></div>
+          <div class="fg"><label for="ai-key">API Key <span class="label-opt">(not needed for Ollama)</span></label><input type="password" id="ai-key" placeholder="PLACEHOLDER — only for hosted APIs"></div>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn primary" id="ai-generate">✦ Analyse My Business</button>
+          <button type="button" class="btn" id="ai-save-cfg">Save Config</button>
+        </div>
+        <p class="ai-note">
+          <strong>Ollama (recommended):</strong> free and 100% on-device. Install from
+          <code>ollama.com</code>, then run <code>ollama pull llama3.2</code>. For the browser to reach it,
+          start it with CORS open: <code>OLLAMA_ORIGINS="*" ollama serve</code> (Mac: run
+          <code>launchctl setenv OLLAMA_ORIGINS "*"</code> once, then restart Ollama).<br>
+          <strong>Hosted fallback:</strong> any OpenAI-compatible endpoint works — e.g. Groq
+          (free tier) with URL <code>https://api.groq.com/openai</code> and model <code>llama-3.1-8b-instant</code>.
+        </p>
+      </div>
+
+      <div class="ai-status" id="ai-status"><span class="ai-spinner"></span><span id="ai-status-text">Thinking…</span></div>
+      <div class="ai-output" id="ai-output" aria-live="polite"></div>
     </div>
 
     <!-- ══ TAB: DATA ENTRY ══ -->
@@ -292,7 +372,7 @@
         </div>
         <div class="form-actions">
           <button type="button" class="btn primary" id="me-save">Save Day</button>
-          <span class="csv-note" style="margin-top:0;">Same date + channel = the row is updated, not duplicated.</span>
+          <span class="csv-note mt-0">Same date + channel = the row is updated, not duplicated.</span>
         </div>
       </div>
 
@@ -300,7 +380,7 @@
       <div class="form-card">
         <div class="form-title">CSV Import (bulk / backfill)</div>
         <div class="form-actions" style="margin-top:0;">
-          <input type="file" id="csv-file" accept=".csv" aria-label="Choose CSV file" style="max-width:280px;">
+          <input type="file" id="csv-file" accept=".csv" aria-label="Choose CSV file" class="w-280">
           <button type="button" class="btn primary" id="csv-import">Import</button>
         </div>
         <p class="csv-note">
@@ -352,6 +432,71 @@
     const chColor = (c) => CHANNELS[c]?.color || CHANNELS.other.color;
     const chLabel = (c) => CHANNELS[c]?.label || c;
     const chDot   = (c) => `<span class="ch-dot" style="background:${chColor(c)}"></span>${chLabel(c)}`;
+
+    /* ════════ CHANNEL ON/OFF (global analysis filter) ════════
+       A channel toggled OFF is excluded from every number, chart and table.
+       State persists in channel_accounts.active (falls back gracefully if
+       the `active` column migration hasn't been run yet).
+       Because the SQL views aggregate ALL channels, marketing numbers are
+       computed here from a raw metrics cache filtered by the toggles. */
+    let channelAccounts = [];
+    let activeCh = new Set(Object.keys(CHANNELS).filter(c => c !== 'other'));
+    let metricsCache = [];   // raw marketing_metrics rows, last 24 months
+
+    async function loadChannelState() {
+      const { data } = await sb.from('channel_accounts').select('*').order('channel');
+      channelAccounts = data || [];
+      if (channelAccounts.length) {
+        activeCh = new Set(channelAccounts.filter(a => a.active !== false).map(a => a.channel));
+      }
+      renderChips();
+    }
+
+    async function loadMetricsCache() {
+      const { data, error } = await sb.from('marketing_metrics')
+        .select('metric_date,channel,spend,impressions,reach,clicks,engagements,followers,leads,conversions,revenue_attr')
+        .gte('metric_date', sinceISO(730)).order('metric_date').limit(10000);
+      if (checkSetupError(error)) return;
+      metricsCache = data || [];
+    }
+    const activeMetrics = () => metricsCache.filter(m => activeCh.has(m.channel));
+
+    function renderChips() {
+      document.getElementById('chips-container').innerHTML =
+        Object.keys(CHANNELS).filter(c => c !== 'other').map(c => `
+          <button type="button" class="chip ${activeCh.has(c) ? '' : 'off'}"
+                  data-ch="${c}" aria-pressed="${activeCh.has(c)}"
+                  title="${activeCh.has(c) ? 'Click to exclude from analysis' : 'Click to include in analysis'}">
+            <span class="ch-dot" style="background:${chColor(c)}"></span>${chLabel(c)}
+          </button>`).join('');
+      document.querySelectorAll('.chip').forEach(b =>
+        b.addEventListener('click', () => toggleChannel(b.dataset.ch)));
+    }
+
+    async function toggleChannel(ch) {
+      const nowActive = !activeCh.has(ch);
+      if (nowActive) activeCh.add(ch); else activeCh.delete(ch);
+      renderChips();
+      /* Persist — harmless no-op warning if the migration lacks `active` */
+      sb.from('channel_accounts').update({ active: nowActive }).eq('channel', ch)
+        .then(({ error }) => { if (error) console.warn('[insights] toggle not persisted:', error.message); });
+      loadOverview(); loadChannels(); loadPnl(); loadConnections();
+      toast(`${chLabel(ch)} ${nowActive ? 'included' : 'excluded'}`);
+    }
+
+    /* ════════ ATTENTION HIGHLIGHTS — tune thresholds here ════════ */
+    const T = {
+      roasGood: 2,    // ROAS ≥ this → green (every ৳1 of ads returns ৳2+)
+      roasBad:  1,    // ROAS < this → red   (ads losing money)
+      ctrGood:  1.5,  // CTR% ≥ this → green
+      ctrBad:   0.5,  // CTR% < this → red
+      cacBad:   500,  // CAC above this (৳) → red — set near your AOV
+    };
+    const hl = (val, display, good, bad) =>
+      val == null ? '—'
+      : good ? `<span class="hl-good">${display}<span class="hl-arrow">▲</span></span>`
+      : bad  ? `<span class="hl-bad">${display}<span class="hl-arrow">▼</span></span>`
+      : display;
 
     /* ── Shared Chart.js theming: recessive grid/axes, readable text ── */
     Chart.defaults.font.family = "'DM Sans', sans-serif";
@@ -416,19 +561,31 @@
       if (checkSetupError(error)) return;
       const days = kpi || [];
 
+      /* Marketing from the toggle-filtered cache — NOT from the view,
+         so excluded channels (e.g. paused LinkedIn) drop out everywhere. */
+      const spendByDay = {};
+      activeMetrics().filter(m => m.metric_date >= since).forEach(m => {
+        spendByDay[m.metric_date] = (spendByDay[m.metric_date] || 0) + (Number(m.spend) || 0);
+      });
+
       /* KPI tiles */
       const sum = (k) => days.reduce((s, d) => s + (Number(d[k]) || 0), 0);
       const revenue = sum('web_revenue') + sum('farm_revenue');
       const orders  = sum('web_orders');
-      const spend   = sum('ad_spend');
-      const net     = sum('net_position');
+      const spend   = Object.values(spendByDay).reduce((s, v) => s + v, 0);
+      const net     = revenue - sum('farm_expenses') - spend;
       document.getElementById('k-revenue').textContent = fmt(revenue);
       document.getElementById('k-orders').textContent  = fmtN(orders);
       document.getElementById('k-aov').textContent     = orders ? 'AOV ' + fmt(sum('web_revenue') / orders) : '';
       document.getElementById('k-spend').textContent   = fmt(spend);
       const netEl = document.getElementById('k-net');
-      netEl.textContent = fmt(net);
+      netEl.innerHTML = fmt(net) + `<span class="hl-arrow">${net >= 0 ? '▲' : '▼'}</span>`;
       netEl.className = 'kpi-val ' + (net >= 0 ? 'green' : 'red');
+
+      /* Snapshot for the AI analyst */
+      aiSnapshot.overview = { rangeDays, revenue, web_orders: orders, ad_spend: spend,
+        net_position: net, farm_expenses: sum('farm_expenses'),
+        harvest_kg: sum('harvest_kg'), active_channels: [...activeCh] };
 
       /* Customer summary (all-time) */
       const { data: cust } = await sb.from('v_customer_summary').select('*').single();
@@ -446,7 +603,7 @@
           { label: 'Revenue',  data: days.map(d => (Number(d.web_revenue)||0) + (Number(d.farm_revenue)||0)),
             borderColor: '#199e70', backgroundColor: '#199e70', borderWidth: 2,
             pointRadius: 0, pointHoverRadius: 4, tension: .3 },
-          { label: 'Ad Spend', data: days.map(d => Number(d.ad_spend)||0),
+          { label: 'Ad Spend', data: days.map(d => spendByDay[d.day] || 0),
             borderColor: '#d95926', backgroundColor: '#d95926', borderWidth: 2,
             pointRadius: 0, pointHoverRadius: 4, tension: .3 },
         ]},
@@ -519,9 +676,11 @@
       const { data, error } = await sb.from('v_channel_month')
         .select('*').order('month', { ascending: false }).limit(60);
       if (checkSetupError(error)) return;
-      const rows = data || [];
+      /* Respect the channel on/off chips */
+      const rows = (data || []).filter(r => activeCh.has(r.channel));
+      aiSnapshot.channels = rows.slice(0, 14);
 
-      /* Table */
+      /* Table — ROAS / CTR / CAC wear attention highlights (see T above) */
       document.getElementById('channel-tbody').innerHTML = rows.length
         ? rows.map(r => `<tr>
             <td>${r.month.slice(0, 7)}</td>
@@ -530,15 +689,15 @@
             <td class="r">${fmtN(r.impressions)}</td>
             <td class="r">${fmtN(r.reach)}</td>
             <td class="r">${fmtN(r.clicks)}</td>
-            <td class="r">${r.ctr_pct ?? '—'}</td>
+            <td class="r">${hl(r.ctr_pct, r.ctr_pct, r.ctr_pct >= T.ctrGood, r.ctr_pct < T.ctrBad)}</td>
             <td class="r">${r.cpc ? fmt(r.cpc) : '—'}</td>
             <td class="r">${fmtN(r.leads)}</td>
             <td class="r">${fmtN(r.conversions)}</td>
-            <td class="r">${r.cac ? fmt(r.cac) : '—'}</td>
-            <td class="r">${r.roas ?? '—'}</td>
+            <td class="r">${hl(r.cac, r.cac ? fmt(r.cac) : null, false, r.cac > T.cacBad)}</td>
+            <td class="r">${hl(r.roas, r.roas, r.roas >= T.roasGood, r.roas < T.roasBad)}</td>
             <td class="r">${fmtN(r.followers_eom)}</td>
           </tr>`).join('')
-        : '<tr><td colspan="13"><div class="empty-state"><div class="empty-icon">📡</div>No channel data yet — add some in the Data Entry tab.</div></td></tr>';
+        : '<tr><td colspan="13"><div class="empty-state"><div class="empty-icon">📡</div>No channel data for the enabled channels — add some in Data Entry, or turn a channel back on above.</div></td></tr>';
 
       /* Charts: aggregate last 90d spend / latest followers per channel.
          Bars are per-channel entities → each wears its own fixed color. */
@@ -575,7 +734,21 @@
       const { data, error } = await sb.from('v_pnl_monthly')
         .select('*').order('month').limit(24);
       if (checkSetupError(error)) return;
-      const rows = data || [];
+
+      /* Recompute ad spend per month from the toggle-filtered cache so
+         excluded channels drop out of costs and net profit too. */
+      const adByMonth = {};
+      activeMetrics().forEach(m => {
+        const mo = m.metric_date.slice(0, 7);
+        adByMonth[mo] = (adByMonth[mo] || 0) + (Number(m.spend) || 0);
+      });
+      const rows = (data || []).map(r => {
+        const ads = adByMonth[r.month.slice(0, 7)] || 0;
+        const totalExp = (Number(r.farm_expenses) || 0) + (Number(r.one_off_expenses) || 0) + ads;
+        return { ...r, ad_spend: ads, total_expenses: totalExp,
+                 net_profit: (Number(r.total_revenue) || 0) - totalExp };
+      });
+      aiSnapshot.pnl = rows.slice(-6);
 
       makeChart('chart-pnl', {
         type: 'bar',
@@ -611,18 +784,28 @@
     /* ════════════════════════ DATA ENTRY ════════════════════════ */
     async function loadConnections() {
       const { data } = await sb.from('channel_accounts').select('*').order('channel');
+      channelAccounts = data || [];
       const grid = document.getElementById('conn-grid');
-      grid.innerHTML = (data || []).map(a => `
-        <div class="conn">
+      grid.innerHTML = channelAccounts.map(a => {
+        const on = activeCh.has(a.channel);
+        return `
+        <div class="conn ${on ? '' : 'inactive'}">
           <span class="ch-dot" style="background:${chColor(a.channel)};width:11px;height:11px;"></span>
-          <div style="flex:1;">
-            <div class="conn-name">${a.display_name}</div>
+          <div class="conn-name">
+            ${a.display_name}
             <div class="conn-sub">${a.sync_enabled
               ? 'Auto-sync · last: ' + (a.last_synced ? a.last_synced.slice(0, 10) : 'never')
               : 'Manual entry (API not connected)'}</div>
           </div>
+          <button type="button" class="conn-toggle ${on ? 'on' : ''}" data-toggle="${a.channel}"
+                  aria-pressed="${on}" title="Include/exclude this channel in analysis">
+            ${on ? 'In analysis' : 'Excluded'}
+          </button>
           <span class="src-badge ${a.sync_enabled ? 'api' : ''}">${a.sync_enabled ? 'API' : 'Manual'}</span>
-        </div>`).join('');
+        </div>`;
+      }).join('');
+      grid.querySelectorAll('[data-toggle]').forEach(b =>
+        b.addEventListener('click', () => toggleChannel(b.dataset.toggle)));
     }
 
     async function loadRecent() {
@@ -644,7 +827,7 @@
 
       document.querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', async () => {
         await sb.from('marketing_metrics').delete().eq('id', b.dataset.del);
-        toast('Entry deleted'); loadRecent();
+        toast('Entry deleted'); refreshAll();
       }));
     }
 
@@ -671,7 +854,7 @@
       const { error } = await sb.from('marketing_metrics')
         .upsert([row], { onConflict: 'metric_date,channel,account_ref' });
       if (error) { checkSetupError(error); toast('Save failed', 'err'); console.error(error); return; }
-      toast('Saved ✓'); loadRecent(); loadOverview(); loadChannels();
+      toast('Saved ✓'); refreshAll();
     });
 
     /* CSV import — header per INTEGRATIONS.md / warehouse spec */
@@ -705,11 +888,121 @@
       if (error) { toast('Import failed', 'err'); console.error(error); return; }
       toast(`Imported ${rows.length} rows ✓`);
       document.getElementById('csv-file').value = '';
-      loadRecent(); loadOverview(); loadChannels();
+      refreshAll();
     });
 
+    /* ════════ AI INSIGHTS ════════
+       Sends a compact summary of the numbers on this page to an LLM and
+       renders its analysis. Two providers:
+         · ollama  → local, free, private (http://localhost:11434)
+         · openai  → any OpenAI-compatible endpoint (Groq free tier, etc.)
+       Config lives in this browser's localStorage — the API key never
+       touches the database. */
+    const aiSnapshot = { overview: null, channels: [], pnl: [] };
+    const AI_DEFAULTS = {
+      ollama: { url: 'http://localhost:11434', model: 'llama3.2' },
+      openai: { url: 'https://api.groq.com/openai', model: 'llama-3.1-8b-instant' },
+    };
+    const $ai = (id) => document.getElementById(id);
+
+    function loadAiCfg() {
+      const saved = JSON.parse(localStorage.getItem('safaAiCfg') || 'null')
+                 || { provider: 'ollama', ...AI_DEFAULTS.ollama, key: '' };
+      $ai('ai-provider').value = saved.provider;
+      $ai('ai-url').value      = saved.url;
+      $ai('ai-model').value    = saved.model;
+      $ai('ai-key').value      = saved.key || '';
+    }
+    function saveAiCfg() {
+      localStorage.setItem('safaAiCfg', JSON.stringify({
+        provider: $ai('ai-provider').value, url: $ai('ai-url').value.trim(),
+        model: $ai('ai-model').value.trim(), key: $ai('ai-key').value.trim(),
+      }));
+      toast('AI config saved');
+    }
+    $ai('ai-save-cfg').addEventListener('click', saveAiCfg);
+    $ai('ai-provider').addEventListener('change', () => {
+      const d = AI_DEFAULTS[$ai('ai-provider').value];
+      $ai('ai-url').value = d.url; $ai('ai-model').value = d.model;
+    });
+
+    function buildAiPrompt() {
+      /* Compact, numbers-only summary — small enough for any local model */
+      return `You are a sharp, practical business analyst for SaFa Naturals, an organic mushroom farm and e-commerce brand in Bangladesh (currency: BDT ৳).
+
+Here is the current business data as JSON:
+
+OVERVIEW (last ${aiSnapshot.overview?.rangeDays ?? '?'} days):
+${JSON.stringify(aiSnapshot.overview)}
+
+CHANNEL PERFORMANCE (monthly, only channels currently in analysis):
+${JSON.stringify(aiSnapshot.channels)}
+
+PROFIT & LOSS (last months):
+${JSON.stringify(aiSnapshot.pnl)}
+
+Write a concise analysis in exactly three sections:
+1. WHAT'S WORKING — the strongest numbers and why they matter.
+2. NEEDS ATTENTION — weak spots, losses, or worrying trends (be direct).
+3. DO THIS NEXT — 3 to 5 specific, practical actions ranked by impact.
+
+Use the actual numbers. Keep it under 350 words. No preamble.`;
+    }
+
+    async function generateInsights() {
+      const cfg = { provider: $ai('ai-provider').value, url: $ai('ai-url').value.trim().replace(/\/$/, ''),
+                    model: $ai('ai-model').value.trim(), key: $ai('ai-key').value.trim() };
+      const out = $ai('ai-output'), status = $ai('ai-status');
+      out.classList.remove('visible');
+      status.classList.add('visible');
+      $ai('ai-status-text').textContent = `Asking ${cfg.model}…`;
+
+      const messages = [{ role: 'user', content: buildAiPrompt() }];
+      try {
+        let text;
+        if (cfg.provider === 'ollama') {
+          const r = await fetch(`${cfg.url}/api/chat`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ model: cfg.model, messages, stream: false }),
+          });
+          if (!r.ok) throw new Error(`Ollama replied ${r.status}`);
+          text = (await r.json()).message?.content;
+        } else {
+          const r = await fetch(`${cfg.url}/v1/chat/completions`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${cfg.key}` },
+            body: JSON.stringify({ model: cfg.model, messages }),
+          });
+          if (!r.ok) throw new Error(`API replied ${r.status}`);
+          text = (await r.json()).choices?.[0]?.message?.content;
+        }
+        if (!text) throw new Error('Empty response');
+
+        /* Render: escape HTML, then allow **bold** only */
+        out.innerHTML = text
+          .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+          .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+        out.classList.add('visible');
+      } catch (e) {
+        out.innerHTML = cfg.provider === 'ollama'
+          ? `<strong>Couldn't reach Ollama.</strong>\nChecklist:\n· Is Ollama running? (\`ollama serve\`)\n· Model pulled? (\`ollama pull ${cfg.model}\`)\n· CORS open? Run once: \`launchctl setenv OLLAMA_ORIGINS "*"\` then restart Ollama.\n\nError: ${e.message}`
+          : `<strong>API call failed.</strong> Check the URL, model name and API key.\n\nError: ${e.message}`;
+        out.classList.add('visible');
+      } finally {
+        status.classList.remove('visible');
+      }
+    }
+    $ai('ai-generate').addEventListener('click', generateInsights);
+
     /* ── Init ── */
+    async function refreshAll() {
+      await loadMetricsCache();
+      loadOverview(); loadChannels(); loadPnl(); loadRecent();
+    }
     document.getElementById('me-date').value = new Date().toISOString().slice(0, 10);
+    loadAiCfg();
+    await loadChannelState();
+    await loadMetricsCache();
     loadOverview(); loadChannels(); loadPnl(); loadConnections(); loadRecent();
   </script>
 </body>

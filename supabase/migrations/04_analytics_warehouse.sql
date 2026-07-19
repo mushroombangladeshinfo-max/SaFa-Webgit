@@ -77,10 +77,18 @@ CREATE TABLE IF NOT EXISTS public.channel_accounts (
                                                 -- {"page_id":"PLACEHOLDER",
                                                 --  "ad_account_id":"PLACEHOLDER"}
   sync_enabled BOOLEAN NOT NULL DEFAULT FALSE,  -- flip TRUE when API is wired
+  active       BOOLEAN NOT NULL DEFAULT TRUE,   -- OFF = excluded from analysis
+                                                -- (e.g. no LinkedIn campaign
+                                                --  running → toggle it off in
+                                                --  the Insights dashboard)
   last_synced  TIMESTAMPTZ,
   created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   UNIQUE (channel, account_ref)
 );
+
+-- Safe upgrade for projects that ran an earlier version of this file.
+ALTER TABLE public.channel_accounts
+  ADD COLUMN IF NOT EXISTS active BOOLEAN NOT NULL DEFAULT TRUE;
 
 ALTER TABLE public.channel_accounts ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS channel_accounts_admin ON public.channel_accounts;

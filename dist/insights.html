@@ -118,17 +118,51 @@
     .conn-name{font-size:12.5px;color:var(--c);flex:1;}
     .conn-sub{font-size:10px;color:var(--cl);margin-top:2px;}
 
+    /* ── Channel on/off chips — global filter, affects every tab ── */
+    .chips-bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:-8px 0 20px;}
+    .chips-label{font-family:'Syne',sans-serif;font-size:8.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--cl);margin-right:2px;}
+    .chip{display:inline-flex;align-items:center;gap:7px;font-size:12px;padding:7px 13px;border-radius:99px;border:1px solid var(--border);background:rgba(255,255,255,.03);color:var(--cm);cursor:pointer;transition:all .15s;font-family:'DM Sans',sans-serif;}
+    .chip .ch-dot{margin-right:0;}
+    .chip.off{opacity:.38;text-decoration:line-through;}
+    .chip:hover{border-color:rgba(255,255,255,.2);}
+
+    /* ── Attention highlights (status colors + arrow, never color alone) ── */
+    .hl-good{color:var(--green) !important;}
+    .hl-bad{color:var(--red) !important;}
+    .hl-arrow{font-size:10px;margin-left:3px;}
+
+    /* ── Connection card on/off switch ── */
+    .conn-toggle{font-family:'Syne',sans-serif;font-size:8px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:5px 10px;border-radius:99px;border:1px solid var(--border);background:none;color:var(--cl);cursor:pointer;transition:all .15s;}
+    .conn-toggle.on{border-color:rgba(95,207,128,.35);color:var(--green);}
+    .conn.inactive{opacity:.45;}
+
+    /* ── AI Insights panel ── */
+    .ai-output{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:20px 22px;font-size:13.5px;line-height:1.85;color:var(--cm);white-space:pre-wrap;display:none;}
+    .ai-output.visible{display:block;animation:fadeUp .25s ease;}
+    .ai-output strong{color:var(--c);}
+    .ai-status{font-size:12px;color:var(--cl);display:none;align-items:center;gap:8px;margin-bottom:12px;}
+    .ai-status.visible{display:flex;}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .ai-spinner{width:14px;height:14px;border:2px solid rgba(196,154,60,.2);border-top-color:var(--al);border-radius:50%;animation:spin .8s linear infinite;}
+    .ai-note{font-size:11.5px;color:var(--cl);line-height:1.8;margin-top:12px;}
+    .ai-note code{background:rgba(255,255,255,.06);padding:1px 6px;border-radius:4px;font-size:10.5px;}
+
     .toast-wrap{position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;gap:8px;}
     .toast{padding:12px 18px;border-radius:8px;font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;animation:fadeUp .3s ease;}
     .toast.ok{background:#1a3322;border:1px solid rgba(95,207,128,.3);color:var(--green);}
     .toast.err{background:#2a1510;border:1px solid rgba(224,90,43,.3);color:var(--red);}
+
+    /* Utilities (replaces inline styles) */
+    .mb-0{margin-bottom:0;} .mb-16{margin-bottom:16px;} .mt-0{margin-top:0;}
+    .w-280{max-width:280px;}
+    .label-opt{opacity:.5;font-size:8px;text-transform:none;letter-spacing:0;}
 
     @media(max-width:768px){
       input,select{font-size:16px;} /* no iOS zoom */
       .chart-wrap{height:210px;}
     }
   </style>
-  <script type="module" crossorigin src="/assets/insights-DLzUsKhO.js"></script>
+  <script type="module" crossorigin src="/assets/insights-Bjl8m39s.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
   <link rel="modulepreload" crossorigin href="/assets/admin-auth-rHatrkP5.js">
   <link rel="modulepreload" crossorigin href="/assets/admin-nav-DxntCGRp.js">
@@ -157,7 +191,16 @@
       <button type="button" class="tab-btn active" data-tab="overview">Overview</button>
       <button type="button" class="tab-btn" data-tab="channels">Channels</button>
       <button type="button" class="tab-btn" data-tab="pnl">P&amp;L</button>
+      <button type="button" class="tab-btn" data-tab="ai">AI Insights</button>
       <button type="button" class="tab-btn" data-tab="entry">Data Entry</button>
+    </div>
+
+    <!-- Channel on/off — global filter. A channel toggled OFF (e.g. no
+         LinkedIn campaign running) is excluded from every number and chart
+         on this page. Persisted to channel_accounts.active. -->
+    <div class="chips-bar" role="group" aria-label="Channels included in analysis">
+      <span class="chips-label">Channels:</span>
+      <span id="chips-container"></span>
     </div>
 
     <!-- ══ TAB: OVERVIEW ══ -->
@@ -197,7 +240,7 @@
           <div class="chart-card-sub">Revenue by product, selected range</div>
           <div class="chart-wrap"><canvas id="chart-products"></canvas></div>
         </div>
-        <div class="table-card" style="margin-bottom:0;">
+        <div class="table-card mb-0">
           <div class="table-toolbar"><span class="table-title">Orders by District</span></div>
           <div class="scroll-x">
             <table>
@@ -245,7 +288,7 @@
 
     <!-- ══ TAB: P&L ══ -->
     <div class="tab-panel" id="tab-pnl">
-      <div class="chart-card" style="margin-bottom:16px;">
+      <div class="chart-card mb-16">
         <div class="chart-card-title">Revenue vs Total Costs — monthly</div>
         <div class="chart-card-sub">Costs = farm expenses + one-off + ad spend, ৳</div>
         <div class="chart-wrap tall"><canvas id="chart-pnl"></canvas></div>
@@ -263,6 +306,43 @@
           </table>
         </div>
       </div>
+    </div>
+
+    <!-- ══ TAB: AI INSIGHTS ══
+         Sends the loaded analytics summary to a local Ollama model
+         (fully on-device — data never leaves this computer) or any
+         OpenAI-compatible endpoint. Config persists in this browser. -->
+    <div class="tab-panel" id="tab-ai">
+      <div class="form-card">
+        <div class="form-title">AI Analyst — configuration</div>
+        <div class="form-grid">
+          <div class="fg">
+            <label for="ai-provider">Provider</label>
+            <select id="ai-provider">
+              <option value="ollama">Ollama (local, free, private)</option>
+              <option value="openai">OpenAI-compatible API (Groq / Gemini / etc.)</option>
+            </select>
+          </div>
+          <div class="fg"><label for="ai-url">Endpoint URL</label><input type="text" id="ai-url" placeholder="http://localhost:11434"></div>
+          <div class="fg"><label for="ai-model">Model</label><input type="text" id="ai-model" placeholder="llama3.2"></div>
+          <div class="fg"><label for="ai-key">API Key <span class="label-opt">(not needed for Ollama)</span></label><input type="password" id="ai-key" placeholder="PLACEHOLDER — only for hosted APIs"></div>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn primary" id="ai-generate">✦ Analyse My Business</button>
+          <button type="button" class="btn" id="ai-save-cfg">Save Config</button>
+        </div>
+        <p class="ai-note">
+          <strong>Ollama (recommended):</strong> free and 100% on-device. Install from
+          <code>ollama.com</code>, then run <code>ollama pull llama3.2</code>. For the browser to reach it,
+          start it with CORS open: <code>OLLAMA_ORIGINS="*" ollama serve</code> (Mac: run
+          <code>launchctl setenv OLLAMA_ORIGINS "*"</code> once, then restart Ollama).<br>
+          <strong>Hosted fallback:</strong> any OpenAI-compatible endpoint works — e.g. Groq
+          (free tier) with URL <code>https://api.groq.com/openai</code> and model <code>llama-3.1-8b-instant</code>.
+        </p>
+      </div>
+
+      <div class="ai-status" id="ai-status"><span class="ai-spinner"></span><span id="ai-status-text">Thinking…</span></div>
+      <div class="ai-output" id="ai-output" aria-live="polite"></div>
     </div>
 
     <!-- ══ TAB: DATA ENTRY ══ -->
@@ -296,7 +376,7 @@
         </div>
         <div class="form-actions">
           <button type="button" class="btn primary" id="me-save">Save Day</button>
-          <span class="csv-note" style="margin-top:0;">Same date + channel = the row is updated, not duplicated.</span>
+          <span class="csv-note mt-0">Same date + channel = the row is updated, not duplicated.</span>
         </div>
       </div>
 
@@ -304,7 +384,7 @@
       <div class="form-card">
         <div class="form-title">CSV Import (bulk / backfill)</div>
         <div class="form-actions" style="margin-top:0;">
-          <input type="file" id="csv-file" accept=".csv" aria-label="Choose CSV file" style="max-width:280px;">
+          <input type="file" id="csv-file" accept=".csv" aria-label="Choose CSV file" class="w-280">
           <button type="button" class="btn primary" id="csv-import">Import</button>
         </div>
         <p class="csv-note">
