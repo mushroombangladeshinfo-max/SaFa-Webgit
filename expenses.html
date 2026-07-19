@@ -108,21 +108,32 @@
     .toast{padding:12px 18px;border-radius:8px;font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;animation:fadeUp .3s ease;}
     .toast.ok{background:#1a3322;border:1px solid rgba(95,207,128,.3);color:var(--green);}
     .toast.err{background:#2a1510;border:1px solid rgba(224,90,43,.3);color:var(--red);}
+
+    /* ── Utilities (replaces inline styles) ── */
+    .scroll-x{overflow-x:auto;}
+    .th-r{text-align:right;}
+    .count-label{font-size:12px;color:var(--cl);}
+    .al-color{color:var(--al);}
+    .kpi-val.sm{font-size:16px;}
+    .mb-sm{margin-bottom:16px;}
+    .mb-md{margin-bottom:20px;}
+    .mb-lg{margin-bottom:24px;}
+    .kpi-grid-3{grid-template-columns:repeat(3,1fr);}
   </style>
 </head>
 <body>
 
-  <div class="page" style="padding-top:28px;">
+  <div class="page">
     <div class="page-header">
-      <div class="page-title">Expense <span style="color:var(--al)">Tracker</span></div>
+      <div class="page-title">Expense <span class="al-color">Tracker</span></div>
       <div class="page-sub">Daily farm expenses + one-off capital costs</div>
     </div>
 
     <!-- Tabs -->
     <div class="tabs">
-      <button class="tab-btn active" data-tab="daily">Daily Farm Expenses</button>
-      <button class="tab-btn" data-tab="oneoff">One-off Expenses</button>
-      <button class="tab-btn" data-tab="summary">P&L Summary</button>
+      <button type="button" class="tab-btn active" data-tab="daily">Daily Farm Expenses</button>
+      <button type="button" class="tab-btn" data-tab="oneoff">One-off Expenses</button>
+      <button type="button" class="tab-btn" data-tab="summary">P&L Summary</button>
     </div>
 
     <!-- ══ TAB: DAILY ══ -->
@@ -132,7 +143,7 @@
       <div class="kpi-grid">
         <div class="kpi"><div class="kpi-label">This Month</div><div class="kpi-val red" id="kpi-month">—</div><div class="kpi-sub">Total farm expenses</div></div>
         <div class="kpi"><div class="kpi-label">This Week</div><div class="kpi-val" id="kpi-week">—</div><div class="kpi-sub">Last 7 days</div></div>
-        <div class="kpi"><div class="kpi-label">Top Category</div><div class="kpi-val" id="kpi-top-cat" style="font-size:16px;">—</div><div class="kpi-sub" id="kpi-top-cat-val"></div></div>
+        <div class="kpi"><div class="kpi-label">Top Category</div><div class="kpi-val sm" id="kpi-top-cat">—</div><div class="kpi-sub" id="kpi-top-cat-val"></div></div>
         <div class="kpi"><div class="kpi-label">Daily Avg</div><div class="kpi-val" id="kpi-avg">—</div><div class="kpi-sub">This month</div></div>
       </div>
 
@@ -152,30 +163,30 @@
       <div class="filter-bar">
         <input type="date" class="filter-input" id="daily-from" aria-label="From date" title="From date">
         <input type="date" class="filter-input" id="daily-to" aria-label="To date" title="To date">
-        <button class="btn" id="daily-filter-btn">Apply</button>
-        <button class="btn" id="daily-reset-btn">Reset</button>
+        <button type="button" class="btn" id="daily-filter-btn">Apply</button>
+        <button type="button" class="btn" id="daily-reset-btn">Reset</button>
       </div>
 
       <!-- Table -->
       <div class="table-card">
         <div class="table-toolbar">
           <span class="table-title">Daily Log Expenses</span>
-          <span style="font-size:12px;color:var(--cl);" id="daily-count"></span>
+          <span class="count-label" id="daily-count"></span>
         </div>
-        <div style="overflow-x:auto;">
+        <div class="scroll-x">
           <table>
             <thead>
               <tr>
                 <th>Date</th>
-                <th style="text-align:right;">Spawn</th>
-                <th style="text-align:right;">Substrate</th>
-                <th style="text-align:right;">Packaging</th>
-                <th style="text-align:right;">Labor</th>
-                <th style="text-align:right;">Electricity</th>
-                <th style="text-align:right;">Transport</th>
-                <th style="text-align:right;">Water</th>
-                <th style="text-align:right;">Other</th>
-                <th style="text-align:right;">Total</th>
+                <th class="th-r">Spawn</th>
+                <th class="th-r">Substrate</th>
+                <th class="th-r">Packaging</th>
+                <th class="th-r">Labor</th>
+                <th class="th-r">Electricity</th>
+                <th class="th-r">Transport</th>
+                <th class="th-r">Water</th>
+                <th class="th-r">Other</th>
+                <th class="th-r">Total</th>
               </tr>
             </thead>
             <tbody id="daily-tbody">
@@ -190,7 +201,7 @@
     <div class="tab-panel" id="tab-oneoff">
 
       <!-- Add form -->
-      <button class="btn primary" id="add-expense-btn" style="margin-bottom:16px;">+ Add Expense</button>
+      <button type="button" class="btn primary mb-sm" id="add-expense-btn">+ Add Expense</button>
 
       <div class="form-card" id="add-expense-form">
         <div class="form-title">Add One-Off Expense</div>
@@ -230,13 +241,13 @@
           </div>
         </div>
         <div class="form-actions">
-          <button class="btn primary" id="oe-save-btn">Save Expense</button>
-          <button class="btn" id="oe-cancel-btn">Cancel</button>
+          <button type="button" class="btn primary" id="oe-save-btn">Save Expense</button>
+          <button type="button" class="btn" id="oe-cancel-btn">Cancel</button>
         </div>
       </div>
 
       <!-- KPIs -->
-      <div class="kpi-grid" style="margin-bottom:20px;">
+      <div class="kpi-grid mb-md">
         <div class="kpi"><div class="kpi-label">Total This Year</div><div class="kpi-val red" id="oe-total-year">—</div></div>
         <div class="kpi"><div class="kpi-label">This Month</div><div class="kpi-val" id="oe-total-month">—</div></div>
         <div class="kpi"><div class="kpi-label">Count</div><div class="kpi-val" id="oe-count">—</div><div class="kpi-sub">Total entries</div></div>
@@ -248,7 +259,7 @@
         <div class="table-toolbar">
           <span class="table-title">One-Off Expenses</span>
         </div>
-        <div style="overflow-x:auto;">
+        <div class="scroll-x">
           <table>
             <thead>
               <tr>
@@ -256,7 +267,7 @@
                 <th>Category</th>
                 <th>Description</th>
                 <th>Vendor</th>
-                <th style="text-align:right;">Amount</th>
+                <th class="th-r">Amount</th>
                 <th></th>
               </tr>
             </thead>
@@ -278,10 +289,10 @@
           <option value="last_3months">Last 3 Months</option>
           <option value="this_year">This Year</option>
         </select>
-        <button class="btn" id="pl-load-btn">Load</button>
+        <button type="button" class="btn" id="pl-load-btn">Load</button>
       </div>
 
-      <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:24px;">
+      <div class="kpi-grid kpi-grid-3 mb-lg">
         <div class="kpi"><div class="kpi-label">Total Revenue</div><div class="kpi-val green" id="pl-revenue">—</div><div class="kpi-sub">From farm sales</div></div>
         <div class="kpi"><div class="kpi-label">Total Expenses</div><div class="kpi-val red" id="pl-expenses">—</div><div class="kpi-sub">Daily + one-off</div></div>
         <div class="kpi"><div class="kpi-label">Net Profit / Loss</div><div class="kpi-val" id="pl-net">—</div><div class="kpi-sub" id="pl-margin"></div></div>
@@ -289,9 +300,9 @@
 
       <div class="table-card">
         <div class="table-toolbar"><span class="table-title">Expense Breakdown</span></div>
-        <div style="overflow-x:auto;">
+        <div class="scroll-x">
           <table>
-            <thead><tr><th>Category</th><th style="text-align:right;">Amount</th><th style="text-align:right;">% of Total</th></tr></thead>
+            <thead><tr><th>Category</th><th class="th-r">Amount</th><th class="th-r">% of Total</th></tr></thead>
             <tbody id="pl-tbody">
               <tr><td colspan="3"><div class="empty-state"><div class="empty-icon">📊</div>Select period and click Load</div></td></tr>
             </tbody>

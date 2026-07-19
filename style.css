@@ -80,6 +80,14 @@
 html {
   scroll-behavior: smooth;
   font-size: 16px;
+  /* Anchor links (#products etc.) land below the fixed nav */
+  scroll-padding-top: 88px;
+}
+
+/* Remove gray tap flash on Android/iOS; kill 300ms double-tap-zoom delay */
+a, button, input, select, textarea, [role="button"] {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 body {
@@ -357,9 +365,12 @@ img {
   border: none;
   color: rgba(255, 255, 255, 0.85);
   padding: 8px;
+  min-width: 44px;   /* WCAG / Apple HIG touch target */
+  min-height: 44px;
   cursor: pointer;
   display: flex;
   align-items: center;
+  justify-content: center;
   position: relative;
   transition: color 0.2s;
 }
@@ -407,11 +418,15 @@ img {
 .hamburger {
   display: none; /* Hidden on desktop — shown via breakpoint below */
   flex-direction: column;
+  justify-content: center;
+  align-items: center;
   gap: 5px;
   background: none;
   border: none;
   cursor: pointer;
   padding: 6px;
+  min-width: 44px;   /* WCAG / Apple HIG touch target */
+  min-height: 44px;
 }
 .hamburger span {
   display: block;
@@ -433,6 +448,7 @@ img {
   right: 0;
   width: min(300px, 80vw);
   height: 100vh;
+  height: 100dvh; /* iOS Safari: exclude browser chrome so bottom links stay reachable */
   background: var(--g800);
   z-index: 490;
   padding: 88px 28px 32px;
@@ -711,12 +727,24 @@ img {
     width: 100%;
     background: linear-gradient(to bottom, var(--g900) 0%, transparent 100%);
   }
-  .hero-scroll-indicator {
-    position: static;
-    align-self: center;
-    margin-top: 48px;
-    transform: none;
-  }
+  /* Pointless mid-page when hero is stacked — hide it */
+  .hero-scroll-indicator { display: none; }
+  /* Let content dictate height when stacked — avoids a stretched empty gap */
+  .hero-modern { min-height: 0; }
+}
+
+/* ── Hero small phones ── */
+@media (max-width: 480px) {
+  .hero-content-left { padding: 104px 6% 44px; }
+  .hero-h1-new { font-size: 36px; }
+  .hero-p-new  { font-size: 15px; }
+  .hero-visual-right { min-height: 300px; }
+  .hero-stat-strip { gap: 14px; }
+  .hero-stat-val { font-size: 22px; }
+  /* Full-width CTAs — thumb-friendly, no mis-taps */
+  .hero-btns-new { flex-direction: column; align-items: stretch; width: 100%; }
+  .hero-btns-new .btn-primary,
+  .hero-btns-new .btn-ghost-dark { justify-content: center; padding: 16px 28px; }
 }
 
 
@@ -1123,7 +1151,10 @@ img {
 }
 @media (max-width: 768px) {
   .products-premium { padding: 60px 20px; }
-  .pl-grid { grid-template-columns: 1fr; }
+  .pl-grid { grid-template-columns: 1fr; gap: 20px; }
+  /* Slightly larger buttons for thumbs */
+  .btn-gold    { padding: 16px; font-size: 12px; }
+  .btn-wa-card { padding: 13px 16px; font-size: 11.5px; }
 }
 
 
@@ -1809,12 +1840,13 @@ img {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 11.5px;
-  color: rgba(245, 239, 230, 0.35);
+  font-size: 12px;
+  color: rgba(245, 239, 230, 0.45);
   cursor: pointer;
   text-decoration: none;
   transition: color 0.2s;
   font-family: 'DM Sans', sans-serif;
+  padding: 8px 0; /* Expand tap area without visual change */
 }
 .rp-notify:hover { color: var(--al); }
 .rp-notify svg { width: 12px; height: 12px; }
@@ -1865,6 +1897,7 @@ img {
   .rp-dot-wrap { margin-bottom: 0; flex-shrink: 0; margin-top: 4px; }
   .rp-card { flex: 1; }
   .vision-notify-bar { flex-direction: column; align-items: flex-start; padding: 18px 20px; }
+  .vnb-wa { width: 100%; justify-content: center; padding: 14px 20px; }
   .roadmap-line { display: none !important; }
 }
 
@@ -2372,7 +2405,7 @@ img {
   overflow: hidden;
   transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
-.faq-item.open .faq-body { max-height: 600px; }
+.faq-item.open .faq-body { max-height: 900px; } /* Headroom for long Bengali answers on narrow screens */
 .faq-a {
   font-family: 'Hind Siliguri', sans-serif;
   font-size: 14px;
@@ -2432,10 +2465,10 @@ img {
 /* Back-to-top button */
 .back-to-top {
   position: fixed;
-  bottom: 88px;
+  bottom: calc(88px + env(safe-area-inset-bottom, 0px));
   right: 22px;
-  width: 42px;
-  height: 42px;
+  width: 46px;
+  height: 46px;
   border-radius: 50%;
   background: var(--g800);
   border: 1px solid rgba(255,255,255,0.12);
@@ -2464,8 +2497,9 @@ img {
 @media (max-width: 768px) {
   .faq-section { padding: 60px 20px; }
   .faq-cta-bar { flex-direction: column; align-items: flex-start; padding: 20px; }
+  .faq-cta-wa { width: 100%; justify-content: center; padding: 14px 22px; }
   .faq-tabs { gap: 6px; }
-  .faq-tab-btn { font-size: 12px; padding: 6px 14px; }
+  .faq-tab-btn { font-size: 13px; padding: 10px 16px; } /* ≥40px tall tap target */
 }
 
 
@@ -2835,6 +2869,11 @@ footer::before {
   .footer-cta::after { left: 22px; right: 22px; }
   .footer-divider { margin: 0 22px; }
   .footer-bottom  { flex-direction: column; align-items: flex-start; padding: 18px 22px; }
+  .footer-cta-btn { width: 100%; justify-content: center; padding: 16px 24px; }
+  .f-social       { width: 44px; height: 44px; } /* Touch target */
+  .f-links a      { padding: 10px 0; font-size: 14px; } /* Comfortable tap rows */
+  /* 16px stops iOS Safari auto-zooming the newsletter input on focus */
+  .f-email        { font-size: 16px; padding-top: 14px; padding-bottom: 14px; }
 }
 
 
@@ -2897,7 +2936,11 @@ footer::before {
 @media (max-width: 768px) {
   .wa-text    { display: none; }
   .wa-content { padding: 6px; }
-  .wa-floating-btn { bottom: 20px; right: 20px; }
+  .wa-floating-btn {
+    bottom: calc(20px + env(safe-area-inset-bottom, 0px)); /* Clear iPhone home indicator */
+    right: 20px;
+  }
+  .wa-icon-box { width: 46px; height: 46px; } /* Bigger tap target on touch devices */
 }
 
 
@@ -3066,6 +3109,7 @@ footer::before {
   right: 0;
   width: min(420px, 92vw);
   height: 100vh;
+  height: 100dvh; /* iOS Safari: keep checkout button above browser chrome */
   background: var(--g800);
   border-left: 1px solid rgba(255, 255, 255, 0.06);
   z-index: 700;
@@ -3105,8 +3149,8 @@ footer::before {
   color: rgba(245, 239, 230, 0.6);
   font-size: 20px;
   cursor: pointer;
-  width: 32px;
-  height: 32px;
+  width: 44px;   /* WCAG / Apple HIG touch target */
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -3187,8 +3231,8 @@ footer::before {
   background: rgba(196, 154, 60, 0.15);
   color: var(--al);
   border: none;
-  width: 30px;
-  height: 30px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
   font-size: 18px;
   cursor: pointer;
@@ -3237,6 +3281,14 @@ footer::before {
 .cart-item button:hover {
   background: rgba(196, 154, 60, 0.15) !important;
   color: var(--al) !important;
+}
+/* Steppers render inline at 28px — enlarge for thumbs on touch screens */
+@media (max-width: 768px) {
+  .cart-item button {
+    width: 36px !important;
+    height: 36px !important;
+    font-size: 17px !important;
+  }
 }
 
 /* ── Drawer footer ── */
@@ -3360,17 +3412,9 @@ footer::before {
   transition: color 0.3s ease;
 }
 
-/* Sticky order summary on mobile */
-@media (max-width: 768px) {
-  .co-layout > div:last-child {
-    position: sticky;
-    bottom: 0;
-    z-index: 10;
-    background: var(--g900);
-    padding: 10px;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-  }
-}
+/* Note: mobile checkout uses natural single-column flow (form → summary →
+   submit). A sticky summary was removed — the column is taller than a phone
+   viewport, so sticky-bottom caused jumpy scroll behavior. */
 
 
 /* ============================================================
@@ -3448,6 +3492,16 @@ footer::before {
   color: var(--c);
 }
 
+.toast-cta {
+  font-family: var(--fl);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--al);
+  margin-top: 4px;
+}
+
 
 /* ============================================================
    19. GLOBAL RESPONSIVE — LARGE SCREEN OVERRIDES
@@ -3488,6 +3542,16 @@ footer::before {
   .safa-toast.show {
     transform: translateY(0);
   }
+}
+
+/* ── Reduced motion — accessibility + battery/perf on low-end phones ── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  html { scroll-behavior: auto; }
 }
 
 /* ── Print styles ── (rarely needed but good practice) */

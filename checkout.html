@@ -667,11 +667,30 @@
       .co-header  { padding: 14px 20px; }
       .co-steps   { padding: 12px 20px; gap: 6px; }
       .step span  { display: none; }
-      .co-layout  { grid-template-columns: 1fr; margin: 20px auto 48px; padding: 0 16px; gap: 0; }
+      .co-layout  { grid-template-columns: 1fr; margin: 20px auto 48px; padding: 0 16px 0; gap: 0; }
       .form-grid  { grid-template-columns: 1fr; }
       .co-sticky  { position: static !important; }
       .co-card    { border-radius: 10px; }
       .trust-badges { gap: 14px; }
+
+      /* 16px inputs stop iOS Safari auto-zooming on focus — critical on
+         the conversion page where every field gets tapped */
+      input[type="text"],
+      input[type="tel"],
+      input[type="email"],
+      textarea,
+      select,
+      .coupon-input-wrap input { font-size: 16px; }
+
+      /* Touch targets */
+      .terms-row input[type="checkbox"] { width: 20px; height: 20px; min-width: 20px; }
+      .coupon-btn    { padding: 13px 18px; }
+      .coupon-remove { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+      /* Qty steppers rendered inline by ui.js at 26px — enlarge for thumbs */
+      .order-item button { width: 36px !important; height: 36px !important; font-size: 17px !important; }
+      .submit-btn { padding: 18px; font-size: 12px; }
+      /* Keep the WhatsApp float clear of the submit area's trust badges */
+      .wa-floating-btn { bottom: calc(20px + env(safe-area-inset-bottom, 0px)); }
     }
     @media (max-width: 420px) {
       .co-steps { overflow-x: auto; }
@@ -921,7 +940,7 @@
             </div>
             <div class="summary-line">
               <span>Delivery</span>
-              <strong id="deliveryVal" aria-live="polite">৳60</strong>
+              <strong id="deliveryVal" aria-live="polite">৳100</strong>
             </div>
             <div class="summary-total">
               <span class="label">Total</span>
@@ -936,7 +955,7 @@
             <div class="terms-row">
               <input type="checkbox" id="termsCheck" checked aria-required="true">
               <label for="termsCheck">
-                I agree to the <a href="#">Terms &amp; Conditions</a> and <a href="#">Privacy Policy</a>.
+                I agree to the <a href="index.html#faq" target="_blank" rel="noopener">Terms &amp; Conditions</a> and <a href="index.html#faq" target="_blank" rel="noopener">Privacy Policy</a>.
               </label>
             </div>
 
@@ -1038,7 +1057,7 @@
     function updateDeliveryProgress() {
       const cart     = window.getCart ? window.getCart() : {};
       const subtotal = Object.values(cart).reduce((s,i) => s + i.price * i.qty, 0);
-      const threshold = window.FREE_SHIPPING_THRESHOLD || 500;
+      const threshold = window.FREE_SHIPPING_THRESHOLD || 700;
       const remaining = threshold - subtotal;
       const pct       = Math.min((subtotal / threshold) * 100, 100);
 
@@ -1399,10 +1418,15 @@
           <span class="cd-val" style="color:var(--al);font-size:24px;font-family:'Cormorant Garamond',serif;font-weight:300;">৳${total.toLocaleString()}</span>
         </div>`;
 
+      const trackUrl = `track.html?order=${encodeURIComponent(order.orderId)}&phone=${encodeURIComponent(order.phone)}`;
       document.getElementById('confirmActions').innerHTML = `
         <a href="${buildCustomerWALink(order, total)}" class="confirm-btn-wa" target="_blank" rel="noopener noreferrer" aria-label="Chat with SaFa Naturals on WhatsApp">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
           Chat About Your Order
+        </a>
+        <a href="${trackUrl}" class="confirm-btn-shop" aria-label="Track this order">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          Track My Order
         </a>
         <a href="index.html" class="confirm-btn-shop">← Continue Shopping</a>`;
 
@@ -1426,6 +1450,9 @@
         if (emptyEl) emptyEl.style.display = 'block';
         const skeleton = document.getElementById('orderSkeleton');
         if (skeleton) skeleton.remove();
+        /* Empty cart → nothing to order; disable submit instead of failing on tap */
+        const orderBtn = document.getElementById('place-order-btn');
+        if (orderBtn) orderBtn.disabled = true;
       }
 
       /* Skeleton → real items */

@@ -154,7 +154,7 @@
       padding: 13px 14px 13px 42px;
       border: 1.5px solid var(--border);
       border-radius: 10px;
-      font-size: .95rem;
+      font-size: 1rem; /* ≥16px — stops iOS Safari auto-zoom on focus */
       font-family: 'DM Sans', sans-serif;
       color: var(--ink);
       background: var(--cream);
@@ -507,7 +507,7 @@
           <path stroke-linecap="round" stroke-linejoin="round"
             d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"/>
         </svg>
-        <input id="inp-order" type="text" placeholder="যেমন: SN-20240501-ABCD"
+        <input id="inp-order" type="text" placeholder="যেমন: SAFA-1907-1234"
           autocomplete="off" spellcheck="false" />
       </div>
     </div>
@@ -523,7 +523,7 @@
                0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
         </svg>
         <input id="inp-phone" type="tel" placeholder="০১XXXXXXXXX"
-          autocomplete="tel" />
+          autocomplete="tel" inputmode="numeric" />
       </div>
     </div>
 

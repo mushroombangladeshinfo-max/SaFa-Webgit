@@ -208,6 +208,17 @@
       .acc-stats { flex-direction:column; }
       .acc-stat { border-right:none; border-bottom:1px solid rgba(255,255,255,.06); }
       .acc-stat:last-child { border-bottom:none; }
+
+      /* 16px inputs stop iOS Safari auto-zooming on focus */
+      .field-wrap input, .edit-input { font-size:16px; }
+      /* Profile edit fields stack — 2 columns were too cramped at this width */
+      .edit-grid { grid-template-columns:1fr; }
+      /* Touch targets */
+      .pwd-toggle { padding:10px; right:6px; }
+      .order-btn { padding:11px 16px; }
+      .modal-close { width:40px; height:40px; }
+      /* Receipt modal: keep buttons reachable above iOS browser chrome */
+      .modal-content { max-height:90vh; max-height:90dvh; }
     }
   </style>
 </head>

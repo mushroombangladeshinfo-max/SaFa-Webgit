@@ -78,8 +78,16 @@ export function renderCartDrawer() {
         </p>
       </div>`;
     if (subtotalEl) subtotalEl.textContent = '0 ৳';
+    /* Nothing to check out — disable the button instead of sending
+       the user to an empty checkout page */
+    const emptyCheckoutBtn = document.querySelector('.cart-checkout-btn');
+    if (emptyCheckoutBtn) { emptyCheckoutBtn.disabled = true; emptyCheckoutBtn.style.opacity = '.45'; emptyCheckoutBtn.style.cursor = 'not-allowed'; }
     return;
   }
+
+  /* Items exist — make sure checkout is enabled (may have been disabled above) */
+  const checkoutBtn = document.querySelector('.cart-checkout-btn');
+  if (checkoutBtn) { checkoutBtn.disabled = false; checkoutBtn.style.opacity = ''; checkoutBtn.style.cursor = ''; }
 
   let total    = 0;
   let itemsHTML = '';
@@ -480,8 +488,17 @@ export function showToast(itemName, itemImage) {
     <div class="toast-content">
       <span class="toast-title">✓ Added to Cart</span>
       <span class="toast-desc">${itemName}</span>
+      <span class="toast-cta">View Cart →</span>
     </div>
   `;
+
+  /* Tap anywhere on the toast to open the cart drawer */
+  toast.style.cursor = 'pointer';
+  toast.addEventListener('click', () => {
+    toast.classList.remove('show');
+    setTimeout(() => toast.remove(), 400);
+    if (window.toggleCart) window.toggleCart();
+  });
 
   container.appendChild(toast);
 

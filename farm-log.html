@@ -204,7 +204,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--g900);color:var(--c);min-
 .fl-progress-bar{height:3px;background:rgba(255,255,255,.08);border-radius:99px;overflow:hidden}
 .fl-progress-fill{height:100%;background:var(--green);border-radius:99px;width:0%;transition:width .4s ease}
 /* Mobile section jump pills — sticky at top of fl-main, hidden on desktop */
-.fl-sec-pills{display:none;gap:6px;overflow-x:auto;padding:10px 24px 12px;scrollbar-width:none;position:sticky;top:0;z-index:10;background:var(--g900);border-bottom:1px solid var(--border);margin:-20px -24px 4px}
+.fl-sec-pills{display:none;gap:6px;overflow-x:auto;padding:10px 24px 12px;position:sticky;top:0;z-index:10;background:var(--g900);border-bottom:1px solid var(--border);margin:-20px -24px 4px}
 .fl-sec-pills::-webkit-scrollbar{display:none}
 .fl-sec-pill{flex-shrink:0;display:inline-flex;align-items:center;gap:4px;padding:5px 11px;border:1px solid var(--border);border-radius:99px;background:rgba(255,255,255,.03);color:rgba(245,239,230,.45);font-size:11px;font-family:'DM Sans',sans-serif;cursor:pointer;white-space:nowrap;transition:all .15s;-webkit-tap-highlight-color:transparent}
 .fl-sec-pill:active{transform:scale(.96)}
@@ -223,6 +223,13 @@ body{font-family:'DM Sans',sans-serif;background:var(--g900);color:var(--c);min-
 .ql-trigger:hover{background:rgba(217,178,84,.2);border-color:rgba(217,178,84,.5)}
 /* Hidden SQL reference block */
 #farm-schema-sql{display:none}
+/* Utility classes replacing inline styles */
+.mt-10{margin-top:10px}
+.fl-readonly.green{background:rgba(95,207,128,.04);color:var(--green)}
+.fl-readonly.red{background:var(--red-dim);color:var(--red)}
+.fl-btn-row{display:flex;gap:10px}
+.scroll-x{overflow-x:auto}
+.tbl-empty{text-align:center;color:rgba(245,239,230,.3);padding:32px}
 @media(max-width:860px){.fl-sec-pills{display:flex}.fl-mini-sum{display:flex}body{padding-bottom:62px}}
 @media(max-width:640px){.fl-topbar{gap:8px;padding:0 10px}#autosave-text{display:none}.fl-btn{font-size:8px;padding:6px 9px;letter-spacing:.07em}.fl-date-input{font-size:11px;padding:6px 8px}}
 </style>
@@ -434,7 +441,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--g900);color:var(--c);min-
               <input type="number" id="qc-contam-bags" class="fl-input" placeholder="0" min="0" step="1"/>
             </div>
           </div>
-          <div class="fl-field" style="margin-top:10px">
+          <div class="fl-field mt-10">
             <label class="fl-label" for="qc-contam-action">ব্যবস্থা নেওয়া হয়েছে</label>
             <input type="text" id="qc-contam-action" class="fl-input" placeholder="যেমন: ব্যাগ সরানো হয়েছে, রুম জীবাণুমুক্ত করা হয়েছে..."/>
           </div>
@@ -484,7 +491,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--g900);color:var(--c);min-
             <input type="number" id="sp-substrate-kg" class="fl-input" placeholder="0.00" min="0" step="0.1"/>
           </div>
         </div>
-        <div class="fl-grid fl-grid-3" style="margin-top:10px">
+        <div class="fl-grid fl-grid-3 mt-10">
           <div class="fl-field">
             <label class="fl-label" for="sp-substrate-type">সাবস্ট্রেট ধরন</label>
             <select id="sp-substrate-type" class="fl-input fl-select">
@@ -546,7 +553,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--g900);color:var(--c);min-
             <span class="fl-calc" id="powder-yield-pct"></span>
           </div>
         </div>
-        <div class="fl-field" style="margin-top:10px">
+        <div class="fl-field mt-10">
           <label class="fl-label" for="pr-notes">প্রসেসিং মন্তব্য</label>
           <input type="text" id="pr-notes" class="fl-input" placeholder="যন্ত্রপাতির অবস্থা, অস্বাভাবিকতা..."/>
         </div>
@@ -574,10 +581,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--g900);color:var(--c);min-
           </div>
           <div class="fl-field">
             <label class="fl-label">তাজা রাজস্ব</label>
-            <div class="fl-input fl-readonly" style="background:rgba(95,207,128,.04);color:var(--green)" id="s-fresh-rev">৳ 0</div>
+            <div class="fl-input fl-readonly green" id="s-fresh-rev">৳ 0</div>
           </div>
         </div>
-        <div class="fl-grid fl-grid-3" style="margin-top:10px">
+        <div class="fl-grid fl-grid-3 mt-10">
           <div class="fl-field">
             <label class="fl-label" for="s-dried-kg">শুকনো বিক্রি <em>(kg)</em></label>
             <input type="number" id="s-dried-kg" class="fl-input" placeholder="0.00" min="0" step="0.01" oninput="calcRevenue()"/>
@@ -588,10 +595,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--g900);color:var(--c);min-
           </div>
           <div class="fl-field">
             <label class="fl-label">শুকনো রাজস্ব</label>
-            <div class="fl-input fl-readonly" style="background:rgba(95,207,128,.04);color:var(--green)" id="s-dried-rev">৳ 0</div>
+            <div class="fl-input fl-readonly green" id="s-dried-rev">৳ 0</div>
           </div>
         </div>
-        <div class="fl-grid fl-grid-3" style="margin-top:10px">
+        <div class="fl-grid fl-grid-3 mt-10">
           <div class="fl-field">
             <label class="fl-label" for="s-powder-kg">পাউডার বিক্রি <em>(kg)</em></label>
             <input type="number" id="s-powder-kg" class="fl-input" placeholder="0.00" min="0" step="0.01" oninput="calcRevenue()"/>
@@ -602,10 +609,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--g900);color:var(--c);min-
           </div>
           <div class="fl-field">
             <label class="fl-label">পাউডার রাজস্ব</label>
-            <div class="fl-input fl-readonly" style="background:rgba(95,207,128,.04);color:var(--green)" id="s-powder-rev">৳ 0</div>
+            <div class="fl-input fl-readonly green" id="s-powder-rev">৳ 0</div>
           </div>
         </div>
-        <div class="fl-grid fl-grid-2" style="margin-top:10px">
+        <div class="fl-grid fl-grid-2 mt-10">
           <div class="fl-field">
             <label class="fl-label" for="s-orders">পূর্ণ হওয়া অর্ডার</label>
             <input type="number" id="s-orders" class="fl-input" placeholder="0" min="0" step="1"/>
@@ -703,10 +710,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--g900);color:var(--c);min-
           </div>
           <div class="fl-field">
             <label class="fl-label">মোট খরচ</label>
-            <div class="fl-input fl-readonly" style="background:var(--red-dim);color:var(--red)" id="ex-total">৳ 0</div>
+            <div class="fl-input fl-readonly red" id="ex-total">৳ 0</div>
           </div>
         </div>
-        <div class="fl-field" style="margin-top:10px">
+        <div class="fl-field mt-10">
           <label class="fl-label" for="ex-notes">খরচের মন্তব্য</label>
           <input type="text" id="ex-notes" class="fl-input" placeholder="অন্যান্য খরচের বিস্তারিত..."/>
         </div>
@@ -805,15 +812,15 @@ body{font-family:'DM Sans',sans-serif;background:var(--g900);color:var(--c);min-
             </select>
           </div>
         </div>
-        <div class="fl-field" style="margin-top:10px">
+        <div class="fl-field mt-10">
           <label class="fl-label" for="n-observations">আজকের পর্যবেক্ষণ</label>
           <textarea id="n-observations" class="fl-input fl-textarea" placeholder="মাশরুমের বৃদ্ধি, রঙ, গন্ধ, অস্বাভাবিক কিছু — যা মনে হয়েছে সব লিখুন..." rows="4"></textarea>
         </div>
-        <div class="fl-field" style="margin-top:10px">
+        <div class="fl-field mt-10">
           <label class="fl-label" for="n-tomorrow">কাল কী করতে হবে</label>
           <textarea id="n-tomorrow" class="fl-input fl-textarea" placeholder="কাল হার্ভেস্ট করতে হবে, ব্যাচ চেক করতে হবে, উপকরণ কিনতে হবে..." rows="3"></textarea>
         </div>
-        <div class="fl-field" style="margin-top:10px">
+        <div class="fl-field mt-10">
           <label class="fl-label" for="n-unusual">অস্বাভাবিক ঘটনা</label>
           <textarea id="n-unusual" class="fl-input fl-textarea" placeholder="বিদ্যুৎ বিভ্রাট, অনুপস্থিত কর্মী, যন্ত্র বিকল, দর্শনার্থী..."></textarea>
         </div>
@@ -886,22 +893,22 @@ body{font-family:'DM Sans',sans-serif;background:var(--g900);color:var(--c);min-
 </div><!-- /fl-layout -->
 
 <!-- LOG HISTORY (full-width) -->
-<div id="fl-history-wrap" style="grid-column:1/-1;padding:24px;border-top:1px solid var(--border)">
+<div id="fl-history-wrap" class="fl-history">
   <div class="fl-history-header">
     <span class="fl-history-title">সাম্প্রতিক লগ — শেষ ৩০ দিন</span>
-    <div style="display:flex;gap:10px">
+    <div class="fl-btn-row">
       <button type="button" class="fl-btn" id="btn-export-history">CSV Export</button>
       <button type="button" class="fl-btn" id="btn-refresh-history">↻ রিফ্রেশ</button>
     </div>
   </div>
-  <div style="overflow-x:auto">
+  <div class="scroll-x">
     <table class="fl-tbl" id="history-tbl">
       <thead><tr>
         <th>তারিখ</th><th>তাজা (kg)</th><th>শুকনো (kg)</th><th>পাউডার (kg)</th>
         <th>QC পাশ%</th><th>রাজস্ব (৳)</th><th>খরচ (৳)</th><th>নিট (৳)</th>
         <th>ব্যাগ</th><th>রেটিং</th><th></th>
       </tr></thead>
-      <tbody id="history-tbody"><tr><td colspan="11" style="text-align:center;color:rgba(245,239,230,.3);padding:32px">লগ লোড হচ্ছে…</td></tr></tbody>
+      <tbody id="history-tbody"><tr><td colspan="11" class="tbl-empty">লগ লোড হচ্ছে…</td></tr></tbody>
     </table>
   </div>
 </div>
