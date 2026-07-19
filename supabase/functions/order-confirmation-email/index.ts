@@ -160,6 +160,17 @@ function buildEmailHtml(o: Order): string {
 Deno.serve(async (req) => {
   if (req.method !== 'POST') return new Response('Method not allowed', { status: 405 });
 
+  // ── Webhook authentication ─────────────────────────────────────────────
+  // Same pattern as whatsapp-order-notify: set WEBHOOK_SECRET in Edge
+  // Function secrets AND as an  x-webhook-secret  header on the Database
+  // Webhook. Blocks anyone else from triggering emails via the public URL.
+  // If the secret isn't configured yet, requests pass (backwards-compatible).
+  const WEBHOOK_SECRET = Deno.env.get('WEBHOOK_SECRET');
+  if (WEBHOOK_SECRET && req.headers.get('x-webhook-secret') !== WEBHOOK_SECRET) {
+    console.error('Rejected: bad or missing x-webhook-secret header');
+    return new Response('Unauthorized', { status: 401 });
+  }
+
   const RESEND_KEY = Deno.env.get('RESEND_API_KEY');
   if (!RESEND_KEY) {
     console.error('Missing RESEND_API_KEY secret');

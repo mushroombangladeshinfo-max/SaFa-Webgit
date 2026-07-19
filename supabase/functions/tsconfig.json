@@ -1,0 +1,16 @@
+{
+  // Editor-only config: makes VS Code treat supabase/functions/ as one
+  // TypeScript project so deno.d.ts (Deno runtime types) applies to every
+  // function. Not used by `supabase functions deploy`.
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "strict": true,
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "skipLibCheck": true
+  },
+  "include": ["**/*.ts", "deno.d.ts"]
+}

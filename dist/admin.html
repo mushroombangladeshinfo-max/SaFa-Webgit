@@ -165,7 +165,7 @@
     /* Main content area */
     .dash-content { max-width:1280px; margin:0 auto; padding:32px 32px 64px; }
     /* Quick actions banner */
-    .quick-actions-bar { display:grid; grid-template-columns:1.6fr 1fr 1fr 1fr 1fr 1fr 1fr; gap:12px; margin-bottom:28px; }
+    .quick-actions-bar { display:grid; grid-template-columns:1.6fr repeat(7, 1fr); gap:12px; margin-bottom:28px; }
     .qa-card { display:flex; align-items:center; gap:14px; padding:16px 18px; border-radius:10px; border:1px solid rgba(255,255,255,.08); background:rgba(255,255,255,.03); text-decoration:none; color:var(--c); transition:all .2s; }
     .qa-card:hover { border-color:rgba(255,255,255,.14); background:rgba(255,255,255,.06); transform:translateY(-2px); }
     .qa-card.qa-primary { border-color:rgba(217,178,84,.28); background:rgba(217,178,84,.07); }
@@ -321,6 +321,14 @@
     .dash-tab { font-family:'Syne',sans-serif; font-size:10px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; padding:12px 22px; background:none; border:none; border-bottom:2px solid transparent; margin-bottom:-1px; cursor:pointer; color:rgba(245,239,230,.35); display:flex; align-items:center; gap:8px; transition:color .2s, border-color .2s; }
     .dash-tab:hover { color:rgba(245,239,230,.65); }
     .dash-tab.active { color:var(--al); border-bottom-color:var(--al); }
+    a.dash-tab { text-decoration:none; }
+    .notif-bar { display:none; align-items:center; gap:12px; padding:12px 16px; background:rgba(95,207,128,.06); border:1px solid rgba(95,207,128,.18); border-radius:8px; margin-bottom:20px; }
+    .notif-bar.show { display:flex; }
+    .notif-bar-txt { flex:1; }
+    .notif-bar-lbl { font-family:'Syne',sans-serif; font-size:11px; font-weight:700; letter-spacing:.1em; color:#5fcf80; }
+    .notif-bar-sub { font-size:11px; color:rgba(245,239,230,.45); margin-top:2px; }
+    .notif-bar-enable { font-family:'Syne',sans-serif; font-size:9px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; background:rgba(95,207,128,.15); border:1px solid rgba(95,207,128,.35); color:#5fcf80; border-radius:6px; padding:8px 14px; cursor:pointer; white-space:nowrap; }
+    .notif-bar-close { background:none; border:none; color:rgba(245,239,230,.28); cursor:pointer; font-size:16px; line-height:1; padding:0 4px; }
 
     /* ══ PROMO PANEL ══ */
     .promo-settings-row { display:grid; grid-template-columns:1fr 1fr 1.5fr; gap:16px; margin-bottom:24px; }
@@ -489,12 +497,12 @@
       .orders-table th:nth-child(5), .orders-table td:nth-child(5) { display:none; }
     }
   </style>
-  <script type="module" crossorigin src="/assets/admin-DRo2aLT0.js"></script>
+  <script type="module" crossorigin src="/assets/admin-BcH1XHWN.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
   <link rel="modulepreload" crossorigin href="/assets/index-B-jIxwbw.js">
-  <link rel="modulepreload" crossorigin href="/assets/supabase-CAmyaeuo.js">
+  <link rel="modulepreload" crossorigin href="/assets/supabase-D4TXEGXI.js">
   <link rel="modulepreload" crossorigin href="/assets/admin-auth-rHatrkP5.js">
-  <link rel="stylesheet" crossorigin href="/assets/supabase-C68sSUdL.css">
+  <link rel="stylesheet" crossorigin href="/assets/supabase-FQp84G0D.css">
 </head>
 <body>
 
@@ -740,6 +748,14 @@
           </div>
           <svg class="qa-arrow" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
         </a>
+        <a href="insights.html" class="qa-card">
+          <div class="qa-icon">📊</div>
+          <div class="qa-text">
+            <div class="qa-title">Insights</div>
+            <div class="qa-sub">Marketing + sales + ops</div>
+          </div>
+          <svg class="qa-arrow" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+        </a>
         <button type="button" class="qa-card" onclick="window.generateSalesReport()">
           <div class="qa-icon">📄</div>
           <div class="qa-text">
@@ -767,14 +783,14 @@
       </div>
 
       <!-- Push notification enable bar (shown once, until granted) -->
-      <div id="notif-bar" style="display:none;align-items:center;gap:12px;padding:12px 16px;background:rgba(95,207,128,.06);border:1px solid rgba(95,207,128,.18);border-radius:8px;margin-bottom:20px;">
-        <span style="font-size:18px;">🔔</span>
-        <div style="flex:1;">
-          <div style="font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:.1em;color:#5fcf80;">New Order Notifications</div>
-          <div style="font-size:11px;color:rgba(245,239,230,.45);margin-top:2px;">Get instant alerts on this device when a new order arrives.</div>
+      <div id="notif-bar" class="notif-bar">
+        <span aria-hidden="true">🔔</span>
+        <div class="notif-bar-txt">
+          <div class="notif-bar-lbl">New Order Notifications</div>
+          <div class="notif-bar-sub">Get instant alerts on this device when a new order arrives.</div>
         </div>
-        <button type="button" onclick="window.enableNotifications()" style="font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;background:rgba(95,207,128,.15);border:1px solid rgba(95,207,128,.35);color:#5fcf80;border-radius:6px;padding:8px 14px;cursor:pointer;white-space:nowrap;">Enable</button>
-        <button type="button" onclick="document.getElementById('notif-bar').style.display='none'" style="background:none;border:none;color:rgba(245,239,230,.28);cursor:pointer;font-size:16px;line-height:1;padding:0 4px;">&times;</button>
+        <button type="button" class="notif-bar-enable" onclick="window.enableNotifications()">Enable</button>
+        <button type="button" class="notif-bar-close" onclick="document.getElementById('notif-bar').classList.remove('show')">&times;</button>
       </div>
 
       <!-- Stats -->
@@ -815,11 +831,11 @@
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
           Analytics
         </button>
-        <a href="products.html" class="dash-tab" style="text-decoration:none;">
+        <a href="products.html" class="dash-tab">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
           Products ↗
         </a>
-        <a href="customers.html" class="dash-tab" style="text-decoration:none;">
+        <a href="customers.html" class="dash-tab">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
           Customers ↗
         </a>

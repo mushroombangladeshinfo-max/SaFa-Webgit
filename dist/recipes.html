@@ -2,6 +2,9 @@
 <html lang="bn">
 <head>
   <meta charset="UTF-8">
+  <!-- Google Tag Manager -->
+  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({"gtm.start":new Date().getTime(),event:"gtm.js"});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!="dataLayer"?"&l="+l:"";j.async=true;j.src="https://www.googletagmanager.com/gtm.js?id="+i+dl;f.parentNode.insertBefore(j,f);})(window,document,"script","dataLayer","GTM-5KC3V54B");</script>
+  <!-- End Google Tag Manager -->
   <link rel="icon" type="image/png" href="/favicon.png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="মাশরুম দিয়ে সেরা রেসিপি — বাংলাদেশি, ভারতীয়, থাই, চাইনিজ। SaFa Naturals-এর তাজা মাশরুম দিয়ে সহজে রান্না করুন।">
@@ -285,7 +288,7 @@
       flex-wrap: wrap;
       align-items: center;
       position: sticky;
-      top: 68px;
+      top: 72px; /* Sits flush under the scrolled fixed nav */
       z-index: 100;
       -webkit-backdrop-filter: blur(12px);
       backdrop-filter: blur(12px);
@@ -786,6 +789,7 @@
       width: 100%;
       max-width: 820px;
       max-height: 92vh;
+      max-height: 92dvh; /* iOS Safari: keep footer CTA above browser chrome */
       overflow-y: auto;
       overflow-x: hidden;
       scrollbar-width: thin;
@@ -795,6 +799,9 @@
       transition: opacity 0.35s cubic-bezier(0.22,1,0.36,1),
                   transform 0.35s cubic-bezier(0.22,1,0.36,1);
     }
+    .rp-modal::-webkit-scrollbar { width: 4px; }
+    .rp-modal::-webkit-scrollbar-track { background: transparent; }
+    .rp-modal::-webkit-scrollbar-thumb { background: rgba(196,154,60,0.2); border-radius: 2px; }
     .rp-modal-overlay.open .rp-modal {
       opacity: 1;
       transform: translateY(0);
@@ -1241,17 +1248,23 @@
       .rp-product-strip   { padding: 20px 0 20px 22px; }
       .rp-product-track   { padding-right: 22px; }
       .rp-product-card    { flex: 0 0 148px; }
-      .rp-filters         { padding: 16px 22px; }
+      /* Filter bar: horizontal scroll strip instead of a tall sticky
+         multi-row block that ate ~120px of a small screen */
+      .rp-filters         { padding: 12px 22px; flex-wrap: nowrap; overflow-x: auto; top: 68px; }
+      .rp-filters::-webkit-scrollbar { display: none; }
+      .rp-filter-btn      { padding: 11px 18px; font-size: 11px; flex-shrink: 0; } /* ≥40px tall tap target */
+      .rp-cuisine-pill    { padding: 11px 18px; }
       .rp-section         { padding: 44px 22px; }
       .rp-grid            { grid-template-columns: 1fr; }
       .rp-featured        { grid-column: 1; }
       .rp-featured-body   { padding: 28px 24px 32px; }
-      .rp-modal           { border-radius: 14px; max-height: 95vh; }
+      .rp-modal           { border-radius: 14px; max-height: 95vh; max-height: 95dvh; }
+      .rp-modal-overlay   { padding: 12px; } /* More modal width on small screens */
       .rp-modal-meta      { padding: 0 24px 20px; }
       .rp-modal-tabs      { margin: 0 24px; }
       .rp-tab-btn         { padding: 12px 16px; }
       .rp-modal-panels    { padding: 24px; }
-      .rp-modal-footer    { padding: 16px 24px 24px; flex-direction: column; align-items: stretch; }
+      .rp-modal-footer    { padding: 16px 24px calc(24px + env(safe-area-inset-bottom, 0px)); flex-direction: column; align-items: stretch; }
       .rp-modal-add-btn   { justify-content: center; }
       .rp-explore         { padding: 44px 22px 40px; }
       .rp-explore-cta     { flex-direction: column; align-items: flex-start; }
@@ -1318,12 +1331,15 @@
   </script>
   <script type="module" crossorigin src="/assets/modulepreload-polyfill-B5Qt9EMX.js"></script>
   <script type="module" crossorigin src="/assets/index-B-jIxwbw.js"></script>
-  <script type="module" crossorigin src="/assets/supabase-CAmyaeuo.js"></script>
-  <script type="module" crossorigin src="/assets/auth-nav-CJWwtIpL.js"></script>
-  <script type="module" crossorigin src="/assets/main-9U0poTqE.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/supabase-C68sSUdL.css">
+  <script type="module" crossorigin src="/assets/supabase-D4TXEGXI.js"></script>
+  <script type="module" crossorigin src="/assets/auth-nav-DfUJ3kWQ.js"></script>
+  <script type="module" crossorigin src="/assets/main-DezdCMnr.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/supabase-FQp84G0D.css">
 </head>
 <body>
+  <!-- Google Tag Manager (noscript) -->
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-5KC3V54B" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+  <!-- End Google Tag Manager (noscript) -->
 
   <!-- ════════════════════════════════════════════════════
        CART DRAWER
@@ -2331,7 +2347,7 @@
                   stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </a>
-        <a href="https://wa.me/+8801970099378" class="btn-ghost-dark"
+        <a href="https://wa.me/+8801970099378?utm_source=whatsapp&utm_medium=recipes_page&utm_campaign=recipe_enquiry" class="btn-ghost-dark"
            target="_blank" rel="noopener noreferrer">WhatsApp Us</a>
       </div>
     </div>
@@ -2342,7 +2358,7 @@
   <!-- ════════════════════════════════════════════════════
        WHATSAPP FLOATING BUTTON
   ════════════════════════════════════════════════════ -->
-  <a href="https://wa.me/+8801970099378"
+  <a href="https://wa.me/+8801970099378?utm_source=whatsapp&utm_medium=floating_btn&utm_campaign=recipes_page"
      class="wa-floating-btn"
      target="_blank"
      rel="noopener noreferrer"

@@ -2,6 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <!-- Google Tag Manager -->
+  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({"gtm.start":new Date().getTime(),event:"gtm.js"});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!="dataLayer"?"&l="+l:"";j.async=true;j.src="https://www.googletagmanager.com/gtm.js?id="+i+dl;f.parentNode.insertBefore(j,f);})(window,document,"script","dataLayer","GTM-5KC3V54B");</script>
+  <!-- End Google Tag Manager -->
   <link rel="icon" type="image/png" href="/favicon.png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
@@ -663,25 +666,47 @@
       .co-header  { padding: 14px 20px; }
       .co-steps   { padding: 12px 20px; gap: 6px; }
       .step span  { display: none; }
-      .co-layout  { grid-template-columns: 1fr; margin: 20px auto 48px; padding: 0 16px; gap: 0; }
+      .co-layout  { grid-template-columns: 1fr; margin: 20px auto 48px; padding: 0 16px 0; gap: 0; }
       .form-grid  { grid-template-columns: 1fr; }
       .co-sticky  { position: static !important; }
       .co-card    { border-radius: 10px; }
       .trust-badges { gap: 14px; }
+
+      /* 16px inputs stop iOS Safari auto-zooming on focus — critical on
+         the conversion page where every field gets tapped */
+      input[type="text"],
+      input[type="tel"],
+      input[type="email"],
+      textarea,
+      select,
+      .coupon-input-wrap input { font-size: 16px; }
+
+      /* Touch targets */
+      .terms-row input[type="checkbox"] { width: 20px; height: 20px; min-width: 20px; }
+      .coupon-btn    { padding: 13px 18px; }
+      .coupon-remove { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+      /* Qty steppers rendered inline by ui.js at 26px — enlarge for thumbs */
+      .order-item button { width: 36px !important; height: 36px !important; font-size: 17px !important; }
+      .submit-btn { padding: 18px; font-size: 12px; }
+      /* Keep the WhatsApp float clear of the submit area's trust badges */
+      .wa-floating-btn { bottom: calc(20px + env(safe-area-inset-bottom, 0px)); }
     }
     @media (max-width: 420px) {
       .co-steps { overflow-x: auto; }
       .confirm-title { font-size: 32px; }
     }
   </style>
-  <script type="module" crossorigin src="/assets/checkout-D0dZn1Nb.js"></script>
+  <script type="module" crossorigin src="/assets/checkout-MIFs9ecn.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
   <link rel="modulepreload" crossorigin href="/assets/index-B-jIxwbw.js">
-  <link rel="modulepreload" crossorigin href="/assets/supabase-CAmyaeuo.js">
-  <link rel="modulepreload" crossorigin href="/assets/main-9U0poTqE.js">
-  <link rel="stylesheet" crossorigin href="/assets/supabase-C68sSUdL.css">
+  <link rel="modulepreload" crossorigin href="/assets/supabase-D4TXEGXI.js">
+  <link rel="modulepreload" crossorigin href="/assets/main-DezdCMnr.js">
+  <link rel="stylesheet" crossorigin href="/assets/supabase-FQp84G0D.css">
 </head>
 <body>
+  <!-- Google Tag Manager (noscript) -->
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-5KC3V54B" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+  <!-- End Google Tag Manager (noscript) -->
 
   <!-- ── Header ── -->
   <header class="co-header">
@@ -920,7 +945,7 @@
             </div>
             <div class="summary-line">
               <span>Delivery</span>
-              <strong id="deliveryVal" aria-live="polite">৳60</strong>
+              <strong id="deliveryVal" aria-live="polite">৳100</strong>
             </div>
             <div class="summary-total">
               <span class="label">Total</span>
@@ -935,7 +960,7 @@
             <div class="terms-row">
               <input type="checkbox" id="termsCheck" checked aria-required="true">
               <label for="termsCheck">
-                I agree to the <a href="#">Terms &amp; Conditions</a> and <a href="#">Privacy Policy</a>.
+                I agree to the <a href="index.html#faq" target="_blank" rel="noopener">Terms &amp; Conditions</a> and <a href="index.html#faq" target="_blank" rel="noopener">Privacy Policy</a>.
               </label>
             </div>
 

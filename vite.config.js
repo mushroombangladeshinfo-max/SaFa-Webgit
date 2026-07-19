@@ -20,6 +20,7 @@ export default defineConfig({
         pipeline:      './pipeline.html',
         customers:     './customers.html',
         products:      './products.html',
+        insights:      './insights.html',
       }
     }
   }

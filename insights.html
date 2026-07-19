@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Insights — SaFa Naturals</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    /* ════════════════════════════════════════════════════════════════════
+       INSIGHTS DASHBOARD — unified marketing + sales + operations analytics
+       Reads the warehouse views from migrations/04_analytics_warehouse.sql
+       Chart colors: CVD-validated 7-slot dark categorical theme, fixed
+       per-channel assignment (never cycled).
+    ════════════════════════════════════════════════════════════════════ */
+    *,*::before,*::after{box-sizing:border-box;}
+    :root{
+      --bg:#060d09;--bg2:#0d1f12;--bg3:#122018;--border:rgba(255,255,255,.07);
+      --c:#f5efe6;--cm:rgba(245,239,230,.6);--cl:rgba(245,239,230,.35);
+      --al:#c49a3c;--green:#5fcf80;--red:#e05a2b;
+      /* Channel palette — validated, fixed assignment */
+      --ch-facebook:#3987e5;--ch-instagram:#d55181;--ch-tiktok:#9085e9;
+      --ch-whatsapp:#008300;--ch-linkedin:#199e70;--ch-google_ads:#c98500;
+      --ch-website:#d95926;
+    }
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--c);min-height:100vh;margin:0;-webkit-font-smoothing:antialiased;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+    .page{max-width:1240px;margin:0 auto;padding:28px 24px 64px;}
+    .page-header{margin-bottom:24px;display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:14px;}
+    .page-title{font-family:'Syne',sans-serif;font-size:22px;font-weight:700;margin:0 0 4px;}
+    .page-title span{color:var(--al);}
+    .page-sub{font-size:12px;color:var(--cl);}
+
+    /* ── Tabs ── */
+    .tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:24px;overflow-x:auto;}
+    .tabs::-webkit-scrollbar{display:none;}
+    .tab-btn{padding:11px 18px;background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-1px;font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--cl);cursor:pointer;white-space:nowrap;flex-shrink:0;transition:all .2s;}
+    .tab-btn.active{color:var(--al);border-bottom-color:var(--al);}
+    .tab-panel{display:none;animation:fadeUp .25s ease;}
+    .tab-panel.active{display:block;}
+
+    /* ── Filter row (single row above charts) ── */
+    .filter-bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:20px;}
+    .range-btn{font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:8px 14px;border-radius:99px;border:1px solid var(--border);background:rgba(255,255,255,.03);color:var(--cl);cursor:pointer;transition:all .2s;}
+    .range-btn.active{background:rgba(196,154,60,.12);border-color:rgba(196,154,60,.35);color:var(--al);}
+
+    /* ── KPI stat tiles (headline numbers — not charts) ── */
+    .kpi-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:24px;}
+    @media(max-width:1000px){.kpi-grid{grid-template-columns:repeat(3,1fr);}}
+    @media(max-width:600px){.kpi-grid{grid-template-columns:repeat(2,1fr);}}
+    .kpi{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;}
+    .kpi-label{font-family:'Syne',sans-serif;font-size:8.5px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--cl);margin-bottom:6px;}
+    .kpi-val{font-family:'DM Mono',monospace;font-size:20px;font-weight:500;color:var(--c);}
+    .kpi-val.green{color:var(--green);} .kpi-val.red{color:var(--red);} .kpi-val.gold{color:var(--al);}
+    .kpi-sub{font-size:10.5px;color:var(--cl);margin-top:3px;}
+
+    /* ── Chart cards ── */
+    .charts-row{display:grid;grid-template-columns:1.5fr 1fr;gap:16px;margin-bottom:20px;}
+    @media(max-width:860px){.charts-row{grid-template-columns:1fr;}}
+    .chart-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:18px 20px;}
+    .chart-card-title{font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--cl);margin-bottom:4px;}
+    .chart-card-sub{font-size:11px;color:var(--cl);margin-bottom:12px;}
+    .chart-wrap{position:relative;height:240px;}
+    .chart-wrap.tall{height:280px;}
+
+    /* ── Tables ── */
+    .table-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:20px;}
+    .table-toolbar{display:flex;align-items:center;justify-content:space-between;padding:13px 18px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:10px;}
+    .table-title{font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--cl);}
+    .scroll-x{overflow-x:auto;}
+    table{width:100%;border-collapse:collapse;}
+    th{font-family:'Syne',sans-serif;font-size:8.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--cl);padding:9px 12px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap;}
+    th.r,td.r{text-align:right;font-family:'DM Mono',monospace;}
+    td{padding:10px 12px;font-size:12.5px;border-bottom:1px solid rgba(255,255,255,.04);white-space:nowrap;}
+    tr:last-child td{border-bottom:none;}
+    tr:hover td{background:rgba(255,255,255,.02);}
+    .empty-state{text-align:center;padding:40px 20px;color:var(--cl);font-size:12.5px;line-height:1.7;}
+    .empty-icon{font-size:28px;margin-bottom:8px;}
+
+    /* Channel identity: colored dot beside neutral text (color never carries text) */
+    .ch-dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:7px;vertical-align:baseline;}
+    .src-badge{font-family:'Syne',sans-serif;font-size:8px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:99px;border:1px solid var(--border);color:var(--cl);}
+    .src-badge.api{border-color:rgba(95,207,128,.3);color:var(--green);}
+    .src-badge.csv{border-color:rgba(196,154,60,.3);color:var(--al);}
+
+    /* ── Setup notice (views not installed yet) ── */
+    .setup-note{display:none;background:rgba(196,154,60,.06);border:1px solid rgba(196,154,60,.22);border-radius:10px;padding:16px 20px;margin-bottom:20px;font-size:13px;line-height:1.7;color:var(--cm);}
+    .setup-note.visible{display:block;}
+    .setup-note strong{color:var(--al);}
+    .setup-note code{background:rgba(255,255,255,.06);padding:1px 6px;border-radius:4px;font-size:12px;}
+
+    /* ── Data-entry form ── */
+    .form-card{background:var(--bg2);border:1px solid rgba(196,154,60,.2);border-radius:10px;padding:20px 22px;margin-bottom:20px;}
+    .form-title{font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--al);margin-bottom:16px;}
+    .form-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+    @media(max-width:860px){.form-grid{grid-template-columns:repeat(2,1fr);}}
+    .fg{display:flex;flex-direction:column;gap:5px;}
+    .fg label{font-family:'Syne',sans-serif;font-size:8.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--cl);}
+    input,select{background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--c);font-family:'DM Sans',sans-serif;font-size:13px;padding:9px 11px;outline:none;width:100%;}
+    input:focus,select:focus{border-color:rgba(196,154,60,.5);}
+    select option{background:#122018;}
+    .form-actions{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;align-items:center;}
+    .btn{font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:10px 18px;border-radius:6px;border:1px solid var(--border);background:rgba(255,255,255,.04);color:var(--cl);cursor:pointer;transition:all .2s;}
+    .btn:hover{color:var(--c);background:rgba(255,255,255,.08);}
+    .btn.primary{background:rgba(196,154,60,.12);border-color:rgba(196,154,60,.3);color:var(--al);}
+    .btn.primary:hover{background:rgba(196,154,60,.2);}
+    .csv-note{font-size:11px;color:var(--cl);line-height:1.7;margin-top:10px;}
+    .csv-note code{background:rgba(255,255,255,.06);padding:1px 5px;border-radius:3px;font-size:10.5px;}
+
+    /* Connection status pills */
+    .conn-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-bottom:20px;}
+    .conn{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:10px;}
+    .conn-name{font-size:12.5px;color:var(--c);flex:1;}
+    .conn-sub{font-size:10px;color:var(--cl);margin-top:2px;}
+
+    .toast-wrap{position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;gap:8px;}
+    .toast{padding:12px 18px;border-radius:8px;font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;animation:fadeUp .3s ease;}
+    .toast.ok{background:#1a3322;border:1px solid rgba(95,207,128,.3);color:var(--green);}
+    .toast.err{background:#2a1510;border:1px solid rgba(224,90,43,.3);color:var(--red);}
+
+    @media(max-width:768px){
+      input,select{font-size:16px;} /* no iOS zoom */
+      .chart-wrap{height:210px;}
+    }
+  </style>
+</head>
+<body>
+
+  <div class="page">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Business <span>Insights</span></div>
+        <div class="page-sub">Marketing · Sales · Production — one picture</div>
+      </div>
+    </div>
+
+    <!-- Shown only if the warehouse migration hasn't been run yet -->
+    <div class="setup-note" id="setup-note">
+      <strong>One-time setup needed.</strong> The analytics warehouse isn't installed
+      in Supabase yet. Open <strong>Supabase → SQL Editor</strong> and run
+      <code>supabase/migrations/01_core_commerce.sql</code>, then
+      <code>02_rpc_functions.sql</code>, then
+      <code>04_analytics_warehouse.sql</code> — then reload this page.
+    </div>
+
+    <!-- ══ Tabs ══ -->
+    <div class="tabs">
+      <button type="button" class="tab-btn active" data-tab="overview">Overview</button>
+      <button type="button" class="tab-btn" data-tab="channels">Channels</button>
+      <button type="button" class="tab-btn" data-tab="pnl">P&amp;L</button>
+      <button type="button" class="tab-btn" data-tab="entry">Data Entry</button>
+    </div>
+
+    <!-- ══ TAB: OVERVIEW ══ -->
+    <div class="tab-panel active" id="tab-overview">
+
+      <div class="filter-bar" role="group" aria-label="Date range">
+        <button type="button" class="range-btn" data-days="30">30 Days</button>
+        <button type="button" class="range-btn active" data-days="90">90 Days</button>
+        <button type="button" class="range-btn" data-days="365">1 Year</button>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi"><div class="kpi-label">Total Revenue</div><div class="kpi-val green" id="k-revenue">—</div><div class="kpi-sub">Web + farm</div></div>
+        <div class="kpi"><div class="kpi-label">Web Orders</div><div class="kpi-val" id="k-orders">—</div><div class="kpi-sub" id="k-aov"></div></div>
+        <div class="kpi"><div class="kpi-label">Ad Spend</div><div class="kpi-val red" id="k-spend">—</div><div class="kpi-sub">All channels</div></div>
+        <div class="kpi"><div class="kpi-label">Net Position</div><div class="kpi-val" id="k-net">—</div><div class="kpi-sub">Rev − costs − ads</div></div>
+        <div class="kpi"><div class="kpi-label">Repeat Rate</div><div class="kpi-val gold" id="k-repeat">—</div><div class="kpi-sub" id="k-custs">All-time</div></div>
+        <div class="kpi"><div class="kpi-label">Avg LTV</div><div class="kpi-val" id="k-ltv">—</div><div class="kpi-sub">Per customer</div></div>
+      </div>
+
+      <div class="charts-row">
+        <div class="chart-card">
+          <div class="chart-card-title">Revenue vs Ad Spend</div>
+          <div class="chart-card-sub">Daily, ৳ — both lines share one axis</div>
+          <div class="chart-wrap tall"><canvas id="chart-money"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-card-title">Daily Harvest</div>
+          <div class="chart-card-sub">Fresh production, kg</div>
+          <div class="chart-wrap tall"><canvas id="chart-harvest"></canvas></div>
+        </div>
+      </div>
+
+      <div class="charts-row">
+        <div class="chart-card">
+          <div class="chart-card-title">Best Sellers</div>
+          <div class="chart-card-sub">Revenue by product, selected range</div>
+          <div class="chart-wrap"><canvas id="chart-products"></canvas></div>
+        </div>
+        <div class="table-card" style="margin-bottom:0;">
+          <div class="table-toolbar"><span class="table-title">Orders by District</span></div>
+          <div class="scroll-x">
+            <table>
+              <thead><tr><th>District</th><th class="r">Orders</th><th class="r">Revenue</th></tr></thead>
+              <tbody id="district-tbody"><tr><td colspan="3"><div class="empty-state">Loading…</div></td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ TAB: CHANNELS ══ -->
+    <div class="tab-panel" id="tab-channels">
+      <div class="charts-row">
+        <div class="chart-card">
+          <div class="chart-card-title">Spend by Channel</div>
+          <div class="chart-card-sub">Last 90 days, ৳</div>
+          <div class="chart-wrap"><canvas id="chart-ch-spend"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-card-title">Followers by Channel</div>
+          <div class="chart-card-sub">Latest snapshot</div>
+          <div class="chart-wrap"><canvas id="chart-ch-followers"></canvas></div>
+        </div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-toolbar">
+          <span class="table-title">Channel Performance — by month</span>
+        </div>
+        <div class="scroll-x">
+          <table>
+            <thead><tr>
+              <th>Month</th><th>Channel</th>
+              <th class="r">Spend</th><th class="r">Impr.</th><th class="r">Reach</th>
+              <th class="r">Clicks</th><th class="r">CTR%</th><th class="r">CPC</th>
+              <th class="r">Leads</th><th class="r">Conv.</th><th class="r">CAC</th><th class="r">ROAS</th>
+              <th class="r">Followers</th>
+            </tr></thead>
+            <tbody id="channel-tbody"><tr><td colspan="13"><div class="empty-state"><div class="empty-icon">📡</div>No channel data yet — add some in the Data Entry tab.</div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ TAB: P&L ══ -->
+    <div class="tab-panel" id="tab-pnl">
+      <div class="chart-card" style="margin-bottom:16px;">
+        <div class="chart-card-title">Revenue vs Total Costs — monthly</div>
+        <div class="chart-card-sub">Costs = farm expenses + one-off + ad spend, ৳</div>
+        <div class="chart-wrap tall"><canvas id="chart-pnl"></canvas></div>
+      </div>
+      <div class="table-card">
+        <div class="table-toolbar"><span class="table-title">Monthly P&amp;L Detail</span></div>
+        <div class="scroll-x">
+          <table>
+            <thead><tr>
+              <th>Month</th><th class="r">Web Rev</th><th class="r">Farm Rev</th>
+              <th class="r">Farm Exp</th><th class="r">One-off</th><th class="r">Ad Spend</th>
+              <th class="r">Net Profit</th>
+            </tr></thead>
+            <tbody id="pnl-tbody"><tr><td colspan="7"><div class="empty-state">Loading…</div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ TAB: DATA ENTRY ══ -->
+    <div class="tab-panel" id="tab-entry">
+
+      <!-- Connection status per channel -->
+      <div class="conn-grid" id="conn-grid"></div>
+
+      <!-- Manual entry -->
+      <div class="form-card">
+        <div class="form-title">Add / Update a Day's Numbers</div>
+        <div class="form-grid">
+          <div class="fg"><label for="me-date">Date</label><input type="date" id="me-date"></div>
+          <div class="fg"><label for="me-channel">Channel</label>
+            <select id="me-channel">
+              <option value="facebook">Facebook</option><option value="instagram">Instagram</option>
+              <option value="tiktok">TikTok</option><option value="whatsapp">WhatsApp</option>
+              <option value="linkedin">LinkedIn</option><option value="google_ads">Google Ads</option>
+              <option value="website">Website</option>
+            </select>
+          </div>
+          <div class="fg"><label for="me-spend">Ad Spend (৳)</label><input type="number" id="me-spend" min="0" placeholder="0"></div>
+          <div class="fg"><label for="me-impressions">Impressions</label><input type="number" id="me-impressions" min="0" placeholder="0"></div>
+          <div class="fg"><label for="me-reach">Reach</label><input type="number" id="me-reach" min="0" placeholder="0"></div>
+          <div class="fg"><label for="me-clicks">Clicks</label><input type="number" id="me-clicks" min="0" placeholder="0"></div>
+          <div class="fg"><label for="me-engagements">Engagements</label><input type="number" id="me-engagements" min="0" placeholder="likes+comments+shares"></div>
+          <div class="fg"><label for="me-video">Video Views</label><input type="number" id="me-video" min="0" placeholder="0"></div>
+          <div class="fg"><label for="me-followers">Followers (total)</label><input type="number" id="me-followers" min="0" placeholder="end-of-day"></div>
+          <div class="fg"><label for="me-leads">Leads / Chats</label><input type="number" id="me-leads" min="0" placeholder="0"></div>
+          <div class="fg"><label for="me-conv">Conversions</label><input type="number" id="me-conv" min="0" placeholder="0"></div>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn primary" id="me-save">Save Day</button>
+          <span class="csv-note" style="margin-top:0;">Same date + channel = the row is updated, not duplicated.</span>
+        </div>
+      </div>
+
+      <!-- CSV import -->
+      <div class="form-card">
+        <div class="form-title">CSV Import (bulk / backfill)</div>
+        <div class="form-actions" style="margin-top:0;">
+          <input type="file" id="csv-file" accept=".csv" aria-label="Choose CSV file" style="max-width:280px;">
+          <button type="button" class="btn primary" id="csv-import">Import</button>
+        </div>
+        <p class="csv-note">
+          Header row required:<br>
+          <code>date,channel,spend,impressions,reach,clicks,engagements,followers,video_views,leads,conversions</code><br>
+          Channel must be one of: facebook, instagram, tiktok, whatsapp, linkedin, google_ads, website.
+          Empty cells are fine. Rows for existing date+channel pairs overwrite.
+        </p>
+      </div>
+
+      <!-- Recent entries -->
+      <div class="table-card">
+        <div class="table-toolbar"><span class="table-title">Recent Entries</span></div>
+        <div class="scroll-x">
+          <table>
+            <thead><tr><th>Date</th><th>Channel</th><th class="r">Spend</th><th class="r">Impr.</th><th class="r">Clicks</th><th class="r">Followers</th><th class="r">Leads</th><th>Source</th><th></th></tr></thead>
+            <tbody id="recent-tbody"><tr><td colspan="9"><div class="empty-state">No entries yet.</div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-wrap" id="toast-wrap"></div>
+
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+    import { requireAdmin }  from '/src/admin-auth.js';
+    import { mountAdminNav } from '/src/admin-nav.js';
+
+    const sb = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY);
+
+    /* ── Auth gate ── */
+    const session = await requireAdmin(sb);
+    if (!session) { window.location.href = 'admin.html'; }
+    mountAdminNav({ page: 'insights', supabase: sb, email: session.user.email });
+
+    /* ── Channel identity: fixed color + label (validated palette) ── */
+    const CHANNELS = {
+      facebook:   { label: 'Facebook',   color: '#3987e5' },
+      instagram:  { label: 'Instagram',  color: '#d55181' },
+      tiktok:     { label: 'TikTok',     color: '#9085e9' },
+      whatsapp:   { label: 'WhatsApp',   color: '#008300' },
+      linkedin:   { label: 'LinkedIn',   color: '#199e70' },
+      google_ads: { label: 'Google Ads', color: '#c98500' },
+      website:    { label: 'Website',    color: '#d95926' },
+      other:      { label: 'Other',      color: '#8a8a8a' },
+    };
+    const chColor = (c) => CHANNELS[c]?.color || CHANNELS.other.color;
+    const chLabel = (c) => CHANNELS[c]?.label || c;
+    const chDot   = (c) => `<span class="ch-dot" style="background:${chColor(c)}"></span>${chLabel(c)}`;
+
+    /* ── Shared Chart.js theming: recessive grid/axes, readable text ── */
+    Chart.defaults.font.family = "'DM Sans', sans-serif";
+    Chart.defaults.font.size = 11;
+    Chart.defaults.color = 'rgba(245,239,230,.55)';
+    Chart.defaults.borderColor = 'rgba(255,255,255,.06)';
+    const GRID = { color: 'rgba(255,255,255,.06)', drawTicks: false };
+    const fmt  = (n) => '৳' + Math.round(n || 0).toLocaleString('en');
+    const fmtN = (n) => (n == null ? '—' : Number(n).toLocaleString('en'));
+    const charts = {};   // id → Chart instance (destroy before re-render)
+
+    function makeChart(id, cfg) {
+      charts[id]?.destroy();
+      charts[id] = new Chart(document.getElementById(id), cfg);
+    }
+
+    /* ── Toast ── */
+    function toast(msg, type = 'ok') {
+      const t = document.createElement('div');
+      t.className = `toast ${type}`; t.textContent = msg;
+      document.getElementById('toast-wrap').appendChild(t);
+      setTimeout(() => t.remove(), 3200);
+    }
+
+    /* ── Tabs ── */
+    document.querySelectorAll('.tab-btn').forEach(b => b.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(x => x.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+      document.getElementById('tab-' + b.dataset.tab).classList.add('active');
+    }));
+
+    /* ── Range filter ── */
+    let rangeDays = 90;
+    document.querySelectorAll('.range-btn').forEach(b => b.addEventListener('click', () => {
+      document.querySelectorAll('.range-btn').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+      rangeDays = +b.dataset.days;
+      loadOverview();
+    }));
+
+    const sinceISO = (days) => {
+      const d = new Date(); d.setDate(d.getDate() - days);
+      return d.toISOString().slice(0, 10);
+    };
+
+    /* Detect "warehouse not installed" once and show the setup note. */
+    function checkSetupError(error) {
+      if (error && (error.code === '42P01' || /does not exist/.test(error.message || ''))) {
+        document.getElementById('setup-note').classList.add('visible');
+        return true;
+      }
+      return false;
+    }
+
+    /* ════════════════════════ OVERVIEW ════════════════════════ */
+    async function loadOverview() {
+      const since = sinceISO(rangeDays);
+
+      const { data: kpi, error } = await sb.from('v_kpi_daily')
+        .select('*').gte('day', since).order('day');
+      if (checkSetupError(error)) return;
+      const days = kpi || [];
+
+      /* KPI tiles */
+      const sum = (k) => days.reduce((s, d) => s + (Number(d[k]) || 0), 0);
+      const revenue = sum('web_revenue') + sum('farm_revenue');
+      const orders  = sum('web_orders');
+      const spend   = sum('ad_spend');
+      const net     = sum('net_position');
+      document.getElementById('k-revenue').textContent = fmt(revenue);
+      document.getElementById('k-orders').textContent  = fmtN(orders);
+      document.getElementById('k-aov').textContent     = orders ? 'AOV ' + fmt(sum('web_revenue') / orders) : '';
+      document.getElementById('k-spend').textContent   = fmt(spend);
+      const netEl = document.getElementById('k-net');
+      netEl.textContent = fmt(net);
+      netEl.className = 'kpi-val ' + (net >= 0 ? 'green' : 'red');
+
+      /* Customer summary (all-time) */
+      const { data: cust } = await sb.from('v_customer_summary').select('*').single();
+      if (cust) {
+        document.getElementById('k-repeat').textContent = (cust.repeat_rate_pct ?? 0) + '%';
+        document.getElementById('k-custs').textContent  = fmtN(cust.total_customers) + ' customers';
+        document.getElementById('k-ltv').textContent    = fmt(cust.avg_lifetime_value);
+      }
+
+      /* Chart: revenue vs spend — same unit (৳), one axis, 2 series */
+      const labels = days.map(d => d.day.slice(5)); // MM-DD
+      makeChart('chart-money', {
+        type: 'line',
+        data: { labels, datasets: [
+          { label: 'Revenue',  data: days.map(d => (Number(d.web_revenue)||0) + (Number(d.farm_revenue)||0)),
+            borderColor: '#199e70', backgroundColor: '#199e70', borderWidth: 2,
+            pointRadius: 0, pointHoverRadius: 4, tension: .3 },
+          { label: 'Ad Spend', data: days.map(d => Number(d.ad_spend)||0),
+            borderColor: '#d95926', backgroundColor: '#d95926', borderWidth: 2,
+            pointRadius: 0, pointHoverRadius: 4, tension: .3 },
+        ]},
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },   // crosshair-style hover
+          plugins: { legend: { labels: { boxWidth: 10, boxHeight: 10, usePointStyle: true } },
+                     tooltip: { callbacks: { label: (c) => ` ${c.dataset.label}: ${fmt(c.parsed.y)}` } } },
+          scales: { x: { grid: { display: false } },
+                    y: { grid: GRID, ticks: { callback: (v) => '৳' + (v >= 1000 ? (v/1000) + 'k' : v) } } },
+        },
+      });
+
+      /* Chart: harvest kg — different unit → its own chart, single series */
+      makeChart('chart-harvest', {
+        type: 'bar',
+        data: { labels, datasets: [
+          { label: 'Fresh harvest (kg)', data: days.map(d => Number(d.harvest_kg)||0),
+            backgroundColor: '#3987e5', borderRadius: 4, maxBarThickness: 14 },
+        ]},
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false },   // single series — title names it
+                     tooltip: { callbacks: { label: (c) => ` ${c.parsed.y} kg` } } },
+          scales: { x: { grid: { display: false } }, y: { grid: GRID } },
+        },
+      });
+
+      /* Best sellers (horizontal bars, single measure) */
+      const { data: prod } = await sb.from('v_product_month')
+        .select('*').gte('month', since.slice(0, 8) + '01');
+      const byProduct = {};
+      (prod || []).forEach(p => {
+        byProduct[p.product_name] = (byProduct[p.product_name] || 0) + Number(p.revenue || 0);
+      });
+      const top = Object.entries(byProduct).sort((a, b) => b[1] - a[1]).slice(0, 6);
+      makeChart('chart-products', {
+        type: 'bar',
+        data: { labels: top.map(t => t[0]), datasets: [
+          { label: 'Revenue', data: top.map(t => t[1]),
+            backgroundColor: '#c98500', borderRadius: 4, maxBarThickness: 18 },
+        ]},
+        options: {
+          indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false },
+                     tooltip: { callbacks: { label: (c) => ' ' + fmt(c.parsed.x) } } },
+          scales: { x: { grid: GRID, ticks: { callback: (v) => '৳' + (v >= 1000 ? (v/1000) + 'k' : v) } },
+                    y: { grid: { display: false } } },
+        },
+      });
+
+      /* Districts table */
+      const { data: dist } = await sb.from('v_district_month')
+        .select('*').gte('month', since.slice(0, 8) + '01');
+      const byDist = {};
+      (dist || []).forEach(d => {
+        byDist[d.district] = byDist[d.district] || { orders: 0, revenue: 0 };
+        byDist[d.district].orders  += Number(d.orders);
+        byDist[d.district].revenue += Number(d.revenue);
+      });
+      const distRows = Object.entries(byDist).sort((a, b) => b[1].revenue - a[1].revenue).slice(0, 8);
+      document.getElementById('district-tbody').innerHTML = distRows.length
+        ? distRows.map(([name, v]) =>
+            `<tr><td>${name}</td><td class="r">${v.orders}</td><td class="r">${fmt(v.revenue)}</td></tr>`).join('')
+        : '<tr><td colspan="3"><div class="empty-state">No orders in range.</div></td></tr>';
+    }
+
+    /* ════════════════════════ CHANNELS ════════════════════════ */
+    async function loadChannels() {
+      const { data, error } = await sb.from('v_channel_month')
+        .select('*').order('month', { ascending: false }).limit(60);
+      if (checkSetupError(error)) return;
+      const rows = data || [];
+
+      /* Table */
+      document.getElementById('channel-tbody').innerHTML = rows.length
+        ? rows.map(r => `<tr>
+            <td>${r.month.slice(0, 7)}</td>
+            <td>${chDot(r.channel)}</td>
+            <td class="r">${r.spend ? fmt(r.spend) : '—'}</td>
+            <td class="r">${fmtN(r.impressions)}</td>
+            <td class="r">${fmtN(r.reach)}</td>
+            <td class="r">${fmtN(r.clicks)}</td>
+            <td class="r">${r.ctr_pct ?? '—'}</td>
+            <td class="r">${r.cpc ? fmt(r.cpc) : '—'}</td>
+            <td class="r">${fmtN(r.leads)}</td>
+            <td class="r">${fmtN(r.conversions)}</td>
+            <td class="r">${r.cac ? fmt(r.cac) : '—'}</td>
+            <td class="r">${r.roas ?? '—'}</td>
+            <td class="r">${fmtN(r.followers_eom)}</td>
+          </tr>`).join('')
+        : '<tr><td colspan="13"><div class="empty-state"><div class="empty-icon">📡</div>No channel data yet — add some in the Data Entry tab.</div></td></tr>';
+
+      /* Charts: aggregate last 90d spend / latest followers per channel.
+         Bars are per-channel entities → each wears its own fixed color. */
+      const spendBy = {}, follBy = {};
+      rows.forEach(r => {
+        spendBy[r.channel] = (spendBy[r.channel] || 0) + Number(r.spend || 0);
+        if (!(r.channel in follBy) && r.followers_eom != null) follBy[r.channel] = Number(r.followers_eom);
+      });
+      const spendE = Object.entries(spendBy).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]);
+      const follE  = Object.entries(follBy).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]);
+
+      makeChart('chart-ch-spend', {
+        type: 'bar',
+        data: { labels: spendE.map(e => chLabel(e[0])), datasets: [
+          { data: spendE.map(e => e[1]), backgroundColor: spendE.map(e => chColor(e[0])),
+            borderRadius: 4, maxBarThickness: 20 } ] },
+        options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => ' ' + fmt(c.parsed.x) } } },
+          scales: { x: { grid: GRID }, y: { grid: { display: false } } } },
+      });
+      makeChart('chart-ch-followers', {
+        type: 'bar',
+        data: { labels: follE.map(e => chLabel(e[0])), datasets: [
+          { data: follE.map(e => e[1]), backgroundColor: follE.map(e => chColor(e[0])),
+            borderRadius: 4, maxBarThickness: 20 } ] },
+        options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => ' ' + fmtN(c.parsed.x) } } },
+          scales: { x: { grid: GRID }, y: { grid: { display: false } } } },
+      });
+    }
+
+    /* ════════════════════════ P&L ════════════════════════ */
+    async function loadPnl() {
+      const { data, error } = await sb.from('v_pnl_monthly')
+        .select('*').order('month').limit(24);
+      if (checkSetupError(error)) return;
+      const rows = data || [];
+
+      makeChart('chart-pnl', {
+        type: 'bar',
+        data: { labels: rows.map(r => r.month.slice(0, 7)), datasets: [
+          { label: 'Revenue', data: rows.map(r => Number(r.total_revenue)||0),
+            backgroundColor: '#199e70', borderRadius: 4, maxBarThickness: 22 },
+          { label: 'Costs',   data: rows.map(r => Number(r.total_expenses)||0),
+            backgroundColor: '#d95926', borderRadius: 4, maxBarThickness: 22 },
+        ]},
+        options: { responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { labels: { boxWidth: 10, boxHeight: 10, usePointStyle: true } },
+                     tooltip: { callbacks: { label: (c) => ` ${c.dataset.label}: ${fmt(c.parsed.y)}` } } },
+          scales: { x: { grid: { display: false } },
+                    y: { grid: GRID, ticks: { callback: (v) => '৳' + (v >= 1000 ? (v/1000) + 'k' : v) } } } },
+      });
+
+      document.getElementById('pnl-tbody').innerHTML = rows.length
+        ? rows.slice().reverse().map(r => {
+            const net = Number(r.net_profit) || 0;
+            return `<tr>
+              <td>${r.month.slice(0, 7)}</td>
+              <td class="r">${fmt(r.web_revenue)}</td>
+              <td class="r">${fmt(r.farm_revenue)}</td>
+              <td class="r">${fmt(r.farm_expenses)}</td>
+              <td class="r">${fmt(r.one_off_expenses)}</td>
+              <td class="r">${fmt(r.ad_spend)}</td>
+              <td class="r" style="color:${net >= 0 ? 'var(--green)' : 'var(--red)'}">${fmt(net)}</td>
+            </tr>`;
+          }).join('')
+        : '<tr><td colspan="7"><div class="empty-state">No data yet.</div></td></tr>';
+    }
+
+    /* ════════════════════════ DATA ENTRY ════════════════════════ */
+    async function loadConnections() {
+      const { data } = await sb.from('channel_accounts').select('*').order('channel');
+      const grid = document.getElementById('conn-grid');
+      grid.innerHTML = (data || []).map(a => `
+        <div class="conn">
+          <span class="ch-dot" style="background:${chColor(a.channel)};width:11px;height:11px;"></span>
+          <div style="flex:1;">
+            <div class="conn-name">${a.display_name}</div>
+            <div class="conn-sub">${a.sync_enabled
+              ? 'Auto-sync · last: ' + (a.last_synced ? a.last_synced.slice(0, 10) : 'never')
+              : 'Manual entry (API not connected)'}</div>
+          </div>
+          <span class="src-badge ${a.sync_enabled ? 'api' : ''}">${a.sync_enabled ? 'API' : 'Manual'}</span>
+        </div>`).join('');
+    }
+
+    async function loadRecent() {
+      const { data } = await sb.from('marketing_metrics')
+        .select('*').order('metric_date', { ascending: false }).limit(20);
+      document.getElementById('recent-tbody').innerHTML = (data || []).length
+        ? data.map(r => `<tr>
+            <td>${r.metric_date}</td>
+            <td>${chDot(r.channel)}</td>
+            <td class="r">${r.spend ? fmt(r.spend) : '—'}</td>
+            <td class="r">${fmtN(r.impressions)}</td>
+            <td class="r">${fmtN(r.clicks)}</td>
+            <td class="r">${fmtN(r.followers)}</td>
+            <td class="r">${fmtN(r.leads)}</td>
+            <td><span class="src-badge ${r.source}">${r.source}</span></td>
+            <td><button type="button" class="btn" data-del="${r.id}" aria-label="Delete entry">✕</button></td>
+          </tr>`).join('')
+        : '<tr><td colspan="9"><div class="empty-state">No entries yet.</div></td></tr>';
+
+      document.querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', async () => {
+        await sb.from('marketing_metrics').delete().eq('id', b.dataset.del);
+        toast('Entry deleted'); loadRecent();
+      }));
+    }
+
+    /* Manual save — UPSERT on (date, channel, account_ref) */
+    const num = (id) => { const v = document.getElementById(id).value; return v === '' ? null : Number(v); };
+    document.getElementById('me-save').addEventListener('click', async () => {
+      const metric_date = document.getElementById('me-date').value;
+      if (!metric_date) { toast('Pick a date', 'err'); return; }
+      const row = {
+        metric_date,
+        channel:     document.getElementById('me-channel').value,
+        account_ref: 'default',
+        spend:       num('me-spend'),
+        impressions: num('me-impressions'),
+        reach:       num('me-reach'),
+        clicks:      num('me-clicks'),
+        engagements: num('me-engagements'),
+        video_views: num('me-video'),
+        followers:   num('me-followers'),
+        leads:       num('me-leads'),
+        conversions: num('me-conv'),
+        source: 'manual',
+      };
+      const { error } = await sb.from('marketing_metrics')
+        .upsert([row], { onConflict: 'metric_date,channel,account_ref' });
+      if (error) { checkSetupError(error); toast('Save failed', 'err'); console.error(error); return; }
+      toast('Saved ✓'); loadRecent(); loadOverview(); loadChannels();
+    });
+
+    /* CSV import — header per INTEGRATIONS.md / warehouse spec */
+    const CSV_COLS = ['date','channel','spend','impressions','reach','clicks','engagements','followers','video_views','leads','conversions'];
+    document.getElementById('csv-import').addEventListener('click', async () => {
+      const file = document.getElementById('csv-file').files[0];
+      if (!file) { toast('Choose a CSV file first', 'err'); return; }
+      const text = await file.text();
+      const lines = text.trim().split(/\r?\n/);
+      const header = lines[0].split(',').map(h => h.trim().toLowerCase());
+      if (header.join() !== CSV_COLS.join()) {
+        toast('Header mismatch — see format note', 'err'); return;
+      }
+      const rows = [];
+      for (const line of lines.slice(1)) {
+        if (!line.trim()) continue;
+        const c = line.split(',').map(x => x.trim());
+        if (!c[0] || !CHANNELS[c[1]]) continue;  // skip bad rows silently-but-countably
+        rows.push({
+          metric_date: c[0], channel: c[1], account_ref: 'default', source: 'csv',
+          spend: c[2] ? +c[2] : null,       impressions: c[3] ? +c[3] : null,
+          reach: c[4] ? +c[4] : null,       clicks: c[5] ? +c[5] : null,
+          engagements: c[6] ? +c[6] : null, followers: c[7] ? +c[7] : null,
+          video_views: c[8] ? +c[8] : null, leads: c[9] ? +c[9] : null,
+          conversions: c[10] ? +c[10] : null,
+        });
+      }
+      if (!rows.length) { toast('No valid rows found', 'err'); return; }
+      const { error } = await sb.from('marketing_metrics')
+        .upsert(rows, { onConflict: 'metric_date,channel,account_ref' });
+      if (error) { toast('Import failed', 'err'); console.error(error); return; }
+      toast(`Imported ${rows.length} rows ✓`);
+      document.getElementById('csv-file').value = '';
+      loadRecent(); loadOverview(); loadChannels();
+    });
+
+    /* ── Init ── */
+    document.getElementById('me-date').value = new Date().toISOString().slice(0, 10);
+    loadOverview(); loadChannels(); loadPnl(); loadConnections(); loadRecent();
+  </script>
+</body>
+</html>

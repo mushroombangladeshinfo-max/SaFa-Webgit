@@ -31,6 +31,19 @@ Deno.serve(async (req) => {
     return new Response('Method not allowed', { status: 405 });
   }
 
+  // ── Webhook authentication ─────────────────────────────────────────────
+  // Without this, anyone who discovers the function URL could POST fake
+  // orders and spam WhatsApp messages on your API quota.
+  // Setup: 1) Dashboard → Edge Functions → Secrets → add WEBHOOK_SECRET
+  //        2) Database → Webhooks → this webhook → HTTP Headers →
+  //           add header  x-webhook-secret: <same value>
+  // If the secret isn't configured yet, requests pass (backwards-compatible).
+  const WEBHOOK_SECRET = Deno.env.get('WEBHOOK_SECRET');
+  if (WEBHOOK_SECRET && req.headers.get('x-webhook-secret') !== WEBHOOK_SECRET) {
+    console.error('Rejected: bad or missing x-webhook-secret header');
+    return new Response('Unauthorized', { status: 401 });
+  }
+
   const WA_ACCESS_TOKEN    = Deno.env.get('WA_ACCESS_TOKEN');
   const WA_PHONE_NUMBER_ID = Deno.env.get('WA_PHONE_NUMBER_ID');
 

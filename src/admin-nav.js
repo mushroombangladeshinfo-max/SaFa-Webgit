@@ -14,6 +14,7 @@ const NAV_LINKS = [
   { key: 'products',  href: 'products.html',   label: 'Products',  icon: '🍄' },
   { key: 'expenses',  href: 'expenses.html',   label: 'Expenses',  icon: '💰' },
   { key: 'pipeline',  href: 'pipeline.html',   label: 'Pipeline',  icon: '🤝' },
+  { key: 'insights',  href: 'insights.html',   label: 'Insights',  icon: '📊' },
 ];
 
 const FARM_LINKS = [

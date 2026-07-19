@@ -94,18 +94,22 @@
     .toast{padding:12px 18px;border-radius:8px;font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;animation:fadeUp .3s ease;}
     .toast.ok{background:#1a3322;border:1px solid rgba(95,207,128,.3);color:var(--green);}
     .toast.err{background:#2a1510;border:1px solid rgba(224,90,43,.3);color:var(--red);}
+    .al-color{color:var(--al);}
+    .count-label{font-size:12px;color:var(--cl);}
+    .scroll-x{overflow-x:auto;}
+    .th-r{text-align:right;}
   </style>
-  <script type="module" crossorigin src="/assets/pipeline-HUs27uPb.js"></script>
+  <script type="module" crossorigin src="/assets/pipeline-D5JaPjSz.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
   <link rel="modulepreload" crossorigin href="/assets/admin-auth-rHatrkP5.js">
-  <link rel="modulepreload" crossorigin href="/assets/admin-nav-BmaD9ZLf.js">
+  <link rel="modulepreload" crossorigin href="/assets/admin-nav-DxntCGRp.js">
 </head>
 <body>
 
   <div class="page">
     <div class="page-header">
       <div>
-        <div class="page-title">B2B <span style="color:var(--al)">Pipeline</span></div>
+        <div class="page-title">B2B <span class="al-color">Pipeline</span></div>
         <div class="page-sub">Restaurants, hotels, cafes, retailers — track every lead</div>
       </div>
       <button class="btn primary" id="add-lead-btn">+ Add Lead</button>
@@ -117,13 +121,13 @@
       <div class="kpi"><div class="kpi-label">Won</div><div class="kpi-val green" id="kpi-won">—</div><div class="kpi-sub" id="kpi-won-val"></div></div>
       <div class="kpi"><div class="kpi-label">In Progress</div><div class="kpi-val" id="kpi-active">—</div><div class="kpi-sub">Contacted + Interested + Proposal</div></div>
       <div class="kpi"><div class="kpi-label">Monthly Potential</div><div class="kpi-val" id="kpi-potential">—</div><div class="kpi-sub">Won accounts</div></div>
-      <div class="kpi"><div class="kpi-label">Follow-ups Due</div><div class="kpi-val" id="kpi-followups" style="color:var(--al);">—</div><div class="kpi-sub">Today or overdue</div></div>
+      <div class="kpi"><div class="kpi-label">Follow-ups Due</div><div class="kpi-val al-color" id="kpi-followups">—</div><div class="kpi-sub">Today or overdue</div></div>
     </div>
 
     <!-- Toolbar -->
     <div class="toolbar">
       <input type="text" class="search-input" id="search-input" placeholder="Search business or contact...">
-      <select class="filter-select" id="filter-status">
+      <select class="filter-select" id="filter-status" aria-label="Filter by status">
         <option value="">All Statuses</option>
         <option value="cold">Cold</option>
         <option value="contacted">Contacted</option>
@@ -132,7 +136,7 @@
         <option value="won">Won</option>
         <option value="lost">Lost</option>
       </select>
-      <select class="filter-select" id="filter-type">
+      <select class="filter-select" id="filter-type" aria-label="Filter by business type">
         <option value="">All Types</option>
         <option>Restaurant</option>
         <option>Hotel</option>
@@ -148,9 +152,9 @@
     <div class="table-card">
       <div class="table-toolbar">
         <span class="table-title">Leads</span>
-        <span style="font-size:12px;color:var(--cl);" id="lead-count"></span>
+        <span class="count-label" id="lead-count"></span>
       </div>
-      <div style="overflow-x:auto;">
+      <div class="scroll-x">
         <table>
           <thead>
             <tr>
@@ -159,7 +163,7 @@
               <th>Type</th>
               <th>Location</th>
               <th>Status</th>
-              <th style="text-align:right;">Monthly ৳</th>
+              <th class="th-r">Monthly ৳</th>
               <th>Follow-up</th>
               <th>Actions</th>
             </tr>
