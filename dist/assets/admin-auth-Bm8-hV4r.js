@@ -1,0 +1,1 @@
+const i=["mushroombangladesh.info@gmail.com","quazishaab@gmail.com","abrarfahim.nsu@gmail.com"];async function n(s){const{data:{session:a}}=await s.auth.getSession();return!a||!i.includes(a.user.email)?null:a}export{i as A,n as r};

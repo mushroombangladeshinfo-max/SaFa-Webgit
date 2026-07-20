@@ -104,6 +104,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--g900);color:var(--c);min-
 .fl-select option{background:var(--g800)}
 .fl-textarea{resize:vertical;min-height:72px;font-family:'Hind Siliguri',sans-serif;font-size:13px;line-height:1.6}
 .fl-hint{font-size:10px;color:rgba(245,239,230,.28);margin-top:2px;line-height:1.4}
+.fl-hint a{color:var(--al,#c9a34e)}
 .fl-calc{font-size:11px;color:var(--al);font-family:'DM Mono',monospace;margin-top:3px;font-weight:500}
 
 /* ══ DIVIDER ══ */
@@ -233,10 +234,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--g900);color:var(--c);min-
 @media(max-width:860px){.fl-sec-pills{display:flex}.fl-mini-sum{display:flex}body{padding-bottom:62px}}
 @media(max-width:640px){.fl-topbar{gap:8px;padding:0 10px}#autosave-text{display:none}.fl-btn{font-size:8px;padding:6px 9px;letter-spacing:.07em}.fl-date-input{font-size:11px;padding:6px 8px}}
 </style>
-  <script type="module" crossorigin src="/assets/farmLog-CJjy0aOW.js"></script>
+  <script type="module" crossorigin src="/assets/farmLog-DIpGbv4g.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
   <link rel="modulepreload" crossorigin href="/assets/index-B-jIxwbw.js">
-  <link rel="modulepreload" crossorigin href="/assets/admin-auth-rHatrkP5.js">
+  <link rel="modulepreload" crossorigin href="/assets/admin-auth-Bm8-hV4r.js">
 </head>
 <body>
 
@@ -340,6 +341,23 @@ body{font-family:'DM Sans',sans-serif;background:var(--g900);color:var(--c);min-
         <div class="fl-metric-row">
           <div class="fl-metric"><div class="fl-metric-val green" id="m-fresh-total">—</div><div class="fl-metric-lbl">মোট তাজা (kg)</div></div>
           <div class="fl-metric"><div class="fl-metric-val gold" id="m-qc-rate">—</div><div class="fl-metric-lbl">QC পাশ হার</div></div>
+        </div>
+        <div class="fl-divider"></div>
+        <div class="fl-sub-title">হার্ভেস্ট উৎস</div>
+        <div class="fl-grid fl-grid-2">
+          <div class="fl-field">
+            <label class="fl-label" for="h-healthy-kg">সুস্থ ব্যাগ থেকে <em>(kg)</em></label>
+            <input type="number" id="h-healthy-kg" class="fl-input" placeholder="0.00" min="0" step="0.01" oninput="calcAll()"/>
+            <span class="fl-hint">কোনো সমস্যা ছাড়া সাধারণ ব্যাগ</span>
+          </div>
+          <div class="fl-field">
+            <label class="fl-label" for="h-recovered-kg">মোল্ড/সমস্যাযুক্ত ব্যাগ থেকে উদ্ধারকৃত <em>(kg)</em></label>
+            <input type="number" id="h-recovered-kg" class="fl-input" placeholder="0.00" min="0" step="0.01" oninput="calcAll()"/>
+            <span class="fl-hint">সংক্রমিত ব্যাগ থেকেও যা ব্যবহারযোগ্য পাওয়া গেছে</span>
+          </div>
+        </div>
+        <div class="fl-metric-row">
+          <div class="fl-metric"><div class="fl-metric-val" id="m-recovery-rate">—</div><div class="fl-metric-lbl">উদ্ধার হার</div></div>
         </div>
         <div class="fl-divider"></div>
         <div class="fl-sub-title">প্রসেসড পণ্য (আউটপুট)</div>
@@ -466,6 +484,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--g900);color:var(--c);min-
           <label class="fl-toggle"><input type="checkbox" id="spawn-bought-toggle" data-target="spawn-bought-block" onchange="toggleConditional('spawn-bought-block',this)"/><span class="fl-toggle-slider"></span></label>
           <span class="fl-toggle-label">আজ স্পন কেনা হয়েছে?</span>
         </div>
+        <span class="fl-hint">মোল্ড/সমস্যা ও সরবরাহকারী রিফান্ড ট্র্যাক করতে <a href="expenses.html">Expenses → Suppliers ট্যাব</a> ব্যবহার করুন — এখানকার এন্ট্রি শুধু আজকের দ্রুত সারাংশের জন্য।</span>
         <div class="fl-conditional" id="spawn-bought-block">
           <div class="fl-grid fl-grid-3">
             <div class="fl-field">
@@ -651,6 +670,34 @@ body{font-family:'DM Sans',sans-serif;background:var(--g900);color:var(--c);min-
           <div class="fl-divider"></div>
         </div>
 
+        <div class="fl-divider"></div>
+        <div class="fl-toggle-row">
+          <label class="fl-toggle"><input type="checkbox" id="sample-toggle" data-target="sample-block" onchange="toggleConditional('sample-block',this)"/><span class="fl-toggle-slider"></span></label>
+          <span class="fl-toggle-label">আজ বিনামূল্যে নমুনা দেওয়া হয়েছে?</span>
+        </div>
+        <div class="fl-conditional" id="sample-block">
+          <span class="fl-hint">বন্ধু-পরিবার, রেস্টুরেন্ট ট্রায়াল ইত্যাদি — এগুলো খরচ হিসেবে যোগ হয় না (উৎপাদন খরচে ইতিমধ্যে ধরা আছে), শুধু অ্যানালিটিক্সে মার্কেটিং ভ্যালু হিসেবে দেখানো হবে।</span>
+          <div class="fl-grid fl-grid-3 mt-10">
+            <div class="fl-field">
+              <label class="fl-label" for="sample-fresh-kg">তাজা নমুনা <em>(kg)</em></label>
+              <input type="number" id="sample-fresh-kg" class="fl-input" placeholder="0.00" min="0" step="0.01"/>
+            </div>
+            <div class="fl-field">
+              <label class="fl-label" for="sample-dried-kg">শুকনো নমুনা <em>(kg)</em></label>
+              <input type="number" id="sample-dried-kg" class="fl-input" placeholder="0.00" min="0" step="0.01"/>
+            </div>
+            <div class="fl-field">
+              <label class="fl-label" for="sample-powder-kg">পাউডার নমুনা <em>(kg)</em></label>
+              <input type="number" id="sample-powder-kg" class="fl-input" placeholder="0.00" min="0" step="0.01"/>
+            </div>
+          </div>
+          <div class="fl-field mt-10">
+            <label class="fl-label" for="sample-notes">কাকে/কেন দেওয়া হয়েছে</label>
+            <input type="text" id="sample-notes" class="fl-input" placeholder="যেমন: রেস্টুরেন্ট ট্রায়াল — ক্যাফে নীলকণ্ঠ, বন্ধু-পরিবার"/>
+          </div>
+          <div class="fl-divider"></div>
+        </div>
+
         <div class="fl-sub-title">দিনশেষের মজুদ (ক্লোজিং স্টক)</div>
         <div class="fl-grid fl-grid-3">
           <div class="fl-field">
@@ -720,6 +767,28 @@ body{font-family:'DM Sans',sans-serif;background:var(--g900);color:var(--c);min-
         <div class="fl-field mt-10">
           <label class="fl-label" for="ex-notes">খরচের মন্তব্য</label>
           <input type="text" id="ex-notes" class="fl-input" placeholder="অন্যান্য খরচের বিস্তারিত..."/>
+        </div>
+
+        <div class="fl-divider"></div>
+        <div class="fl-sub-title">চ্যানেল অনুযায়ী প্যাকেজিং ও ডেলিভারি খরচ</div>
+        <span class="fl-hint">ঐচ্ছিক — অনলাইন (ওয়েবসাইট অর্ডার) বনাম অফলাইন (সরাসরি/B2B) বিক্রির প্রকৃত প্যাকেজিং ও ডেলিভারি খরচ আলাদা করে রাখলে অ্যানালিটিক্সে চ্যানেল-ভিত্তিক লাভ-ক্ষতি দেখা যাবে। উপরের সাধারণ প্যাকেজিং/পরিবহন থেকে আলাদা — এটি নির্দিষ্ট চ্যানেলের প্রকৃত খরচ।</span>
+        <div class="fl-grid fl-grid-2 mt-10">
+          <div class="fl-field">
+            <label class="fl-label" for="ex-online-packaging">অনলাইন প্যাকেজিং <em>(৳)</em></label>
+            <input type="number" id="ex-online-packaging" class="fl-input" placeholder="0" min="0"/>
+          </div>
+          <div class="fl-field">
+            <label class="fl-label" for="ex-online-delivery">অনলাইন ডেলিভারি <em>(৳)</em></label>
+            <input type="number" id="ex-online-delivery" class="fl-input" placeholder="0" min="0"/>
+          </div>
+          <div class="fl-field">
+            <label class="fl-label" for="ex-offline-packaging">অফলাইন প্যাকেজিং <em>(৳)</em></label>
+            <input type="number" id="ex-offline-packaging" class="fl-input" placeholder="0" min="0"/>
+          </div>
+          <div class="fl-field">
+            <label class="fl-label" for="ex-offline-delivery">অফলাইন ডেলিভারি <em>(৳)</em></label>
+            <input type="number" id="ex-offline-delivery" class="fl-input" placeholder="0" min="0"/>
+          </div>
         </div>
       </div>
     </div>
@@ -962,8 +1031,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--g900);color:var(--c);min-
 );
 ALTER TABLE farm_daily_logs ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "admin_only" ON farm_daily_logs FOR ALL TO authenticated
-  USING (auth.jwt() ->> 'email' = ANY(ARRAY['mushroombangladesh.info@gmail.com','quazishaab@gmail.com']))
-  WITH CHECK (auth.jwt() ->> 'email' = ANY(ARRAY['mushroombangladesh.info@gmail.com','quazishaab@gmail.com']));</pre>
+  USING (auth.jwt() ->> 'email' = ANY(ARRAY['mushroombangladesh.info@gmail.com','quazishaab@gmail.com','abrarfahim.nsu@gmail.com']))
+  WITH CHECK (auth.jwt() ->> 'email' = ANY(ARRAY['mushroombangladesh.info@gmail.com','quazishaab@gmail.com','abrarfahim.nsu@gmail.com']));</pre>
 
 <!-- ══ SUPABASE SQL SCHEMA REFERENCE (run in Supabase SQL editor) ══
 CREATE TABLE farm_daily_logs (
@@ -1012,8 +1081,8 @@ ALTER TABLE farm_daily_logs ENABLE ROW LEVEL SECURITY;
 -- Replace the broad policy with this admin-only version:
 -- DROP POLICY IF EXISTS "admin_all" ON farm_daily_logs;
 CREATE POLICY "admin_only" ON farm_daily_logs FOR ALL TO authenticated
-  USING (auth.jwt() ->> 'email' = ANY(ARRAY['mushroombangladesh.info@gmail.com','quazishaab@gmail.com']))
-  WITH CHECK (auth.jwt() ->> 'email' = ANY(ARRAY['mushroombangladesh.info@gmail.com','quazishaab@gmail.com']));
+  USING (auth.jwt() ->> 'email' = ANY(ARRAY['mushroombangladesh.info@gmail.com','quazishaab@gmail.com','abrarfahim.nsu@gmail.com']))
+  WITH CHECK (auth.jwt() ->> 'email' = ANY(ARRAY['mushroombangladesh.info@gmail.com','quazishaab@gmail.com','abrarfahim.nsu@gmail.com']));
 -->
 
 </body>

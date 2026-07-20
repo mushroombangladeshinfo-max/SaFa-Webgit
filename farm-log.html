@@ -104,6 +104,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--g900);color:var(--c);min-
 .fl-select option{background:var(--g800)}
 .fl-textarea{resize:vertical;min-height:72px;font-family:'Hind Siliguri',sans-serif;font-size:13px;line-height:1.6}
 .fl-hint{font-size:10px;color:rgba(245,239,230,.28);margin-top:2px;line-height:1.4}
+.fl-hint a{color:var(--al,#c9a34e)}
 .fl-calc{font-size:11px;color:var(--al);font-family:'DM Mono',monospace;margin-top:3px;font-weight:500}
 
 /* ══ DIVIDER ══ */
@@ -338,6 +339,23 @@ body{font-family:'DM Sans',sans-serif;background:var(--g900);color:var(--c);min-
           <div class="fl-metric"><div class="fl-metric-val gold" id="m-qc-rate">—</div><div class="fl-metric-lbl">QC পাশ হার</div></div>
         </div>
         <div class="fl-divider"></div>
+        <div class="fl-sub-title">হার্ভেস্ট উৎস</div>
+        <div class="fl-grid fl-grid-2">
+          <div class="fl-field">
+            <label class="fl-label" for="h-healthy-kg">সুস্থ ব্যাগ থেকে <em>(kg)</em></label>
+            <input type="number" id="h-healthy-kg" class="fl-input" placeholder="0.00" min="0" step="0.01" oninput="calcAll()"/>
+            <span class="fl-hint">কোনো সমস্যা ছাড়া সাধারণ ব্যাগ</span>
+          </div>
+          <div class="fl-field">
+            <label class="fl-label" for="h-recovered-kg">মোল্ড/সমস্যাযুক্ত ব্যাগ থেকে উদ্ধারকৃত <em>(kg)</em></label>
+            <input type="number" id="h-recovered-kg" class="fl-input" placeholder="0.00" min="0" step="0.01" oninput="calcAll()"/>
+            <span class="fl-hint">সংক্রমিত ব্যাগ থেকেও যা ব্যবহারযোগ্য পাওয়া গেছে</span>
+          </div>
+        </div>
+        <div class="fl-metric-row">
+          <div class="fl-metric"><div class="fl-metric-val" id="m-recovery-rate">—</div><div class="fl-metric-lbl">উদ্ধার হার</div></div>
+        </div>
+        <div class="fl-divider"></div>
         <div class="fl-sub-title">প্রসেসড পণ্য (আউটপুট)</div>
         <div class="fl-grid fl-grid-2">
           <div class="fl-field">
@@ -462,6 +480,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--g900);color:var(--c);min-
           <label class="fl-toggle"><input type="checkbox" id="spawn-bought-toggle" data-target="spawn-bought-block" onchange="toggleConditional('spawn-bought-block',this)"/><span class="fl-toggle-slider"></span></label>
           <span class="fl-toggle-label">আজ স্পন কেনা হয়েছে?</span>
         </div>
+        <span class="fl-hint">মোল্ড/সমস্যা ও সরবরাহকারী রিফান্ড ট্র্যাক করতে <a href="expenses.html">Expenses → Suppliers ট্যাব</a> ব্যবহার করুন — এখানকার এন্ট্রি শুধু আজকের দ্রুত সারাংশের জন্য।</span>
         <div class="fl-conditional" id="spawn-bought-block">
           <div class="fl-grid fl-grid-3">
             <div class="fl-field">
@@ -647,6 +666,34 @@ body{font-family:'DM Sans',sans-serif;background:var(--g900);color:var(--c);min-
           <div class="fl-divider"></div>
         </div>
 
+        <div class="fl-divider"></div>
+        <div class="fl-toggle-row">
+          <label class="fl-toggle"><input type="checkbox" id="sample-toggle" data-target="sample-block" onchange="toggleConditional('sample-block',this)"/><span class="fl-toggle-slider"></span></label>
+          <span class="fl-toggle-label">আজ বিনামূল্যে নমুনা দেওয়া হয়েছে?</span>
+        </div>
+        <div class="fl-conditional" id="sample-block">
+          <span class="fl-hint">বন্ধু-পরিবার, রেস্টুরেন্ট ট্রায়াল ইত্যাদি — এগুলো খরচ হিসেবে যোগ হয় না (উৎপাদন খরচে ইতিমধ্যে ধরা আছে), শুধু অ্যানালিটিক্সে মার্কেটিং ভ্যালু হিসেবে দেখানো হবে।</span>
+          <div class="fl-grid fl-grid-3 mt-10">
+            <div class="fl-field">
+              <label class="fl-label" for="sample-fresh-kg">তাজা নমুনা <em>(kg)</em></label>
+              <input type="number" id="sample-fresh-kg" class="fl-input" placeholder="0.00" min="0" step="0.01"/>
+            </div>
+            <div class="fl-field">
+              <label class="fl-label" for="sample-dried-kg">শুকনো নমুনা <em>(kg)</em></label>
+              <input type="number" id="sample-dried-kg" class="fl-input" placeholder="0.00" min="0" step="0.01"/>
+            </div>
+            <div class="fl-field">
+              <label class="fl-label" for="sample-powder-kg">পাউডার নমুনা <em>(kg)</em></label>
+              <input type="number" id="sample-powder-kg" class="fl-input" placeholder="0.00" min="0" step="0.01"/>
+            </div>
+          </div>
+          <div class="fl-field mt-10">
+            <label class="fl-label" for="sample-notes">কাকে/কেন দেওয়া হয়েছে</label>
+            <input type="text" id="sample-notes" class="fl-input" placeholder="যেমন: রেস্টুরেন্ট ট্রায়াল — ক্যাফে নীলকণ্ঠ, বন্ধু-পরিবার"/>
+          </div>
+          <div class="fl-divider"></div>
+        </div>
+
         <div class="fl-sub-title">দিনশেষের মজুদ (ক্লোজিং স্টক)</div>
         <div class="fl-grid fl-grid-3">
           <div class="fl-field">
@@ -716,6 +763,28 @@ body{font-family:'DM Sans',sans-serif;background:var(--g900);color:var(--c);min-
         <div class="fl-field mt-10">
           <label class="fl-label" for="ex-notes">খরচের মন্তব্য</label>
           <input type="text" id="ex-notes" class="fl-input" placeholder="অন্যান্য খরচের বিস্তারিত..."/>
+        </div>
+
+        <div class="fl-divider"></div>
+        <div class="fl-sub-title">চ্যানেল অনুযায়ী প্যাকেজিং ও ডেলিভারি খরচ</div>
+        <span class="fl-hint">ঐচ্ছিক — অনলাইন (ওয়েবসাইট অর্ডার) বনাম অফলাইন (সরাসরি/B2B) বিক্রির প্রকৃত প্যাকেজিং ও ডেলিভারি খরচ আলাদা করে রাখলে অ্যানালিটিক্সে চ্যানেল-ভিত্তিক লাভ-ক্ষতি দেখা যাবে। উপরের সাধারণ প্যাকেজিং/পরিবহন থেকে আলাদা — এটি নির্দিষ্ট চ্যানেলের প্রকৃত খরচ।</span>
+        <div class="fl-grid fl-grid-2 mt-10">
+          <div class="fl-field">
+            <label class="fl-label" for="ex-online-packaging">অনলাইন প্যাকেজিং <em>(৳)</em></label>
+            <input type="number" id="ex-online-packaging" class="fl-input" placeholder="0" min="0"/>
+          </div>
+          <div class="fl-field">
+            <label class="fl-label" for="ex-online-delivery">অনলাইন ডেলিভারি <em>(৳)</em></label>
+            <input type="number" id="ex-online-delivery" class="fl-input" placeholder="0" min="0"/>
+          </div>
+          <div class="fl-field">
+            <label class="fl-label" for="ex-offline-packaging">অফলাইন প্যাকেজিং <em>(৳)</em></label>
+            <input type="number" id="ex-offline-packaging" class="fl-input" placeholder="0" min="0"/>
+          </div>
+          <div class="fl-field">
+            <label class="fl-label" for="ex-offline-delivery">অফলাইন ডেলিভারি <em>(৳)</em></label>
+            <input type="number" id="ex-offline-delivery" class="fl-input" placeholder="0" min="0"/>
+          </div>
         </div>
       </div>
     </div>
@@ -958,8 +1027,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--g900);color:var(--c);min-
 );
 ALTER TABLE farm_daily_logs ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "admin_only" ON farm_daily_logs FOR ALL TO authenticated
-  USING (auth.jwt() ->> 'email' = ANY(ARRAY['mushroombangladesh.info@gmail.com','quazishaab@gmail.com']))
-  WITH CHECK (auth.jwt() ->> 'email' = ANY(ARRAY['mushroombangladesh.info@gmail.com','quazishaab@gmail.com']));</pre>
+  USING (auth.jwt() ->> 'email' = ANY(ARRAY['mushroombangladesh.info@gmail.com','quazishaab@gmail.com','abrarfahim.nsu@gmail.com']))
+  WITH CHECK (auth.jwt() ->> 'email' = ANY(ARRAY['mushroombangladesh.info@gmail.com','quazishaab@gmail.com','abrarfahim.nsu@gmail.com']));</pre>
 
 <!-- ══ SUPABASE SQL SCHEMA REFERENCE (run in Supabase SQL editor) ══
 CREATE TABLE farm_daily_logs (
@@ -1008,8 +1077,8 @@ ALTER TABLE farm_daily_logs ENABLE ROW LEVEL SECURITY;
 -- Replace the broad policy with this admin-only version:
 -- DROP POLICY IF EXISTS "admin_all" ON farm_daily_logs;
 CREATE POLICY "admin_only" ON farm_daily_logs FOR ALL TO authenticated
-  USING (auth.jwt() ->> 'email' = ANY(ARRAY['mushroombangladesh.info@gmail.com','quazishaab@gmail.com']))
-  WITH CHECK (auth.jwt() ->> 'email' = ANY(ARRAY['mushroombangladesh.info@gmail.com','quazishaab@gmail.com']));
+  USING (auth.jwt() ->> 'email' = ANY(ARRAY['mushroombangladesh.info@gmail.com','quazishaab@gmail.com','abrarfahim.nsu@gmail.com']))
+  WITH CHECK (auth.jwt() ->> 'email' = ANY(ARRAY['mushroombangladesh.info@gmail.com','quazishaab@gmail.com','abrarfahim.nsu@gmail.com']));
 -->
 
 <script type="module">
@@ -1101,6 +1170,11 @@ function calcAll() {
   set('m-fresh-total', freshTotal > 0 ? freshTotal.toFixed(2)+' kg' : '—');
   set('m-qc-rate', qcPass);
   set('sum-fresh-total', fmtKg(freshTotal));
+
+  // Harvest source recovery rate
+  const healthyKg = n('h-healthy-kg'), recoveredKg = n('h-recovered-kg');
+  const sourceTotal = healthyKg + recoveredKg;
+  set('m-recovery-rate', sourceTotal > 0 ? (recoveredKg/sourceTotal*100).toFixed(1)+'%' : '—');
   set('sum-qc', qcPass);
   set('sum-dried-out', fmtKg(n('h-dried')));
   set('sum-powder-out', fmtKg(n('h-powder')));
@@ -1330,6 +1404,7 @@ document.getElementById('btn-submit').addEventListener('click', async () => {
     harvest_powder:   n('h-powder')  || null,  harvest_rooms:    rooms.length ? rooms : null,
     harvest_primary_batch: document.getElementById('h-primary-batch').value || null,
     harvest_flush_num:n('h-flush-num') || null,
+    harvest_healthy_kg:n('h-healthy-kg')||null, harvest_recovered_kg:n('h-recovered-kg')||null,
     qc_pass:n('qc-pass')||null, qc_fail:n('qc-fail')||null,
     qc_fail_reason:document.getElementById('qc-fail-reason').value||null,
     contam_event:document.getElementById('qc-contam-toggle').checked,
@@ -1352,12 +1427,17 @@ document.getElementById('btn-submit').addEventListener('click', async () => {
     s_orders:n('s-orders')||null, s_waste:n('s-waste')||null,
     s_b2b_name:document.getElementById('s-b2b-name').value||null,
     s_b2b_qty:n('s-b2b-qty')||null, s_b2b_value:n('s-b2b-value')||null,
+    sample_fresh_kg:n('sample-fresh-kg')||null, sample_dried_kg:n('sample-dried-kg')||null,
+    sample_powder_kg:n('sample-powder-kg')||null,
+    sample_notes:document.getElementById('sample-notes').value||null,
     st_fresh:n('st-fresh')||null, st_dried:n('st-dried')||null, st_powder:n('st-powder')||null,
     ex_spawn:n('ex-spawn')||null, ex_substrate:n('ex-substrate')||null,
     ex_packaging:n('ex-packaging')||null, ex_labor:n('ex-labor')||null,
     ex_electricity:n('ex-electricity')||null, ex_transport:n('ex-transport')||null,
     ex_water:n('ex-water')||null, ex_other:n('ex-other')||null,
     ex_notes:document.getElementById('ex-notes').value||null,
+    online_packaging_cost:n('ex-online-packaging')||null, online_delivery_cost:n('ex-online-delivery')||null,
+    offline_packaging_cost:n('ex-offline-packaging')||null, offline_delivery_cost:n('ex-offline-delivery')||null,
     op_rooms:n('op-rooms')||null, op_bags_total:n('op-bags-total')||null,
     op_workers:n('op-workers')||null, op_shifts:n('op-shifts')||null,
     op_new_batches:n('op-new-batches')||null, op_done_batches:n('op-done-batches')||null,
@@ -1438,7 +1518,9 @@ window.loadLog = async function(date) {
   const map = {
     'h-fresh-a':'harvest_fresh_a','h-fresh-b':'harvest_fresh_b','h-fresh-rej':'harvest_fresh_rej',
     'h-dried':'harvest_dried','h-powder':'harvest_powder','h-primary-batch':'harvest_primary_batch',
-    'h-flush-num':'harvest_flush_num','qc-pass':'qc_pass','qc-fail':'qc_fail',
+    'h-flush-num':'harvest_flush_num',
+    'h-healthy-kg':'harvest_healthy_kg','h-recovered-kg':'harvest_recovered_kg',
+    'qc-pass':'qc_pass','qc-fail':'qc_fail',
     'qc-fail-reason':'qc_fail_reason','qc-contam-room':'contam_room','qc-contam-type':'contam_type',
     'qc-contam-bags':'contam_bags','qc-contam-action':'contam_action',
     'sp-bought-kg':'spawn_bought_kg','sp-price-per-kg':'spawn_price_per_kg','sp-supplier':'spawn_supplier',
@@ -1450,10 +1532,14 @@ window.loadLog = async function(date) {
     's-dried-price':'s_dried_price','s-powder-kg':'s_powder_kg','s-powder-price':'s_powder_price',
     's-orders':'s_orders','s-waste':'s_waste','s-b2b-name':'s_b2b_name',
     's-b2b-qty':'s_b2b_qty','s-b2b-value':'s_b2b_value',
+    'sample-fresh-kg':'sample_fresh_kg','sample-dried-kg':'sample_dried_kg',
+    'sample-powder-kg':'sample_powder_kg','sample-notes':'sample_notes',
     'st-fresh':'st_fresh','st-dried':'st_dried','st-powder':'st_powder',
     'ex-spawn':'ex_spawn','ex-substrate':'ex_substrate','ex-packaging':'ex_packaging',
     'ex-labor':'ex_labor','ex-electricity':'ex_electricity','ex-transport':'ex_transport',
     'ex-water':'ex_water','ex-other':'ex_other','ex-notes':'ex_notes',
+    'ex-online-packaging':'online_packaging_cost','ex-online-delivery':'online_delivery_cost',
+    'ex-offline-packaging':'offline_packaging_cost','ex-offline-delivery':'offline_delivery_cost',
     'op-rooms':'op_rooms','op-bags-total':'op_bags_total','op-workers':'op_workers',
     'op-shifts':'op_shifts','op-new-batches':'op_new_batches','op-done-batches':'op_done_batches',
     'op-bags-removed':'op_bags_removed','op-energy-kwh':'op_energy_kwh','op-issue-desc':'op_issue_desc',
@@ -1466,6 +1552,12 @@ window.loadLog = async function(date) {
   });
   if (data.contam_event) { document.getElementById('qc-contam-toggle').checked=true; document.getElementById('qc-contam-block').classList.add('show'); }
   if (data.op_issue)     { document.getElementById('op-issue-toggle').checked=true;  document.getElementById('op-issue-block').classList.add('show'); }
+  if (data.sample_fresh_kg || data.sample_dried_kg || data.sample_powder_kg || data.sample_notes) {
+    document.getElementById('sample-toggle').checked=true; document.getElementById('sample-block').classList.add('show');
+  }
+  if (data.s_b2b_name || data.s_b2b_qty || data.s_b2b_value) {
+    document.getElementById('s-b2b-toggle').checked=true; document.getElementById('s-b2b-block').classList.add('show');
+  }
   if (data.harvest_rooms) data.harvest_rooms.forEach(r => { const el=document.getElementById('h-room-'+r.toLowerCase()); if(el) el.checked=true; });
   calcAll();
   toast(`${date} এর লগ লোড হয়েছে`, 'success');

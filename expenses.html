@@ -118,7 +118,10 @@
     .mb-sm{margin-bottom:16px;}
     .mb-md{margin-bottom:20px;}
     .mb-lg{margin-bottom:24px;}
+    .mt-md{margin-top:20px;}
     .kpi-grid-3{grid-template-columns:repeat(3,1fr);}
+    .label-optional{opacity:.5;font-weight:400;text-transform:none;letter-spacing:0;}
+    .readonly-preview{padding:9px 11px;border-radius:6px;border:1px solid var(--border);background:var(--bg3);color:var(--al);font-family:'DM Mono',monospace;font-size:13px;}
   </style>
 </head>
 <body>
@@ -133,6 +136,7 @@
     <div class="tabs">
       <button type="button" class="tab-btn active" data-tab="daily">Daily Farm Expenses</button>
       <button type="button" class="tab-btn" data-tab="oneoff">One-off Expenses</button>
+      <button type="button" class="tab-btn" data-tab="suppliers">Suppliers</button>
       <button type="button" class="tab-btn" data-tab="summary">P&L Summary</button>
     </div>
 
@@ -235,6 +239,14 @@
             <label>Vendor / Supplier</label>
             <input type="text" id="oe-vendor" placeholder="Optional">
           </div>
+          <div class="form-group">
+            <label>Channel <span class="label-optional">(optional)</span></label>
+            <select id="oe-channel">
+              <option value="">Shared / Unallocated</option>
+              <option value="online">Online</option>
+              <option value="offline">Offline</option>
+            </select>
+          </div>
           <div class="form-group span3">
             <label>Notes</label>
             <textarea id="oe-notes" rows="2" placeholder="Any additional notes..."></textarea>
@@ -267,13 +279,131 @@
                 <th>Category</th>
                 <th>Description</th>
                 <th>Vendor</th>
+                <th>Channel</th>
                 <th class="th-r">Amount</th>
                 <th></th>
               </tr>
             </thead>
             <tbody id="oe-tbody">
-              <tr><td colspan="6"><div class="empty-state"><div class="empty-icon">⏳</div>Loading...</div></td></tr>
+              <tr><td colspan="7"><div class="empty-state"><div class="empty-icon">⏳</div>Loading...</div></td></tr>
             </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ TAB: SUPPLIERS ══ -->
+    <div class="tab-panel" id="tab-suppliers">
+
+      <!-- Add purchase form -->
+      <button type="button" class="btn primary mb-sm" id="add-sp-btn">+ Add Spawn Purchase</button>
+
+      <div class="form-card" id="add-sp-form">
+        <div class="form-title">Add Spawn Purchase</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Date</label>
+            <input type="date" id="sp-date">
+          </div>
+          <div class="form-group">
+            <label>Supplier <span class="label-optional">(optional)</span></label>
+            <input type="text" id="sp-supplier-name" placeholder="Supplier name">
+          </div>
+          <div class="form-group">
+            <label>Kg Purchased</label>
+            <input type="number" id="sp-kg" placeholder="0.00" min="0" step="0.01">
+          </div>
+          <div class="form-group">
+            <label>Price per Kg (৳)</label>
+            <input type="number" id="sp-price" placeholder="0" min="0" step="0.01">
+          </div>
+          <div class="form-group">
+            <label>Total Cost</label>
+            <div class="readonly-preview" id="sp-total-preview">৳ 0</div>
+          </div>
+        </div>
+
+        <div class="form-title mt-md">Mold / Problems <span class="label-optional">(if any)</span></div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Kg Wasted</label>
+            <input type="number" id="sp-wasted" placeholder="0.00" min="0" step="0.01">
+          </div>
+          <div class="form-group">
+            <label>Problem Type</label>
+            <select id="sp-problem-type">
+              <option value="">Select...</option>
+              <option value="mold">Mold</option>
+              <option value="contamination">Contamination</option>
+              <option value="weak_growth">Weak Growth</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="form-group span3">
+            <label>Problem Notes</label>
+            <input type="text" id="sp-problem-notes" placeholder="What went wrong...">
+          </div>
+        </div>
+
+        <div class="form-title mt-md">Supplier Refund <span class="label-optional">(if any)</span></div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Kg Refunded/Replaced</label>
+            <input type="number" id="sp-refund-kg" placeholder="0.00" min="0" step="0.01">
+          </div>
+          <div class="form-group">
+            <label>Refund Amount (৳)</label>
+            <input type="number" id="sp-refund-amount" placeholder="0" min="0">
+          </div>
+          <div class="form-group span3">
+            <label>Refund Notes</label>
+            <input type="text" id="sp-refund-notes" placeholder="Cash refund, free replacement bag, etc...">
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn primary" id="sp-save-btn">Save Purchase</button>
+          <button type="button" class="btn" id="sp-cancel-btn">Cancel</button>
+        </div>
+      </div>
+
+      <!-- KPIs -->
+      <div class="kpi-grid mb-md">
+        <div class="kpi"><div class="kpi-label">Spent This Month</div><div class="kpi-val red" id="sp-total-month">—</div></div>
+        <div class="kpi"><div class="kpi-label">Kg Purchased</div><div class="kpi-val" id="sp-kg-month">—</div><div class="kpi-sub">This month</div></div>
+        <div class="kpi"><div class="kpi-label">Waste Rate</div><div class="kpi-val" id="sp-waste-month">—</div><div class="kpi-sub">This month</div></div>
+        <div class="kpi"><div class="kpi-label">Refunds Received</div><div class="kpi-val green" id="sp-refund-month">—</div><div class="kpi-sub">This month</div></div>
+      </div>
+
+      <!-- Supplier scorecard -->
+      <div class="table-card mb-md">
+        <div class="table-toolbar"><span class="table-title">Supplier Scorecard</span></div>
+        <div class="scroll-x">
+          <table>
+            <thead>
+              <tr>
+                <th>Supplier</th><th class="th-r">Purchases</th><th class="th-r">Total Kg</th>
+                <th class="th-r">Avg ৳/Kg</th><th class="th-r">Total Spent</th>
+                <th class="th-r">Waste %</th><th class="th-r">Refunded</th><th class="th-r">Net Cost</th>
+              </tr>
+            </thead>
+            <tbody id="scorecard-tbody"><tr><td colspan="8"><div class="empty-state"><div class="empty-icon">⏳</div>Loading...</div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Purchase history -->
+      <div class="table-card">
+        <div class="table-toolbar"><span class="table-title">Purchase History</span></div>
+        <div class="scroll-x">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th><th>Supplier</th><th class="th-r">Kg</th><th class="th-r">৳/Kg</th>
+                <th class="th-r">Cost</th><th class="th-r">Wasted</th><th class="th-r">Refunded</th><th></th>
+              </tr>
+            </thead>
+            <tbody id="sp-tbody"><tr><td colspan="8"><div class="empty-state"><div class="empty-icon">🌱</div>No spawn purchases logged yet</div></td></tr></tbody>
           </table>
         </div>
       </div>
@@ -476,7 +606,7 @@
     function renderOETable() {
       if (!_oeData.length) {
         document.getElementById('oe-tbody').innerHTML =
-          '<tr><td colspan="6"><div class="empty-state"><div class="empty-icon">💰</div>No one-off expenses yet</div></td></tr>';
+          '<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">💰</div>No one-off expenses yet</div></td></tr>';
         return;
       }
       document.getElementById('oe-tbody').innerHTML = _oeData.map(r => `
@@ -485,6 +615,7 @@
           <td><span class="cat-badge cat-${(r.category||'other').toLowerCase()}">${r.category||'Other'}</span></td>
           <td>${r.description||'—'}</td>
           <td style="color:var(--cl);font-size:12px;">${r.vendor||'—'}</td>
+          <td style="color:var(--cl);font-size:12px;">${r.channel ? (r.channel==='online'?'🌐 Online':'🏪 Offline') : '—'}</td>
           <td class="amount-cell total">${fmt(+r.amount||0)}</td>
           <td><button class="btn danger" onclick="window.deleteOE(${r.id})">Delete</button></td>
         </tr>`).join('');
@@ -511,13 +642,14 @@
         description: desc,
         amount,
         vendor:      document.getElementById('oe-vendor').value.trim() || null,
+        channel:     document.getElementById('oe-channel').value || null,
         notes:       document.getElementById('oe-notes').value.trim()  || null,
         added_by:    userEmail,
       }]);
       if (error) { toast(error.message, 'err'); return; }
       toast('Expense saved');
       document.getElementById('add-expense-form').classList.remove('open');
-      ['oe-cat','oe-desc','oe-amount','oe-vendor','oe-notes'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+      ['oe-cat','oe-desc','oe-amount','oe-vendor','oe-channel','oe-notes'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
       loadOneOff();
     });
 
@@ -527,6 +659,134 @@
       if (error) { toast(error.message, 'err'); return; }
       toast('Deleted');
       loadOneOff();
+    };
+
+    /* ══ SUPPLIERS TAB ══ */
+    let _spData = [];
+
+    async function loadSuppliers() {
+      const [{ data: purchases, error: pErr }, { data: scorecard, error: sErr }] = await Promise.all([
+        sb.from('spawn_purchases').select('*').order('purchase_date', { ascending: false }),
+        sb.from('v_supplier_scorecard').select('*').order('total_spent', { ascending: false }),
+      ]);
+      if (pErr) { toast(pErr.message, 'err'); return; }
+      _spData = purchases || [];
+      renderSPKPIs();
+      renderScorecard(scorecard || [], sErr);
+      renderSPTable();
+    }
+
+    function renderSPKPIs() {
+      const ms = monthStart();
+      const monthRows = _spData.filter(r => r.purchase_date >= ms);
+      const spent    = monthRows.reduce((s,r)=>s+(+r.total_cost||0),0);
+      const kg       = monthRows.reduce((s,r)=>s+(+r.kg_purchased||0),0);
+      const wasted   = monthRows.reduce((s,r)=>s+(+r.kg_wasted||0),0);
+      const refunded = monthRows.reduce((s,r)=>s+(+r.refund_amount||0),0);
+      document.getElementById('sp-total-month').textContent  = fmt(spent);
+      document.getElementById('sp-kg-month').textContent     = kg.toFixed(1)+' kg';
+      document.getElementById('sp-waste-month').textContent  = kg>0 ? ((wasted/kg)*100).toFixed(1)+'%' : '—';
+      document.getElementById('sp-refund-month').textContent = fmt(refunded);
+    }
+
+    function renderScorecard(rows, error) {
+      const tbody = document.getElementById('scorecard-tbody');
+      if (error) {
+        tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">⚠️</div>${error.message}</div></td></tr>`;
+        return;
+      }
+      if (!rows.length) {
+        tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">📊</div>No purchases logged yet</div></td></tr>';
+        return;
+      }
+      tbody.innerHTML = rows.map(r => `
+        <tr>
+          <td>${r.supplier_name}</td>
+          <td class="th-r">${r.purchase_count}</td>
+          <td class="th-r">${(+r.total_kg_purchased||0).toFixed(1)} kg</td>
+          <td class="th-r">${fmt(r.avg_price_per_kg)}</td>
+          <td class="th-r">${fmt(r.total_spent)}</td>
+          <td class="th-r" style="color:${r.waste_rate_pct>10?'var(--red)':'var(--cl)'}">${r.waste_rate_pct ?? 0}%</td>
+          <td class="th-r">${fmt(r.total_refunded_amount)}</td>
+          <td class="th-r" style="color:var(--al);">${fmt(r.net_cost_after_refunds)}</td>
+        </tr>`).join('');
+    }
+
+    function renderSPTable() {
+      const tbody = document.getElementById('sp-tbody');
+      if (!_spData.length) {
+        tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">🌱</div>No spawn purchases logged yet</div></td></tr>';
+        return;
+      }
+      tbody.innerHTML = _spData.map(r => `
+        <tr>
+          <td style="font-family:'DM Mono',monospace;font-size:12px;">${r.purchase_date}</td>
+          <td>${r.supplier_name || '—'}</td>
+          <td class="th-r">${(+r.kg_purchased||0).toFixed(2)}</td>
+          <td class="th-r">${fmt(r.price_per_kg)}</td>
+          <td class="th-r amount-cell total">${fmt(r.total_cost)}</td>
+          <td class="th-r" style="color:${r.kg_wasted>0?'var(--red)':'var(--cl)'}">${r.kg_wasted>0 ? (+r.kg_wasted).toFixed(2) : '—'}</td>
+          <td class="th-r" style="color:${r.refund_amount>0?'var(--green)':'var(--cl)'}">${r.refund_amount>0 ? fmt(r.refund_amount) : '—'}</td>
+          <td><button class="btn danger" onclick="window.deleteSP(${r.id})">Delete</button></td>
+        </tr>`).join('');
+    }
+
+    /* Live total-cost preview */
+    function updateSPTotalPreview() {
+      const kg    = parseFloat(document.getElementById('sp-kg').value) || 0;
+      const price = parseFloat(document.getElementById('sp-price').value) || 0;
+      document.getElementById('sp-total-preview').textContent = fmt(kg * price);
+    }
+    document.getElementById('sp-kg').addEventListener('input', updateSPTotalPreview);
+    document.getElementById('sp-price').addEventListener('input', updateSPTotalPreview);
+
+    document.getElementById('add-sp-btn').addEventListener('click', () => {
+      const f = document.getElementById('add-sp-form');
+      f.classList.toggle('open');
+      document.getElementById('sp-date').value = today();
+    });
+    document.getElementById('sp-cancel-btn').addEventListener('click', () => {
+      document.getElementById('add-sp-form').classList.remove('open');
+    });
+
+    document.getElementById('sp-save-btn').addEventListener('click', async () => {
+      const kg    = parseFloat(document.getElementById('sp-kg').value);
+      const price = parseFloat(document.getElementById('sp-price').value);
+      const date  = document.getElementById('sp-date').value || today();
+      if (isNaN(kg) || kg <= 0 || isNaN(price) || price < 0) { toast('Enter a valid kg and price', 'err'); return; }
+
+      const wasted  = parseFloat(document.getElementById('sp-wasted').value) || 0;
+      const refKg   = parseFloat(document.getElementById('sp-refund-kg').value) || 0;
+      if (wasted > kg)  { toast('Wasted kg cannot exceed purchased kg', 'err'); return; }
+      if (refKg > wasted) { toast('Refunded kg cannot exceed wasted kg', 'err'); return; }
+
+      const { error } = await sb.from('spawn_purchases').insert([{
+        purchase_date: date,
+        supplier_name: document.getElementById('sp-supplier-name').value.trim() || null,
+        kg_purchased:  kg,
+        price_per_kg:  price,
+        kg_wasted:     wasted,
+        problem_type:  document.getElementById('sp-problem-type').value || null,
+        problem_notes: document.getElementById('sp-problem-notes').value.trim() || null,
+        kg_refunded:   refKg,
+        refund_amount: parseFloat(document.getElementById('sp-refund-amount').value) || 0,
+        refund_notes:  document.getElementById('sp-refund-notes').value.trim() || null,
+      }]);
+      if (error) { toast(error.message, 'err'); return; }
+      toast('Purchase saved');
+      document.getElementById('add-sp-form').classList.remove('open');
+      ['sp-supplier-name','sp-kg','sp-price','sp-wasted','sp-problem-type','sp-problem-notes',
+       'sp-refund-kg','sp-refund-amount','sp-refund-notes'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+      document.getElementById('sp-total-preview').textContent = '৳ 0';
+      loadSuppliers();
+    });
+
+    window.deleteSP = async (id) => {
+      if (!confirm('Delete this purchase record?')) return;
+      const { error } = await sb.from('spawn_purchases').delete().eq('id', id);
+      if (error) { toast(error.message, 'err'); return; }
+      toast('Deleted');
+      loadSuppliers();
     };
 
     /* ══ P&L SUMMARY ══ */
@@ -589,6 +849,7 @@
         btn.classList.add('active');
         document.getElementById('tab-'+btn.dataset.tab).classList.add('active');
         if (btn.dataset.tab==='oneoff' && !_oeData.length) loadOneOff();
+        if (btn.dataset.tab==='suppliers' && !_spData.length) loadSuppliers();
         if (btn.dataset.tab==='summary') loadPL();
       });
     });

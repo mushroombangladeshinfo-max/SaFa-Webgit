@@ -118,11 +118,14 @@
     .mb-sm{margin-bottom:16px;}
     .mb-md{margin-bottom:20px;}
     .mb-lg{margin-bottom:24px;}
+    .mt-md{margin-top:20px;}
     .kpi-grid-3{grid-template-columns:repeat(3,1fr);}
+    .label-optional{opacity:.5;font-weight:400;text-transform:none;letter-spacing:0;}
+    .readonly-preview{padding:9px 11px;border-radius:6px;border:1px solid var(--border);background:var(--bg3);color:var(--al);font-family:'DM Mono',monospace;font-size:13px;}
   </style>
-  <script type="module" crossorigin src="/assets/expenses-DegSehER.js"></script>
+  <script type="module" crossorigin src="/assets/expenses-Nb7SieRU.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
-  <link rel="modulepreload" crossorigin href="/assets/admin-auth-rHatrkP5.js">
+  <link rel="modulepreload" crossorigin href="/assets/admin-auth-Bm8-hV4r.js">
   <link rel="modulepreload" crossorigin href="/assets/admin-nav-DxntCGRp.js">
 </head>
 <body>
@@ -137,6 +140,7 @@
     <div class="tabs">
       <button type="button" class="tab-btn active" data-tab="daily">Daily Farm Expenses</button>
       <button type="button" class="tab-btn" data-tab="oneoff">One-off Expenses</button>
+      <button type="button" class="tab-btn" data-tab="suppliers">Suppliers</button>
       <button type="button" class="tab-btn" data-tab="summary">P&L Summary</button>
     </div>
 
@@ -239,6 +243,14 @@
             <label>Vendor / Supplier</label>
             <input type="text" id="oe-vendor" placeholder="Optional">
           </div>
+          <div class="form-group">
+            <label>Channel <span class="label-optional">(optional)</span></label>
+            <select id="oe-channel">
+              <option value="">Shared / Unallocated</option>
+              <option value="online">Online</option>
+              <option value="offline">Offline</option>
+            </select>
+          </div>
           <div class="form-group span3">
             <label>Notes</label>
             <textarea id="oe-notes" rows="2" placeholder="Any additional notes..."></textarea>
@@ -271,13 +283,131 @@
                 <th>Category</th>
                 <th>Description</th>
                 <th>Vendor</th>
+                <th>Channel</th>
                 <th class="th-r">Amount</th>
                 <th></th>
               </tr>
             </thead>
             <tbody id="oe-tbody">
-              <tr><td colspan="6"><div class="empty-state"><div class="empty-icon">⏳</div>Loading...</div></td></tr>
+              <tr><td colspan="7"><div class="empty-state"><div class="empty-icon">⏳</div>Loading...</div></td></tr>
             </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ TAB: SUPPLIERS ══ -->
+    <div class="tab-panel" id="tab-suppliers">
+
+      <!-- Add purchase form -->
+      <button type="button" class="btn primary mb-sm" id="add-sp-btn">+ Add Spawn Purchase</button>
+
+      <div class="form-card" id="add-sp-form">
+        <div class="form-title">Add Spawn Purchase</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Date</label>
+            <input type="date" id="sp-date">
+          </div>
+          <div class="form-group">
+            <label>Supplier <span class="label-optional">(optional)</span></label>
+            <input type="text" id="sp-supplier-name" placeholder="Supplier name">
+          </div>
+          <div class="form-group">
+            <label>Kg Purchased</label>
+            <input type="number" id="sp-kg" placeholder="0.00" min="0" step="0.01">
+          </div>
+          <div class="form-group">
+            <label>Price per Kg (৳)</label>
+            <input type="number" id="sp-price" placeholder="0" min="0" step="0.01">
+          </div>
+          <div class="form-group">
+            <label>Total Cost</label>
+            <div class="readonly-preview" id="sp-total-preview">৳ 0</div>
+          </div>
+        </div>
+
+        <div class="form-title mt-md">Mold / Problems <span class="label-optional">(if any)</span></div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Kg Wasted</label>
+            <input type="number" id="sp-wasted" placeholder="0.00" min="0" step="0.01">
+          </div>
+          <div class="form-group">
+            <label>Problem Type</label>
+            <select id="sp-problem-type">
+              <option value="">Select...</option>
+              <option value="mold">Mold</option>
+              <option value="contamination">Contamination</option>
+              <option value="weak_growth">Weak Growth</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="form-group span3">
+            <label>Problem Notes</label>
+            <input type="text" id="sp-problem-notes" placeholder="What went wrong...">
+          </div>
+        </div>
+
+        <div class="form-title mt-md">Supplier Refund <span class="label-optional">(if any)</span></div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Kg Refunded/Replaced</label>
+            <input type="number" id="sp-refund-kg" placeholder="0.00" min="0" step="0.01">
+          </div>
+          <div class="form-group">
+            <label>Refund Amount (৳)</label>
+            <input type="number" id="sp-refund-amount" placeholder="0" min="0">
+          </div>
+          <div class="form-group span3">
+            <label>Refund Notes</label>
+            <input type="text" id="sp-refund-notes" placeholder="Cash refund, free replacement bag, etc...">
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn primary" id="sp-save-btn">Save Purchase</button>
+          <button type="button" class="btn" id="sp-cancel-btn">Cancel</button>
+        </div>
+      </div>
+
+      <!-- KPIs -->
+      <div class="kpi-grid mb-md">
+        <div class="kpi"><div class="kpi-label">Spent This Month</div><div class="kpi-val red" id="sp-total-month">—</div></div>
+        <div class="kpi"><div class="kpi-label">Kg Purchased</div><div class="kpi-val" id="sp-kg-month">—</div><div class="kpi-sub">This month</div></div>
+        <div class="kpi"><div class="kpi-label">Waste Rate</div><div class="kpi-val" id="sp-waste-month">—</div><div class="kpi-sub">This month</div></div>
+        <div class="kpi"><div class="kpi-label">Refunds Received</div><div class="kpi-val green" id="sp-refund-month">—</div><div class="kpi-sub">This month</div></div>
+      </div>
+
+      <!-- Supplier scorecard -->
+      <div class="table-card mb-md">
+        <div class="table-toolbar"><span class="table-title">Supplier Scorecard</span></div>
+        <div class="scroll-x">
+          <table>
+            <thead>
+              <tr>
+                <th>Supplier</th><th class="th-r">Purchases</th><th class="th-r">Total Kg</th>
+                <th class="th-r">Avg ৳/Kg</th><th class="th-r">Total Spent</th>
+                <th class="th-r">Waste %</th><th class="th-r">Refunded</th><th class="th-r">Net Cost</th>
+              </tr>
+            </thead>
+            <tbody id="scorecard-tbody"><tr><td colspan="8"><div class="empty-state"><div class="empty-icon">⏳</div>Loading...</div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Purchase history -->
+      <div class="table-card">
+        <div class="table-toolbar"><span class="table-title">Purchase History</span></div>
+        <div class="scroll-x">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th><th>Supplier</th><th class="th-r">Kg</th><th class="th-r">৳/Kg</th>
+                <th class="th-r">Cost</th><th class="th-r">Wasted</th><th class="th-r">Refunded</th><th></th>
+              </tr>
+            </thead>
+            <tbody id="sp-tbody"><tr><td colspan="8"><div class="empty-state"><div class="empty-icon">🌱</div>No spawn purchases logged yet</div></td></tr></tbody>
           </table>
         </div>
       </div>

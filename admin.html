@@ -113,6 +113,11 @@
     .login-btn.reset { background:rgba(95,207,128,.1); border:1px solid rgba(95,207,128,.25); color:#5fcf80; }
     .login-btn.reset:hover:not(:disabled) { background:rgba(95,207,128,.2); transform:translateY(-1px); }
     .login-btn:disabled { opacity:.55; cursor:not-allowed; transform:none; }
+    .google-btn { width:100%; padding:12px; margin-bottom:18px; background:#fff; color:#1f1f1f; font-family:'DM Sans',sans-serif; font-size:12.5px; font-weight:500; border:1px solid rgba(255,255,255,.1); border-radius:6px; cursor:pointer; transition:background .2s, box-shadow .2s; display:flex; align-items:center; justify-content:center; gap:10px; }
+    .google-btn:hover:not(:disabled) { background:#f5f5f5; box-shadow:0 2px 8px rgba(0,0,0,.15); }
+    .google-btn:disabled { opacity:.6; cursor:not-allowed; }
+    .login-or-divider { display:flex; align-items:center; gap:12px; margin-bottom:18px; font-size:10px; color:rgba(245,239,230,.3); text-transform:uppercase; letter-spacing:.1em; font-family:'Syne',sans-serif; }
+    .login-or-divider::before, .login-or-divider::after { content:''; flex:1; height:1px; background:rgba(255,255,255,.07); }
 
     /* Security footer */
     .login-security { margin-top:28px; display:flex; align-items:center; justify-content:center; gap:6px; font-family:'Syne',sans-serif; font-size:9px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:rgba(245,239,230,.16); }
@@ -556,6 +561,20 @@
         <div class="lockout-timer" id="lockout-timer">5:00</div>
         <div class="lockout-lbl">minutes remaining</div>
       </div>
+
+      <!-- Google sign-in — gated by the same admin email allowlist as
+           password/magic link (checkAuth() runs after any sign-in method
+           succeeds and signs out anyone not in ADMIN_EMAILS). -->
+      <button type="button" class="google-btn" id="google-signin-btn" onclick="handleGoogleSignIn()">
+        <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+          <path fill="#4285F4" d="M23.52 12.27c0-.85-.08-1.67-.22-2.45H12v4.63h6.47a5.53 5.53 0 01-2.4 3.63v3h3.87c2.27-2.09 3.58-5.17 3.58-8.81z"/>
+          <path fill="#34A853" d="M12 24c3.24 0 5.95-1.07 7.94-2.92l-3.87-3c-1.08.72-2.45 1.15-4.07 1.15-3.13 0-5.78-2.11-6.73-4.96H1.28v3.09A12 12 0 0012 24z"/>
+          <path fill="#FBBC05" d="M5.27 14.27a7.2 7.2 0 010-4.54v-3.1H1.28a12 12 0 000 10.73l3.99-3.09z"/>
+          <path fill="#EA4335" d="M12 4.77c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.94 1.19 15.24 0 12 0A12 12 0 001.28 6.63l3.99 3.1C6.22 6.88 8.87 4.77 12 4.77z"/>
+        </svg>
+        Continue with Google
+      </button>
+      <div class="login-or-divider">or</div>
 
       <!-- Method tabs -->
       <div class="login-tabs" role="tablist">
@@ -1525,6 +1544,21 @@
     });
 
     /* ── Magic Link ── */
+    /* ── Google OAuth ── */
+    window.handleGoogleSignIn = async function() {
+      if (checkLockout()) return;
+      hideBanner('pw-banner');
+      const btn = document.getElementById('google-signin-btn');
+      btn.disabled = true;
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: window.location.origin + '/admin.html' },
+      });
+      /* On success, Supabase redirects to Google immediately — non-admin
+         rejection happens in checkAuth() after the redirect returns. */
+      if (error) { showBanner('pw-banner', error.message); btn.disabled = false; }
+    };
+
     window.sendMagicLink = async function() {
       hideBanner('ml-banner');
       const email = document.getElementById('magic-email').value.trim();

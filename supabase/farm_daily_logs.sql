@@ -114,14 +114,8 @@ DROP POLICY IF EXISTS "admin_only" ON farm_daily_logs;
 CREATE POLICY "admin_only" ON farm_daily_logs
   FOR ALL TO authenticated
   USING (
-    auth.jwt() ->> 'email' = ANY(ARRAY[
-      'mushroombangladesh.info@gmail.com',
-      'quazishaab@gmail.com'
-    ])
+    auth.jwt() ->> 'email' = ANY(ARRAY['mushroombangladesh.info@gmail.com', 'quazishaab@gmail.com', 'abrarfahim.nsu@gmail.com'])
   )
   WITH CHECK (
-    auth.jwt() ->> 'email' = ANY(ARRAY[
-      'mushroombangladesh.info@gmail.com',
-      'quazishaab@gmail.com'
-    ])
+    auth.jwt() ->> 'email' = ANY(ARRAY['mushroombangladesh.info@gmail.com', 'quazishaab@gmail.com', 'abrarfahim.nsu@gmail.com'])
   );

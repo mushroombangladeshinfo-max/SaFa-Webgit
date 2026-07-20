@@ -67,6 +67,10 @@
     .chart-card-sub{font-size:11px;color:var(--cl);margin-bottom:12px;}
     .chart-wrap{position:relative;height:240px;}
     .chart-wrap.tall{height:280px;}
+    .chart-wrap.short{height:160px;}
+    .section-heading{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--c);margin-bottom:4px;}
+    .section-sub{font-size:12px;color:var(--cl);margin-bottom:16px;line-height:1.6;}
+    .kpi-grid-2{grid-template-columns:1fr 1fr;margin-bottom:14px;}
 
     /* ── Tables ── */
     .table-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:20px;}
@@ -162,9 +166,9 @@
       .chart-wrap{height:210px;}
     }
   </style>
-  <script type="module" crossorigin src="/assets/insights-Bjl8m39s.js"></script>
+  <script type="module" crossorigin src="/assets/insights-5qnRS_lj.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
-  <link rel="modulepreload" crossorigin href="/assets/admin-auth-rHatrkP5.js">
+  <link rel="modulepreload" crossorigin href="/assets/admin-auth-Bm8-hV4r.js">
   <link rel="modulepreload" crossorigin href="/assets/admin-nav-DxntCGRp.js">
 </head>
 <body>
@@ -191,6 +195,7 @@
       <button type="button" class="tab-btn active" data-tab="overview">Overview</button>
       <button type="button" class="tab-btn" data-tab="channels">Channels</button>
       <button type="button" class="tab-btn" data-tab="pnl">P&amp;L</button>
+      <button type="button" class="tab-btn" data-tab="ops">Operations</button>
       <button type="button" class="tab-btn" data-tab="ai">AI Insights</button>
       <button type="button" class="tab-btn" data-tab="entry">Data Entry</button>
     </div>
@@ -303,6 +308,74 @@
               <th class="r">Net Profit</th>
             </tr></thead>
             <tbody id="pnl-tbody"><tr><td colspan="7"><div class="empty-state">Loading…</div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ TAB: OPERATIONS ══
+         Online vs offline channel P&L, harvest source (healthy vs
+         mold-recovered), marketing samples given away, and supplier
+         health — all from the Phase 1-3 warehouse additions. -->
+    <div class="tab-panel" id="tab-ops">
+
+      <div class="section-heading">Online vs Offline P&amp;L</div>
+      <p class="section-sub">Shared production costs (spawn, substrate, labor…) are allocated between channels by revenue share — see the note on the chart.</p>
+
+      <div class="kpi-grid mb-md">
+        <div class="kpi"><div class="kpi-label">Online Revenue</div><div class="kpi-val green" id="ops-online-rev">—</div><div class="kpi-sub" id="ops-online-share"></div></div>
+        <div class="kpi"><div class="kpi-label">Offline Revenue</div><div class="kpi-val green" id="ops-offline-rev">—</div><div class="kpi-sub" id="ops-offline-share"></div></div>
+        <div class="kpi"><div class="kpi-label">Online Net Profit</div><div class="kpi-val" id="ops-online-net">—</div></div>
+        <div class="kpi"><div class="kpi-label">Offline Net Profit</div><div class="kpi-val" id="ops-offline-net">—</div></div>
+      </div>
+
+      <div class="chart-card mb-16">
+        <div class="chart-card-title">Revenue by Channel — monthly</div>
+        <div class="chart-card-sub">Online (web checkout) vs offline (direct/B2B), ৳</div>
+        <div class="chart-wrap tall"><canvas id="chart-channel-rev"></canvas></div>
+      </div>
+
+      <div class="table-card mb-lg">
+        <div class="table-toolbar"><span class="table-title">Channel P&amp;L Detail</span></div>
+        <div class="scroll-x">
+          <table>
+            <thead><tr>
+              <th>Month</th><th class="r">Online Rev</th><th class="r">Online Direct</th>
+              <th class="r">Online Shared</th><th class="r">Online Net</th>
+              <th class="r">Offline Rev</th><th class="r">Offline Direct</th>
+              <th class="r">Offline Shared</th><th class="r">Offline Net</th>
+            </tr></thead>
+            <tbody id="ops-pnl-tbody"><tr><td colspan="9"><div class="empty-state">Loading…</div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="charts-row">
+        <div class="chart-card">
+          <div class="chart-card-title">Harvest Source</div>
+          <div class="chart-card-sub">Healthy bags vs recovered from mold/problem bags, kg/month</div>
+          <div class="chart-wrap"><canvas id="chart-harvest-source"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-card-title">Marketing Samples</div>
+          <div class="chart-card-sub">Free product given away — value shown, not expensed</div>
+          <div class="kpi-grid kpi-grid-2">
+            <div class="kpi"><div class="kpi-label">Total Given (kg)</div><div class="kpi-val" id="ops-sample-kg">—</div></div>
+            <div class="kpi"><div class="kpi-label">Retail Value</div><div class="kpi-val gold" id="ops-sample-value">—</div></div>
+          </div>
+          <div class="chart-wrap short"><canvas id="chart-samples"></canvas></div>
+        </div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-toolbar"><span class="table-title">Supplier Health</span></div>
+        <div class="scroll-x">
+          <table>
+            <thead><tr>
+              <th>Supplier</th><th class="r">Purchases</th><th class="r">Total Kg</th>
+              <th class="r">Avg ৳/Kg</th><th class="r">Waste %</th><th class="r">Net Cost</th>
+            </tr></thead>
+            <tbody id="ops-supplier-tbody"><tr><td colspan="6"><div class="empty-state">Loading…</div></td></tr></tbody>
           </table>
         </div>
       </div>

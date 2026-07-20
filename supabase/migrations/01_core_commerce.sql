@@ -26,7 +26,8 @@ SET search_path = public
 AS $$
   SELECT COALESCE(auth.jwt() ->> 'email', '') IN (
     'quazishaab@gmail.com',
-    'mushroombangladesh.info@gmail.com'
+    'mushroombangladesh.info@gmail.com',
+    'abrarfahim.nsu@gmail.com'
   );
 $$;
 

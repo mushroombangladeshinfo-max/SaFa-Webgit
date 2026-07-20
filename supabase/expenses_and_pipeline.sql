@@ -18,8 +18,8 @@ CREATE TABLE IF NOT EXISTS one_off_expenses (
 ALTER TABLE one_off_expenses ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "admin_only" ON one_off_expenses;
 CREATE POLICY "admin_only" ON one_off_expenses FOR ALL TO authenticated
-  USING (auth.jwt() ->> 'email' = ANY(ARRAY['mushroombangladesh.info@gmail.com','quazishaab@gmail.com']))
-  WITH CHECK (auth.jwt() ->> 'email' = ANY(ARRAY['mushroombangladesh.info@gmail.com','quazishaab@gmail.com']));
+  USING (auth.jwt() ->> 'email' = ANY(ARRAY['mushroombangladesh.info@gmail.com','quazishaab@gmail.com','abrarfahim.nsu@gmail.com']))
+  WITH CHECK (auth.jwt() ->> 'email' = ANY(ARRAY['mushroombangladesh.info@gmail.com','quazishaab@gmail.com','abrarfahim.nsu@gmail.com']));
 
 -- B2B customer pipeline
 CREATE TABLE IF NOT EXISTS b2b_pipeline (
@@ -43,8 +43,8 @@ CREATE TABLE IF NOT EXISTS b2b_pipeline (
 ALTER TABLE b2b_pipeline ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "admin_only" ON b2b_pipeline;
 CREATE POLICY "admin_only" ON b2b_pipeline FOR ALL TO authenticated
-  USING (auth.jwt() ->> 'email' = ANY(ARRAY['mushroombangladesh.info@gmail.com','quazishaab@gmail.com']))
-  WITH CHECK (auth.jwt() ->> 'email' = ANY(ARRAY['mushroombangladesh.info@gmail.com','quazishaab@gmail.com']));
+  USING (auth.jwt() ->> 'email' = ANY(ARRAY['mushroombangladesh.info@gmail.com','quazishaab@gmail.com','abrarfahim.nsu@gmail.com']))
+  WITH CHECK (auth.jwt() ->> 'email' = ANY(ARRAY['mushroombangladesh.info@gmail.com','quazishaab@gmail.com','abrarfahim.nsu@gmail.com']));
 
 -- Auto-update updated_at on b2b_pipeline
 DROP TRIGGER IF EXISTS b2b_pipeline_updated_at ON b2b_pipeline;
