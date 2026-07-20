@@ -393,7 +393,7 @@ img {
 /* CTA button in nav */
 .nav-cta {
   font-family: var(--fl);
-  font-size: 11px;
+  font-size: 12px; /* was 11px — below the 12px CTA legibility floor */
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -788,7 +788,8 @@ img {
   gap: 2px;
 }
 .ribbon-text span {
-  font-size: 11px;
+  font-size: 12px; /* was 11px — this is persuasive trust copy, meant to
+                       be read, not decorative */
   font-weight: 400;
   color: rgba(255, 255, 255, 0.68);
 }
@@ -1153,8 +1154,8 @@ img {
   .products-premium { padding: 60px 20px; }
   .pl-grid { grid-template-columns: 1fr; gap: 20px; }
   /* Slightly larger buttons for thumbs */
-  .btn-gold    { padding: 16px; font-size: 12px; }
-  .btn-wa-card { padding: 13px 16px; font-size: 11.5px; }
+  .btn-gold    { padding: 16px; font-size: 13px; } /* match new base — mobile must never be smaller */
+  .btn-wa-card { padding: 13px 16px; font-size: 12.5px; }
 }
 
 
@@ -1826,7 +1827,7 @@ img {
   color: #5fcf80;
   text-decoration: none;
   font-family: var(--fl);
-  font-size: 10px;
+  font-size: 11px; /* was 10px */
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -1877,7 +1878,7 @@ img {
   color: #25d366;
   text-decoration: none;
   font-family: var(--fl);
-  font-size: 10px;
+  font-size: 11px; /* was 10px */
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -2128,7 +2129,7 @@ img {
   .how-cta-row { flex-direction: column; align-items: stretch; text-align: center; }
 }
 @media (max-width: 480px) {
-  .btn-wa-card { font-size: 10px; gap: 5px; }
+  .btn-wa-card { font-size: 11.5px; gap: 5px; } /* was 10px, now below new 12.5px base — keep it close but allow the tighter 480px layout some room */
 }
 
 /* ── Testimonials Section ── */
@@ -2583,7 +2584,7 @@ footer::before {
   background: var(--t);
   color: rgba(245, 239, 230, 0.95);
   font-family: var(--fl);
-  font-size: 11px;
+  font-size: 12.5px; /* was 11px — below CTA floor */
   font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -2961,7 +2962,7 @@ footer::before {
   background: var(--t);
   color: var(--c);
   font-family: var(--fl);
-  font-size: 12px;
+  font-size: 13px; /* was 12px — bare floor for a primary CTA */
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -2988,7 +2989,9 @@ footer::before {
   border: 1px solid rgba(184, 92, 56, 0.4);
   color: var(--c);
   font-family: var(--fl);
-  font-size: 11.5px;
+  font-size: 13px; /* was 11.5px — this is the Add-to-Cart button, the
+                      single most-clicked CTA on the page; below-floor
+                      size here carries the most real conversion risk */
   font-weight: 700;
   letter-spacing: 0.12em;
   padding: 14px;
@@ -3057,7 +3060,8 @@ footer::before {
   border-radius: 4px;
   color: #25d366;
   font-family: var(--fl);
-  font-size: 11px;
+  font-size: 12.5px; /* was 11px — this is the WhatsApp order button,
+                        the dominant purchase path for BD e-commerce */
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;

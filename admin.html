@@ -2177,15 +2177,10 @@
     };
 
     /* ════════════════ STEADFAST COURIER ════════════════ */
-
-    const STEADFAST_KEY    = import.meta.env.VITE_STEADFAST_KEY    || '';
-    const STEADFAST_SECRET = import.meta.env.VITE_STEADFAST_SECRET || '';
+    /* API key/secret live only in the steadfast-create-shipment Edge Function —
+       never sent to the browser. */
 
     window.createSteadFastShipment = async function(orderId) {
-      if (!STEADFAST_KEY || !STEADFAST_SECRET) {
-        toast('Add VITE_STEADFAST_KEY + VITE_STEADFAST_SECRET to .env first', 'error');
-        return;
-      }
       const o = S.orders.find(x => x.id === orderId);
       if (!o) { toast('Order not found', 'error'); return; }
 
@@ -2193,39 +2188,13 @@
       if (btn) { btn.disabled = true; btn.textContent = 'Creating…'; }
 
       try {
-        /* SteadFast API: https://portal.steadfast.com.bd/api/v1/create_order
-           ⚠ Production note: move this call to a Supabase Edge Function so the
-           API key is never bundled into the client-side JS. */
-        const res = await fetch('https://portal.steadfast.com.bd/api/v1/create_order', {
-          method: 'POST',
-          headers: {
-            'Api-Key':    STEADFAST_KEY,
-            'Secret-Key': STEADFAST_SECRET,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            invoice:           o.order_number,
-            recipient_name:    o.customer_name,
-            recipient_phone:   o.customer_phone,
-            recipient_address: `${o.full_address}, ${o.thana}, ${o.district}`,
-            cod_amount:        o.total_amount,
-            note:              o.special_notes || '',
-          }),
+        const { data, error } = await supabase.functions.invoke('steadfast-create-shipment', {
+          body: { orderId },
         });
-
-        if (!res.ok) throw new Error(`SteadFast API error: ${res.status}`);
-        const data = await res.json();
-        const trackingCode = data?.consignment?.tracking_code || data?.tracking_code;
-        if (!trackingCode) throw new Error('No tracking code in response');
-
-        /* Persist tracking code to Supabase order */
-        const { error } = await supabase
-          .from('orders')
-          .update({ tracking_code: trackingCode })
-          .eq('id', orderId);
         if (error) throw error;
+        if (!data?.trackingCode) throw new Error(data?.error || 'No tracking code in response');
 
-        toast(`Shipment created ✓ — ${trackingCode}`);
+        toast(`Shipment created ✓ — ${data.trackingCode}`);
         updateStatus(orderId, 'processing');
         fetchOrders();
       } catch (err) {
