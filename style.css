@@ -57,8 +57,8 @@
   --al: #d9b254;     /* Hover/light gold */
 
   /* ── Typography ── */
-  --fd: 'Cormorant Garamond', serif;   /* Display / headlines */
-  --fl: 'Syne', sans-serif;            /* Labels / UI / buttons */
+  --fd: 'Cormorant Garamond', 'Hind Siliguri', serif;   /* Display / headlines */
+  --fl: 'Syne', 'Hind Siliguri', sans-serif;            /* Labels / UI / buttons */
   --fb: 'DM Sans', 'Hind Siliguri', sans-serif; /* Body / Bengali */
 }
 
@@ -1846,7 +1846,7 @@ img {
   cursor: pointer;
   text-decoration: none;
   transition: color 0.2s;
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'DM Sans', 'Hind Siliguri', sans-serif;
   padding: 8px 0; /* Expand tap area without visual change */
 }
 .rp-notify:hover { color: var(--al); }
@@ -2312,7 +2312,7 @@ img {
   border: 1px solid rgba(255, 255, 255, 0.1);
   background: none;
   color: rgba(245, 239, 230, 0.5);
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'DM Sans', 'Hind Siliguri', sans-serif;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
@@ -2373,7 +2373,7 @@ img {
 .faq-q-wrap { flex: 1; min-width: 0; }
 .faq-cat-badge {
   display: inline-block;
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'DM Sans', 'Hind Siliguri', sans-serif;
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.5px;
@@ -2451,7 +2451,7 @@ img {
   color: #fff;
   border-radius: 10px;
   text-decoration: none;
-  font-family: 'Syne', sans-serif;
+  font-family: 'Syne', 'Hind Siliguri', sans-serif;
   font-size: 13px;
   font-weight: 700;
   white-space: nowrap;

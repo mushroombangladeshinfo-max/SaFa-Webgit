@@ -5,12 +5,12 @@ import"./modulepreload-polyfill-B5Qt9EMX.js";import{createClient as w}from"https
           </td>
           <td>
             <div>${t.contact_name||"—"}</div>
-            ${t.phone?`<div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--cl);">${t.phone}</div>`:""}
+            ${t.phone?`<div style="font-family:'DM Mono','Hind Siliguri',monospace;font-size:11px;color:var(--cl);">${t.phone}</div>`:""}
           </td>
           <td style="color:var(--cl);font-size:12px;">${t.business_type||"—"}</td>
           <td style="color:var(--cl);font-size:12px;">${[t.location,t.district].filter(Boolean).join(", ")||"—"}</td>
           <td><span class="status s-${t.status||"cold"}">${t.status||"cold"}</span></td>
-          <td style="text-align:right;font-family:'DM Mono',monospace;">${t.monthly_potential?m(+t.monthly_potential):"—"}</td>
+          <td style="text-align:right;font-family:'DM Mono','Hind Siliguri',monospace;">${t.monthly_potential?m(+t.monthly_potential):"—"}</td>
           <td>${x(t.next_followup)}</td>
           <td>
             <div class="td-actions">

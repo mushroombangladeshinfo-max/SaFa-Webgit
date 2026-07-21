@@ -46,6 +46,43 @@ function push(name, params = {}) {
   if (typeof window.gtag === 'function') window.gtag('event', name, params);
 }
 
+/* ── Scroll depth: fires once per threshold, per page load ── */
+if (GA_ID) {
+  const thresholds = [25, 50, 75, 90];
+  const fired = new Set();
+  function onScroll() {
+    const scrollTop = window.scrollY || document.documentElement.scrollTop;
+    const docHeight  = document.documentElement.scrollHeight - window.innerHeight;
+    if (docHeight <= 0) return;
+    const pct = Math.round((scrollTop / docHeight) * 100);
+    thresholds.forEach(t => {
+      if (pct >= t && !fired.has(t)) {
+        fired.add(t);
+        push('scroll_depth', { percent_scrolled: t, page_path: location.pathname });
+      }
+    });
+    if (fired.size === thresholds.length) window.removeEventListener('scroll', onScroll);
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+}
+
+/* ── Section visibility: fires once per section, per page load.
+   Add data-section-name="..." to any element you want tracked. ── */
+if (GA_ID && typeof IntersectionObserver !== 'undefined') {
+  const sections = document.querySelectorAll('[data-section-name]');
+  if (sections.length) {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          push('section_view', { section_name: entry.target.dataset.sectionName });
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.5 });
+    sections.forEach(el => observer.observe(el));
+  }
+}
+
 /* ── Public helpers ── */
 
 export function trackAddToCart(name, price, id, qty = 1) {
