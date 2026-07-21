@@ -31,6 +31,24 @@ export interface MetricRow {
   notes?: string;
 }
 
+/** Every column PostgREST needs to see on EVERY row of a batch insert —
+ *  it rejects the whole batch (PGRST102) if row objects don't all have
+ *  identical key sets, so we pad every row out to this full shape. */
+const METRIC_ROW_TEMPLATE: Omit<MetricRow, 'metric_date' | 'channel'> = {
+  account_ref:  'default',
+  spend:        undefined,
+  impressions:  undefined,
+  reach:        undefined,
+  clicks:       undefined,
+  engagements:  undefined,
+  video_views:  undefined,
+  followers:    undefined,
+  leads:        undefined,
+  conversions:  undefined,
+  revenue_attr: undefined,
+  notes:        undefined,
+};
+
 /** Insert-or-update rows into marketing_metrics (source = 'api'). */
 export async function upsertMetrics(rows: MetricRow[]): Promise<void> {
   if (!rows.length) return;
@@ -38,6 +56,16 @@ export async function upsertMetrics(rows: MetricRow[]): Promise<void> {
   const url = Deno.env.get('SUPABASE_URL');
   const key = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
   if (!url || !key) throw new Error('Supabase env vars missing (deploy via supabase CLI)');
+
+  // Normalize every row to the same key set (values default to null, not
+  // just omitted) — PostgREST's bulk insert requires matching object shapes.
+  const normalized = rows.map((r) => {
+    const merged = { ...METRIC_ROW_TEMPLATE, ...r, source: 'api' };
+    for (const k of Object.keys(merged) as (keyof typeof merged)[]) {
+      if (merged[k] === undefined) (merged as Record<string, unknown>)[k] = null;
+    }
+    return merged;
+  });
 
   const res = await fetch(
     `${url}/rest/v1/marketing_metrics?on_conflict=metric_date,channel,account_ref`,
@@ -50,7 +78,7 @@ export async function upsertMetrics(rows: MetricRow[]): Promise<void> {
         // merge-duplicates → UPSERT on the unique key
         Prefer: 'resolution=merge-duplicates,return=minimal',
       },
-      body: JSON.stringify(rows.map((r) => ({ account_ref: 'default', ...r, source: 'api' }))),
+      body: JSON.stringify(normalized),
     },
   );
 

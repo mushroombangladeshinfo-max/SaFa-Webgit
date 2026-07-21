@@ -48,11 +48,25 @@ Deno.serve(async (req) => {
   const errors: string[] = [];
 
   // ── 1. Facebook Page insights ─────────────────────────────────────────────
+  // Page Insights requires a PAGE access token, not the System User token
+  // directly (Graph API error #190) — exchange for one first.
+  // Metric names below are current as of Graph API v20-v25: Meta retired
+  // page_impressions / page_impressions_unique / page_fans in 2023.
+  // page_fans is Meta's replaced with the `fan_count`/`followers_count`
+  // fields read directly off the Page node instead of via insights.
   try {
-    const metrics = 'page_impressions,page_impressions_unique,page_post_engagements,page_fans';
+    const pageToken = await fetch(
+      `${GRAPH}/${META_PAGE_ID}?fields=access_token&access_token=${TOKEN}`,
+    ).then((x) => x.json()).then((x) => x.access_token as string | undefined);
+    if (!pageToken) throw new Error('could not obtain Page access token');
+
+    const metrics = 'page_post_engagements,page_follows';
     const r = await fetch(
       `${GRAPH}/${META_PAGE_ID}/insights?metric=${metrics}&period=day` +
-      `&since=${since}&until=${until}&access_token=${TOKEN}`,
+      `&since=${since}&until=${until}&access_token=${pageToken}`,
+    ).then((x) => x.json());
+    const fans = await fetch(
+      `${GRAPH}/${META_PAGE_ID}?fields=followers_count&access_token=${pageToken}`,
     ).then((x) => x.json());
 
     // Response shape: { data: [ { name, values: [{ value }] }, ... ] }
@@ -62,17 +76,18 @@ Deno.serve(async (req) => {
     rows.push({
       metric_date: date,
       channel: 'facebook',
-      impressions: get('page_impressions'),
-      reach:       get('page_impressions_unique'),
+      reach:       get('page_follows'),
       engagements: get('page_post_engagements'),
-      followers:   get('page_fans'),
+      followers:   fans.followers_count ?? null,
     });
   } catch (e) { errors.push(`facebook page: ${e}`); }
 
   // ── 2. Instagram insights ────────────────────────────────────────────────
+  // 'impressions' was retired from the Instagram insights metric list;
+  // 'reach' is still valid and is the closest equivalent.
   try {
     const r = await fetch(
-      `${GRAPH}/${META_IG_USER_ID}/insights?metric=impressions,reach&period=day` +
+      `${GRAPH}/${META_IG_USER_ID}/insights?metric=reach&period=day` +
       `&since=${since}&until=${until}&access_token=${TOKEN}`,
     ).then((x) => x.json());
     const follower = await fetch(
@@ -85,7 +100,6 @@ Deno.serve(async (req) => {
     rows.push({
       metric_date: date,
       channel: 'instagram',
-      impressions: get('impressions'),
       reach:       get('reach'),
       followers:   follower.followers_count ?? null,
     });
