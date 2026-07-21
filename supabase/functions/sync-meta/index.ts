@@ -107,9 +107,10 @@ Deno.serve(async (req) => {
 
   // ── 3. Meta Ads spend (whole ad account, attributed to 'facebook') ────────
   try {
+    const timeRange = encodeURIComponent(JSON.stringify({ since, until }));
     const r = await fetch(
       `${GRAPH}/${META_AD_ACCOUNT_ID}/insights?fields=spend,impressions,clicks,actions` +
-      `&time_range={"since":"${since}","until":"${until}"}&access_token=${TOKEN}`,
+      `&time_range=${timeRange}&access_token=${TOKEN}`,
     ).then((x) => x.json());
 
     const d = r.data?.[0];
