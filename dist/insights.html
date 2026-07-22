@@ -70,6 +70,7 @@
     .chart-wrap.short{height:160px;}
     .section-heading{font-family:'Syne','Hind Siliguri',sans-serif;font-size:13px;font-weight:700;color:var(--c);margin-bottom:4px;}
     .section-sub{font-size:12px;color:var(--cl);margin-bottom:16px;line-height:1.6;}
+    .section-sub.tight{margin-top:-4px;margin-bottom:10px;}
     .kpi-grid-2{grid-template-columns:1fr 1fr;margin-bottom:14px;}
 
     /* ── Tables ── */
@@ -166,7 +167,7 @@
       .chart-wrap{height:210px;}
     }
   </style>
-  <script type="module" crossorigin src="/assets/insights-5qnRS_lj.js"></script>
+  <script type="module" crossorigin src="/assets/insights-B9bRQAwE.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
   <link rel="modulepreload" crossorigin href="/assets/admin-auth-Bm8-hV4r.js">
   <link rel="modulepreload" crossorigin href="/assets/admin-nav-DxntCGRp.js">
@@ -286,6 +287,22 @@
               <th class="r">Followers</th>
             </tr></thead>
             <tbody id="channel-tbody"><tr><td colspan="13"><div class="empty-state"><div class="empty-icon">📡</div>No channel data yet — add some in the Data Entry tab.</div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-toolbar">
+          <span class="table-title">Real Order Attribution — by channel</span>
+        </div>
+        <p class="section-sub tight">From your own confirmed orders (excludes cancelled/returned) — not the ad platforms' self-reported conversions, which can't see COD refusals after the fact.</p>
+        <div class="scroll-x">
+          <table>
+            <thead><tr>
+              <th>Month</th><th>Source</th><th>Medium</th><th>Campaign</th>
+              <th class="r">Orders</th><th class="r">Revenue</th><th class="r">AOV</th><th class="r">Cancelled/Returned</th>
+            </tr></thead>
+            <tbody id="attribution-tbody"><tr><td colspan="8"><div class="empty-state"><div class="empty-icon">🔗</div>No attributed orders yet — this fills in as customers check out through UTM-tagged links.</div></td></tr></tbody>
           </table>
         </div>
       </div>

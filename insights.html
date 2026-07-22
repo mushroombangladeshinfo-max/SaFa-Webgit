@@ -70,6 +70,7 @@
     .chart-wrap.short{height:160px;}
     .section-heading{font-family:'Syne','Hind Siliguri',sans-serif;font-size:13px;font-weight:700;color:var(--c);margin-bottom:4px;}
     .section-sub{font-size:12px;color:var(--cl);margin-bottom:16px;line-height:1.6;}
+    .section-sub.tight{margin-top:-4px;margin-bottom:10px;}
     .kpi-grid-2{grid-template-columns:1fr 1fr;margin-bottom:14px;}
 
     /* ── Tables ── */
@@ -282,6 +283,22 @@
               <th class="r">Followers</th>
             </tr></thead>
             <tbody id="channel-tbody"><tr><td colspan="13"><div class="empty-state"><div class="empty-icon">📡</div>No channel data yet — add some in the Data Entry tab.</div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-toolbar">
+          <span class="table-title">Real Order Attribution — by channel</span>
+        </div>
+        <p class="section-sub tight">From your own confirmed orders (excludes cancelled/returned) — not the ad platforms' self-reported conversions, which can't see COD refusals after the fact.</p>
+        <div class="scroll-x">
+          <table>
+            <thead><tr>
+              <th>Month</th><th>Source</th><th>Medium</th><th>Campaign</th>
+              <th class="r">Orders</th><th class="r">Revenue</th><th class="r">AOV</th><th class="r">Cancelled/Returned</th>
+            </tr></thead>
+            <tbody id="attribution-tbody"><tr><td colspan="8"><div class="empty-state"><div class="empty-icon">🔗</div>No attributed orders yet — this fills in as customers check out through UTM-tagged links.</div></td></tr></tbody>
           </table>
         </div>
       </div>
@@ -553,7 +570,7 @@
       /* Persist — harmless no-op warning if the migration lacks `active` */
       sb.from('channel_accounts').update({ active: nowActive }).eq('channel', ch)
         .then(({ error }) => { if (error) console.warn('[insights] toggle not persisted:', error.message); });
-      loadOverview(); loadChannels(); loadPnl(); loadConnections();
+      loadOverview(); loadChannels(); loadOrderAttribution(); loadPnl(); loadConnections();
       toast(`${chLabel(ch)} ${nowActive ? 'included' : 'excluded'}`);
     }
 
@@ -800,6 +817,27 @@
           plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => ' ' + fmtN(c.parsed.x) } } },
           scales: { x: { grid: GRID }, y: { grid: { display: false } } } },
       });
+    }
+
+    /* ════════ REAL ORDER ATTRIBUTION — from confirmed orders, not ad-platform self-reports ════════ */
+    async function loadOrderAttribution() {
+      const { data, error } = await sb.from('v_order_attribution_monthly')
+        .select('*').order('month', { ascending: false }).limit(60);
+      if (checkSetupError(error)) return;
+      const rows = data || [];
+
+      document.getElementById('attribution-tbody').innerHTML = rows.length
+        ? rows.map(r => `<tr>
+            <td>${r.month.slice(0, 7)}</td>
+            <td>${r.utm_source === 'direct/untracked' ? r.utm_source : chDot(r.utm_source)}</td>
+            <td>${r.utm_medium || '—'}</td>
+            <td>${r.utm_campaign || '—'}</td>
+            <td class="r">${fmtN(r.orders)}</td>
+            <td class="r">${fmt(r.revenue)}</td>
+            <td class="r">${fmt(r.aov)}</td>
+            <td class="r">${fmtN(r.cancelled_or_returned)}</td>
+          </tr>`).join('')
+        : '<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">🔗</div>No attributed orders yet — this fills in as customers check out through UTM-tagged links.</div></td></tr>';
     }
 
     /* ════════════════════════ P&L ════════════════════════ */
@@ -1193,13 +1231,13 @@ Use the actual numbers. Keep it under 350 words. No preamble.`;
     /* ── Init ── */
     async function refreshAll() {
       await loadMetricsCache();
-      loadOverview(); loadChannels(); loadPnl(); loadOperations(); loadRecent();
+      loadOverview(); loadChannels(); loadOrderAttribution(); loadPnl(); loadOperations(); loadRecent();
     }
     document.getElementById('me-date').value = new Date().toISOString().slice(0, 10);
     loadAiCfg();
     await loadChannelState();
     await loadMetricsCache();
-    loadOverview(); loadChannels(); loadPnl(); loadOperations(); loadConnections(); loadRecent();
+    loadOverview(); loadChannels(); loadOrderAttribution(); loadPnl(); loadOperations(); loadConnections(); loadRecent();
   </script>
 </body>
 </html>
