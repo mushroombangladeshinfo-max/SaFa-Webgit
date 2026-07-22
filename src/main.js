@@ -23,6 +23,7 @@ import { initNav, initHamburger, initSmoothScroll, closeMenu } from './nav.js';
 import { syncProductPrices } from './products.js';
 import { initProductFilters }  from './filters.js';
 import { initFadeObserver }    from './observer.js';
+import { captureAttribution }  from './attribution.js';
 import {
   getCart,
   saveCart,
@@ -102,6 +103,7 @@ window.DELIVERY_FEE            = DELIVERY_FEE;
 
 document.addEventListener('DOMContentLoaded', () => {
 
+  captureAttribution();   /* Store UTM params (if present) for order attribution at checkout */
   initNav();              /* Sticky nav scroll + active link highlight */
   initHamburger();        /* Mobile menu toggle + outside-click close  */
   initSmoothScroll();     /* Anchor smooth scroll + menu close          */

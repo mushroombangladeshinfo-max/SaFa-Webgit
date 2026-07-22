@@ -1011,6 +1011,7 @@
   <script type="module">
     import { supabase }                           from '/src/supabase.js';
     import { trackBeginCheckout, trackPurchase }  from '/src/analytics.js';
+    import { getAttribution }                     from '/src/attribution.js';
 
     /* ─── Constants ─── */
     const SELLER_PHONE      = '8801970099378';
@@ -1270,12 +1271,16 @@
       };
       if (userId) baseRow.user_id = userId;
 
-      /* Extended row — includes coupon columns added in later migration */
+      /* Extended row — includes coupon + attribution columns added in later migrations */
+      const attribution = getAttribution();
       const extRow = {
         ...baseRow,
         special_notes:  order.notes || null,   /* clean notes when columns exist */
         discount_amount: order.discount || 0,
         coupon_code:    order.couponCode || null,
+        utm_source:     attribution.utm_source,
+        utm_medium:     attribution.utm_medium,
+        utm_campaign:   attribution.utm_campaign,
       };
 
       console.log('[SaFa] Saving order:', baseRow.order_number);
@@ -1301,11 +1306,12 @@
         if (error.code === 'PGRST301') { console.error('[SaFa] RLS blocked insert.'); throw new Error('Permission denied. Contact support.'); }
         if (error.code === '42P01' || error.message?.includes('does not exist')) { console.error('[SaFa] orders table missing.'); throw new Error('SETUP_NEEDED'); }
 
-        /* 400 with column-not-found = schema missing coupon columns → fall back to base row */
+        /* 400 with column-not-found = schema missing coupon/attribution columns → fall back to base row */
         const isSchemaError = error.code === 'PGRST204' ||
-          (error.message && (error.message.includes('discount_amount') || error.message.includes('coupon_code')));
+          (error.message && (error.message.includes('discount_amount') || error.message.includes('coupon_code')
+            || error.message.includes('utm_source')));
         if (isSchemaError && row === extRow) {
-          console.warn('[SaFa] Coupon columns not in schema — falling back to base row.');
+          console.warn('[SaFa] Extended columns not in schema — falling back to base row.');
           row = baseRow;
           continue;
         }
