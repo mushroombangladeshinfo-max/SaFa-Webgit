@@ -14,7 +14,8 @@ over the same rows automatically.** No migration, nothing breaks.
  TikTok ──────────────► sync-tiktok ────────┤
  Google Ads ──────────► sync-google-ads ────┼──► marketing_metrics ──► Insights
  LinkedIn ────────────► sync-linkedin ──────┤    (one row per day        dashboard
- WhatsApp ────────────► sync-whatsapp ──────┘     per channel)          (insights.html)
+ WhatsApp ────────────► sync-whatsapp ──────┤     per channel)          (insights.html)
+ Website (GA4) ────────► sync-ga4 ──────────┘
  Manual entry / CSV ───────────────────────────────────┘
  Orders · farm logs · expenses · IoT sensors ──► SQL views (v_kpi_daily, …)
 ```
@@ -48,11 +49,12 @@ Set all of these in **Supabase Dashboard → Edge Functions → Secrets**.
 | WhatsApp | `WA_ACCESS_TOKEN` | Already set (order notifications use it) |
 | | `WA_WABA_ID` | developers.facebook.com → WhatsApp → API Setup → WhatsApp **Business Account** ID |
 | Webhooks | `WEBHOOK_SECRET` | Invent a random string; also add it as `x-webhook-secret` header on both Database Webhooks (order notify + email) |
+| Website (GA4) | `GA4_CLIENT_EMAIL` | From a Google Cloud service-account JSON key (IAM & Admin → Service Accounts → Keys → Add Key → JSON) |
+| | `GA4_PRIVATE_KEY` | Same JSON file — the full `-----BEGIN PRIVATE KEY-----...` block, `\n` line breaks included |
+| | `GA4_PROPERTY_ID` | GA4 Admin → Property Settings → Property ID (digits only, not the `G-XXXXXXXXXX` Measurement ID). Also grant the service account "Viewer" access under Property Access Management. |
 
-**Website (GA4):** stays inside Google Analytics for now (you already track
-add_to_cart / begin_checkout / purchase). Orders and revenue come from your
-own database — the source of truth. A GA4 Data API sync can be added later
-the same way if you want sessions/users in the warehouse.
+Orders and revenue still come from your own database — the source of truth.
+`sync-ga4` only adds sessions/users/engagement/conversions context alongside it.
 
 ---
 
@@ -64,7 +66,7 @@ npx supabase login
 npx supabase link --project-ref uiwmerejtrdrykqpumdu
 
 # Deploy everything
-npx supabase functions deploy sync-meta sync-tiktok sync-google-ads sync-linkedin sync-whatsapp
+npx supabase functions deploy sync-meta sync-tiktok sync-google-ads sync-linkedin sync-whatsapp sync-ga4
 npx supabase functions deploy whatsapp-order-notify order-confirmation-email
 ```
 
