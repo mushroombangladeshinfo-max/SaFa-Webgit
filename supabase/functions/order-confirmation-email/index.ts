@@ -126,7 +126,7 @@ function buildEmailHtml(o: Order): string {
 
           <!-- Track CTA -->
           <div style="text-align:center;margin-top:32px;">
-            <a href="https://safanaturals.org/track.html"
+            <a href="https://safa-webgit.pages.dev/track.html"
                style="display:inline-block;background:#0a1a0f;color:#f5efe6;text-decoration:none;padding:14px 32px;border-radius:6px;font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;">
               Track Your Order
             </a>
@@ -146,7 +146,7 @@ function buildEmailHtml(o: Order): string {
             100% Organic · Zero Pesticides · Farm to Doorstep
           </p>
           <p style="font-size:11px;color:#bbb;margin:8px 0 0;">
-            © 2026 SaFa Naturals · <a href="https://safanaturals.org" style="color:#bbb;">safanaturals.org</a>
+            © 2026 SaFa Naturals · <a href="https://safa-webgit.pages.dev" style="color:#bbb;">safa-webgit.pages.dev</a>
           </p>
         </td></tr>
 
