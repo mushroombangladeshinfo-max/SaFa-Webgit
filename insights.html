@@ -75,6 +75,10 @@
 
     /* ── Tables ── */
     .table-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:20px;}
+    .eng-bar-wrap{display:flex;align-items:center;gap:8px;}
+    .eng-bar-track{flex:1;height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;min-width:60px;}
+    .eng-bar-fill{height:100%;background:var(--al);border-radius:3px;}
+    .eng-bar-pct{font-size:11px;color:var(--cl);width:34px;text-align:right;flex-shrink:0;}
     .table-toolbar{display:flex;align-items:center;justify-content:space-between;padding:13px 18px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:10px;}
     .table-title{font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--cl);}
     .scroll-x{overflow-x:auto;}
@@ -299,6 +303,32 @@
               <th class="r">Orders</th><th class="r">Revenue</th><th class="r">AOV</th><th class="r">Cancelled/Returned</th>
             </tr></thead>
             <tbody id="attribution-tbody"><tr><td colspan="8"><div class="empty-state"><div class="empty-icon">🔗</div>No attributed orders yet — this fills in as customers check out through UTM-tagged links.</div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-toolbar">
+          <span class="table-title">Section Engagement — which content actually gets read</span>
+        </div>
+        <p class="section-sub tight">Last 30 days. Ranked within each page against that page's own best-seen section — a low bar means visitors aren't scrolling to (or aren't interested in) that part of the page.</p>
+        <div class="scroll-x">
+          <table>
+            <thead><tr><th>Page</th><th>Section</th><th class="r">Views</th><th>vs. top section</th></tr></thead>
+            <tbody id="section-eng-tbody"><tr><td colspan="4"><div class="empty-state"><div class="empty-icon">📊</div>No section data yet — register the "Section Name" custom dimension in GA4 Admin, then check back after the next sync.</div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-toolbar">
+          <span class="table-title">Scroll Depth — how far people get before leaving</span>
+        </div>
+        <p class="section-sub tight">Last 30 days, per page. Sessions reaching each scroll milestone — a sharp drop between two milestones marks where the page loses people.</p>
+        <div class="scroll-x">
+          <table>
+            <thead><tr><th>Page</th><th class="r">25%</th><th class="r">50%</th><th class="r">75%</th><th class="r">90%</th></tr></thead>
+            <tbody id="scroll-depth-tbody"><tr><td colspan="5"><div class="empty-state"><div class="empty-icon">📉</div>No scroll data yet — register the "Scroll Percent" custom dimension in GA4 Admin, then check back after the next sync.</div></td></tr></tbody>
           </table>
         </div>
       </div>
@@ -570,7 +600,7 @@
       /* Persist — harmless no-op warning if the migration lacks `active` */
       sb.from('channel_accounts').update({ active: nowActive }).eq('channel', ch)
         .then(({ error }) => { if (error) console.warn('[insights] toggle not persisted:', error.message); });
-      loadOverview(); loadChannels(); loadOrderAttribution(); loadPnl(); loadConnections();
+      loadOverview(); loadChannels(); loadOrderAttribution(); loadSiteEngagement(); loadPnl(); loadConnections();
       toast(`${chLabel(ch)} ${nowActive ? 'included' : 'excluded'}`);
     }
 
@@ -838,6 +868,51 @@
             <td class="r">${fmtN(r.cancelled_or_returned)}</td>
           </tr>`).join('')
         : '<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">🔗</div>No attributed orders yet — this fills in as customers check out through UTM-tagged links.</div></td></tr>';
+    }
+
+    /* ════════ SITE ENGAGEMENT — which content gets read, how far people scroll ════════ */
+    function shortPagePath(p) {
+      if (!p) return '/';
+      const clean = p.split('?')[0];
+      return clean === '/' ? 'Home' : clean.replace(/^\//, '').replace(/\.html$/, '');
+    }
+
+    async function loadSiteEngagement() {
+      const [sectionRes, scrollRes] = await Promise.all([
+        sb.from('v_section_engagement_30d').select('*').limit(200),
+        sb.from('v_scroll_depth_30d').select('*').limit(200),
+      ]);
+      if (checkSetupError(sectionRes.error) || checkSetupError(scrollRes.error)) return;
+
+      const sectionRows = sectionRes.data || [];
+      document.getElementById('section-eng-tbody').innerHTML = sectionRows.length
+        ? sectionRows.map(r => `<tr>
+            <td>${shortPagePath(r.page_path)}</td>
+            <td>${r.section_name}</td>
+            <td class="r">${fmtN(r.total_views)}</td>
+            <td><div class="eng-bar-wrap">
+              <div class="eng-bar-track"><div class="eng-bar-fill" style="width:${r.pct_of_top_section || 0}%"></div></div>
+              <span class="eng-bar-pct">${Math.round(r.pct_of_top_section || 0)}%</span>
+            </div></td>
+          </tr>`).join('')
+        : '<tr><td colspan="4"><div class="empty-state"><div class="empty-icon">📊</div>No section data yet — register the "Section Name" custom dimension in GA4 Admin, then check back after the next sync.</div></td></tr>';
+
+      const scrollRows = scrollRes.data || [];
+      const byPage = {};
+      scrollRows.forEach(r => {
+        byPage[r.page_path] = byPage[r.page_path] || {};
+        byPage[r.page_path][r.percent_scrolled] = r.sessions;
+      });
+      const pages = Object.keys(byPage);
+      document.getElementById('scroll-depth-tbody').innerHTML = pages.length
+        ? pages.map(p => `<tr>
+            <td>${shortPagePath(p)}</td>
+            <td class="r">${fmtN(byPage[p][25] || 0)}</td>
+            <td class="r">${fmtN(byPage[p][50] || 0)}</td>
+            <td class="r">${fmtN(byPage[p][75] || 0)}</td>
+            <td class="r">${fmtN(byPage[p][90] || 0)}</td>
+          </tr>`).join('')
+        : '<tr><td colspan="5"><div class="empty-state"><div class="empty-icon">📉</div>No scroll data yet — register the "Scroll Percent" custom dimension in GA4 Admin, then check back after the next sync.</div></td></tr>';
     }
 
     /* ════════════════════════ P&L ════════════════════════ */
@@ -1231,13 +1306,13 @@ Use the actual numbers. Keep it under 350 words. No preamble.`;
     /* ── Init ── */
     async function refreshAll() {
       await loadMetricsCache();
-      loadOverview(); loadChannels(); loadOrderAttribution(); loadPnl(); loadOperations(); loadRecent();
+      loadOverview(); loadChannels(); loadOrderAttribution(); loadSiteEngagement(); loadPnl(); loadOperations(); loadRecent();
     }
     document.getElementById('me-date').value = new Date().toISOString().slice(0, 10);
     loadAiCfg();
     await loadChannelState();
     await loadMetricsCache();
-    loadOverview(); loadChannels(); loadOrderAttribution(); loadPnl(); loadOperations(); loadConnections(); loadRecent();
+    loadOverview(); loadChannels(); loadOrderAttribution(); loadSiteEngagement(); loadPnl(); loadOperations(); loadConnections(); loadRecent();
   </script>
 </body>
 </html>
