@@ -28,7 +28,11 @@
 //   Backfill: .../sync-ga4?date=2026-07-01
 // ============================================================================
 
-import { upsertMetrics, touchLastSynced, daysAgo, json, guard, type MetricRow } from '../_shared/metrics.ts';
+import {
+  upsertMetrics, upsertSectionEngagement, upsertScrollDepth,
+  touchLastSynced, daysAgo, json, guard,
+  type MetricRow, type SectionEngagementRow, type ScrollDepthRow,
+} from '../_shared/metrics.ts';
 
 const TOKEN_URL = 'https://oauth2.googleapis.com/token';
 const DATA_API  = 'https://analyticsdata.googleapis.com/v1beta';
@@ -87,6 +91,29 @@ async function getAccessToken(clientEmail: string, privateKeyPem: string): Promi
   return data.access_token;
 }
 
+/** Run a GA4 Data API report and return its raw rows (dimension values + metric values, as strings). */
+async function runReport(
+  accessToken: string,
+  propertyId: string,
+  body: Record<string, unknown>,
+): Promise<{ dims: string[]; metrics: string[] }[]> {
+  const r = await fetch(`${DATA_API}/properties/${propertyId}:runReport`, {
+    method:  'POST',
+    headers: {
+      Authorization:  `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  }).then((x) => x.json());
+
+  if (r.error) throw new Error(`GA4 Data API error: ${JSON.stringify(r.error)}`);
+
+  return (r.rows ?? []).map((row: { dimensionValues?: { value: string }[]; metricValues: { value: string }[] }) => ({
+    dims:    (row.dimensionValues ?? []).map((d) => d.value),
+    metrics: row.metricValues.map((m) => m.value),
+  }));
+}
+
 Deno.serve(async (req) => {
   const g = guard(req, ['GA4_CLIENT_EMAIL', 'GA4_PRIVATE_KEY', 'GA4_PROPERTY_ID']);
   if (!g.ok) return g.res;
@@ -95,33 +122,31 @@ Deno.serve(async (req) => {
   const date = new URL(req.url).searchParams.get('date') ?? daysAgo(1);
   const errors: string[] = [];
   let row: MetricRow | null = null;
+  let sectionRows: SectionEngagementRow[] = [];
+  let scrollRows: ScrollDepthRow[] = [];
+
+  let accessToken: string;
+  try {
+    accessToken = await getAccessToken(GA4_CLIENT_EMAIL, GA4_PRIVATE_KEY.replace(/\\n/g, '\n'));
+  } catch (e) {
+    errors.push(`ga4 auth: ${e}`);
+    return json({ configured: true, date, rows_written: 0, errors });
+  }
 
   try {
-    const accessToken = await getAccessToken(GA4_CLIENT_EMAIL, GA4_PRIVATE_KEY.replace(/\\n/g, '\n'));
+    const [siteTotals] = await runReport(accessToken, GA4_PROPERTY_ID, {
+      dateRanges: [{ startDate: date, endDate: date }],
+      metrics: [
+        { name: 'totalUsers' },        // → reach
+        { name: 'sessions' },
+        { name: 'engagedSessions' },    // → engagements
+        { name: 'screenPageViews' },    // → impressions (closest GA4 equivalent)
+        { name: 'conversions' },
+        { name: 'totalRevenue' },       // → revenue_attr
+      ],
+    }).then((rows) => rows.map((r) => r.metrics.map(Number)));
 
-    const r = await fetch(`${DATA_API}/properties/${GA4_PROPERTY_ID}:runReport`, {
-      method:  'POST',
-      headers: {
-        Authorization:  `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        dateRanges: [{ startDate: date, endDate: date }],
-        metrics: [
-          { name: 'totalUsers' },        // → reach
-          { name: 'sessions' },
-          { name: 'engagedSessions' },    // → engagements
-          { name: 'screenPageViews' },    // → impressions (closest GA4 equivalent)
-          { name: 'conversions' },
-          { name: 'totalRevenue' },       // → revenue_attr
-        ],
-      }),
-    }).then((x) => x.json());
-
-    if (r.error) throw new Error(`GA4 Data API error: ${JSON.stringify(r.error)}`);
-
-    const values = r.rows?.[0]?.metricValues?.map((m: { value: string }) => Number(m.value)) ?? [];
-    const [totalUsers, sessions, engagedSessions, pageViews, conversions, revenue] = values;
+    const [totalUsers, sessions, engagedSessions, pageViews, conversions, revenue] = siteTotals ?? [];
 
     row = {
       metric_date:  date,
@@ -133,11 +158,67 @@ Deno.serve(async (req) => {
       conversions:  conversions ?? null,
       revenue_attr: revenue ?? null,
     };
-  } catch (e) { errors.push(`ga4: ${e}`); }
+  } catch (e) { errors.push(`ga4 site totals: ${e}`); }
+
+  // ── Section engagement: which on-page sections people actually see ──────
+  // Needs "Section Name" custom dimension registered in GA4 Admin →
+  // Custom definitions, mapped to the section_view event's section_name
+  // parameter (src/analytics.js fires this via IntersectionObserver).
+  try {
+    const sectionData = await runReport(accessToken, GA4_PROPERTY_ID, {
+      dateRanges: [{ startDate: date, endDate: date }],
+      dimensions: [{ name: 'pagePath' }, { name: 'customEvent:section_name' }],
+      metrics: [{ name: 'eventCount' }],
+      dimensionFilter: {
+        filter: { fieldName: 'eventName', stringFilter: { value: 'section_view' } },
+      },
+      limit: 1000,
+    });
+    sectionRows = sectionData
+      .filter((r) => r.dims[1])
+      .map((r) => ({
+        metric_date:  date,
+        page_path:    r.dims[0] || '/',
+        section_name: r.dims[1],
+        views:        Number(r.metrics[0]) || 0,
+      }));
+    await upsertSectionEngagement(sectionRows);
+  } catch (e) { errors.push(`ga4 section engagement: ${e}`); }
+
+  // ── Scroll depth: how far down the page people get before leaving ──────
+  // Needs "Scroll Percent" custom dimension registered the same way, mapped
+  // to scroll_depth's percent_scrolled parameter.
+  try {
+    const scrollData = await runReport(accessToken, GA4_PROPERTY_ID, {
+      dateRanges: [{ startDate: date, endDate: date }],
+      dimensions: [{ name: 'pagePath' }, { name: 'customEvent:percent_scrolled' }],
+      metrics: [{ name: 'eventCount' }],
+      dimensionFilter: {
+        filter: { fieldName: 'eventName', stringFilter: { value: 'scroll_depth' } },
+      },
+      limit: 1000,
+    });
+    scrollRows = scrollData
+      .filter((r) => [25, 50, 75, 90].includes(Number(r.dims[1])))
+      .map((r) => ({
+        metric_date:      date,
+        page_path:        r.dims[0] || '/',
+        percent_scrolled: Number(r.dims[1]) as 25 | 50 | 75 | 90,
+        sessions:         Number(r.metrics[0]) || 0,
+      }));
+    await upsertScrollDepth(scrollRows);
+  } catch (e) { errors.push(`ga4 scroll depth: ${e}`); }
 
   const rows = row ? [row] : [];
   await upsertMetrics(rows);
   await touchLastSynced('website');
 
-  return json({ configured: true, date, rows_written: rows.length, errors });
+  return json({
+    configured: true,
+    date,
+    rows_written: rows.length,
+    section_engagement_rows: sectionRows.length,
+    scroll_depth_rows: scrollRows.length,
+    errors,
+  });
 });

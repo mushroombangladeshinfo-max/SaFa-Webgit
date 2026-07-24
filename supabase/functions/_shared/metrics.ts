@@ -87,6 +87,72 @@ export async function upsertMetrics(rows: MetricRow[]): Promise<void> {
   }
 }
 
+/** One day-row destined for public.site_section_engagement. */
+export interface SectionEngagementRow {
+  metric_date:  string;
+  page_path:    string;
+  section_name: string;
+  views:        number;
+}
+
+/** Insert-or-update rows into site_section_engagement. */
+export async function upsertSectionEngagement(rows: SectionEngagementRow[]): Promise<void> {
+  if (!rows.length) return;
+  const url = Deno.env.get('SUPABASE_URL');
+  const key = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+  if (!url || !key) throw new Error('Supabase env vars missing (deploy via supabase CLI)');
+
+  const res = await fetch(
+    `${url}/rest/v1/site_section_engagement?on_conflict=metric_date,page_path,section_name`,
+    {
+      method: 'POST',
+      headers: {
+        apikey: key,
+        Authorization: `Bearer ${key}`,
+        'Content-Type': 'application/json',
+        Prefer: 'resolution=merge-duplicates,return=minimal',
+      },
+      body: JSON.stringify(rows),
+    },
+  );
+  if (!res.ok) {
+    throw new Error(`site_section_engagement upsert failed (${res.status}): ${await res.text()}`);
+  }
+}
+
+/** One day-row destined for public.site_scroll_depth. */
+export interface ScrollDepthRow {
+  metric_date:      string;
+  page_path:        string;
+  percent_scrolled: 25 | 50 | 75 | 90;
+  sessions:         number;
+}
+
+/** Insert-or-update rows into site_scroll_depth. */
+export async function upsertScrollDepth(rows: ScrollDepthRow[]): Promise<void> {
+  if (!rows.length) return;
+  const url = Deno.env.get('SUPABASE_URL');
+  const key = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+  if (!url || !key) throw new Error('Supabase env vars missing (deploy via supabase CLI)');
+
+  const res = await fetch(
+    `${url}/rest/v1/site_scroll_depth?on_conflict=metric_date,page_path,percent_scrolled`,
+    {
+      method: 'POST',
+      headers: {
+        apikey: key,
+        Authorization: `Bearer ${key}`,
+        'Content-Type': 'application/json',
+        Prefer: 'resolution=merge-duplicates,return=minimal',
+      },
+      body: JSON.stringify(rows),
+    },
+  );
+  if (!res.ok) {
+    throw new Error(`site_scroll_depth upsert failed (${res.status}): ${await res.text()}`);
+  }
+}
+
 /** Stamp channel_accounts.last_synced so the dashboard shows sync health. */
 export async function touchLastSynced(channel: string): Promise<void> {
   const url = Deno.env.get('SUPABASE_URL');
