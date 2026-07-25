@@ -353,19 +353,21 @@
     /* ── Farm summary (last 30 days) + unresolved contamination ── */
     async function loadFarm() {
       const { data, error } = await sb.from('v_ops_daily')
-        .select('day,harvest_fresh_kg,farm_revenue,farm_expenses')
+        .select('day,harvest_fresh_kg,farm_revenue,farm_expenses,one_off_expenses')
         .gte('day', daysAgo(30)).order('day', { ascending:false });
       if (error || !data) { document.getElementById('farm-summary').innerHTML = '<div class="empty-mini">No farm data yet.</div>'; return; }
 
       const harvest  = data.reduce((s,r) => s + (Number(r.harvest_fresh_kg)||0), 0);
       const revenue  = data.reduce((s,r) => s + (Number(r.farm_revenue)||0), 0);
       const expenses = data.reduce((s,r) => s + (Number(r.farm_expenses)||0), 0);
+      const oneOff   = data.reduce((s,r) => s + (Number(r.one_off_expenses)||0), 0);
 
       document.getElementById('k-harvest').textContent = fmtKg(harvest);
       document.getElementById('farm-summary').innerHTML = `
         <div class="rl-row"><span>Harvest</span><span class="rl-val">${fmtKg(harvest)}</span></div>
         <div class="rl-row"><span>Farm Revenue</span><span class="rl-val">${fmt(revenue)}</span></div>
-        <div class="rl-row"><span>Farm Expenses</span><span class="rl-val">${fmt(expenses)}</span></div>`;
+        <div class="rl-row"><span>Farm Expenses</span><span class="rl-val">${fmt(expenses)}</span></div>
+        ${oneOff > 0 ? `<div class="rl-row"><span>— incl. one-off/equipment</span><span class="rl-val">${fmt(oneOff)}</span></div>` : ''}`;
 
       window._farmRevenue30d = revenue;
       window._farmExpenses30d = expenses;
