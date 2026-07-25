@@ -216,6 +216,7 @@
         <button type="button" class="range-btn" data-days="30">30 Days</button>
         <button type="button" class="range-btn active" data-days="90">90 Days</button>
         <button type="button" class="range-btn" data-days="365">1 Year</button>
+        <button type="button" class="range-btn" data-days="1095">3 Years</button>
       </div>
 
       <div class="kpi-grid">
@@ -576,7 +577,7 @@
     async function loadMetricsCache() {
       const { data, error } = await sb.from('marketing_metrics')
         .select('metric_date,channel,spend,impressions,reach,clicks,engagements,followers,leads,conversions,revenue_attr')
-        .gte('metric_date', sinceISO(730)).order('metric_date').limit(10000);
+        .gte('metric_date', sinceISO(1095)).order('metric_date').limit(10000);
       if (checkSetupError(error)) return;
       metricsCache = data || [];
     }

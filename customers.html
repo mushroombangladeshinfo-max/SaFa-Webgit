@@ -34,6 +34,7 @@
     /* ── Toolbar ── */
     .toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:18px;}
     .f-search{background:var(--bg2);border:1px solid var(--border);border-radius:6px;color:var(--c);font-family:'DM Sans','Hind Siliguri',sans-serif;font-size:13px;padding:9px 13px;outline:none;min-width:220px;}
+    .filter-date-sep{color:var(--cl);font-size:12px;}
     .f-search:focus{border-color:rgba(196,154,60,.4);}
     .f-select{background:var(--bg2);border:1px solid var(--border);border-radius:6px;color:var(--c);font-family:'DM Sans','Hind Siliguri',sans-serif;font-size:13px;padding:9px 12px;outline:none;cursor:pointer;}
     .f-action-btn{font-family:'Syne','Hind Siliguri',sans-serif;font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:9px 16px;border-radius:5px;cursor:pointer;transition:all .2s;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.03);color:rgba(245,239,230,.65);display:inline-flex;align-items:center;gap:6px;}
@@ -124,6 +125,9 @@
         <option value="repeat">Repeat (2+ orders)</option>
         <option value="new">New (1 order)</option>
       </select>
+      <input type="date" class="f-search" id="date-from" title="Last order from">
+      <span class="filter-date-sep">to</span>
+      <input type="date" class="f-search" id="date-to" title="Last order to">
       <span class="result-count" id="result-count"></span>
     </div>
 
@@ -223,12 +227,16 @@
 
     function filtered() {
       const term = document.getElementById('search-input').value.trim().toLowerCase();
+      const dateFrom = document.getElementById('date-from').value;
+      const dateTo   = document.getElementById('date-to').value;
       let list = [..._all];
       if (_typeKey === 'repeat') list = list.filter(c => c.orders.length >= 2);
       else if (_typeKey === 'new') list = list.filter(c => c.orders.length === 1);
       if (term) list = list.filter(c =>
         c.name?.toLowerCase().includes(term) || c.phone.includes(term) || (c.district||'').toLowerCase().includes(term)
       );
+      if (dateFrom) list = list.filter(c => c.orders[0]?.created_at >= dateFrom);
+      if (dateTo)   list = list.filter(c => c.orders[0]?.created_at <= dateTo + 'T23:59:59.999');
       if (_sortKey === 'spent')  list.sort((a,b) => b.totalSpent - a.totalSpent);
       if (_sortKey === 'orders') list.sort((a,b) => b.orders.length - a.orders.length);
       if (_sortKey === 'recent') list.sort((a,b) => new Date(b.orders[0]?.created_at||0) - new Date(a.orders[0]?.created_at||0));
@@ -307,6 +315,8 @@
     document.getElementById('search-input').addEventListener('input', () => { clearTimeout(_st); _st = setTimeout(render, 250); });
     document.getElementById('sort-select').addEventListener('change', e => { _sortKey = e.target.value; render(); });
     document.getElementById('type-select').addEventListener('change', e => { _typeKey = e.target.value; render(); });
+    document.getElementById('date-from').addEventListener('change', render);
+    document.getElementById('date-to').addEventListener('change', render);
 
     /* ── Export ── */
     document.getElementById('export-btn').addEventListener('click', () => {

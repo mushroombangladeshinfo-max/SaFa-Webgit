@@ -50,6 +50,8 @@
     .filter-select,.search-input{background:var(--bg2);border:1px solid var(--border);border-radius:6px;color:var(--c);font-family:'DM Sans','Hind Siliguri',sans-serif;font-size:13px;padding:8px 12px;outline:none;}
     .filter-select:focus,.search-input:focus{border-color:rgba(196,154,60,.4);}
     .search-input{min-width:200px;}
+    .filter-date-sep{color:var(--cl);font-size:12px;}
+    .search-input.date-narrow{min-width:0;}
 
     /* ── Add / Edit modal ── */
     .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:500;padding:20px;}
@@ -142,6 +144,9 @@
         <option>Wholesaler</option>
         <option>Other</option>
       </select>
+      <input type="date" class="search-input date-narrow" id="date-from" title="Last contact from">
+      <span class="filter-date-sep">to</span>
+      <input type="date" class="search-input date-narrow" id="date-to" title="Last contact to">
       <button class="btn" id="export-btn">↓ CSV</button>
     </div>
 
@@ -306,13 +311,17 @@
     }
 
     function filtered() {
-      const search = document.getElementById('search-input').value.toLowerCase();
-      const status = document.getElementById('filter-status').value;
-      const type   = document.getElementById('filter-type').value;
+      const search   = document.getElementById('search-input').value.toLowerCase();
+      const status   = document.getElementById('filter-status').value;
+      const type     = document.getElementById('filter-type').value;
+      const dateFrom = document.getElementById('date-from').value;
+      const dateTo   = document.getElementById('date-to').value;
       return _all.filter(r =>
         (!search || r.business_name?.toLowerCase().includes(search) || r.contact_name?.toLowerCase().includes(search) || r.phone?.includes(search)) &&
         (!status || r.status === status) &&
-        (!type   || r.business_type === type)
+        (!type   || r.business_type === type) &&
+        (!dateFrom || (r.last_contact && r.last_contact >= dateFrom)) &&
+        (!dateTo   || (r.last_contact && r.last_contact <= dateTo))
       );
     }
 
@@ -430,6 +439,8 @@
     document.getElementById('search-input').addEventListener('input', ()=>{ clearTimeout(searchTimer); searchTimer=setTimeout(renderTable,250); });
     document.getElementById('filter-status').addEventListener('change', renderTable);
     document.getElementById('filter-type').addEventListener('change', renderTable);
+    document.getElementById('date-from').addEventListener('change', renderTable);
+    document.getElementById('date-to').addEventListener('change', renderTable);
 
     /* ── CSV Export ── */
     document.getElementById('export-btn').addEventListener('click', ()=>{

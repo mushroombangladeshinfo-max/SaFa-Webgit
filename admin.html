@@ -1094,6 +1094,8 @@
             <button type="button" class="period-btn active" id="period-7"  onclick="setPeriod(7)">7D</button>
             <button type="button" class="period-btn"        id="period-30" onclick="setPeriod(30)">30D</button>
             <button type="button" class="period-btn"        id="period-90" onclick="setPeriod(90)">90D</button>
+            <button type="button" class="period-btn"        id="period-365" onclick="setPeriod(365)">1Y</button>
+            <button type="button" class="period-btn"        id="period-1095" onclick="setPeriod(1095)">3Y</button>
           </div>
         </div>
 
@@ -2376,7 +2378,7 @@
 
     window.setPeriod = function(days) {
       _analyticsPeriod = days;
-      [7, 30, 90].forEach(d => {
+      [7, 30, 90, 365, 1095].forEach(d => {
         document.getElementById(`period-${d}`)?.classList.toggle('active', d === days);
       });
       _analyticsLoaded = false;
