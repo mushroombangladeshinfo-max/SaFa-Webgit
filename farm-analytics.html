@@ -198,6 +198,7 @@ async function load() {
     .from('farm_daily_logs')
     .select(`log_date,
       harvest_fresh_a,harvest_fresh_b,harvest_fresh_rej,
+      harvest_healthy_kg,harvest_recovered_kg,
       harvest_dried,harvest_powder,
       qc_pass,qc_fail,
       s_fresh_kg,s_fresh_price,s_dried_kg,s_dried_price,s_powder_kg,s_powder_price,
@@ -220,6 +221,13 @@ async function load() {
 const dn = (r, k) => parseFloat(r?.[k]) || 0;
 const fmt = n => '৳ ' + Math.round(n).toLocaleString('en-BD');
 
+function rowFresh(r) {
+  // Two harvest models coexist: older Grade A/B/Rejected entries, and
+  // newer healthy-vs-mold-recovered entries (quick-log.html). A day's
+  // total fresh harvest is whichever fields that entry actually used.
+  return dn(r,'harvest_fresh_a') + dn(r,'harvest_fresh_b') + dn(r,'harvest_fresh_rej') +
+         dn(r,'harvest_healthy_kg') + dn(r,'harvest_recovered_kg');
+}
 function rowRevenue(r) {
   return dn(r,'s_fresh_kg')*dn(r,'s_fresh_price') +
          dn(r,'s_dried_kg')*dn(r,'s_dried_price') +
@@ -232,7 +240,7 @@ function rowExpenses(r) {
 
 /* ── Metrics ── */
 function renderMetrics() {
-  const totalHarvest = _data.reduce((s,r) => s + dn(r,'harvest_fresh_a') + dn(r,'harvest_fresh_b') + dn(r,'harvest_fresh_rej'), 0);
+  const totalHarvest = _data.reduce((s,r) => s + rowFresh(r), 0);
   const totalRev     = _data.reduce((s,r) => s + rowRevenue(r), 0);
   const totalExp     = _data.reduce((s,r) => s + rowExpenses(r), 0);
   const net          = totalRev - totalExp;
@@ -280,7 +288,7 @@ function renderCharts() {
 
   // ── Harvest trend ──
   destroyChart('chart-harvest');
-  const freshTotals = _data.map(r => +(dn(r,'harvest_fresh_a') + dn(r,'harvest_fresh_b') + dn(r,'harvest_fresh_rej')).toFixed(2));
+  const freshTotals = _data.map(r => +rowFresh(r).toFixed(2));
   const gradeA      = _data.map(r => +dn(r,'harvest_fresh_a').toFixed(2));
   const gradeB      = _data.map(r => +dn(r,'harvest_fresh_b').toFixed(2));
   charts['chart-harvest'] = new Chart(document.getElementById('chart-harvest'), {
@@ -421,14 +429,15 @@ function showError(isMissing) {
 /* ── CSV Export ── */
 document.getElementById('export-btn').addEventListener('click', () => {
   if (!_data.length) { alert('No data to export'); return; }
-  const cols = ['Date','Fresh A','Fresh B','Rejected','Total Fresh','QC Pass','QC Fail','QC%','Revenue','Expenses','Net'];
+  const cols = ['Date','Fresh A','Fresh B','Rejected','Healthy','Recovered (mold)','Total Fresh','QC Pass','QC Fail','QC%','Revenue','Expenses','Net'];
   const rows = _data.map(r => {
-    const freshT = dn(r,'harvest_fresh_a')+dn(r,'harvest_fresh_b')+dn(r,'harvest_fresh_rej');
+    const freshT = rowFresh(r);
     const qcT    = dn(r,'qc_pass')+dn(r,'qc_fail');
     const rev    = rowRevenue(r), exp = rowExpenses(r);
     return [
       r.log_date,
       dn(r,'harvest_fresh_a'), dn(r,'harvest_fresh_b'), dn(r,'harvest_fresh_rej'),
+      dn(r,'harvest_healthy_kg'), dn(r,'harvest_recovered_kg'),
       freshT.toFixed(2),
       dn(r,'qc_pass'), dn(r,'qc_fail'),
       qcT > 0 ? (dn(r,'qc_pass')/qcT*100).toFixed(1)+'%' : '—',
