@@ -191,7 +191,13 @@
     const fmt = n => '৳' + Math.round(n || 0).toLocaleString('en-BD');
     const fmtKg = n => (n || 0).toFixed(2) + ' kg';
     const cap = s => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
-    const daysAgo = n => { const d = new Date(); d.setDate(d.getDate() - n); return d.toISOString().slice(0,10); };
+    // Local Y-M-D, not toISOString() — that converts to UTC and shifts the
+    // date backward for timezones ahead of UTC (Bangladesh is UTC+6), which
+    // would quietly widen every "last N days" window by up to a day.
+    const daysAgo = n => {
+      const d = new Date(); d.setDate(d.getDate() - n);
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    };
     const weekAgoISO = () => { const d = new Date(); d.setDate(d.getDate() - 7); return d.toISOString(); };
     const relTime = iso => {
       const h = Math.floor((Date.now() - new Date(iso).getTime()) / 36e5);

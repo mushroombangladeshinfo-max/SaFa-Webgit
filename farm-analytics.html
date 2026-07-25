@@ -189,10 +189,18 @@ document.getElementById('range-btns').addEventListener('click', e => {
 });
 
 /* ── Load data ── */
+// Builds a local Y-M-D string rather than going through toISOString(),
+// which converts to UTC and shifts the date backward for any timezone
+// ahead of UTC (e.g. Bangladesh, UTC+6) — log_date is a plain DATE with
+// no timezone concept, so the filter must match the browser's own local
+// calendar date, not a UTC-shifted one.
+function localDateStr(d) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
 async function load() {
   const from = new Date();
   from.setDate(from.getDate() - _days + 1);
-  from.setHours(0,0,0,0);
 
   const { data, error } = await sb
     .from('farm_daily_logs')
@@ -203,7 +211,7 @@ async function load() {
       qc_pass,qc_fail,
       s_fresh_kg,s_fresh_price,s_dried_kg,s_dried_price,s_powder_kg,s_powder_price,
       ex_spawn,ex_substrate,ex_packaging,ex_labor,ex_electricity,ex_transport,ex_water,ex_other`)
-    .gte('log_date', from.toISOString().slice(0,10))
+    .gte('log_date', localDateStr(from))
     .order('log_date', { ascending: true });
 
   if (error) {
@@ -254,7 +262,7 @@ function renderMetrics() {
       }, 0) / qcDays.length
     : null;
 
-  setMetric('m-harvest', totalHarvest > 0 ? totalHarvest.toFixed(1)+' kg' : '—', totalHarvest > 0 ? 'green' : '');
+  setMetric('m-harvest', _data.length > 0 ? totalHarvest.toFixed(1)+' kg' : '—', totalHarvest > 0 ? 'green' : '');
   setMetric('m-revenue', totalRev > 0 ? fmt(totalRev) : '—', 'gold');
   setMetric('m-net', _data.length > 0 ? fmt(net) : '—', net >= 0 ? 'green' : 'red');
   setMetric('m-qc', avgQC !== null ? avgQC.toFixed(1)+'%' : '—', avgQC >= 80 ? 'green' : avgQC !== null ? 'red' : '');
@@ -291,6 +299,8 @@ function renderCharts() {
   const freshTotals = _data.map(r => +rowFresh(r).toFixed(2));
   const gradeA      = _data.map(r => +dn(r,'harvest_fresh_a').toFixed(2));
   const gradeB      = _data.map(r => +dn(r,'harvest_fresh_b').toFixed(2));
+  const healthy     = _data.map(r => +dn(r,'harvest_healthy_kg').toFixed(2));
+  const recovered    = _data.map(r => +dn(r,'harvest_recovered_kg').toFixed(2));
   charts['chart-harvest'] = new Chart(document.getElementById('chart-harvest'), {
     type: 'line',
     data: {
@@ -299,6 +309,8 @@ function renderCharts() {
         { label:'Total', data:freshTotals, borderColor:'#5fcf80', backgroundColor:'rgba(95,207,128,.08)', fill:true, tension:.35, pointRadius:3, borderWidth:2 },
         { label:'Grade A', data:gradeA, borderColor:'#d9b254', backgroundColor:'transparent', tension:.35, pointRadius:2, borderWidth:1.5, borderDash:[4,3] },
         { label:'Grade B', data:gradeB, borderColor:'rgba(245,239,230,.3)', backgroundColor:'transparent', tension:.35, pointRadius:2, borderWidth:1.5, borderDash:[4,3] },
+        { label:'Healthy', data:healthy, borderColor:'#7ba3ff', backgroundColor:'transparent', tension:.35, pointRadius:2, borderWidth:1.5, borderDash:[2,2] },
+        { label:'Recovered (mold)', data:recovered, borderColor:'rgba(224,82,82,.6)', backgroundColor:'transparent', tension:.35, pointRadius:2, borderWidth:1.5, borderDash:[2,2] },
       ]
     },
     options: chartOpts({ yLabel:'kg', prefix:'' })
