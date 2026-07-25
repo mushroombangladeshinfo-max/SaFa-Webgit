@@ -43,6 +43,16 @@
     .panel-link{font-size:11px;color:var(--al);text-decoration:none;margin-left:auto;white-space:nowrap;}
     .panel-link:hover{text-decoration:underline;}
     .panel-head{display:flex;align-items:center;margin-bottom:4px;}
+    .tw-panel{margin-bottom:16px;}
+    .tw-split{display:flex;align-items:stretch;gap:20px;margin-top:6px;}
+    @media(max-width:600px){.tw-split{flex-direction:column;gap:14px;}}
+    .tw-side{flex:1;text-align:center;padding:8px 0;}
+    .tw-side-lbl{font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--cl);margin-bottom:8px;}
+    .tw-side-val{font-family:'DM Mono','Hind Siliguri',monospace;font-size:26px;font-weight:500;color:var(--c);}
+    .tw-side-val.gold{color:var(--al);}
+    .tw-side-sub{font-size:11px;color:var(--cl);margin-top:4px;}
+    .tw-div{width:1px;background:var(--border);flex-shrink:0;}
+    @media(max-width:600px){.tw-div{width:100%;height:1px;}}
 
     /* Attention list */
     .att-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.05);}
@@ -114,6 +124,25 @@
         <div class="kpi-lbl">Needs Attention</div>
         <div class="kpi-val" id="k-attention">—</div>
         <div class="kpi-sub" id="k-attention-sub">See panel below</div>
+      </div>
+    </div>
+
+    <!-- This Week: Harvest vs Sell, side by side -->
+    <div class="panel tw-panel">
+      <div class="panel-head"><div class="panel-title">📅 This Week</div></div>
+      <div class="panel-sub">Last 7 days — production vs. what actually sold.</div>
+      <div class="tw-split">
+        <div class="tw-side">
+          <div class="tw-side-lbl">🌾 Harvest</div>
+          <div class="tw-side-val" id="tw-harvest-kg">—</div>
+          <div class="tw-side-sub">Fresh, kg</div>
+        </div>
+        <div class="tw-div"></div>
+        <div class="tw-side">
+          <div class="tw-side-lbl">💰 Sold</div>
+          <div class="tw-side-val gold" id="tw-sold-kg">—</div>
+          <div class="tw-side-sub" id="tw-sold-rev">Fresh + dried + powder, kg</div>
+        </div>
       </div>
     </div>
 
@@ -302,6 +331,31 @@
       });
     }
 
+    /* ── This Week: harvest vs. sold, side by side (the one card that stays weekly) ── */
+    async function loadThisWeek() {
+      const [harvestRes, salesRes] = await Promise.all([
+        sb.from('v_ops_daily').select('harvest_fresh_kg').gte('day', daysAgo(7)),
+        sb.from('farm_daily_logs')
+          .select('s_fresh_kg,s_fresh_price,s_dried_kg,s_dried_price,s_powder_kg,s_powder_price,s_b2b_qty,s_b2b_value')
+          .gte('log_date', daysAgo(7)),
+      ]);
+
+      const harvestKg = (harvestRes.data || []).reduce((s,r) => s + (Number(r.harvest_fresh_kg)||0), 0);
+      document.getElementById('tw-harvest-kg').textContent = fmtKg(harvestKg);
+
+      const sales = salesRes.data || [];
+      const soldKg = sales.reduce((s,r) =>
+        s + (Number(r.s_fresh_kg)||0) + (Number(r.s_dried_kg)||0) + (Number(r.s_powder_kg)||0) + (Number(r.s_b2b_qty)||0), 0);
+      const soldRev = sales.reduce((s,r) =>
+        s + (Number(r.s_fresh_kg)||0)*(Number(r.s_fresh_price)||0)
+          + (Number(r.s_dried_kg)||0)*(Number(r.s_dried_price)||0)
+          + (Number(r.s_powder_kg)||0)*(Number(r.s_powder_price)||0)
+          + (Number(r.s_b2b_value)||0), 0);
+
+      document.getElementById('tw-sold-kg').textContent = fmtKg(soldKg);
+      document.getElementById('tw-sold-rev').textContent = soldKg > 0 ? `${fmt(soldRev)} · fresh + dried + powder + B2B` : 'Fresh + dried + powder + B2B, kg';
+    }
+
     /* ── Marketing summary (last 30 days) ── */
     async function loadMarketing() {
       const { data, error } = await sb.from('marketing_metrics')
@@ -360,7 +414,7 @@
     }
 
     /* ── Load everything ── */
-    await Promise.all([loadOrders(), loadStock(), loadFarm(), loadMarketing()]);
+    await Promise.all([loadOrders(), loadStock(), loadFarm(), loadMarketing(), loadThisWeek()]);
     renderAttention();
   </script>
 </body>
