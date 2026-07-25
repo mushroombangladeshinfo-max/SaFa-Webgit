@@ -39,6 +39,11 @@
     .f-select{background:var(--bg2);border:1px solid var(--border);border-radius:6px;color:var(--c);font-family:'DM Sans','Hind Siliguri',sans-serif;font-size:13px;padding:9px 12px;outline:none;cursor:pointer;}
     .f-action-btn{font-family:'Syne','Hind Siliguri',sans-serif;font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:9px 16px;border-radius:5px;cursor:pointer;transition:all .2s;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.03);color:rgba(245,239,230,.65);display:inline-flex;align-items:center;gap:6px;}
     .f-action-btn:hover{border-color:rgba(255,255,255,.25);color:var(--c);background:rgba(255,255,255,.06);}
+    .f-preset-btn{font-family:'DM Sans','Hind Siliguri',sans-serif;font-size:11px;font-weight:600;padding:7px 11px;border-radius:5px;cursor:pointer;border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.03);color:rgba(245,239,230,.55);transition:all .15s;white-space:nowrap;}
+    .f-preset-btn:hover{border-color:rgba(196,154,60,.35);color:var(--al);background:rgba(196,154,60,.06);}
+    .f-preset-btn.active{border-color:rgba(196,154,60,.5);color:var(--al);background:rgba(196,154,60,.11);}
+    .f-clear-btn{font-family:'Syne','Hind Siliguri',sans-serif;font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(245,239,230,.38);background:none;border:none;cursor:pointer;padding:6px 4px;transition:color .2s;}
+    .f-clear-btn:hover{color:var(--al);}
     .f-action-btn.green-btn{color:var(--green);border-color:rgba(95,207,128,.25);background:rgba(95,207,128,.05);}
     .f-action-btn.green-btn:hover{background:rgba(95,207,128,.12);border-color:rgba(95,207,128,.5);}
     .result-count{font-size:12px;color:var(--cl);margin-left:auto;}
@@ -125,9 +130,13 @@
         <option value="repeat">Repeat (2+ orders)</option>
         <option value="new">New (1 order)</option>
       </select>
+      <button type="button" class="f-preset-btn" id="preset-today" onclick="setPreset('today')">Today</button>
+      <button type="button" class="f-preset-btn" id="preset-this_week" onclick="setPreset('this_week')">This Week</button>
+      <button type="button" class="f-preset-btn" id="preset-this_month" onclick="setPreset('this_month')">This Month</button>
       <input type="date" class="f-search" id="date-from" title="Last order from">
       <span class="filter-date-sep">to</span>
       <input type="date" class="f-search" id="date-to" title="Last order to">
+      <button type="button" class="f-clear-btn" id="clear-filters-btn">✕ Clear</button>
       <span class="result-count" id="result-count"></span>
     </div>
 
@@ -162,6 +171,7 @@
     import { requireAdmin }             from '/src/admin-auth.js';
     import { mountAdminNav }            from '/src/admin-nav.js';
     import { localDateStr }             from '/src/date-utils.js';
+    import { readFiltersFromURL, writeFiltersToURL, debounce, DATE_PRESETS } from '/src/filter-state.js';
 
     const sb = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY);
 
@@ -185,6 +195,37 @@
 
     /* ── State ── */
     let _all = [], _sortKey = 'spent', _typeKey = 'all';
+
+    /* ── URL-persisted filters — filtered views are shareable/bookmarkable
+       and survive a refresh, matching Stripe/Linear/Shopify Admin. ── */
+    const FILTER_DEFAULTS = { q:'', sort:'spent', type:'all', from:'', to:'' };
+    function applyFiltersFromURL() {
+      const f = readFiltersFromURL(FILTER_DEFAULTS);
+      document.getElementById('search-input').value = f.q;
+      document.getElementById('sort-select').value   = f.sort;
+      document.getElementById('type-select').value   = f.type;
+      document.getElementById('date-from').value     = f.from;
+      document.getElementById('date-to').value       = f.to;
+      _sortKey = f.sort; _typeKey = f.type;
+    }
+    function syncFiltersURL() {
+      writeFiltersToURL({
+        q:    document.getElementById('search-input').value.trim(),
+        sort: _sortKey,
+        type: _typeKey,
+        from: document.getElementById('date-from').value,
+        to:   document.getElementById('date-to').value,
+      }, FILTER_DEFAULTS);
+    }
+    window.setPreset = function(key) {
+      const { from, to } = DATE_PRESETS[key]();
+      document.getElementById('date-from').value = from;
+      document.getElementById('date-to').value   = to;
+      document.querySelectorAll('.f-preset-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(`preset-${key}`)?.classList.add('active');
+      syncFiltersURL();
+      render();
+    };
 
     /* ── Load ── */
     async function load() {
@@ -312,11 +353,22 @@
 
     /* ── Filters ── */
     let _st;
-    document.getElementById('search-input').addEventListener('input', () => { clearTimeout(_st); _st = setTimeout(render, 250); });
-    document.getElementById('sort-select').addEventListener('change', e => { _sortKey = e.target.value; render(); });
-    document.getElementById('type-select').addEventListener('change', e => { _typeKey = e.target.value; render(); });
-    document.getElementById('date-from').addEventListener('change', render);
-    document.getElementById('date-to').addEventListener('change', render);
+    document.getElementById('search-input').addEventListener('input', () => { clearTimeout(_st); _st = setTimeout(() => { syncFiltersURL(); render(); }, 250); });
+    document.getElementById('sort-select').addEventListener('change', e => { _sortKey = e.target.value; syncFiltersURL(); render(); });
+    document.getElementById('type-select').addEventListener('change', e => { _typeKey = e.target.value; syncFiltersURL(); render(); });
+    document.getElementById('date-from').addEventListener('change', () => { syncFiltersURL(); render(); });
+    document.getElementById('date-to').addEventListener('change', () => { syncFiltersURL(); render(); });
+    document.getElementById('clear-filters-btn').addEventListener('click', () => {
+      document.getElementById('search-input').value = '';
+      document.getElementById('sort-select').value   = FILTER_DEFAULTS.sort;
+      document.getElementById('type-select').value   = FILTER_DEFAULTS.type;
+      document.getElementById('date-from').value = '';
+      document.getElementById('date-to').value   = '';
+      document.querySelectorAll('.f-preset-btn').forEach(b => b.classList.remove('active'));
+      _sortKey = FILTER_DEFAULTS.sort; _typeKey = FILTER_DEFAULTS.type;
+      syncFiltersURL();
+      render();
+    });
 
     /* ── Export ── */
     document.getElementById('export-btn').addEventListener('click', () => {
@@ -335,6 +387,7 @@
       toast(`Exported ${_all.length} customers`);
     });
 
+    applyFiltersFromURL();
     load();
   </script>
 </body>

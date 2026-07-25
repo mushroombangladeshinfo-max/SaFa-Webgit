@@ -49,6 +49,11 @@
 
     /* ── Filter bar ── */
     .filter-bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:20px;}
+    .f-preset-btn{font-family:'DM Sans','Hind Siliguri',sans-serif;font-size:11px;font-weight:600;padding:7px 11px;border-radius:5px;cursor:pointer;border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.03);color:rgba(245,239,230,.55);transition:all .15s;white-space:nowrap;}
+    .f-preset-btn:hover{border-color:rgba(196,154,60,.35);color:var(--al);background:rgba(196,154,60,.06);}
+    .f-preset-btn.active{border-color:rgba(196,154,60,.5);color:var(--al);background:rgba(196,154,60,.11);}
+    .f-clear-btn{font-family:'Syne','Hind Siliguri',sans-serif;font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(245,239,230,.38);background:none;border:none;cursor:pointer;padding:6px 4px;transition:color .2s;}
+    .f-clear-btn:hover{color:var(--al);}
     .filter-select,.filter-input{background:var(--bg2);border:1px solid var(--border);border-radius:6px;color:var(--c);font-family:'DM Sans','Hind Siliguri',sans-serif;font-size:13px;padding:8px 12px;outline:none;}
     .filter-select:focus,.filter-input:focus{border-color:rgba(196,154,60,.4);}
     .btn{font-family:'Syne','Hind Siliguri',sans-serif;font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:9px 16px;border-radius:6px;border:1px solid var(--border);background:rgba(255,255,255,.04);color:var(--cl);cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:6px;}
@@ -165,6 +170,10 @@
 
       <!-- Filter -->
       <div class="filter-bar">
+        <button type="button" class="f-preset-btn" id="daily-preset-today" onclick="setDailyPreset('today')">Today</button>
+        <button type="button" class="f-preset-btn" id="daily-preset-this_week" onclick="setDailyPreset('this_week')">This Week</button>
+        <button type="button" class="f-preset-btn active" id="daily-preset-this_month" onclick="setDailyPreset('this_month')">This Month</button>
+        <button type="button" class="f-preset-btn" id="daily-preset-this_year" onclick="setDailyPreset('this_year')">This Year</button>
         <input type="date" class="filter-input" id="daily-from" aria-label="From date" title="From date">
         <input type="date" class="filter-input" id="daily-to" aria-label="To date" title="To date">
         <button type="button" class="btn" id="daily-filter-btn">Apply</button>
@@ -256,6 +265,24 @@
           <button type="button" class="btn primary" id="oe-save-btn">Save Expense</button>
           <button type="button" class="btn" id="oe-cancel-btn">Cancel</button>
         </div>
+      </div>
+
+      <!-- Filter -->
+      <div class="filter-bar">
+        <input type="text" class="filter-input" id="oe-search" placeholder="Search description or vendor…">
+        <select class="filter-select" id="oe-filter-cat">
+          <option value="">All Categories</option>
+          <option>Equipment</option>
+          <option>Rent</option>
+          <option>Repair</option>
+          <option>Utilities</option>
+          <option>Marketing</option>
+          <option>Transport</option>
+          <option>Other</option>
+        </select>
+        <input type="date" class="filter-input" id="oe-from" title="From date">
+        <input type="date" class="filter-input" id="oe-to" title="To date">
+        <button type="button" class="f-clear-btn" id="oe-clear-btn">✕ Clear</button>
       </div>
 
       <!-- KPIs -->
@@ -449,6 +476,7 @@
     import { requireAdmin }  from '/src/admin-auth.js';
     import { mountAdminNav } from '/src/admin-nav.js';
     import { localDateStr }  from '/src/date-utils.js';
+    import { readFiltersFromURL, writeFiltersToURL, DATE_PRESETS } from '/src/filter-state.js';
 
     const sb = createClient(
       import.meta.env.VITE_SUPABASE_URL,
@@ -568,14 +596,32 @@
       });
     }
 
+    /* URL-persisted date range for the Daily tab — shareable/bookmarkable,
+       survives a refresh instead of silently resetting to "this month." */
+    function syncDailyURL(from, to) {
+      writeFiltersToURL({ from, to }, { from: monthStart(), to: today() });
+    }
+    window.setDailyPreset = function(key) {
+      const { from, to } = DATE_PRESETS[key]();
+      document.getElementById('daily-from').value = from;
+      document.getElementById('daily-to').value   = to;
+      document.querySelectorAll('#tab-daily .f-preset-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(`daily-preset-${key}`)?.classList.add('active');
+      syncDailyURL(from, to);
+      loadDaily(from, to);
+    };
     document.getElementById('daily-filter-btn').addEventListener('click', () => {
       const from = document.getElementById('daily-from').value || monthStart();
       const to   = document.getElementById('daily-to').value   || today();
+      document.querySelectorAll('#tab-daily .f-preset-btn').forEach(b => b.classList.remove('active'));
+      syncDailyURL(from, to);
       loadDaily(from, to);
     });
     document.getElementById('daily-reset-btn').addEventListener('click', () => {
       document.getElementById('daily-from').value = '';
       document.getElementById('daily-to').value   = '';
+      document.querySelectorAll('#tab-daily .f-preset-btn').forEach(b => b.classList.remove('active'));
+      syncDailyURL('', '');
       loadDaily();
     });
 
@@ -604,13 +650,35 @@
       document.getElementById('oe-largest-desc').textContent= largest.description||'';
     }
 
+    const OE_DEFAULTS = { q:'', cat:'', from:'', to:'' };
+    function filteredOE() {
+      const q    = document.getElementById('oe-search').value.trim().toLowerCase();
+      const cat  = document.getElementById('oe-filter-cat').value;
+      const from = document.getElementById('oe-from').value;
+      const to   = document.getElementById('oe-to').value;
+      return _oeData.filter(r =>
+        (!q || (r.description||'').toLowerCase().includes(q) || (r.vendor||'').toLowerCase().includes(q)) &&
+        (!cat || r.category === cat) &&
+        (!from || r.expense_date >= from) &&
+        (!to   || r.expense_date <= to)
+      );
+    }
+    function syncOEFiltersURL() {
+      writeFiltersToURL({
+        q:    document.getElementById('oe-search').value.trim(),
+        cat:  document.getElementById('oe-filter-cat').value,
+        from: document.getElementById('oe-from').value,
+        to:   document.getElementById('oe-to').value,
+      }, OE_DEFAULTS);
+    }
     function renderOETable() {
-      if (!_oeData.length) {
+      const rows = filteredOE();
+      if (!rows.length) {
         document.getElementById('oe-tbody').innerHTML =
-          '<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">💰</div>No one-off expenses yet</div></td></tr>';
+          `<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">💰</div>${_oeData.length ? 'No expenses match these filters' : 'No one-off expenses yet'}</div></td></tr>`;
         return;
       }
-      document.getElementById('oe-tbody').innerHTML = _oeData.map(r => `
+      document.getElementById('oe-tbody').innerHTML = rows.map(r => `
         <tr>
           <td style="font-family:'DM Mono','Hind Siliguri',monospace;font-size:12px;">${r.expense_date}</td>
           <td><span class="cat-badge cat-${(r.category||'other').toLowerCase()}">${r.category||'Other'}</span></td>
@@ -623,6 +691,28 @@
     }
 
     /* Add expense */
+    let _oeSearchTimer;
+    document.getElementById('oe-search').addEventListener('input', () => {
+      clearTimeout(_oeSearchTimer);
+      _oeSearchTimer = setTimeout(() => { syncOEFiltersURL(); renderOETable(); }, 250);
+    });
+    document.getElementById('oe-filter-cat').addEventListener('change', () => { syncOEFiltersURL(); renderOETable(); });
+    document.getElementById('oe-from').addEventListener('change', () => { syncOEFiltersURL(); renderOETable(); });
+    document.getElementById('oe-to').addEventListener('change', () => { syncOEFiltersURL(); renderOETable(); });
+    document.getElementById('oe-clear-btn').addEventListener('click', () => {
+      document.getElementById('oe-search').value = '';
+      document.getElementById('oe-filter-cat').value = '';
+      document.getElementById('oe-from').value = '';
+      document.getElementById('oe-to').value = '';
+      syncOEFiltersURL();
+      renderOETable();
+    });
+    { const f = readFiltersFromURL(OE_DEFAULTS);
+      document.getElementById('oe-search').value = f.q;
+      document.getElementById('oe-filter-cat').value = f.cat;
+      document.getElementById('oe-from').value = f.from;
+      document.getElementById('oe-to').value = f.to; }
+
     document.getElementById('add-expense-btn').addEventListener('click', () => {
       const f = document.getElementById('add-expense-form');
       f.classList.toggle('open');
@@ -840,7 +930,14 @@
         '<tr><td colspan="3"><div class="empty-state"><div class="empty-icon">📊</div>No data for this period</div></td></tr>';
     }
 
-    document.getElementById('pl-load-btn').addEventListener('click', loadPL);
+    document.getElementById('pl-load-btn').addEventListener('click', () => {
+      writeFiltersToURL({ pl: document.getElementById('pl-period').value }, { pl: 'this_month' });
+      loadPL();
+    });
+    document.getElementById('pl-period').addEventListener('change', () => {
+      writeFiltersToURL({ pl: document.getElementById('pl-period').value }, { pl: 'this_month' });
+    });
+    { const { pl } = readFiltersFromURL({ pl: 'this_month' }); document.getElementById('pl-period').value = pl; }
 
     /* ══ TABS ══ */
     document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -883,9 +980,13 @@
     }
 
     /* ── Init ── */
-    document.getElementById('daily-from').value = monthStart();
-    document.getElementById('daily-to').value   = today();
-    loadDaily();
+    const _dailyURL = readFiltersFromURL({ from: monthStart(), to: today() });
+    document.getElementById('daily-from').value = _dailyURL.from;
+    document.getElementById('daily-to').value   = _dailyURL.to;
+    if (_dailyURL.from === monthStart() && _dailyURL.to === today()) {
+      document.getElementById('daily-preset-this_month')?.classList.add('active');
+    }
+    loadDaily(_dailyURL.from, _dailyURL.to);
   </script>
 </body>
 </html>

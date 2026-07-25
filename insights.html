@@ -532,6 +532,7 @@
     import { requireAdmin }  from '/src/admin-auth.js';
     import { mountAdminNav } from '/src/admin-nav.js';
     import { localDateStr }  from '/src/date-utils.js';
+    import { readFiltersFromURL, writeFiltersToURL } from '/src/filter-state.js';
 
     const sb = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY);
 
@@ -651,14 +652,21 @@
       document.getElementById('tab-' + b.dataset.tab).classList.add('active');
     }));
 
-    /* ── Range filter ── */
+    /* ── Range filter — persisted in the URL so a range is
+       shareable/bookmarkable and survives a refresh. ── */
     let rangeDays = 90;
     document.querySelectorAll('.range-btn').forEach(b => b.addEventListener('click', () => {
       document.querySelectorAll('.range-btn').forEach(x => x.classList.remove('active'));
       b.classList.add('active');
       rangeDays = +b.dataset.days;
+      writeFiltersToURL({ days: rangeDays }, { days: 90 });
       loadOverview();
     }));
+    {
+      const { days } = readFiltersFromURL({ days: 90 });
+      rangeDays = +days;
+      document.querySelectorAll('.range-btn').forEach(b => b.classList.toggle('active', +b.dataset.days === rangeDays));
+    }
 
     const sinceISO = (days) => {
       const d = new Date(); d.setDate(d.getDate() - days);

@@ -52,6 +52,11 @@
     .search-input{min-width:200px;}
     .filter-date-sep{color:var(--cl);font-size:12px;}
     .search-input.date-narrow{min-width:0;}
+    .f-preset-btn{font-family:'DM Sans','Hind Siliguri',sans-serif;font-size:11px;font-weight:600;padding:7px 11px;border-radius:5px;cursor:pointer;border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.03);color:rgba(245,239,230,.55);transition:all .15s;white-space:nowrap;}
+    .f-preset-btn:hover{border-color:rgba(196,154,60,.35);color:var(--al);background:rgba(196,154,60,.06);}
+    .f-preset-btn.active{border-color:rgba(196,154,60,.5);color:var(--al);background:rgba(196,154,60,.11);}
+    .f-clear-btn{font-family:'Syne','Hind Siliguri',sans-serif;font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(245,239,230,.38);background:none;border:none;cursor:pointer;padding:6px 4px;transition:color .2s;}
+    .f-clear-btn:hover{color:var(--al);}
 
     /* ── Add / Edit modal ── */
     .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:500;padding:20px;}
@@ -144,9 +149,13 @@
         <option>Wholesaler</option>
         <option>Other</option>
       </select>
+      <button type="button" class="f-preset-btn" id="preset-today" onclick="setPreset('today')">Today</button>
+      <button type="button" class="f-preset-btn" id="preset-this_week" onclick="setPreset('this_week')">This Week</button>
+      <button type="button" class="f-preset-btn" id="preset-this_month" onclick="setPreset('this_month')">This Month</button>
       <input type="date" class="search-input date-narrow" id="date-from" title="Last contact from">
       <span class="filter-date-sep">to</span>
       <input type="date" class="search-input date-narrow" id="date-to" title="Last contact to">
+      <button type="button" class="f-clear-btn" id="clear-filters-btn">✕ Clear</button>
       <button class="btn" id="export-btn">↓ CSV</button>
     </div>
 
@@ -262,6 +271,7 @@
     import { requireAdmin }  from '/src/admin-auth.js';
     import { mountAdminNav } from '/src/admin-nav.js';
     import { localDateStr }  from '/src/date-utils.js';
+    import { readFiltersFromURL, writeFiltersToURL, DATE_PRESETS } from '/src/filter-state.js';
 
     const sb = createClient(
       import.meta.env.VITE_SUPABASE_URL,
@@ -286,6 +296,35 @@
 
     /* ── Data ── */
     let _all = [], _editId = null;
+
+    /* ── URL-persisted filters — shareable/bookmarkable, survives refresh ── */
+    const FILTER_DEFAULTS = { q:'', status:'', type:'', from:'', to:'' };
+    function applyFiltersFromURL() {
+      const f = readFiltersFromURL(FILTER_DEFAULTS);
+      document.getElementById('search-input').value  = f.q;
+      document.getElementById('filter-status').value = f.status;
+      document.getElementById('filter-type').value   = f.type;
+      document.getElementById('date-from').value     = f.from;
+      document.getElementById('date-to').value       = f.to;
+    }
+    function syncFiltersURL() {
+      writeFiltersToURL({
+        q:      document.getElementById('search-input').value.trim(),
+        status: document.getElementById('filter-status').value,
+        type:   document.getElementById('filter-type').value,
+        from:   document.getElementById('date-from').value,
+        to:     document.getElementById('date-to').value,
+      }, FILTER_DEFAULTS);
+    }
+    window.setPreset = function(key) {
+      const { from, to } = DATE_PRESETS[key]();
+      document.getElementById('date-from').value = from;
+      document.getElementById('date-to').value   = to;
+      document.querySelectorAll('.f-preset-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(`preset-${key}`)?.classList.add('active');
+      syncFiltersURL();
+      renderTable();
+    };
 
     async function load() {
       const { data, error } = await sb.from('b2b_pipeline').select('*').order('updated_at', { ascending: false });
@@ -436,11 +475,21 @@
 
     /* ── Filters ── */
     let searchTimer;
-    document.getElementById('search-input').addEventListener('input', ()=>{ clearTimeout(searchTimer); searchTimer=setTimeout(renderTable,250); });
-    document.getElementById('filter-status').addEventListener('change', renderTable);
-    document.getElementById('filter-type').addEventListener('change', renderTable);
-    document.getElementById('date-from').addEventListener('change', renderTable);
-    document.getElementById('date-to').addEventListener('change', renderTable);
+    document.getElementById('search-input').addEventListener('input', ()=>{ clearTimeout(searchTimer); searchTimer=setTimeout(()=>{ syncFiltersURL(); renderTable(); },250); });
+    document.getElementById('filter-status').addEventListener('change', () => { syncFiltersURL(); renderTable(); });
+    document.getElementById('filter-type').addEventListener('change', () => { syncFiltersURL(); renderTable(); });
+    document.getElementById('date-from').addEventListener('change', () => { syncFiltersURL(); renderTable(); });
+    document.getElementById('date-to').addEventListener('change', () => { syncFiltersURL(); renderTable(); });
+    document.getElementById('clear-filters-btn').addEventListener('click', () => {
+      document.getElementById('search-input').value  = '';
+      document.getElementById('filter-status').value = '';
+      document.getElementById('filter-type').value   = '';
+      document.getElementById('date-from').value = '';
+      document.getElementById('date-to').value   = '';
+      document.querySelectorAll('.f-preset-btn').forEach(b => b.classList.remove('active'));
+      syncFiltersURL();
+      renderTable();
+    });
 
     /* ── CSV Export ── */
     document.getElementById('export-btn').addEventListener('click', ()=>{
@@ -453,6 +502,7 @@
       a.click();
     });
 
+    applyFiltersFromURL();
     load();
   </script>
 </body>

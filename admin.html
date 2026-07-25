@@ -1379,6 +1379,7 @@
     import { supabase }                from '/src/supabase.js';
     import { ADMIN_EMAILS, requireAdmin } from '/src/admin-auth.js';
     import { localDateStr }            from '/src/date-utils.js';
+    import { readFiltersFromURL, writeFiltersToURL } from '/src/filter-state.js';
 
     /* ── Config ── */
     const SELLER_WA = '8801970099378';
@@ -1386,6 +1387,32 @@
 
     /* ── State ── */
     const S = { page:1, search:'', dateFrom:'', dateTo:'', statusFilter:'', sortField:'created_at', sortAsc:false, minAmt:'', maxAmt:'', totalCount:0, orders:[], realtimeSub:null };
+
+    /* ── URL-persisted filters — a filtered/sorted view of orders is
+       shareable/bookmarkable and survives a refresh, matching Stripe/
+       Linear/Shopify Admin. Synced from fetchOrders() (the one function
+       every filter change already routes through) rather than in each
+       individual listener, so nothing can fall out of sync by omission. ── */
+    const ORDER_FILTER_DEFAULTS = { q:'', from:'', to:'', status:'', sort:'created_at', dir:'0', min:'', max:'', p:'1' };
+    function restoreOrderFiltersFromURL() {
+      const f = readFiltersFromURL(ORDER_FILTER_DEFAULTS);
+      S.search = f.q; S.dateFrom = f.from; S.dateTo = f.to; S.statusFilter = f.status;
+      S.sortField = f.sort; S.sortAsc = f.dir === '1'; S.minAmt = f.min; S.maxAmt = f.max;
+      S.page = Math.max(1, +f.p || 1);
+      document.getElementById('search-input').value    = f.q;
+      document.getElementById('filter-date-from').value = f.from;
+      document.getElementById('filter-date-to').value   = f.to;
+      document.getElementById('filter-status').value    = f.status;
+      document.getElementById('filter-min').value        = f.min;
+      document.getElementById('filter-max').value        = f.max;
+      document.getElementById('filter-sort').value       = `${f.sort}|${f.dir}`;
+    }
+    function syncOrderFiltersURL() {
+      writeFiltersToURL({
+        q: S.search, from: S.dateFrom, to: S.dateTo, status: S.statusFilter,
+        sort: S.sortField, dir: S.sortAsc ? '1' : '0', min: S.minAmt, max: S.maxAmt, p: String(S.page),
+      }, ORDER_FILTER_DEFAULTS);
+    }
 
     /* ── Formatters — instantiated once, reused on every render ── */
     const _dayFmt = new Intl.DateTimeFormat('en-GB', { day:'numeric', month:'short', year:'numeric' });
@@ -1660,6 +1687,7 @@
       const now = new Date().toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
       document.getElementById('dash-subtitle').textContent = now;
       fetchStats();
+      restoreOrderFiltersFromURL();
       fetchOrders();
       startRealtime();
     }
@@ -1693,6 +1721,7 @@
 
     /* ── Fetch orders ── */
     async function fetchOrders() {
+      syncOrderFiltersURL();
       const tbody = document.getElementById('order-tbody');
       tbody.innerHTML = [1,2,3,4,5].map(()=>`
         <tr><td colspan="8"><div class="skel-row-wrap">
