@@ -96,17 +96,17 @@
     <!-- KPI strip -->
     <div class="kpi-strip">
       <div class="kpi-card">
-        <div class="kpi-lbl">Orders This Week</div>
+        <div class="kpi-lbl">Orders This Month</div>
         <div class="kpi-val" id="k-orders">—</div>
         <div class="kpi-sub" id="k-orders-sub"></div>
       </div>
       <div class="kpi-card">
-        <div class="kpi-lbl">Revenue This Week</div>
+        <div class="kpi-lbl">Revenue This Month</div>
         <div class="kpi-val green" id="k-revenue">—</div>
         <div class="kpi-sub" id="k-revenue-sub">Web orders + farm-gate</div>
       </div>
       <div class="kpi-card">
-        <div class="kpi-lbl">Harvest This Week</div>
+        <div class="kpi-lbl">Harvest This Month</div>
         <div class="kpi-val gold" id="k-harvest">—</div>
         <div class="kpi-sub" id="k-harvest-sub">Fresh, kg</div>
       </div>
@@ -142,7 +142,7 @@
           <div class="panel-title">🌿 Farm Production</div>
           <a href="farm-analytics.html" class="panel-link">Details →</a>
         </div>
-        <div class="panel-sub">Last 7 days.</div>
+        <div class="panel-sub">Last 30 days.</div>
         <div id="farm-summary"><div class="empty-mini">Loading…</div></div>
       </div>
 
@@ -151,7 +151,7 @@
           <div class="panel-title">📣 Marketing</div>
           <a href="insights.html" class="panel-link">Details →</a>
         </div>
-        <div class="panel-sub">Last 7 days.</div>
+        <div class="panel-sub">Last 30 days.</div>
         <div id="marketing-summary"><div class="empty-mini">Loading…</div></div>
       </div>
 
@@ -160,7 +160,7 @@
           <div class="panel-title">💵 Net Position</div>
           <a href="insights.html" class="panel-link">Details →</a>
         </div>
-        <div class="panel-sub">Revenue − costs − ad spend, last 7 days.</div>
+        <div class="panel-sub">Revenue − costs − ad spend, last 30 days.</div>
         <div id="net-summary"><div class="empty-mini">Loading…</div></div>
       </div>
     </div>
@@ -198,7 +198,7 @@
       const d = new Date(); d.setDate(d.getDate() - n);
       return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
     };
-    const weekAgoISO = () => { const d = new Date(); d.setDate(d.getDate() - 7); return d.toISOString(); };
+    const monthAgoISO = () => { const d = new Date(); d.setDate(d.getDate() - 30); return d.toISOString(); };
     const relTime = iso => {
       const h = Math.floor((Date.now() - new Date(iso).getTime()) / 36e5);
       if (h < 1) return 'just now';
@@ -218,13 +218,13 @@
         .order('created_at', { ascending:false }).limit(200);
       if (error || !data) return;
 
-      const weekCutoff = new Date(weekAgoISO());
-      const weekOrders = data.filter(o => new Date(o.created_at) >= weekCutoff && o.status !== 'cancelled');
-      const weekRevenue = weekOrders.reduce((s,o) => s + (o.total_amount||0), 0);
+      const monthCutoff = new Date(monthAgoISO());
+      const monthOrders = data.filter(o => new Date(o.created_at) >= monthCutoff && o.status !== 'cancelled');
+      const monthRevenue = monthOrders.reduce((s,o) => s + (o.total_amount||0), 0);
 
-      document.getElementById('k-orders').textContent = weekOrders.length;
-      document.getElementById('k-orders-sub').textContent = `${fmt(weekRevenue)} revenue`;
-      document.getElementById('k-revenue').textContent = fmt(weekRevenue);
+      document.getElementById('k-orders').textContent = monthOrders.length;
+      document.getElementById('k-orders-sub').textContent = `${fmt(monthRevenue)} revenue`;
+      document.getElementById('k-revenue').textContent = fmt(monthRevenue);
 
       const recent = data.slice(0, 5);
       document.getElementById('recent-orders').innerHTML = recent.length
@@ -268,11 +268,11 @@
       });
     }
 
-    /* ── Farm summary (last 7 days) + unresolved contamination ── */
+    /* ── Farm summary (last 30 days) + unresolved contamination ── */
     async function loadFarm() {
       const { data, error } = await sb.from('v_ops_daily')
         .select('day,harvest_fresh_kg,farm_revenue,farm_expenses')
-        .gte('day', daysAgo(7)).order('day', { ascending:false });
+        .gte('day', daysAgo(30)).order('day', { ascending:false });
       if (error || !data) { document.getElementById('farm-summary').innerHTML = '<div class="empty-mini">No farm data yet.</div>'; return; }
 
       const harvest  = data.reduce((s,r) => s + (Number(r.harvest_fresh_kg)||0), 0);
@@ -285,8 +285,8 @@
         <div class="rl-row"><span>Farm Revenue</span><span class="rl-val">${fmt(revenue)}</span></div>
         <div class="rl-row"><span>Farm Expenses</span><span class="rl-val">${fmt(expenses)}</span></div>`;
 
-      window._farmRevenue7d = revenue;
-      window._farmExpenses7d = expenses;
+      window._farmRevenue30d = revenue;
+      window._farmExpenses30d = expenses;
 
       /* Contamination events in the raw log, unresolved (no contam_action noted) */
       const { data: contam } = await sb.from('farm_daily_logs')
@@ -302,10 +302,10 @@
       });
     }
 
-    /* ── Marketing summary (last 7 days) ── */
+    /* ── Marketing summary (last 30 days) ── */
     async function loadMarketing() {
       const { data, error } = await sb.from('marketing_metrics')
-        .select('channel,spend').gte('metric_date', daysAgo(7));
+        .select('channel,spend').gte('metric_date', daysAgo(30));
       if (error || !data) { document.getElementById('marketing-summary').innerHTML = '<div class="empty-mini">No marketing data yet.</div>'; return; }
 
       const byChannel = {};
@@ -322,13 +322,13 @@
            <div class="rl-row"><span>Top Channel</span><span class="rl-val">${top ? cap(top[0]) : '—'}</span></div>`
         : '<div class="empty-mini">No ad spend this week.</div>';
 
-      window._adSpend7d = totalSpend;
+      window._adSpend30d = totalSpend;
       renderNet();
     }
 
     function renderNet() {
-      const rev = (window._farmRevenue7d || 0);
-      const exp = (window._farmExpenses7d || 0) + (window._adSpend7d || 0);
+      const rev = (window._farmRevenue30d || 0);
+      const exp = (window._farmExpenses30d || 0) + (window._adSpend30d || 0);
       const net = rev - exp;
       document.getElementById('net-summary').innerHTML = `
         <div class="rl-row"><span>Income</span><span class="rl-val">${fmt(rev)}</span></div>
