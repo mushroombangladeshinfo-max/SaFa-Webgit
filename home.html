@@ -21,7 +21,7 @@
     .page-sub{font-size:12px;color:var(--cl);margin-top:4px;}
 
     /* KPI strip */
-    .kpi-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px;}
+    .kpi-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;}
     @media(max-width:800px){.kpi-strip{grid-template-columns:repeat(2,1fr);}}
     .kpi-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px 18px;}
     .kpi-lbl{font-family:'Syne','Hind Siliguri',sans-serif;font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--cl);margin-bottom:6px;}
@@ -31,11 +31,11 @@
     .kpi-val.red{color:var(--red);}
     .kpi-sub{font-size:11px;color:var(--cl);margin-top:3px;}
 
-    /* Layout grid */
-    .grid-main{display:grid;grid-template-columns:1.3fr 1fr;gap:16px;margin-bottom:16px;}
+    /* Layout grids */
+    .grid-main{display:grid;grid-template-columns:1.2fr 1fr;gap:16px;margin-bottom:16px;}
     @media(max-width:900px){.grid-main{grid-template-columns:1fr;}}
-    .grid-three{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:16px;}
-    @media(max-width:900px){.grid-three{grid-template-columns:1fr;}}
+    .grid-two{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+    @media(max-width:900px){.grid-two{grid-template-columns:1fr;}}
 
     .panel{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:18px 20px;}
     .panel-title{font-family:'Syne','Hind Siliguri',sans-serif;font-size:13px;font-weight:700;color:var(--c);display:flex;align-items:center;gap:8px;margin-bottom:4px;}
@@ -43,6 +43,8 @@
     .panel-link{font-size:11px;color:var(--al);text-decoration:none;margin-left:auto;white-space:nowrap;}
     .panel-link:hover{text-decoration:underline;}
     .panel-head{display:flex;align-items:center;margin-bottom:4px;}
+
+    /* Split card (Harvest vs Sold) */
     .tw-panel{margin-bottom:16px;}
     .tw-split{display:flex;align-items:stretch;gap:20px;margin-top:6px;}
     @media(max-width:600px){.tw-split{flex-direction:column;gap:14px;}}
@@ -69,19 +71,16 @@
     .att-empty-icon{font-size:26px;margin-bottom:6px;}
     .att-empty-text{font-size:12px;color:var(--cl);}
 
-    /* Recent list rows */
+    /* Row-style summary lines */
     .rl-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:13px;gap:10px;}
     .rl-row:last-child{border-bottom:none;}
-    .rl-id{font-weight:500;color:var(--c);}
-    .rl-meta{font-size:11px;color:var(--cl);margin-top:2px;}
     .rl-val{font-family:'DM Mono','Hind Siliguri',monospace;color:var(--al);font-weight:500;white-space:nowrap;}
-    .status-badge{display:inline-flex;padding:2px 7px;border-radius:4px;font-family:'Syne','Hind Siliguri',sans-serif;font-size:8px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-left:6px;}
-    .s-pending{background:rgba(196,154,60,.1);color:var(--al);}
-    .s-confirmed,.s-processing{background:rgba(95,207,128,.1);color:var(--green);}
-    .s-shipped{background:rgba(100,140,255,.1);color:#7ba3ff;}
-    .s-delivered{background:rgba(95,207,128,.15);color:var(--green);}
-    .s-cancelled,.s-returned{background:rgba(224,90,43,.1);color:var(--red);}
     .empty-mini{text-align:center;padding:20px 10px;font-size:12px;color:var(--cl);}
+
+    /* Dormant B2C status strip */
+    .b2c-strip{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px 20px;margin-bottom:16px;flex-wrap:wrap;}
+    .b2c-strip-text{font-size:12px;color:var(--cl);}
+    .b2c-strip-text strong{color:var(--cm);font-weight:500;}
 
     /* Quick links */
     .ql-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;}
@@ -103,21 +102,21 @@
       </div>
     </div>
 
-    <!-- KPI strip -->
+    <!-- KPI strip — B2B-first, since that's the real revenue channel right now -->
     <div class="kpi-strip">
       <div class="kpi-card">
-        <div class="kpi-lbl">Orders This Month</div>
-        <div class="kpi-val" id="k-orders">—</div>
-        <div class="kpi-sub" id="k-orders-sub"></div>
+        <div class="kpi-lbl">B2B Revenue (30d)</div>
+        <div class="kpi-val green" id="k-b2b-revenue">—</div>
+        <div class="kpi-sub" id="k-b2b-revenue-sub">Real sales, not estimates</div>
       </div>
       <div class="kpi-card">
-        <div class="kpi-lbl">Revenue This Month</div>
-        <div class="kpi-val green" id="k-revenue">—</div>
-        <div class="kpi-sub" id="k-revenue-sub">Web orders + farm-gate</div>
+        <div class="kpi-lbl">Days Since Last B2B Sale</div>
+        <div class="kpi-val gold" id="k-b2b-days">—</div>
+        <div class="kpi-sub" id="k-b2b-days-sub"></div>
       </div>
       <div class="kpi-card">
-        <div class="kpi-lbl">Harvest This Month</div>
-        <div class="kpi-val gold" id="k-harvest">—</div>
+        <div class="kpi-lbl">Harvest (30d)</div>
+        <div class="kpi-val" id="k-harvest">—</div>
         <div class="kpi-sub" id="k-harvest-sub">Fresh, kg</div>
       </div>
       <div class="kpi-card">
@@ -127,10 +126,10 @@
       </div>
     </div>
 
-    <!-- This Week: Harvest vs Sell, side by side -->
+    <!-- Harvest vs Sold, last 14 days (matches the real ~biweekly B2B sales cadence) -->
     <div class="panel tw-panel">
-      <div class="panel-head"><div class="panel-title">📅 This Week</div></div>
-      <div class="panel-sub">Last 7 days — production vs. what actually sold.</div>
+      <div class="panel-head"><div class="panel-title">📅 Last 14 Days</div></div>
+      <div class="panel-sub">Production vs. what actually sold — matched to your real sales cadence (~1–3× per 2 weeks), not a calendar week.</div>
       <div class="tw-split">
         <div class="tw-side">
           <div class="tw-side-lbl">🌾 Harvest</div>
@@ -141,38 +140,38 @@
         <div class="tw-side">
           <div class="tw-side-lbl">💰 Sold</div>
           <div class="tw-side-val gold" id="tw-sold-kg">—</div>
-          <div class="tw-side-sub" id="tw-sold-rev">Fresh + dried + powder, kg</div>
+          <div class="tw-side-sub" id="tw-sold-rev">Fresh + dried + powder + B2B, kg</div>
         </div>
       </div>
     </div>
 
-    <!-- Attention + Orders -->
+    <!-- Attention + B2B -->
     <div class="grid-main">
       <div class="panel">
         <div class="panel-head"><div class="panel-title">🔔 Needs Your Attention</div></div>
-        <div class="panel-sub">Orders stuck in processing, low stock, and unresolved farm issues — pulled from real data, not estimates.</div>
+        <div class="panel-sub">Overdue B2B check-ins, suppliers due for restock, unresolved spawn/farm quality issues, low stock — pulled from real data.</div>
         <div id="attention-list"><div class="empty-mini">Loading…</div></div>
       </div>
 
       <div class="panel">
         <div class="panel-head">
-          <div class="panel-title">📦 Recent Orders</div>
-          <a href="admin.html" class="panel-link">Open Orders →</a>
+          <div class="panel-title">🤝 B2B</div>
+          <a href="pipeline.html" class="panel-link">Open →</a>
         </div>
-        <div class="panel-sub">Last 5 orders, any status.</div>
-        <div id="recent-orders"><div class="empty-mini">Loading…</div></div>
+        <div class="panel-sub">Your active buyer relationship.</div>
+        <div id="b2b-summary"><div class="empty-mini">Loading…</div></div>
       </div>
     </div>
 
-    <!-- Farm + Marketing summary -->
-    <div class="grid-three">
+    <!-- Suppliers + Marketing -->
+    <div class="grid-two">
       <div class="panel">
         <div class="panel-head">
-          <div class="panel-title">🌿 Farm Production</div>
-          <a href="farm-analytics.html" class="panel-link">Details →</a>
+          <div class="panel-title">🌱 Suppliers</div>
+          <a href="expenses.html" class="panel-link">Open →</a>
         </div>
-        <div class="panel-sub">Last 30 days.</div>
-        <div id="farm-summary"><div class="empty-mini">Loading…</div></div>
+        <div class="panel-sub">Days since last spawn purchase, per supplier.</div>
+        <div id="suppliers-summary"><div class="empty-mini">Loading…</div></div>
       </div>
 
       <div class="panel">
@@ -180,8 +179,20 @@
           <div class="panel-title">📣 Marketing</div>
           <a href="insights.html" class="panel-link">Details →</a>
         </div>
-        <div class="panel-sub">Last 30 days.</div>
+        <div class="panel-sub">Organic reach &amp; engagement, last 30 days — no paid campaigns running.</div>
         <div id="marketing-summary"><div class="empty-mini">Loading…</div></div>
+      </div>
+    </div>
+
+    <!-- Farm Production + Net Position (slower-moving monthly trend) -->
+    <div class="grid-two">
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title">🌿 Farm Production</div>
+          <a href="farm-analytics.html" class="panel-link">Details →</a>
+        </div>
+        <div class="panel-sub">Last 30 days.</div>
+        <div id="farm-summary"><div class="empty-mini">Loading…</div></div>
       </div>
 
       <div class="panel">
@@ -194,13 +205,19 @@
       </div>
     </div>
 
+    <!-- B2C: dormant for now, kept minimal on purpose -->
+    <div class="b2c-strip">
+      <div class="b2c-strip-text">🌐 Website (B2C): <strong id="b2c-status">—</strong></div>
+      <a href="admin.html" class="panel-link">Open Orders →</a>
+    </div>
+
     <!-- Quick links -->
     <div class="ql-row">
       <a href="quick-log.html" class="ql-card"><span class="ql-icon">⚡</span><div><div class="ql-title">Quick Log</div><div class="ql-sub">Daily farm entry</div></div></a>
-      <a href="admin.html" class="ql-card"><span class="ql-icon">📦</span><div><div class="ql-title">Orders</div><div class="ql-sub">Manage & ship</div></div></a>
+      <a href="pipeline.html" class="ql-card"><span class="ql-icon">🤝</span><div><div class="ql-title">B2B Customers</div><div class="ql-sub">Leads & pipeline</div></div></a>
+      <a href="expenses.html" class="ql-card"><span class="ql-icon">🌱</span><div><div class="ql-title">Suppliers</div><div class="ql-sub">Spawn purchases</div></div></a>
       <a href="farm-analytics.html" class="ql-card"><span class="ql-icon">📈</span><div><div class="ql-title">Farm Analytics</div><div class="ql-sub">Harvest & revenue</div></div></a>
       <a href="insights.html" class="ql-card"><span class="ql-icon">📊</span><div><div class="ql-title">Insights</div><div class="ql-sub">Channels & P&amp;L</div></div></a>
-      <a href="dashboard.html" class="ql-card"><span class="ql-icon">📡</span><div><div class="ql-title">IoT Dashboard</div><div class="ql-sub">Demo preview</div></div></a>
     </div>
   </div>
 
@@ -219,6 +236,7 @@
     /* ── Helpers ── */
     const fmt = n => '৳' + Math.round(n || 0).toLocaleString('en-BD');
     const fmtKg = n => (n || 0).toFixed(2) + ' kg';
+    const fmtN = n => (n || 0).toLocaleString('en-BD');
     const cap = s => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
     // Local Y-M-D, not toISOString() — that converts to UTC and shifts the
     // date backward for timezones ahead of UTC (Bangladesh is UTC+6), which
@@ -227,57 +245,86 @@
       const d = new Date(); d.setDate(d.getDate() - n);
       return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
     };
-    const monthAgoISO = () => { const d = new Date(); d.setDate(d.getDate() - 30); return d.toISOString(); };
-    const relTime = iso => {
-      const h = Math.floor((Date.now() - new Date(iso).getTime()) / 36e5);
-      if (h < 1) return 'just now';
-      if (h < 24) return `${h}h ago`;
-      return `${Math.floor(h/24)}d ago`;
-    };
+    const daysSince = dateStr => Math.floor((Date.now() - new Date(dateStr).getTime()) / 864e5);
 
     document.getElementById('page-date').textContent =
       new Date().toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
 
-    /* ── Orders this week + recent 5 + processing list ── */
     const attentionItems = [];
 
-    async function loadOrders() {
-      const { data, error } = await sb.from('orders')
-        .select('order_number,customer_name,total_amount,status,created_at')
-        .order('created_at', { ascending:false }).limit(200);
-      if (error || !data) return;
+    /* ── B2B: buyer identity (b2b_pipeline) + real transaction history (farm_daily_logs) ── */
+    async function loadB2B() {
+      const [pipelineRes, salesRes] = await Promise.all([
+        sb.from('b2b_pipeline').select('business_name,contact_name').eq('status', 'won'),
+        sb.from('farm_daily_logs').select('log_date,s_b2b_name,s_b2b_qty,s_b2b_value')
+          .not('s_b2b_name', 'is', null).order('log_date', { ascending:false }),
+      ]);
 
-      const monthCutoff = new Date(monthAgoISO());
-      const monthOrders = data.filter(o => new Date(o.created_at) >= monthCutoff && o.status !== 'cancelled');
-      const monthRevenue = monthOrders.reduce((s,o) => s + (o.total_amount||0), 0);
+      const buyers = pipelineRes.data || [];
+      const sales  = salesRes.data || [];
+      const last   = sales[0];
+      const lastDaysAgo = last ? daysSince(last.log_date) : null;
+      const monthCutoff = daysAgo(30);
+      const rev30 = sales.filter(s => s.log_date >= monthCutoff)
+        .reduce((s,r) => s + (Number(r.s_b2b_value)||0), 0);
 
-      document.getElementById('k-orders').textContent = monthOrders.length;
-      document.getElementById('k-orders-sub').textContent = `${fmt(monthRevenue)} revenue`;
-      document.getElementById('k-revenue').textContent = fmt(monthRevenue);
+      document.getElementById('k-b2b-revenue').textContent = fmt(rev30);
+      document.getElementById('k-b2b-days').textContent = lastDaysAgo !== null ? lastDaysAgo : '—';
+      document.getElementById('k-b2b-days-sub').textContent = last ? `Last: ${last.log_date}` : 'No sales logged yet';
 
-      const recent = data.slice(0, 5);
-      document.getElementById('recent-orders').innerHTML = recent.length
-        ? recent.map(o => `
-          <div class="rl-row">
-            <div>
-              <span class="rl-id">#${o.order_number}</span>
-              <span class="status-badge s-${o.status}">${cap(o.status)}</span>
-              <div class="rl-meta">${o.customer_name || '—'} · ${relTime(o.created_at)}</div>
-            </div>
-            <div class="rl-val">${fmt(o.total_amount)}</div>
-          </div>`).join('')
-        : '<div class="empty-mini">No orders yet.</div>';
+      const buyerNames = buyers.map(b => b.contact_name ? `${b.business_name} (${b.contact_name})` : b.business_name).join(', ');
+      document.getElementById('b2b-summary').innerHTML = `
+        <div class="rl-row"><span>Buyer</span><span class="rl-val">${buyerNames || 'No won buyer yet'}</span></div>
+        <div class="rl-row"><span>Last Sale</span><span class="rl-val">${last ? lastDaysAgo + 'd ago' : '—'}</span></div>
+        <div class="rl-row"><span>Revenue (30d)</span><span class="rl-val">${fmt(rev30)}</span></div>`;
 
-      /* Attention: orders stuck in processing */
-      const stuck = data.filter(o => o.status === 'processing');
-      stuck.forEach(o => {
-        const hoursOld = Math.floor((Date.now() - new Date(o.created_at).getTime()) / 36e5);
+      // Attention: your real cadence is ~1-3 sales per 2 weeks (every 5-14
+      // days on average) — flag once a gap clearly exceeds that.
+      if (lastDaysAgo !== null && lastDaysAgo > 18) {
         attentionItems.push({
-          sev: hoursOld > 48 ? 'crit' : 'warn',
-          text: `Order #${o.order_number} still processing`,
-          meta: `${o.customer_name || 'Customer'} · ${relTime(o.created_at)} · ${fmt(o.total_amount)}`,
-          href: 'admin.html',
+          sev: lastDaysAgo > 28 ? 'crit' : 'warn',
+          text: 'No B2B sale in a while',
+          meta: `Last sale ${lastDaysAgo}d ago — usual cadence is every 1–2 weeks`,
+          href: 'pipeline.html',
         });
+      }
+    }
+
+    /* ── Suppliers: last purchase per supplier, from spawn_purchases ── */
+    async function loadSuppliers() {
+      const { data, error } = await sb.from('spawn_purchases')
+        .select('supplier_name,purchase_date,problem_type').order('purchase_date', { ascending:false });
+
+      if (error || !data || !data.length) {
+        document.getElementById('suppliers-summary').innerHTML =
+          '<div class="empty-mini">No purchases logged yet — add them in Expenses → Suppliers.</div>';
+        return;
+      }
+
+      const bySupplier = {};
+      data.forEach(p => {
+        const name = p.supplier_name || 'Unknown';
+        if (!bySupplier[name] || p.purchase_date > bySupplier[name].purchase_date) bySupplier[name] = p;
+      });
+      const rows = Object.entries(bySupplier).sort((a,b) => new Date(b[1].purchase_date) - new Date(a[1].purchase_date));
+
+      document.getElementById('suppliers-summary').innerHTML = rows.map(([name, p]) => {
+        const d = daysSince(p.purchase_date);
+        return `<div class="rl-row"><span>${name}</span><span class="rl-val">${d}d ago</span></div>`;
+      }).join('');
+
+      // Attention: your real cadence is buying every 1-3 months (~30-90
+      // days) — flag a supplier that's gone notably past that.
+      rows.forEach(([name, p]) => {
+        const d = daysSince(p.purchase_date);
+        if (d > 100) {
+          attentionItems.push({
+            sev: 'warn',
+            text: `${name} overdue for restock`,
+            meta: `Last purchase ${d}d ago — usual cadence is every 1–3 months`,
+            href: 'expenses.html',
+          });
+        }
       });
     }
 
@@ -317,7 +364,10 @@
       window._farmRevenue30d = revenue;
       window._farmExpenses30d = expenses;
 
-      /* Contamination events in the raw log, unresolved (no contam_action noted) */
+      /* Contamination events in the raw log, unresolved (no contam_action noted).
+         Note: this only tells you WHICH ROOM had a problem, not which spawn
+         supplier's batch caused it — that link doesn't exist yet in the
+         schema. Worth adding once real supplier purchase data exists. */
       const { data: contam } = await sb.from('farm_daily_logs')
         .select('log_date,contam_room,contam_type,contam_bags,contam_action')
         .eq('contam_event', true).gte('log_date', daysAgo(14)).order('log_date', { ascending:false });
@@ -331,13 +381,13 @@
       });
     }
 
-    /* ── This Week: harvest vs. sold, side by side (the one card that stays weekly) ── */
-    async function loadThisWeek() {
+    /* ── Last 14 days: harvest vs. sold, side by side ── */
+    async function loadHarvestVsSold() {
       const [harvestRes, salesRes] = await Promise.all([
-        sb.from('v_ops_daily').select('harvest_fresh_kg').gte('day', daysAgo(7)),
+        sb.from('v_ops_daily').select('harvest_fresh_kg').gte('day', daysAgo(14)),
         sb.from('farm_daily_logs')
           .select('s_fresh_kg,s_fresh_price,s_dried_kg,s_dried_price,s_powder_kg,s_powder_price,s_b2b_qty,s_b2b_value')
-          .gte('log_date', daysAgo(7)),
+          .gte('log_date', daysAgo(14)),
       ]);
 
       const harvestKg = (harvestRes.data || []).reduce((s,r) => s + (Number(r.harvest_fresh_kg)||0), 0);
@@ -356,25 +406,31 @@
       document.getElementById('tw-sold-rev').textContent = soldKg > 0 ? `${fmt(soldRev)} · fresh + dried + powder + B2B` : 'Fresh + dried + powder + B2B, kg';
     }
 
-    /* ── Marketing summary (last 30 days) ── */
+    /* ── Marketing: organic reach/engagement, not ad spend (no paid campaigns running) ── */
     async function loadMarketing() {
       const { data, error } = await sb.from('marketing_metrics')
-        .select('channel,spend').gte('metric_date', daysAgo(30));
-      if (error || !data) { document.getElementById('marketing-summary').innerHTML = '<div class="empty-mini">No marketing data yet.</div>'; return; }
+        .select('channel,reach,engagements,followers,spend').gte('metric_date', daysAgo(30));
+      if (error || !data || !data.length) {
+        document.getElementById('marketing-summary').innerHTML = '<div class="empty-mini">No marketing data synced yet.</div>';
+        window._adSpend30d = 0;
+        renderNet();
+        return;
+      }
 
-      const byChannel = {};
-      let totalSpend = 0;
+      let totalReach = 0, totalEngagements = 0, totalSpend = 0;
+      const latestFollowers = {};
       data.forEach(r => {
-        const s = Number(r.spend) || 0;
-        totalSpend += s;
-        byChannel[r.channel] = (byChannel[r.channel]||0) + s;
+        totalReach += Number(r.reach) || 0;
+        totalEngagements += Number(r.engagements) || 0;
+        totalSpend += Number(r.spend) || 0;
+        if (r.followers != null) latestFollowers[r.channel] = Number(r.followers);
       });
-      const top = Object.entries(byChannel).sort((a,b) => b[1]-a[1])[0];
+      const followerTotal = Object.values(latestFollowers).reduce((s,v) => s+v, 0);
 
-      document.getElementById('marketing-summary').innerHTML = totalSpend > 0
-        ? `<div class="rl-row"><span>Total Ad Spend</span><span class="rl-val">${fmt(totalSpend)}</span></div>
-           <div class="rl-row"><span>Top Channel</span><span class="rl-val">${top ? cap(top[0]) : '—'}</span></div>`
-        : '<div class="empty-mini">No ad spend this week.</div>';
+      document.getElementById('marketing-summary').innerHTML = `
+        <div class="rl-row"><span>Reach</span><span class="rl-val">${fmtN(totalReach)}</span></div>
+        <div class="rl-row"><span>Engagements</span><span class="rl-val">${fmtN(totalEngagements)}</span></div>
+        <div class="rl-row"><span>Followers</span><span class="rl-val">${followerTotal > 0 ? fmtN(followerTotal) : '—'}</span></div>`;
 
       window._adSpend30d = totalSpend;
       renderNet();
@@ -388,6 +444,37 @@
         <div class="rl-row"><span>Income</span><span class="rl-val">${fmt(rev)}</span></div>
         <div class="rl-row"><span>Costs</span><span class="rl-val">${fmt(exp)}</span></div>
         <div class="rl-row"><span>Net</span><span class="rl-val" style="color:${net>=0?'var(--green)':'var(--red)'}">${fmt(net)}</span></div>`;
+    }
+
+    /* ── B2C: dormant channel, kept to one honest line, not a full panel ── */
+    async function loadB2C() {
+      const { data, error } = await sb.from('orders').select('total_amount,status,created_at');
+      if (error || !data) { document.getElementById('b2c-status').textContent = 'No data'; return; }
+
+      const monthCutoff = daysAgo(30);
+      const recent = data.filter(o => o.created_at >= monthCutoff && o.status !== 'cancelled');
+      const lifetime = data.filter(o => o.status !== 'cancelled');
+      const lifetimeRevenue = lifetime.reduce((s,o) => s + (o.total_amount||0), 0);
+
+      document.getElementById('b2c-status').textContent = recent.length > 0
+        ? `${recent.length} order${recent.length===1?'':'s'} in the last 30 days`
+        : `Not yet an active channel — 0 orders in the last 30 days (${lifetime.length} lifetime, ${fmt(lifetimeRevenue)} total)`;
+
+      /* Attention: orders stuck in processing — still relevant even while B2C is quiet */
+      data.filter(o => o.status === 'processing').forEach(o => {
+        attentionItems.push({
+          sev: daysSince(o.created_at) > 2 ? 'crit' : 'warn',
+          text: 'An order is still processing',
+          meta: `${relOrderTime(o.created_at)} · ${fmt(o.total_amount)}`,
+          href: 'admin.html',
+        });
+      });
+    }
+    function relOrderTime(iso) {
+      const h = Math.floor((Date.now() - new Date(iso).getTime()) / 36e5);
+      if (h < 1) return 'just now';
+      if (h < 24) return `${h}h ago`;
+      return `${Math.floor(h/24)}d ago`;
     }
 
     /* ── Render attention list + KPI ── */
@@ -414,7 +501,7 @@
     }
 
     /* ── Load everything ── */
-    await Promise.all([loadOrders(), loadStock(), loadFarm(), loadMarketing(), loadThisWeek()]);
+    await Promise.all([loadB2B(), loadSuppliers(), loadStock(), loadFarm(), loadMarketing(), loadHarvestVsSold(), loadB2C()]);
     renderAttention();
   </script>
 </body>
