@@ -81,6 +81,12 @@ body{font-family:'DM Sans','Hind Siliguri',sans-serif;background:var(--bg);color
 .live-chip{display:flex;align-items:center;gap:7px;font-size:.72rem;color:var(--txt2)}
 .live-dot{width:7px;height:7px;border-radius:50%;background:var(--g);flex-shrink:0;position:relative}
 .live-dot::after{content:'';position:absolute;inset:-3px;border-radius:50%;border:1.5px solid var(--g);opacity:0;animation:livepulse 2.2s ease-in-out infinite;will-change:opacity}
+.live-chip.demo{color:var(--gold)}
+.live-chip.demo .live-dot{background:var(--gold);animation:none}
+.live-chip.demo .live-dot::after{display:none}
+.demo-banner{display:flex;align-items:center;gap:10px;background:var(--golddim);border:1px solid rgba(201,168,76,.35);border-radius:var(--r2);padding:11px 16px;margin-bottom:18px;font-size:.82rem;color:var(--txt)}
+.demo-banner strong{color:var(--gold)}
+.demo-banner svg{flex-shrink:0;width:18px;height:18px;color:var(--gold)}
 @keyframes livepulse{0%,100%{opacity:0}45%,55%{opacity:.55}}
 .sb-clock{font-family:'DM Mono','Hind Siliguri',monospace;font-size:.72rem;color:var(--txt3)}
 
@@ -391,9 +397,9 @@ body{font-family:'DM Sans','Hind Siliguri',sans-serif;background:var(--bg);color
   </nav>
 
   <div class="sb-footer">
-    <div class="live-chip">
+    <div class="live-chip demo">
       <div class="live-dot"></div>
-      <span>Live · Updates every 5s</span>
+      <span>Demo Mode · Simulated data</span>
     </div>
     <div class="sb-clock" id="sb-clock">--:--:--</div>
   </div>
@@ -416,12 +422,17 @@ body{font-family:'DM Sans','Hind Siliguri',sans-serif;background:var(--bg);color
 
   <div class="content">
 
+    <div class="demo-banner">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/></svg>
+      <span><strong>Demo Mode:</strong> all room readings, batches, and alerts on this page are simulated for preview — no IoT sensors are connected yet. Only the Outdoor Weather panel below uses live data.</span>
+    </div>
+
     <!-- ══════════════════════════════════
          SECTION: OVERVIEW
     ══════════════════════════════════ -->
     <div class="section active fin" id="section-overview">
       <div class="sh">
-        <div><div class="sh-title">Farm Overview</div><div class="sh-sub">Real-time status across all grow rooms</div></div>
+        <div><div class="sh-title">Farm Overview</div><div class="sh-sub">Simulated preview — no sensors connected yet</div></div>
         <div class="sh-right">
           <span id="ov-date" class="topbar-meta"></span>
           <button type="button" class="btn-add" onclick="openAlertModal()">
