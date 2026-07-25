@@ -530,6 +530,7 @@
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
     import { requireAdmin }  from '/src/admin-auth.js';
     import { mountAdminNav } from '/src/admin-nav.js';
+    import { localDateStr }  from '/src/date-utils.js';
 
     const sb = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY);
 
@@ -660,7 +661,7 @@
 
     const sinceISO = (days) => {
       const d = new Date(); d.setDate(d.getDate() - days);
-      return d.toISOString().slice(0, 10);
+      return localDateStr(d);
     };
 
     /* Detect "warehouse not installed" once and show the setup note. */
@@ -1308,7 +1309,7 @@ Use the actual numbers. Keep it under 350 words. No preamble.`;
       await loadMetricsCache();
       loadOverview(); loadChannels(); loadOrderAttribution(); loadSiteEngagement(); loadPnl(); loadOperations(); loadRecent();
     }
-    document.getElementById('me-date').value = new Date().toISOString().slice(0, 10);
+    document.getElementById('me-date').value = localDateStr();
     loadAiCfg();
     await loadChannelState();
     await loadMetricsCache();

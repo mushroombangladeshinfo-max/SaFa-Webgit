@@ -1013,6 +1013,13 @@ CREATE POLICY "admin_all" ON alert_log         FOR ALL TO authenticated USING (t
 // with async calls to your Supabase tables:
 //   const { data } = await supabase.from('sensor_readings').select('*').order('created_at',{ascending:false}).limit(288)
 
+// Local Y-M-D, not toISOString() — that converts to UTC and shifts the
+// date backward for timezones ahead of UTC (Bangladesh is +6). This block
+// isn't a module, so it can't import src/date-utils.js — same fix inlined.
+function localDateStr(d = new Date()) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
 // `active:false` hides a room from every card, dropdown, and count on this
 // page without deleting its config — flip it back to true (or remove the
 // key) once that room actually comes into use.
@@ -1670,8 +1677,9 @@ function simulateLiveData() {
 //  EXPORT CSV
 // ══════════════════════════════════════
 function exportCSV() {
-  const now   = new Date().toISOString().slice(0,19).replace('T',' ')
-  const date  = now.slice(0,10)
+  const _n = new Date()
+  const now   = `${localDateStr(_n)} ${String(_n.getHours()).padStart(2,'0')}:${String(_n.getMinutes()).padStart(2,'0')}:${String(_n.getSeconds()).padStart(2,'0')}`
+  const date  = localDateStr(_n)
   let csv = ''
 
   /* ── Section 1: Current sensor snapshot ── */
@@ -1911,7 +1919,7 @@ function openBatchModal(idx) {
 // ══════════════════════════════════════
 function openHarvestModal(idx) {
   const isEdit = idx !== undefined
-  const today  = new Date().toISOString().slice(0, 10)
+  const today  = localDateStr()
   const h = isEdit ? {...HARVEST_LOG[idx]}
     : { batch:'', flush:1, date:today, kg:'', be:'', room:'A', notes:'' }
   const batchOpts = BATCHES.map(b =>

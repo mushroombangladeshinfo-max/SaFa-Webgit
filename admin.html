@@ -1376,6 +1376,7 @@
   <script type="module">
     import { supabase }                from '/src/supabase.js';
     import { ADMIN_EMAILS, requireAdmin } from '/src/admin-auth.js';
+    import { localDateStr }            from '/src/date-utils.js';
 
     /* ── Config ── */
     const SELLER_WA = '8801970099378';
@@ -1928,16 +1929,16 @@
     /* ── Quick date presets ── */
     window.setPreset = function(key) {
       const now = new Date();
-      let from, to = now.toISOString().slice(0,10);
+      let from, to = localDateStr(now);
       if (key === 'today') {
         from = to;
       } else if (key === 'yesterday') {
         const y = new Date(now); y.setDate(y.getDate()-1);
-        from = to = y.toISOString().slice(0,10);
+        from = to = localDateStr(y);
       } else if (key === 'week') {
         const dow = now.getDay();
         const mon = new Date(now); mon.setDate(mon.getDate() - (dow===0?6:dow-1));
-        from = mon.toISOString().slice(0,10);
+        from = localDateStr(mon);
       } else if (key === 'month') {
         from = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-01`;
       }
@@ -2438,13 +2439,17 @@
       for (let i = days - 1; i >= 0; i--) {
         const d   = new Date(now);
         d.setDate(d.getDate() - i);
-        const key = d.toISOString().slice(0, 10);
+        const key = localDateStr(d);
         labels.push(d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }));
         revMap[key] = 0;
         volMap[key] = 0;
       }
       currActive.forEach(o => {
-        const key = o.created_at.slice(0, 10);
+        // created_at comes back from Supabase as a UTC ISO string — slicing
+        // it directly would bucket early-morning Bangladesh orders into the
+        // previous UTC day. Convert to a real Date first, then read the
+        // local calendar date.
+        const key = localDateStr(new Date(o.created_at));
         if (revMap[key] !== undefined) revMap[key] += o.total_amount || 0;
         if (volMap[key] !== undefined) volMap[key] += 1;
       });
@@ -3072,7 +3077,7 @@
       const blob = new Blob([csv], { type:'text/csv;charset=utf-8;' });
       const link = Object.assign(document.createElement('a'), {
         href:     URL.createObjectURL(blob),
-        download: `safa_customers_${new Date().toISOString().slice(0,10)}.csv`,
+        download: `safa_customers_${localDateStr()}.csv`,
       });
       link.click();
       toast(`Exported ${_allCustomers.length} customers`);
@@ -3085,8 +3090,8 @@
         const now   = new Date();
         const y     = now.getFullYear();
         const m     = now.getMonth(); // 0-indexed — report is for last complete month
-        const from  = new Date(y, m - 1, 1).toISOString().slice(0, 10);
-        const to    = new Date(y, m, 0).toISOString().slice(0, 10);
+        const from  = localDateStr(new Date(y, m - 1, 1));
+        const to    = localDateStr(new Date(y, m, 0));
         const monthName = new Date(y, m - 1, 1).toLocaleString('en-GB', { month: 'long', year: 'numeric' });
 
         const { data: orders, error } = await supabase

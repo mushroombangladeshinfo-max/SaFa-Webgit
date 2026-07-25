@@ -448,6 +448,7 @@
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
     import { requireAdmin }  from '/src/admin-auth.js';
     import { mountAdminNav } from '/src/admin-nav.js';
+    import { localDateStr }  from '/src/date-utils.js';
 
     const sb = createClient(
       import.meta.env.VITE_SUPABASE_URL,
@@ -463,9 +464,9 @@
     /* ── Helpers ── */
     const fmt  = n => '৳' + (n||0).toLocaleString('en', {minimumFractionDigits:0, maximumFractionDigits:0});
     const dn   = (r,k) => parseFloat(r?.[k]) || 0;
-    const today = () => new Date().toISOString().slice(0,10);
-    const monthStart = () => { const d=new Date(); d.setDate(1); return d.toISOString().slice(0,10); };
-    const weekStart  = () => { const d=new Date(); d.setDate(d.getDate()-6); return d.toISOString().slice(0,10); };
+    const today = () => localDateStr();
+    const monthStart = () => { const d=new Date(); d.setDate(1); return localDateStr(d); };
+    const weekStart  = () => { const d=new Date(); d.setDate(d.getDate()-6); return localDateStr(d); };
 
     const CAT_KEYS = ['ex_spawn','ex_substrate','ex_packaging','ex_labor','ex_electricity','ex_transport','ex_water','ex_other'];
     const CAT_LABELS = ['Spawn','Substrate','Packaging','Labor','Electricity','Transport','Water','Other'];
@@ -798,10 +799,10 @@
       if (period === 'this_month')   { from = monthStart(); }
       else if (period === 'last_month') {
         const d = new Date(now.getFullYear(), now.getMonth()-1, 1);
-        from = d.toISOString().slice(0,10);
-        to   = new Date(now.getFullYear(), now.getMonth(), 0).toISOString().slice(0,10);
+        from = localDateStr(d);
+        to   = localDateStr(new Date(now.getFullYear(), now.getMonth(), 0));
       }
-      else if (period === 'last_3months') { const d=new Date(); d.setMonth(d.getMonth()-3); from=d.toISOString().slice(0,10); }
+      else if (period === 'last_3months') { const d=new Date(); d.setMonth(d.getMonth()-3); from=localDateStr(d); }
       else { from = now.getFullYear() + '-01-01'; }
 
       const [{ data: dailyRows }, { data: oeRows }, { data: salesRows }] = await Promise.all([

@@ -206,6 +206,7 @@ input[type="date"].date-nat::-webkit-calendar-picker-indicator{filter:invert(.7)
 <script type="module">
 import { createClient } from '@supabase/supabase-js';
 import { requireAdmin } from '/src/admin-auth.js';
+import { localDateStr } from '/src/date-utils.js';
 
 const sb = createClient(
   import.meta.env.VITE_SUPABASE_URL,
@@ -643,7 +644,7 @@ const FORMS = {
 function buildSlide(step) {
   /* Rooms/date step */
   if (step.type === 'rooms') {
-    const date  = S.d['log-date'] || new Date().toISOString().slice(0,10);
+    const date  = S.d['log-date'] || localDateStr();
     const rBtns = ['A','B','C'].map(r=>`
       <div class="rc${S.rooms.includes(r)?' sel':''}" id="rc-${r}" onclick="togRoom('${r}')">
         <div class="rc-letter">${r}</div>
@@ -878,7 +879,7 @@ async function submit() {
   btn.disabled = true; btn.textContent = 'Submit হচ্ছে…';
 
   const payload = {
-    log_date: S.d['log-date'] || new Date().toISOString().slice(0,10),
+    log_date: S.d['log-date'] || localDateStr(),
     submitted_by: S.userEmail || null,
     harvest_fresh_a:dn2('h-fresh-a'), harvest_fresh_b:dn2('h-fresh-b'), harvest_fresh_rej:dn2('h-fresh-rej'),
     harvest_dried:dn2('h-dried'), harvest_powder:dn2('h-powder'),
@@ -1002,7 +1003,7 @@ document.getElementById('hdr-back').style.visibility = 'hidden';
   if (!session) { window.location.href = 'admin.html'; return; }
 
   S.userEmail             = session.user.email;
-  S.d['log-date']         = new Date().toISOString().slice(0,10);
+  S.d['log-date']         = localDateStr();
   S.d['s-fresh-price']    = '350';
   S.d['s-dried-price']    = '2800';
   S.d['s-powder-price']   = '3500';

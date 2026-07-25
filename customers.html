@@ -157,6 +157,7 @@
     import { createClient }             from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
     import { requireAdmin }             from '/src/admin-auth.js';
     import { mountAdminNav }            from '/src/admin-nav.js';
+    import { localDateStr }             from '/src/date-utils.js';
 
     const sb = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY);
 
@@ -319,7 +320,7 @@
       ].join('\n');
       Object.assign(document.createElement('a'), {
         href: 'data:text/csv;charset=utf-8,' + encodeURIComponent(rows),
-        download: `safa_customers_${new Date().toISOString().slice(0,10)}.csv`,
+        download: `safa_customers_${localDateStr()}.csv`,
       }).click();
       toast(`Exported ${_all.length} customers`);
     });

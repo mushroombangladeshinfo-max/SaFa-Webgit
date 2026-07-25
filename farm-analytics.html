@@ -154,6 +154,7 @@ body{font-family:'DM Sans','Hind Siliguri',sans-serif;background:var(--g900);col
 <script type="module">
 import { createClient } from '@supabase/supabase-js';
 import { requireAdmin } from '/src/admin-auth.js';
+import { localDateStr } from '/src/date-utils.js';
 
 const sb = createClient(
   import.meta.env.VITE_SUPABASE_URL,
@@ -189,15 +190,6 @@ document.getElementById('range-btns').addEventListener('click', e => {
 });
 
 /* ── Load data ── */
-// Builds a local Y-M-D string rather than going through toISOString(),
-// which converts to UTC and shifts the date backward for any timezone
-// ahead of UTC (e.g. Bangladesh, UTC+6) — log_date is a plain DATE with
-// no timezone concept, so the filter must match the browser's own local
-// calendar date, not a UTC-shifted one.
-function localDateStr(d) {
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-}
-
 async function load() {
   const from = new Date();
   from.setDate(from.getDate() - _days + 1);
@@ -459,7 +451,7 @@ document.getElementById('export-btn').addEventListener('click', () => {
   const csv  = [cols.join(','), ...rows].join('\n');
   const link = Object.assign(document.createElement('a'), {
     href: 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv),
-    download: `safa-farm-analytics-${_days}d-${new Date().toISOString().slice(0,10)}.csv`
+    download: `safa-farm-analytics-${_days}d-${localDateStr()}.csv`
   });
   link.click();
 });

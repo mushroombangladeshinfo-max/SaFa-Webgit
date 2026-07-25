@@ -256,6 +256,7 @@
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
     import { requireAdmin }  from '/src/admin-auth.js';
     import { mountAdminNav } from '/src/admin-nav.js';
+    import { localDateStr }  from '/src/date-utils.js';
 
     const sb = createClient(
       import.meta.env.VITE_SUPABASE_URL,
@@ -268,7 +269,7 @@
     const userEmail = session.user.email;
 
     const fmt = n => '৳' + (n||0).toLocaleString('en');
-    const today = () => new Date().toISOString().slice(0,10);
+    const today = () => localDateStr();
 
     function toast(msg, type='ok') {
       const el = document.createElement('div');

@@ -231,6 +231,7 @@
     import { createClient }  from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
     import { requireAdmin }  from '/src/admin-auth.js';
     import { mountAdminNav } from '/src/admin-nav.js';
+    import { localDateStr, daysAgoStr as daysAgo } from '/src/date-utils.js';
 
     const sb = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY);
 
@@ -244,19 +245,12 @@
     const fmtKg = n => (n || 0).toFixed(2) + ' kg';
     const fmtN = n => (n || 0).toLocaleString('en-BD');
     const cap = s => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
-    // Local Y-M-D, not toISOString() — that converts to UTC and shifts the
-    // date backward for timezones ahead of UTC (Bangladesh is UTC+6), which
-    // would quietly widen every "last N days" window by up to a day.
-    const daysAgo = n => {
-      const d = new Date(); d.setDate(d.getDate() - n);
-      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-    };
     const daysSince = dateStr => Math.floor((Date.now() - new Date(dateStr).getTime()) / 864e5);
     // First day of the current calendar month, local Y-M-D — rolls from
     // July to August etc. automatically, no hardcoded month.
     const startOfMonth = () => {
       const d = new Date();
-      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-01`;
+      return localDateStr(new Date(d.getFullYear(), d.getMonth(), 1));
     };
 
     document.getElementById('page-date').textContent =
