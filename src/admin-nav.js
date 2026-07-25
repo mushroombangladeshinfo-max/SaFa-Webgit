@@ -14,7 +14,7 @@ const NAV_LINKS = [
   { key: 'customers', href: 'customers.html',  label: 'Customers', icon: '👤' },
   { key: 'products',  href: 'products.html',   label: 'Products',  icon: '🍄' },
   { key: 'expenses',  href: 'expenses.html',   label: 'Expenses',  icon: '💰' },
-  { key: 'pipeline',  href: 'pipeline.html',   label: 'Pipeline',  icon: '🤝' },
+  { key: 'pipeline',  href: 'pipeline.html',   label: 'B2B',       icon: '🤝' },
   { key: 'insights',  href: 'insights.html',   label: 'Insights',  icon: '📊' },
 ];
 
