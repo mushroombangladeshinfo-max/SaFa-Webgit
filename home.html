@@ -11,7 +11,9 @@
   <style>
     *,*::before,*::after{box-sizing:border-box;}
     :root{--bg:#060d09;--bg2:#0d1f12;--bg3:#122018;--border:rgba(255,255,255,.07);--c:#f5efe6;--cm:rgba(245,239,230,.6);--cl:rgba(245,239,230,.35);--al:#c49a3c;--green:#5fcf80;--red:#e05a2b;}
+    html{scroll-behavior:smooth;}
     body{font-family:'DM Sans','Hind Siliguri',sans-serif;background:var(--bg);color:var(--c);min-height:100vh;margin:0;-webkit-font-smoothing:antialiased;}
+    @media (prefers-reduced-motion: reduce){html{scroll-behavior:auto;}}
     @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 
     .page{max-width:1280px;margin:0 auto;padding:28px 24px 64px;animation:fadeUp .3s ease;}
@@ -24,6 +26,11 @@
     .kpi-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;}
     @media(max-width:800px){.kpi-strip{grid-template-columns:repeat(2,1fr);}}
     .kpi-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px 18px;}
+    a.kpi-card,a.panel{display:block;text-decoration:none;color:inherit;transition:border-color .18s,background .18s,transform .12s;}
+    a.kpi-card:hover,a.panel:hover{border-color:rgba(196,154,60,.35);background:var(--bg3);}
+    a.kpi-card:active,a.panel:active{transform:scale(.99);}
+    .panel-chevron{margin-left:auto;color:var(--cl);flex-shrink:0;transition:transform .18s,color .18s;}
+    a.panel:hover .panel-chevron{color:var(--al);transform:translateX(2px);}
     .kpi-lbl{font-family:'Syne','Hind Siliguri',sans-serif;font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--cl);margin-bottom:6px;}
     .kpi-val{font-family:'DM Mono','Hind Siliguri',monospace;font-size:22px;font-weight:500;color:var(--c);}
     .kpi-val.green{color:var(--green);}
@@ -40,8 +47,6 @@
     .panel{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:18px 20px;}
     .panel-title{font-family:'Syne','Hind Siliguri',sans-serif;font-size:13px;font-weight:700;color:var(--c);display:flex;align-items:center;gap:8px;margin-bottom:4px;}
     .panel-sub{font-size:11px;color:var(--cl);margin-bottom:14px;}
-    .panel-link{font-size:11px;color:var(--al);text-decoration:none;margin-left:auto;white-space:nowrap;}
-    .panel-link:hover{text-decoration:underline;}
     .panel-head{display:flex;align-items:center;margin-bottom:4px;}
 
     /* Split card (Harvest vs Sold) */
@@ -78,7 +83,8 @@
     .empty-mini{text-align:center;padding:20px 10px;font-size:12px;color:var(--cl);}
 
     /* Dormant B2C status strip */
-    .b2c-strip{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px 20px;margin-bottom:16px;flex-wrap:wrap;}
+    a.b2c-strip{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px 20px;margin-bottom:16px;flex-wrap:wrap;text-decoration:none;color:inherit;transition:border-color .18s,background .18s;}
+    a.b2c-strip:hover{border-color:rgba(196,154,60,.35);background:var(--bg3);}
     .b2c-strip-text{font-size:12px;color:var(--cl);}
     .b2c-strip-text strong{color:var(--cm);font-weight:500;}
 
@@ -104,31 +110,31 @@
 
     <!-- KPI strip — B2B-first, since that's the real revenue channel right now -->
     <div class="kpi-strip">
-      <div class="kpi-card">
+      <a href="pipeline.html" class="kpi-card" aria-label="B2B revenue, last 30 days — open B2B Customers">
         <div class="kpi-lbl">B2B Revenue (30d)</div>
         <div class="kpi-val green" id="k-b2b-revenue">—</div>
         <div class="kpi-sub" id="k-b2b-revenue-sub">Real sales, not estimates</div>
-      </div>
-      <div class="kpi-card">
+      </a>
+      <a href="pipeline.html" class="kpi-card" aria-label="Days since last B2B sale — open B2B Customers">
         <div class="kpi-lbl">Days Since Last B2B Sale</div>
         <div class="kpi-val gold" id="k-b2b-days">—</div>
         <div class="kpi-sub" id="k-b2b-days-sub"></div>
-      </div>
-      <div class="kpi-card">
+      </a>
+      <a href="farm-analytics.html" class="kpi-card" aria-label="Harvest, last 30 days — open Farm Analytics">
         <div class="kpi-lbl">Harvest (30d)</div>
         <div class="kpi-val" id="k-harvest">—</div>
         <div class="kpi-sub" id="k-harvest-sub">Fresh, kg</div>
-      </div>
-      <div class="kpi-card">
+      </a>
+      <a href="#attention-list" class="kpi-card" aria-label="Needs attention — jump to the attention panel below">
         <div class="kpi-lbl">Needs Attention</div>
         <div class="kpi-val" id="k-attention">—</div>
         <div class="kpi-sub" id="k-attention-sub">See panel below</div>
-      </div>
+      </a>
     </div>
 
     <!-- Harvest vs Sold, current calendar month -->
-    <div class="panel tw-panel">
-      <div class="panel-head"><div class="panel-title">📅 <span id="tw-month-label">This Month</span></div></div>
+    <a href="farm-analytics.html" class="panel tw-panel" aria-label="Harvest vs sold this month — open Farm Analytics">
+      <div class="panel-head"><div class="panel-title">📅 <span id="tw-month-label">This Month</span></div><svg class="panel-chevron" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg></div>
       <div class="panel-sub">Production vs. what actually sold this calendar month so far.</div>
       <div class="tw-split">
         <div class="tw-side">
@@ -143,7 +149,7 @@
           <div class="tw-side-sub" id="tw-sold-rev">Fresh + dried + powder + B2B, kg</div>
         </div>
       </div>
-    </div>
+    </a>
 
     <!-- Attention + B2B -->
     <div class="grid-main">
@@ -153,69 +159,69 @@
         <div id="attention-list"><div class="empty-mini">Loading…</div></div>
       </div>
 
-      <div class="panel">
+      <a href="pipeline.html" class="panel" aria-label="B2B summary — open B2B Customers">
         <div class="panel-head">
           <div class="panel-title">🤝 B2B</div>
-          <a href="pipeline.html" class="panel-link">Open →</a>
+          <svg class="panel-chevron" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
         </div>
         <div class="panel-sub">Your active buyer relationship.</div>
         <div id="b2b-summary"><div class="empty-mini">Loading…</div></div>
-      </div>
+      </a>
     </div>
 
     <!-- Suppliers + Marketing -->
     <div class="grid-two">
-      <div class="panel">
+      <a href="expenses.html#suppliers" class="panel" aria-label="Suppliers — open Expenses, Suppliers tab">
         <div class="panel-head">
           <div class="panel-title">🌱 Suppliers</div>
-          <a href="expenses.html" class="panel-link">Open →</a>
+          <svg class="panel-chevron" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
         </div>
         <div class="panel-sub">Days since last spawn purchase, per supplier.</div>
         <div id="suppliers-summary"><div class="empty-mini">Loading…</div></div>
-      </div>
+      </a>
 
-      <div class="panel">
+      <a href="insights.html" class="panel" aria-label="Marketing summary — open Insights">
         <div class="panel-head">
           <div class="panel-title">📣 Marketing</div>
-          <a href="insights.html" class="panel-link">Details →</a>
+          <svg class="panel-chevron" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
         </div>
         <div class="panel-sub">Organic reach &amp; engagement, last 30 days — no paid campaigns running.</div>
         <div id="marketing-summary"><div class="empty-mini">Loading…</div></div>
-      </div>
+      </a>
     </div>
 
     <!-- Farm Production + Net Position (slower-moving monthly trend) -->
     <div class="grid-two">
-      <div class="panel">
+      <a href="farm-analytics.html" class="panel" aria-label="Farm production summary — open Farm Analytics">
         <div class="panel-head">
           <div class="panel-title">🌿 Farm Production</div>
-          <a href="farm-analytics.html" class="panel-link">Details →</a>
+          <svg class="panel-chevron" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
         </div>
         <div class="panel-sub">Last 30 days.</div>
         <div id="farm-summary"><div class="empty-mini">Loading…</div></div>
-      </div>
+      </a>
 
-      <div class="panel">
+      <a href="insights.html" class="panel" aria-label="Net position summary — open Insights">
         <div class="panel-head">
           <div class="panel-title">💵 Net Position</div>
-          <a href="insights.html" class="panel-link">Details →</a>
+          <svg class="panel-chevron" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
         </div>
         <div class="panel-sub">Revenue − costs − ad spend, last 30 days.</div>
         <div id="net-summary"><div class="empty-mini">Loading…</div></div>
-      </div>
+      </a>
     </div>
 
     <!-- B2C: dormant for now, kept minimal on purpose -->
-    <div class="b2c-strip">
+    <a href="admin.html" class="b2c-strip" aria-label="Website B2C status — open Orders">
       <div class="b2c-strip-text">🌐 Website (B2C): <strong id="b2c-status">—</strong></div>
-      <a href="admin.html" class="panel-link">Open Orders →</a>
-    </div>
+      <svg class="panel-chevron" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+    </a>
 
     <!-- Quick links -->
     <div class="ql-row">
       <a href="quick-log.html" class="ql-card"><span class="ql-icon">⚡</span><div><div class="ql-title">Quick Log</div><div class="ql-sub">Daily farm entry</div></div></a>
       <a href="pipeline.html" class="ql-card"><span class="ql-icon">🤝</span><div><div class="ql-title">B2B Customers</div><div class="ql-sub">Leads & pipeline</div></div></a>
-      <a href="expenses.html" class="ql-card"><span class="ql-icon">🌱</span><div><div class="ql-title">Suppliers</div><div class="ql-sub">Spawn purchases</div></div></a>
+      <a href="expenses.html#suppliers" class="ql-card"><span class="ql-icon">🌱</span><div><div class="ql-title">Suppliers</div><div class="ql-sub">Spawn purchases</div></div></a>
       <a href="farm-analytics.html" class="ql-card"><span class="ql-icon">📈</span><div><div class="ql-title">Farm Analytics</div><div class="ql-sub">Harvest & revenue</div></div></a>
       <a href="insights.html" class="ql-card"><span class="ql-icon">📊</span><div><div class="ql-title">Insights</div><div class="ql-sub">Channels & P&amp;L</div></div></a>
     </div>

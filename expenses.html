@@ -854,6 +854,13 @@
       });
     });
 
+    /* Deep-link support: expenses.html#suppliers lands directly on that tab */
+    const _hashTab = location.hash.replace('#', '');
+    if (_hashTab) {
+      const hb = document.querySelector(`.tab-btn[data-tab="${_hashTab}"]`);
+      if (hb) hb.click();
+    }
+
     /* ══ CSV EXPORT ══ */
     document.getElementById('export-btn').addEventListener('click', () => {
       const active = document.querySelector('.tab-btn.active').dataset.tab;
