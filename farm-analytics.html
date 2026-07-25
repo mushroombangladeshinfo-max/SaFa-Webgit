@@ -174,6 +174,7 @@ const sb = createClient(
 /* ── State ── */
 let _days = 7;
 let _data = [];
+let _oneOff = [];
 const charts = {};
 
 /* ── Chart.js global defaults ── */
@@ -200,30 +201,43 @@ document.getElementById('range-btns').addEventListener('click', e => {
   document.querySelectorAll('.range-btn').forEach(b => b.classList.toggle('active', +b.dataset.days === _days));
 }
 
-/* ── Load data ── */
+/* ── Load data ──
+   Two sources: farm_daily_logs (daily operating numbers) and
+   one_off_expenses (capital/equipment purchases — e.g. a hygrometer).
+   A one-off expense can land on a day with no farm log row at all, so
+   the day-axis used for totals and the chart is the UNION of both
+   sources' dates, not just farm_daily_logs' — otherwise a pure-expense
+   day is silently invisible everywhere, not just outside the date range. */
 async function load() {
   const from = new Date();
   from.setDate(from.getDate() - _days + 1);
+  const fromStr = localDateStr(from);
 
-  const { data, error } = await sb
-    .from('farm_daily_logs')
-    .select(`log_date,
-      harvest_fresh_a,harvest_fresh_b,harvest_fresh_rej,
-      harvest_healthy_kg,harvest_recovered_kg,
-      harvest_dried,harvest_powder,
-      qc_pass,qc_fail,
-      s_fresh_kg,s_fresh_price,s_dried_kg,s_dried_price,s_powder_kg,s_powder_price,
-      ex_spawn,ex_substrate,ex_packaging,ex_labor,ex_electricity,ex_transport,ex_water,ex_other`)
-    .gte('log_date', localDateStr(from))
-    .order('log_date', { ascending: true });
+  const [farmRes, oneOffRes] = await Promise.all([
+    sb.from('farm_daily_logs')
+      .select(`log_date,
+        harvest_fresh_a,harvest_fresh_b,harvest_fresh_rej,
+        harvest_healthy_kg,harvest_recovered_kg,
+        harvest_dried,harvest_powder,
+        qc_pass,qc_fail,
+        s_fresh_kg,s_fresh_price,s_dried_kg,s_dried_price,s_powder_kg,s_powder_price,
+        ex_spawn,ex_substrate,ex_packaging,ex_labor,ex_electricity,ex_transport,ex_water,ex_other`)
+      .gte('log_date', fromStr)
+      .order('log_date', { ascending: true }),
+    sb.from('one_off_expenses')
+      .select('expense_date,category,description,amount')
+      .gte('expense_date', fromStr)
+      .order('expense_date', { ascending: true }),
+  ]);
 
-  if (error) {
-    const isMissing = error.message?.includes('schema cache') || error.message?.includes('does not exist');
+  if (farmRes.error) {
+    const isMissing = farmRes.error.message?.includes('schema cache') || farmRes.error.message?.includes('does not exist');
     showError(isMissing);
     return;
   }
 
-  _data = data || [];
+  _data   = farmRes.data || [];
+  _oneOff = oneOffRes.data || [];
   renderMetrics();
   renderCharts();
 }
@@ -248,12 +262,24 @@ function rowExpenses(r) {
   return ['ex_spawn','ex_substrate','ex_packaging','ex_labor','ex_electricity','ex_transport','ex_water','ex_other']
     .reduce((s,k) => s + dn(r,k), 0);
 }
+const oneOffTotal = () => _oneOff.reduce((s,r) => s + (+r.amount||0), 0);
+function oneOffByDate() {
+  const m = {};
+  _oneOff.forEach(r => { m[r.expense_date] = (m[r.expense_date]||0) + (+r.amount||0); });
+  return m;
+}
+/** Every date with any activity at all, from either source, sorted ascending —
+ *  a pure one-off-expense day (no farm log row) still gets its own entry. */
+function combinedDates() {
+  const s = new Set([..._data.map(r=>r.log_date), ..._oneOff.map(r=>r.expense_date)]);
+  return [...s].sort();
+}
 
 /* ── Metrics ── */
 function renderMetrics() {
   const totalHarvest = _data.reduce((s,r) => s + rowFresh(r), 0);
   const totalRev     = _data.reduce((s,r) => s + rowRevenue(r), 0);
-  const totalExp     = _data.reduce((s,r) => s + rowExpenses(r), 0);
+  const totalExp     = _data.reduce((s,r) => s + rowExpenses(r), 0) + oneOffTotal();
   const net          = totalRev - totalExp;
 
   // QC average
@@ -265,9 +291,10 @@ function renderMetrics() {
       }, 0) / qcDays.length
     : null;
 
+  const hasAnyData = _data.length > 0 || _oneOff.length > 0;
   setMetric('m-harvest', _data.length > 0 ? totalHarvest.toFixed(1)+' kg' : '—', totalHarvest > 0 ? 'green' : '');
   setMetric('m-revenue', totalRev > 0 ? fmt(totalRev) : '—', 'gold');
-  setMetric('m-net', _data.length > 0 ? fmt(net) : '—', net >= 0 ? 'green' : 'red');
+  setMetric('m-net', hasAnyData ? fmt(net) : '—', net >= 0 ? 'green' : 'red');
   setMetric('m-qc', avgQC !== null ? avgQC.toFixed(1)+'%' : '—', avgQC >= 80 ? 'green' : avgQC !== null ? 'red' : '');
 }
 
@@ -281,8 +308,9 @@ function setMetric(id, val, cls) {
 /* ── Charts ── */
 function renderCharts() {
   const labels = _data.map(r => r.log_date);
+  const hasAnyData = _data.length > 0 || _oneOff.length > 0;
 
-  if (_data.length === 0) {
+  if (!hasAnyData) {
     ['chart-harvest','chart-finance','chart-qc','chart-products'].forEach(id => {
       destroyChart(id);
       const wrap = document.getElementById(id).parentElement;
@@ -296,6 +324,44 @@ function renderCharts() {
     });
     return;
   }
+
+  // ── Revenue vs Expenses — the one chart that includes one-off expenses,
+  // so it uses the UNION of both sources' dates (a pure-expense day like
+  // an equipment purchase gets its own bar even with no farm log entry
+  // that day) rather than farm_daily_logs' dates alone. ──
+  destroyChart('chart-finance');
+  const financeDates = combinedDates();
+  const farmByDate = {};
+  _data.forEach(r => { farmByDate[r.log_date] = r; });
+  const oneOffMap = oneOffByDate();
+  charts['chart-finance'] = new Chart(document.getElementById('chart-finance'), {
+    type: 'bar',
+    data: {
+      labels: financeDates,
+      datasets: [
+        { label:'Revenue', data:financeDates.map(d => farmByDate[d] ? +rowRevenue(farmByDate[d]).toFixed(0) : 0), backgroundColor:'rgba(95,207,128,.5)', borderColor:'#5fcf80', borderWidth:1, borderRadius:3 },
+        { label:'Expenses', data:financeDates.map(d => +(((farmByDate[d] ? rowExpenses(farmByDate[d]) : 0) + (oneOffMap[d]||0))).toFixed(0)), backgroundColor:'rgba(224,82,82,.4)', borderColor:'#e05252', borderWidth:1, borderRadius:3 },
+      ]
+    },
+    options: chartOpts({ yLabel:'৳', prefix:'৳', groupBars:true })
+  });
+
+  // Harvest/QC/Products have no one-off-expense equivalent, so they stay
+  // on farm_daily_logs' own dates. Only hide them specifically if that
+  // source is empty (a period with only a one-off expense, no farm log).
+  if (_data.length === 0) {
+    ['chart-harvest','chart-qc','chart-products'].forEach(id => {
+      destroyChart(id);
+      const wrap = document.getElementById(id).parentElement;
+      document.getElementById(id).style.display = 'none';
+      if (!wrap.querySelector('.chart-empty')) {
+        const d = document.createElement('div');
+        d.className = 'chart-empty';
+        d.textContent = 'No farm log entries for this period';
+        wrap.appendChild(d);
+      }
+    });
+  } else {
 
   // ── Harvest trend ──
   destroyChart('chart-harvest');
@@ -317,20 +383,6 @@ function renderCharts() {
       ]
     },
     options: chartOpts({ yLabel:'kg', prefix:'' })
-  });
-
-  // ── Revenue vs Expenses ──
-  destroyChart('chart-finance');
-  charts['chart-finance'] = new Chart(document.getElementById('chart-finance'), {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [
-        { label:'Revenue', data:_data.map(r => +rowRevenue(r).toFixed(0)), backgroundColor:'rgba(95,207,128,.5)', borderColor:'#5fcf80', borderWidth:1, borderRadius:3 },
-        { label:'Expenses', data:_data.map(r => +rowExpenses(r).toFixed(0)), backgroundColor:'rgba(224,82,82,.4)', borderColor:'#e05252', borderWidth:1, borderRadius:3 },
-      ]
-    },
-    options: chartOpts({ yLabel:'৳', prefix:'৳', groupBars:true })
   });
 
   // ── QC Pass Rate ──
@@ -385,6 +437,8 @@ function renderCharts() {
       }
     }
   });
+
+  } // end else (has farm log data)
 }
 
 /* ── Chart options factory ── */
@@ -443,20 +497,31 @@ function showError(isMissing) {
 
 /* ── CSV Export ── */
 document.getElementById('export-btn').addEventListener('click', () => {
-  if (!_data.length) { alert('No data to export'); return; }
-  const cols = ['Date','Fresh A','Fresh B','Rejected','Healthy','Recovered (mold)','Total Fresh','QC Pass','QC Fail','QC%','Revenue','Expenses','Net'];
-  const rows = _data.map(r => {
-    const freshT = rowFresh(r);
-    const qcT    = dn(r,'qc_pass')+dn(r,'qc_fail');
-    const rev    = rowRevenue(r), exp = rowExpenses(r);
+  if (!_data.length && !_oneOff.length) { alert('No data to export'); return; }
+  const cols = ['Date','Fresh A','Fresh B','Rejected','Healthy','Recovered (mold)','Total Fresh','QC Pass','QC Fail','QC%','Revenue','Expenses','Net','One-off Expense Notes'];
+  const farmByDate = {};
+  _data.forEach(r => { farmByDate[r.log_date] = r; });
+  const oneOffMap = oneOffByDate();
+  const oneOffNotes = {};
+  _oneOff.forEach(r => {
+    const note = `${r.category||'Other'}: ${r.description||''} (${fmt(+r.amount||0)})`;
+    oneOffNotes[r.expense_date] = oneOffNotes[r.expense_date] ? oneOffNotes[r.expense_date] + '; ' + note : note;
+  });
+  const rows = combinedDates().map(date => {
+    const r = farmByDate[date];
+    const freshT = r ? rowFresh(r) : 0;
+    const qcT    = r ? dn(r,'qc_pass')+dn(r,'qc_fail') : 0;
+    const rev    = r ? rowRevenue(r) : 0;
+    const exp    = (r ? rowExpenses(r) : 0) + (oneOffMap[date]||0);
     return [
-      r.log_date,
-      dn(r,'harvest_fresh_a'), dn(r,'harvest_fresh_b'), dn(r,'harvest_fresh_rej'),
-      dn(r,'harvest_healthy_kg'), dn(r,'harvest_recovered_kg'),
+      date,
+      r?dn(r,'harvest_fresh_a'):0, r?dn(r,'harvest_fresh_b'):0, r?dn(r,'harvest_fresh_rej'):0,
+      r?dn(r,'harvest_healthy_kg'):0, r?dn(r,'harvest_recovered_kg'):0,
       freshT.toFixed(2),
-      dn(r,'qc_pass'), dn(r,'qc_fail'),
+      r?dn(r,'qc_pass'):0, r?dn(r,'qc_fail'):0,
       qcT > 0 ? (dn(r,'qc_pass')/qcT*100).toFixed(1)+'%' : '—',
-      Math.round(rev), Math.round(exp), Math.round(rev-exp)
+      Math.round(rev), Math.round(exp), Math.round(rev-exp),
+      `"${(oneOffNotes[date]||'').replace(/"/g,'""')}"`,
     ].join(',');
   });
   const csv  = [cols.join(','), ...rows].join('\n');
