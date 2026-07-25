@@ -19,7 +19,6 @@ const NAV_LINKS = [
 
 const FARM_LINKS = [
   { href: 'quick-log.html',      label: '⚡ Quick Log'      },
-  { href: 'farm-log.html',       label: '📋 Farm Log'       },
   { href: 'farm-analytics.html', label: '📈 Farm Analytics' },
   { href: 'dashboard.html',      label: '📡 IoT Dashboard'  },
 ];

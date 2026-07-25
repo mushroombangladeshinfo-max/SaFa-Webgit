@@ -4,7 +4,10 @@
 
 const RESEND_API = 'https://api.resend.com/emails';
 const FROM_NAME  = 'SaFa Naturals';
-const FROM_EMAIL = 'orders@safanaturals.org'; // must be verified in Resend
+// Using Resend's shared sending domain since we don't own a verified domain
+// yet. Switch to a real @yourdomain address once one is registered and
+// verified at resend.com/domains — sending logic doesn't need to change.
+const FROM_EMAIL = 'onboarding@resend.dev';
 
 interface OrderItem { name: string; qty: number; price: number; }
 

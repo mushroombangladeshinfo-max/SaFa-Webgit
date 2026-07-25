@@ -219,7 +219,7 @@ const S = window.S = {
   rooms:     [],      // ['A','B','C']
   rating:    0,
   phase:     {},      // stepId → 'form'  (user answered YES)
-  tog:       { contam:false, spawnBought:false, b2b:false, opIssue:false },
+  tog:       { contam:false, spawnBought:false, b2b:false, samples:false, opIssue:false },
   userEmail: ''
 };
 
@@ -336,6 +336,12 @@ function formHarvest() {
     </div>
     <div class="tot"><span class="tot-lbl">মোট তাজা</span><span class="tot-val" id="ht-tot">0.00 kg</span></div>
     <div class="divider"></div>
+    <div class="sec-lbl">হার্ভেস্ট উৎস</div>
+    <div class="cg2">
+      ${sc('h-healthy-kg','সুস্থ ব্যাগ থেকে','kg',0.01)}
+      ${sc('h-recovered-kg','মোল্ড থেকে উদ্ধারকৃত','kg',0.01)}
+    </div>
+    <div class="divider"></div>
     <div class="sec-lbl">প্রসেসড পণ্য (kg)</div>
     <div class="cg2">
       ${sc('h-dried', 'শুকনো', 'kg', 0.1)}
@@ -400,6 +406,10 @@ function formQC() {
         </div>
         ${sc('qc-contam-bags','ক্ষতিগ্রস্ত ব্যাগ','টি',1)}
       </div>
+      <div class="card" style="max-width:460px;width:100%">
+        <div class="card-lbl">ব্যবস্থা নেওয়া হয়েছে</div>
+        <input class="ci-txt" type="text" id="f-qc-contam-action" value="${S.d['qc-contam-action']||''}" placeholder="যেমন: ব্যাগ সরানো হয়েছে, রুম জীবাণুমুক্ত করা হয়েছে..." oninput="S.d['qc-contam-action']=this.value"/>
+      </div>
     </div>
   </div>`;
 }
@@ -462,6 +472,11 @@ function formProcessing() {
       ${sc('pr-powder-out','পাউডার পাওয়া','kg',0.1,'proc')}
     </div>
     <div class="yield-tag" id="pow-yld"></div>
+    <div class="divider"></div>
+    <div class="card" style="max-width:460px;width:100%">
+      <div class="card-lbl">প্রসেসিং মন্তব্য</div>
+      <input class="ci-txt" type="text" id="f-pr-notes" value="${S.d['pr-notes']||''}" placeholder="যন্ত্রপাতির অবস্থা, অস্বাভাবিকতা..." oninput="S.d['pr-notes']=this.value"/>
+    </div>
   </div>`;
 }
 
@@ -508,6 +523,22 @@ function formSales() {
         ${sc('s-b2b-value','মূল্য','৳',100)}
       </div>
     </div>
+    <div class="tog-row">
+      <span class="tog-lbl">আজ বিনামূল্যে নমুনা দেওয়া হয়েছে?</span>
+      <label class="tog"><input type="checkbox" id="tog-samples" ${S.tog.samples?'checked':''} onchange="togC('samples',this)"/><span class="tog-track"></span></label>
+    </div>
+    <div class="cond${S.tog.samples?' show':''}" id="cond-samples">
+      <div style="font-size:11px;color:rgba(245,239,230,.38);max-width:460px;margin-bottom:8px">বন্ধু-পরিবার, রেস্টুরেন্ট ট্রায়াল ইত্যাদি — খরচ হিসেবে যোগ হয় না, শুধু মার্কেটিং ভ্যালু হিসেবে ট্র্যাক করা হয়।</div>
+      <div class="cg3" style="width:100%;max-width:460px">
+        ${sc('sample-fresh-kg','তাজা','kg',0.01)}
+        ${sc('sample-dried-kg','শুকনো','kg',0.01)}
+        ${sc('sample-powder-kg','পাউডার','kg',0.01)}
+      </div>
+      <div class="card" style="max-width:460px;width:100%">
+        <div class="card-lbl">কাকে/কেন দেওয়া হয়েছে</div>
+        <input class="ci-txt" type="text" id="f-sample-notes" value="${S.d['sample-notes']||''}" placeholder="যেমন: রেস্টুরেন্ট ট্রায়াল, বন্ধু-পরিবার" oninput="S.d['sample-notes']=this.value"/>
+      </div>
+    </div>
   </div>`;
 }
 
@@ -539,6 +570,21 @@ function formExpenses() {
   return `<div class="cards">
     ${rows.join('')}
     <div class="tot exp"><span class="tot-lbl">মোট খরচ</span><span class="tot-val" id="exp-tot">৳ 0</span></div>
+    <div class="card" style="max-width:460px;width:100%">
+      <div class="card-lbl">খরচের মন্তব্য</div>
+      <input class="ci-txt" type="text" id="f-ex-notes" value="${S.d['ex-notes']||''}" placeholder="অন্যান্য খরচের বিস্তারিত..." oninput="S.d['ex-notes']=this.value"/>
+    </div>
+    <div class="divider"></div>
+    <div class="sec-lbl">চ্যানেল অনুযায়ী খরচ (ঐচ্ছিক)</div>
+    <div style="font-size:11px;color:rgba(245,239,230,.38);max-width:460px;margin-bottom:8px">অনলাইন (ওয়েবসাইট) বনাম অফলাইন (সরাসরি/B2B) বিক্রির প্রকৃত প্যাকেজিং ও ডেলিভারি খরচ আলাদা রাখলে চ্যানেল-ভিত্তিক লাভ-ক্ষতি দেখা যাবে।</div>
+    <div class="cg2">
+      ${sc('ex-online-packaging','অনলাইন প্যাকেজিং','৳',50)}
+      ${sc('ex-online-delivery','অনলাইন ডেলিভারি','৳',50)}
+    </div>
+    <div class="cg2">
+      ${sc('ex-offline-packaging','অফলাইন প্যাকেজিং','৳',50)}
+      ${sc('ex-offline-delivery','অফলাইন ডেলিভারি','৳',50)}
+    </div>
   </div>`;
 }
 
@@ -765,7 +811,7 @@ function collect() {
   if (disp) S.d['log-date'] = disp.textContent;
 
   /* Toggles */
-  const tMap = { contam:'tog-contam', spawnBought:'tog-spawn', b2b:'tog-b2b', opIssue:'tog-issue' };
+  const tMap = { contam:'tog-contam', spawnBought:'tog-spawn', b2b:'tog-b2b', samples:'tog-samples', opIssue:'tog-issue' };
   Object.entries(tMap).forEach(([k,id]) => {
     const el = document.getElementById(id);
     if (el) S.tog[k] = el.checked;
@@ -785,7 +831,7 @@ window.togRoom = function(r) {
 
 window.togC = function(key, el) {
   S.tog[key] = el.checked;
-  const map = { contam:'cond-contam', spawnBought:'cond-spawn', b2b:'cond-b2b', opIssue:'cond-issue' };
+  const map = { contam:'cond-contam', spawnBought:'cond-spawn', b2b:'cond-b2b', samples:'cond-samples', opIssue:'cond-issue' };
   const c = document.getElementById(map[key]);
   if (c) c.classList.toggle('show', el.checked);
   if (key === 'spawnBought') calcSpn();
@@ -836,24 +882,29 @@ async function submit() {
     submitted_by: S.userEmail || null,
     harvest_fresh_a:dn2('h-fresh-a'), harvest_fresh_b:dn2('h-fresh-b'), harvest_fresh_rej:dn2('h-fresh-rej'),
     harvest_dried:dn2('h-dried'), harvest_powder:dn2('h-powder'),
+    harvest_healthy_kg:dn2('h-healthy-kg'), harvest_recovered_kg:dn2('h-recovered-kg'),
     harvest_rooms: S.rooms.length ? S.rooms : null,
     harvest_primary_batch:ds('h-primary-batch'), harvest_flush_num:dn2('h-flush-num'),
     qc_pass:dn2('qc-pass'), qc_fail:dn2('qc-fail'), qc_fail_reason:ds('qc-fail-reason'),
-    contam_event:S.tog.contam, contam_room:ds('qc-contam-room'), contam_type:ds('qc-contam-type'), contam_bags:dn2('qc-contam-bags'),
+    contam_event:S.tog.contam, contam_room:ds('qc-contam-room'), contam_type:ds('qc-contam-type'), contam_bags:dn2('qc-contam-bags'), contam_action:ds('qc-contam-action'),
     spawn_bought_kg:dn2('sp-bought-kg'), spawn_price_per_kg:dn2('sp-price-per-kg'), spawn_supplier:ds('sp-supplier'),
     spawn_used_kg:dn2('sp-used-kg'), substrate_kg:dn2('sp-substrate-kg'), substrate_type:ds('sp-substrate-type'),
     bags_inoculated:dn2('sp-bags-inoculated'), bags_discarded:dn2('sp-bags-discarded'),
     pr_fresh_in:dn2('pr-fresh-in'), pr_dried_out:dn2('pr-dried-out'),
-    pr_dried_in:dn2('pr-dried-in'), pr_powder_out:dn2('pr-powder-out'),
+    pr_dried_in:dn2('pr-dried-in'), pr_powder_out:dn2('pr-powder-out'), pr_notes:ds('pr-notes'),
     s_fresh_kg:dn2('s-fresh-kg'), s_fresh_price:dn2('s-fresh-price'),
     s_dried_kg:dn2('s-dried-kg'), s_dried_price:dn2('s-dried-price'),
     s_powder_kg:dn2('s-powder-kg'), s_powder_price:dn2('s-powder-price'),
     s_orders:dn2('s-orders'), s_waste:dn2('s-waste'),
     s_b2b_name:ds('s-b2b-name'), s_b2b_qty:dn2('s-b2b-qty'), s_b2b_value:dn2('s-b2b-value'),
+    sample_fresh_kg:dn2('sample-fresh-kg'), sample_dried_kg:dn2('sample-dried-kg'),
+    sample_powder_kg:dn2('sample-powder-kg'), sample_notes:ds('sample-notes'),
     st_fresh:dn2('st-fresh'), st_dried:dn2('st-dried'), st_powder:dn2('st-powder'),
     ex_spawn:dn2('ex-spawn'), ex_substrate:dn2('ex-substrate'), ex_packaging:dn2('ex-packaging'),
     ex_labor:dn2('ex-labor'), ex_electricity:dn2('ex-electricity'), ex_transport:dn2('ex-transport'),
-    ex_water:dn2('ex-water'), ex_other:dn2('ex-other'),
+    ex_water:dn2('ex-water'), ex_other:dn2('ex-other'), ex_notes:ds('ex-notes'),
+    online_packaging_cost:dn2('ex-online-packaging'), online_delivery_cost:dn2('ex-online-delivery'),
+    offline_packaging_cost:dn2('ex-offline-packaging'), offline_delivery_cost:dn2('ex-offline-delivery'),
     op_rooms:dn2('op-rooms'), op_bags_total:dn2('op-bags-total'), op_workers:dn2('op-workers'),
     op_shifts:dn2('op-shifts'), op_new_batches:dn2('op-new-batches'), op_done_batches:dn2('op-done-batches'),
     op_bags_removed:dn2('op-bags-removed'), op_energy_kwh:dn2('op-energy-kwh'),

@@ -405,9 +405,9 @@ function showError(isMissing) {
   if (isMissing) {
     grid.innerHTML = `<div class="state-center">
       <div class="state-icon">🌿</div>
-      <div class="state-title">Farm log table not set up yet</div>
-      <div class="state-sub">Go to the Farm Log page, click "📋 SQL কপি করুন" and run it in Supabase SQL Editor. Then submit your first log via Quick Log.</div>
-      <button type="button" class="state-btn" onclick="window.location.href='farm-log.html'">Open Farm Log →</button>
+      <div class="state-title">No farm log entries yet</div>
+      <div class="state-sub">Submit your first daily log via Quick Log.</div>
+      <button type="button" class="state-btn" onclick="window.location.href='quick-log.html'">Open Quick Log →</button>
     </div>`;
   } else {
     grid.innerHTML = `<div class="state-center">
