@@ -1013,10 +1013,27 @@ CREATE POLICY "admin_all" ON alert_log         FOR ALL TO authenticated USING (t
 // with async calls to your Supabase tables:
 //   const { data } = await supabase.from('sensor_readings').select('*').order('created_at',{ascending:false}).limit(288)
 
+// `active:false` hides a room from every card, dropdown, and count on this
+// page without deleting its config — flip it back to true (or remove the
+// key) once that room actually comes into use.
 const ROOMS = {
-  A: { name:'Room A', species:'Fresh Oyster', temp:24.5, humidity:89, co2:850,  o2:20.2, airflow:0.42, vpd:0.38 },
-  B: { name:'Room B', species:'Dried Batch',  temp:26.1, humidity:92, co2:1150, o2:19.8, airflow:0.31, vpd:0.29 },
-  C: { name:'Room C', species:'Spawn Prep',   temp:23.8, humidity:87, co2:780,  o2:20.5, airflow:0.55, vpd:0.44 },
+  A: { name:'Room A', species:'Clean Spawn',          temp:24.5, humidity:89, co2:850,  o2:20.2, airflow:0.42, vpd:0.38, active:true  },
+  B: { name:'Room B', species:'Mold/Infected Spawn',  temp:26.1, humidity:92, co2:1150, o2:19.8, airflow:0.31, vpd:0.29, active:true  },
+  C: { name:'Room C', species:'Not in use',           temp:23.8, humidity:87, co2:780,  o2:20.5, airflow:0.55, vpd:0.44, active:false },
+}
+const activeRoomEntries = () => Object.entries(ROOMS).filter(([,r]) => r.active !== false)
+const activeRoomKeys    = () => activeRoomEntries().map(([k]) => k)
+
+// Hides inactive rooms' tab buttons (static HTML in the Environment
+// section) and steers the selected room away from a hidden one.
+function applyRoomVisibility() {
+  document.querySelectorAll('#room-tabs [data-room]').forEach(btn => {
+    btn.style.display = (ROOMS[btn.dataset.room]?.active === false) ? 'none' : ''
+  })
+  if (ROOMS[selectedRoom]?.active === false) {
+    const fallback = activeRoomKeys()[0]
+    if (fallback) selectRoom(fallback)
+  }
 }
 
 const OPTIMAL = {
@@ -1584,7 +1601,7 @@ function initCharts() {
 function patchRoomCards() {
   const badgeMap = {ok:'b-ok', warn:'b-warn', crit:'b-crit'}
   const lblMap   = {ok:'Optimal', warn:'Warning', crit:'Critical'}
-  Object.entries(ROOMS).forEach(([k, r]) => {
+  activeRoomEntries().forEach(([k, r]) => {
     const ts = getStatus('temp', r.temp)
     const hs = getStatus('humidity', r.humidity)
     const cs = getStatus('co2', r.co2)
@@ -1660,7 +1677,7 @@ function exportCSV() {
   /* ── Section 1: Current sensor snapshot ── */
   csv += 'SENSOR SNAPSHOT\n'
   csv += 'Timestamp,Room,Temperature (°C),Humidity (%RH),CO2 (ppm),O2 (%),Airflow (m/s),VPD (kPa)\n'
-  Object.entries(ROOMS).forEach(([k,r]) => {
+  activeRoomEntries().forEach(([k,r]) => {
     csv += [now, `"${r.name}"`, r.temp, r.humidity, r.co2, r.o2, r.airflow, r.vpd].join(',') + '\n'
   })
 
@@ -1834,7 +1851,7 @@ const STAGES = ['Inoculated','Colonising','Spawn Complete','Pinning','Fruiting',
 function openBatchModal(idx) {
   const isEdit = idx !== undefined
   const b = isEdit ? {...BATCHES[idx]} : { id:'', species:'', room:'A', stage:'Inoculated', col:0, days:0, est:30, status:'ok' }
-  const roomOpts = Object.entries(ROOMS).map(([k,r]) =>
+  const roomOpts = activeRoomEntries().map(([k,r]) =>
     `<option value="${k}" ${b.room===k?'selected':''}>${r.name}</option>`).join('')
   const stageOpts = STAGES.map(s =>
     `<option value="${s}" ${b.stage===s?'selected':''}>${s}</option>`).join('')
@@ -1899,7 +1916,7 @@ function openHarvestModal(idx) {
     : { batch:'', flush:1, date:today, kg:'', be:'', room:'A', notes:'' }
   const batchOpts = BATCHES.map(b =>
     `<option value="${b.id}" ${h.batch===b.id?'selected':''}>${b.id}</option>`).join('')
-  const roomOpts = Object.entries(ROOMS).map(([k,r]) =>
+  const roomOpts = activeRoomEntries().map(([k,r]) =>
     `<option value="${k}" ${h.room===k?'selected':''}>${r.name}</option>`).join('')
   openModal(isEdit ? `Edit Harvest · ${h.batch} F${h.flush}` : 'Log Harvest Event', `
     <div class="form-g2">
@@ -1953,7 +1970,7 @@ function openHarvestModal(idx) {
 //  MODAL: ALERT
 // ══════════════════════════════════════
 function openAlertModal() {
-  const roomOpts = Object.entries(ROOMS).map(([k,r]) =>
+  const roomOpts = activeRoomEntries().map(([k,r]) =>
     `<option value="${k}">${r.name}</option>`).join('')
   openModal('Add Alert', `
     <div class="form-group"><label class="form-label">Message</label>
@@ -2076,7 +2093,7 @@ function renderHarvestLog() {
 // Override renderRoomCards to add edit icon
 function renderRoomCards() {
   const wrap = document.getElementById('room-cards'); if (!wrap) return
-  wrap.innerHTML = Object.entries(ROOMS).map(([k, r]) => {
+  wrap.innerHTML = activeRoomEntries().map(([k, r]) => {
     const ts = getStatus('temp',r.temp), hs = getStatus('humidity',r.humidity), cs = getStatus('co2',r.co2)
     const overall = [ts,hs,cs].includes('crit') ? 'crit' : [ts,hs,cs].includes('warn') ? 'warn' : 'ok'
     const badgeMap = {ok:'b-ok',warn:'b-warn',crit:'b-crit'}
@@ -2152,6 +2169,8 @@ setInterval(fetchWeather, 30 * 60 * 1000) /* refresh every 30 min */
 // ══════════════════════════════════════
 document.addEventListener('DOMContentLoaded', () => {
   loadData()
+  applyRoomVisibility()
+  const kr = document.getElementById('kpi-rooms'); if (kr) kr.textContent = activeRoomKeys().length
   renderRoomCards()
   renderAlerts()
   renderGauges()
