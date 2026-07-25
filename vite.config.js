@@ -6,6 +6,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main:      './index.html',
+        home:      './home.html',
         admin:     './admin.html',
         dashboard: './dashboard.html',
         product:   './product.html',

@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Overview — SaFa Naturals Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;}
+    :root{--bg:#060d09;--bg2:#0d1f12;--bg3:#122018;--border:rgba(255,255,255,.07);--c:#f5efe6;--cm:rgba(245,239,230,.6);--cl:rgba(245,239,230,.35);--al:#c49a3c;--green:#5fcf80;--red:#e05a2b;}
+    body{font-family:'DM Sans','Hind Siliguri',sans-serif;background:var(--bg);color:var(--c);min-height:100vh;margin:0;-webkit-font-smoothing:antialiased;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+    .page{max-width:1280px;margin:0 auto;padding:28px 24px 64px;animation:fadeUp .3s ease;}
+    .page-header{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:12px;}
+    .page-title{font-family:'Syne','Hind Siliguri',sans-serif;font-size:24px;font-weight:700;color:var(--c);margin:0;}
+    .page-title em{font-style:italic;color:var(--al);}
+    .page-sub{font-size:12px;color:var(--cl);margin-top:4px;}
+
+    /* KPI strip */
+    .kpi-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px;}
+    @media(max-width:800px){.kpi-strip{grid-template-columns:repeat(2,1fr);}}
+    .kpi-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px 18px;}
+    .kpi-lbl{font-family:'Syne','Hind Siliguri',sans-serif;font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--cl);margin-bottom:6px;}
+    .kpi-val{font-family:'DM Mono','Hind Siliguri',monospace;font-size:22px;font-weight:500;color:var(--c);}
+    .kpi-val.green{color:var(--green);}
+    .kpi-val.gold{color:var(--al);}
+    .kpi-val.red{color:var(--red);}
+    .kpi-sub{font-size:11px;color:var(--cl);margin-top:3px;}
+
+    /* Layout grid */
+    .grid-main{display:grid;grid-template-columns:1.3fr 1fr;gap:16px;margin-bottom:16px;}
+    @media(max-width:900px){.grid-main{grid-template-columns:1fr;}}
+    .grid-three{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:16px;}
+    @media(max-width:900px){.grid-three{grid-template-columns:1fr;}}
+
+    .panel{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:18px 20px;}
+    .panel-title{font-family:'Syne','Hind Siliguri',sans-serif;font-size:13px;font-weight:700;color:var(--c);display:flex;align-items:center;gap:8px;margin-bottom:4px;}
+    .panel-sub{font-size:11px;color:var(--cl);margin-bottom:14px;}
+    .panel-link{font-size:11px;color:var(--al);text-decoration:none;margin-left:auto;white-space:nowrap;}
+    .panel-link:hover{text-decoration:underline;}
+    .panel-head{display:flex;align-items:center;margin-bottom:4px;}
+
+    /* Attention list */
+    .att-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.05);}
+    .att-item:last-child{border-bottom:none;}
+    .att-dot{width:7px;height:7px;border-radius:50%;margin-top:5px;flex-shrink:0;}
+    .att-dot.crit{background:var(--red);}
+    .att-dot.warn{background:var(--al);}
+    .att-body{flex:1;min-width:0;}
+    .att-text{font-size:13px;color:var(--c);}
+    .att-meta{font-size:11px;color:var(--cl);margin-top:2px;}
+    .att-action{font-size:11px;color:var(--al);text-decoration:none;white-space:nowrap;align-self:center;}
+    .att-action:hover{text-decoration:underline;}
+    .att-empty{text-align:center;padding:24px 10px;}
+    .att-empty-icon{font-size:26px;margin-bottom:6px;}
+    .att-empty-text{font-size:12px;color:var(--cl);}
+
+    /* Recent list rows */
+    .rl-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:13px;gap:10px;}
+    .rl-row:last-child{border-bottom:none;}
+    .rl-id{font-weight:500;color:var(--c);}
+    .rl-meta{font-size:11px;color:var(--cl);margin-top:2px;}
+    .rl-val{font-family:'DM Mono','Hind Siliguri',monospace;color:var(--al);font-weight:500;white-space:nowrap;}
+    .status-badge{display:inline-flex;padding:2px 7px;border-radius:4px;font-family:'Syne','Hind Siliguri',sans-serif;font-size:8px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-left:6px;}
+    .s-pending{background:rgba(196,154,60,.1);color:var(--al);}
+    .s-confirmed,.s-processing{background:rgba(95,207,128,.1);color:var(--green);}
+    .s-shipped{background:rgba(100,140,255,.1);color:#7ba3ff;}
+    .s-delivered{background:rgba(95,207,128,.15);color:var(--green);}
+    .s-cancelled,.s-returned{background:rgba(224,90,43,.1);color:var(--red);}
+    .empty-mini{text-align:center;padding:20px 10px;font-size:12px;color:var(--cl);}
+
+    /* Quick links */
+    .ql-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;}
+    @media(max-width:900px){.ql-row{grid-template-columns:repeat(2,1fr);}}
+    .ql-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px;text-decoration:none;display:flex;align-items:center;gap:12px;transition:border-color .18s,background .18s;}
+    .ql-card:hover{border-color:rgba(196,154,60,.35);background:var(--bg3);}
+    .ql-icon{font-size:20px;}
+    .ql-title{font-size:13px;font-weight:500;color:var(--c);}
+    .ql-sub{font-size:10px;color:var(--cl);margin-top:1px;}
+  </style>
+</head>
+<body>
+
+  <div class="page">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Farm <em>Overview</em></h1>
+        <div class="page-sub" id="page-date">—</div>
+      </div>
+    </div>
+
+    <!-- KPI strip -->
+    <div class="kpi-strip">
+      <div class="kpi-card">
+        <div class="kpi-lbl">Orders This Week</div>
+        <div class="kpi-val" id="k-orders">—</div>
+        <div class="kpi-sub" id="k-orders-sub"></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-lbl">Revenue This Week</div>
+        <div class="kpi-val green" id="k-revenue">—</div>
+        <div class="kpi-sub" id="k-revenue-sub">Web orders + farm-gate</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-lbl">Harvest This Week</div>
+        <div class="kpi-val gold" id="k-harvest">—</div>
+        <div class="kpi-sub" id="k-harvest-sub">Fresh, kg</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-lbl">Needs Attention</div>
+        <div class="kpi-val" id="k-attention">—</div>
+        <div class="kpi-sub" id="k-attention-sub">See panel below</div>
+      </div>
+    </div>
+
+    <!-- Attention + Orders -->
+    <div class="grid-main">
+      <div class="panel">
+        <div class="panel-head"><div class="panel-title">🔔 Needs Your Attention</div></div>
+        <div class="panel-sub">Orders stuck in processing, low stock, and unresolved farm issues — pulled from real data, not estimates.</div>
+        <div id="attention-list"><div class="empty-mini">Loading…</div></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title">📦 Recent Orders</div>
+          <a href="admin.html" class="panel-link">Open Orders →</a>
+        </div>
+        <div class="panel-sub">Last 5 orders, any status.</div>
+        <div id="recent-orders"><div class="empty-mini">Loading…</div></div>
+      </div>
+    </div>
+
+    <!-- Farm + Marketing summary -->
+    <div class="grid-three">
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title">🌿 Farm Production</div>
+          <a href="farm-analytics.html" class="panel-link">Details →</a>
+        </div>
+        <div class="panel-sub">Last 7 days.</div>
+        <div id="farm-summary"><div class="empty-mini">Loading…</div></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title">📣 Marketing</div>
+          <a href="insights.html" class="panel-link">Details →</a>
+        </div>
+        <div class="panel-sub">Last 7 days.</div>
+        <div id="marketing-summary"><div class="empty-mini">Loading…</div></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title">💵 Net Position</div>
+          <a href="insights.html" class="panel-link">Details →</a>
+        </div>
+        <div class="panel-sub">Revenue − costs − ad spend, last 7 days.</div>
+        <div id="net-summary"><div class="empty-mini">Loading…</div></div>
+      </div>
+    </div>
+
+    <!-- Quick links -->
+    <div class="ql-row">
+      <a href="quick-log.html" class="ql-card"><span class="ql-icon">⚡</span><div><div class="ql-title">Quick Log</div><div class="ql-sub">Daily farm entry</div></div></a>
+      <a href="admin.html" class="ql-card"><span class="ql-icon">📦</span><div><div class="ql-title">Orders</div><div class="ql-sub">Manage & ship</div></div></a>
+      <a href="farm-analytics.html" class="ql-card"><span class="ql-icon">📈</span><div><div class="ql-title">Farm Analytics</div><div class="ql-sub">Harvest & revenue</div></div></a>
+      <a href="insights.html" class="ql-card"><span class="ql-icon">📊</span><div><div class="ql-title">Insights</div><div class="ql-sub">Channels & P&amp;L</div></div></a>
+      <a href="dashboard.html" class="ql-card"><span class="ql-icon">📡</span><div><div class="ql-title">IoT Dashboard</div><div class="ql-sub">Demo preview</div></div></a>
+    </div>
+  </div>
+
+  <script type="module">
+    import { createClient }  from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+    import { requireAdmin }  from '/src/admin-auth.js';
+    import { mountAdminNav } from '/src/admin-nav.js';
+
+    const sb = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY);
+
+    const session = await requireAdmin(sb);
+    if (!session) { window.location.href = 'admin.html'; }
+
+    mountAdminNav({ page: 'home', supabase: sb, email: session.user.email });
+
+    /* ── Helpers ── */
+    const fmt = n => '৳' + Math.round(n || 0).toLocaleString('en-BD');
+    const fmtKg = n => (n || 0).toFixed(2) + ' kg';
+    const cap = s => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
+    const daysAgo = n => { const d = new Date(); d.setDate(d.getDate() - n); return d.toISOString().slice(0,10); };
+    const weekAgoISO = () => { const d = new Date(); d.setDate(d.getDate() - 7); return d.toISOString(); };
+    const relTime = iso => {
+      const h = Math.floor((Date.now() - new Date(iso).getTime()) / 36e5);
+      if (h < 1) return 'just now';
+      if (h < 24) return `${h}h ago`;
+      return `${Math.floor(h/24)}d ago`;
+    };
+
+    document.getElementById('page-date').textContent =
+      new Date().toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+
+    /* ── Orders this week + recent 5 + processing list ── */
+    const attentionItems = [];
+
+    async function loadOrders() {
+      const { data, error } = await sb.from('orders')
+        .select('order_number,customer_name,total_amount,status,created_at')
+        .order('created_at', { ascending:false }).limit(200);
+      if (error || !data) return;
+
+      const weekCutoff = new Date(weekAgoISO());
+      const weekOrders = data.filter(o => new Date(o.created_at) >= weekCutoff && o.status !== 'cancelled');
+      const weekRevenue = weekOrders.reduce((s,o) => s + (o.total_amount||0), 0);
+
+      document.getElementById('k-orders').textContent = weekOrders.length;
+      document.getElementById('k-orders-sub').textContent = `${fmt(weekRevenue)} revenue`;
+      document.getElementById('k-revenue').textContent = fmt(weekRevenue);
+
+      const recent = data.slice(0, 5);
+      document.getElementById('recent-orders').innerHTML = recent.length
+        ? recent.map(o => `
+          <div class="rl-row">
+            <div>
+              <span class="rl-id">#${o.order_number}</span>
+              <span class="status-badge s-${o.status}">${cap(o.status)}</span>
+              <div class="rl-meta">${o.customer_name || '—'} · ${relTime(o.created_at)}</div>
+            </div>
+            <div class="rl-val">${fmt(o.total_amount)}</div>
+          </div>`).join('')
+        : '<div class="empty-mini">No orders yet.</div>';
+
+      /* Attention: orders stuck in processing */
+      const stuck = data.filter(o => o.status === 'processing');
+      stuck.forEach(o => {
+        const hoursOld = Math.floor((Date.now() - new Date(o.created_at).getTime()) / 36e5);
+        attentionItems.push({
+          sev: hoursOld > 48 ? 'crit' : 'warn',
+          text: `Order #${o.order_number} still processing`,
+          meta: `${o.customer_name || 'Customer'} · ${relTime(o.created_at)} · ${fmt(o.total_amount)}`,
+          href: 'admin.html',
+        });
+      });
+    }
+
+    /* ── Low stock ── */
+    async function loadStock() {
+      const { data, error } = await sb.from('products')
+        .select('id,name,inventory_count').eq('active', true).lt('inventory_count', 10)
+        .order('inventory_count', { ascending:true });
+      if (error || !data) return;
+      data.forEach(p => {
+        attentionItems.push({
+          sev: p.inventory_count === 0 ? 'crit' : 'warn',
+          text: p.inventory_count === 0 ? `${p.name} is out of stock` : `${p.name} is low on stock`,
+          meta: `${p.inventory_count} units left`,
+          href: 'products.html',
+        });
+      });
+    }
+
+    /* ── Farm summary (last 7 days) + unresolved contamination ── */
+    async function loadFarm() {
+      const { data, error } = await sb.from('v_ops_daily')
+        .select('day,harvest_fresh_kg,farm_revenue,farm_expenses')
+        .gte('day', daysAgo(7)).order('day', { ascending:false });
+      if (error || !data) { document.getElementById('farm-summary').innerHTML = '<div class="empty-mini">No farm data yet.</div>'; return; }
+
+      const harvest  = data.reduce((s,r) => s + (Number(r.harvest_fresh_kg)||0), 0);
+      const revenue  = data.reduce((s,r) => s + (Number(r.farm_revenue)||0), 0);
+      const expenses = data.reduce((s,r) => s + (Number(r.farm_expenses)||0), 0);
+
+      document.getElementById('k-harvest').textContent = fmtKg(harvest);
+      document.getElementById('farm-summary').innerHTML = `
+        <div class="rl-row"><span>Harvest</span><span class="rl-val">${fmtKg(harvest)}</span></div>
+        <div class="rl-row"><span>Farm Revenue</span><span class="rl-val">${fmt(revenue)}</span></div>
+        <div class="rl-row"><span>Farm Expenses</span><span class="rl-val">${fmt(expenses)}</span></div>`;
+
+      window._farmRevenue7d = revenue;
+      window._farmExpenses7d = expenses;
+
+      /* Contamination events in the raw log, unresolved (no contam_action noted) */
+      const { data: contam } = await sb.from('farm_daily_logs')
+        .select('log_date,contam_room,contam_type,contam_bags,contam_action')
+        .eq('contam_event', true).gte('log_date', daysAgo(14)).order('log_date', { ascending:false });
+      (contam || []).filter(c => !c.contam_action).forEach(c => {
+        attentionItems.push({
+          sev: 'warn',
+          text: `Contamination in Room ${c.contam_room || '?'} not yet resolved`,
+          meta: `${c.contam_type || 'Unknown type'} · ${c.contam_bags || '?'} bags · ${c.log_date}`,
+          href: 'quick-log.html',
+        });
+      });
+    }
+
+    /* ── Marketing summary (last 7 days) ── */
+    async function loadMarketing() {
+      const { data, error } = await sb.from('marketing_metrics')
+        .select('channel,spend').gte('metric_date', daysAgo(7));
+      if (error || !data) { document.getElementById('marketing-summary').innerHTML = '<div class="empty-mini">No marketing data yet.</div>'; return; }
+
+      const byChannel = {};
+      let totalSpend = 0;
+      data.forEach(r => {
+        const s = Number(r.spend) || 0;
+        totalSpend += s;
+        byChannel[r.channel] = (byChannel[r.channel]||0) + s;
+      });
+      const top = Object.entries(byChannel).sort((a,b) => b[1]-a[1])[0];
+
+      document.getElementById('marketing-summary').innerHTML = totalSpend > 0
+        ? `<div class="rl-row"><span>Total Ad Spend</span><span class="rl-val">${fmt(totalSpend)}</span></div>
+           <div class="rl-row"><span>Top Channel</span><span class="rl-val">${top ? cap(top[0]) : '—'}</span></div>`
+        : '<div class="empty-mini">No ad spend this week.</div>';
+
+      window._adSpend7d = totalSpend;
+      renderNet();
+    }
+
+    function renderNet() {
+      const rev = (window._farmRevenue7d || 0);
+      const exp = (window._farmExpenses7d || 0) + (window._adSpend7d || 0);
+      const net = rev - exp;
+      document.getElementById('net-summary').innerHTML = `
+        <div class="rl-row"><span>Income</span><span class="rl-val">${fmt(rev)}</span></div>
+        <div class="rl-row"><span>Costs</span><span class="rl-val">${fmt(exp)}</span></div>
+        <div class="rl-row"><span>Net</span><span class="rl-val" style="color:${net>=0?'var(--green)':'var(--red)'}">${fmt(net)}</span></div>`;
+    }
+
+    /* ── Render attention list + KPI ── */
+    function renderAttention() {
+      const sevRank = { crit:0, warn:1 };
+      attentionItems.sort((a,b) => sevRank[a.sev] - sevRank[b.sev]);
+
+      document.getElementById('k-attention').textContent = attentionItems.length;
+      document.getElementById('k-attention').className = 'kpi-val ' + (attentionItems.some(a=>a.sev==='crit') ? 'red' : attentionItems.length ? 'gold' : 'green');
+      document.getElementById('k-attention-sub').textContent =
+        attentionItems.length ? `${attentionItems.filter(a=>a.sev==='crit').length} critical` : 'All clear';
+
+      document.getElementById('attention-list').innerHTML = attentionItems.length
+        ? attentionItems.map(a => `
+          <div class="att-item">
+            <div class="att-dot ${a.sev}"></div>
+            <div class="att-body">
+              <div class="att-text">${a.text}</div>
+              <div class="att-meta">${a.meta}</div>
+            </div>
+            <a href="${a.href}" class="att-action">View →</a>
+          </div>`).join('')
+        : `<div class="att-empty"><div class="att-empty-icon">✅</div><div class="att-empty-text">Nothing needs attention right now.</div></div>`;
+    }
+
+    /* ── Load everything ── */
+    await Promise.all([loadOrders(), loadStock(), loadFarm(), loadMarketing()]);
+    renderAttention();
+  </script>
+</body>
+</html>

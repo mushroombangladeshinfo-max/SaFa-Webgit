@@ -9,6 +9,7 @@
 ============================================================ */
 
 const NAV_LINKS = [
+  { key: 'home',      href: 'home.html',      label: 'Overview',  icon: '🏠' },
   { key: 'orders',    href: 'admin.html',     label: 'Orders',    icon: '📦' },
   { key: 'customers', href: 'customers.html',  label: 'Customers', icon: '👤' },
   { key: 'products',  href: 'products.html',   label: 'Products',  icon: '🍄' },
@@ -90,7 +91,7 @@ export function mountAdminNav({ page, supabase, email }) {
 
   const html = `
     <header class="an" role="banner">
-      <a href="admin.html" class="an-logo">
+      <a href="home.html" class="an-logo">
         <span class="an-logo-main">SaFa</span>
         <span class="an-logo-dot">·</span>
         <span class="an-logo-sub">Naturals</span>
