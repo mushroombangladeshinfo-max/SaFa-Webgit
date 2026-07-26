@@ -106,6 +106,7 @@
         <h1 class="page-title">Farm <em>Overview</em></h1>
         <div class="page-sub" id="page-date">—</div>
       </div>
+      <span class="rt-indicator" id="rt-indicator"><span class="rt-dot"></span>Live</span>
     </div>
 
     <!-- KPI strip — B2B-first, since that's the real revenue channel right now -->
@@ -232,6 +233,7 @@
     import { requireAdmin }  from '/src/admin-auth.js';
     import { mountAdminNav } from '/src/admin-nav.js';
     import { localDateStr, daysAgoStr as daysAgo } from '/src/date-utils.js';
+    import { subscribeRealtime, injectRealtimeStyles } from '/src/realtime.js';
 
     const sb = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY);
 
@@ -513,8 +515,21 @@
     }
 
     /* ── Load everything ── */
-    await Promise.all([loadB2B(), loadSuppliers(), loadStock(), loadFarm(), loadMarketing(), loadHarvestVsSold(), loadB2C()]);
-    renderAttention();
+    async function reloadAll() {
+      attentionItems.length = 0;
+      await Promise.all([loadB2B(), loadSuppliers(), loadStock(), loadFarm(), loadMarketing(), loadHarvestVsSold(), loadB2C()]);
+      renderAttention();
+    }
+    await reloadAll();
+
+    /* ── Realtime: refresh whenever the underlying data changes anywhere
+       (another tab, another admin, or a direct database edit) instead of
+       requiring a manual reload — this is the main "at a glance" page. ── */
+    injectRealtimeStyles();
+    subscribeRealtime(sb, 'home-live',
+      ['orders', 'products', 'farm_daily_logs', 'one_off_expenses', 'b2b_pipeline', 'spawn_purchases'],
+      reloadAll,
+      { indicatorId: 'rt-indicator' });
   </script>
 </body>
 </html>

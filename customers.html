@@ -102,6 +102,7 @@
   <div class="page">
     <div class="page-header">
       <h1 class="page-title">Customer <em>Directory</em></h1>
+      <span class="rt-indicator" id="rt-indicator"><span class="rt-dot"></span>Live</span>
       <button class="f-action-btn" id="export-btn">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
         Export CSV
@@ -172,6 +173,7 @@
     import { mountAdminNav }            from '/src/admin-nav.js';
     import { localDateStr }             from '/src/date-utils.js';
     import { readFiltersFromURL, writeFiltersToURL, debounce, DATE_PRESETS } from '/src/filter-state.js';
+    import { subscribeRealtime, injectRealtimeStyles } from '/src/realtime.js';
 
     const sb = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY);
 
@@ -389,6 +391,9 @@
 
     applyFiltersFromURL();
     load();
+
+    injectRealtimeStyles();
+    subscribeRealtime(sb, 'customers-live', ['orders'], load, { indicatorId: 'rt-indicator' });
   </script>
 </body>
 </html>

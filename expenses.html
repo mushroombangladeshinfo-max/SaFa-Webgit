@@ -26,7 +26,7 @@
 
     /* ── Layout ── */
     .page{max-width:1200px;margin:0 auto;padding:28px 24px 64px;}
-    .page-header{margin-bottom:24px;}
+    .page-header{margin-bottom:24px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;}
     .page-title{font-family:'Syne','Hind Siliguri',sans-serif;font-size:22px;font-weight:700;color:var(--c);margin:0 0 4px;}
     .page-sub{font-size:12px;color:var(--cl);}
 
@@ -133,8 +133,11 @@
 
   <div class="page">
     <div class="page-header">
-      <div class="page-title">Expense <span class="al-color">Tracker</span></div>
-      <div class="page-sub">Daily farm expenses + one-off capital costs</div>
+      <div>
+        <div class="page-title">Expense <span class="al-color">Tracker</span></div>
+        <div class="page-sub">Daily farm expenses + one-off capital costs</div>
+      </div>
+      <span class="rt-indicator" id="rt-indicator"><span class="rt-dot"></span>Live</span>
     </div>
 
     <!-- Tabs -->
@@ -477,6 +480,7 @@
     import { mountAdminNav } from '/src/admin-nav.js';
     import { localDateStr }  from '/src/date-utils.js';
     import { readFiltersFromURL, writeFiltersToURL, DATE_PRESETS } from '/src/filter-state.js';
+    import { subscribeRealtime, injectRealtimeStyles } from '/src/realtime.js';
 
     const sb = createClient(
       import.meta.env.VITE_SUPABASE_URL,
@@ -987,6 +991,19 @@
       document.getElementById('daily-preset-this_month')?.classList.add('active');
     }
     loadDaily(_dailyURL.from, _dailyURL.to);
+
+    /* Realtime: only refresh whichever tab is currently visible, since
+       the other tabs' data is lazily loaded and may not exist yet. */
+    function reloadVisibleTab() {
+      const tab = document.querySelector('.tab-btn.active')?.dataset.tab;
+      if (tab === 'daily')     loadDaily(document.getElementById('daily-from').value, document.getElementById('daily-to').value);
+      if (tab === 'oneoff')    loadOneOff();
+      if (tab === 'suppliers') loadSuppliers();
+      if (tab === 'summary')   loadPL();
+    }
+    injectRealtimeStyles();
+    subscribeRealtime(sb, 'expenses-live', ['farm_daily_logs', 'one_off_expenses', 'spawn_purchases'], reloadVisibleTab,
+      { indicatorId: 'rt-indicator' });
   </script>
 </body>
 </html>

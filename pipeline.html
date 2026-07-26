@@ -115,6 +115,7 @@
         <div class="page-title">B2B <span class="al-color">Customers</span></div>
         <div class="page-sub">Restaurants, hotels, cafes, retailers — track every lead</div>
       </div>
+      <span class="rt-indicator" id="rt-indicator"><span class="rt-dot"></span>Live</span>
       <button class="btn primary" id="add-lead-btn">+ Add Lead</button>
     </div>
 
@@ -272,6 +273,7 @@
     import { mountAdminNav } from '/src/admin-nav.js';
     import { localDateStr }  from '/src/date-utils.js';
     import { readFiltersFromURL, writeFiltersToURL, DATE_PRESETS } from '/src/filter-state.js';
+    import { subscribeRealtime, injectRealtimeStyles } from '/src/realtime.js';
 
     const sb = createClient(
       import.meta.env.VITE_SUPABASE_URL,
@@ -504,6 +506,9 @@
 
     applyFiltersFromURL();
     load();
+
+    injectRealtimeStyles();
+    subscribeRealtime(sb, 'pipeline-live', ['b2b_pipeline'], load, { indicatorId: 'rt-indicator' });
   </script>
 </body>
 </html>

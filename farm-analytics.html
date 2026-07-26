@@ -81,6 +81,7 @@ body{font-family:'DM Sans','Hind Siliguri',sans-serif;background:var(--g900);col
   </a>
   <div class="top-sep"></div>
   <div class="top-title">🌿 Farm Analytics</div>
+  <span class="rt-indicator" id="rt-indicator"><span class="rt-dot"></span>Live</span>
   <div class="range-btns" id="range-btns">
     <button type="button" class="range-btn active" data-days="7">7D</button>
     <button type="button" class="range-btn" data-days="14">14D</button>
@@ -158,6 +159,7 @@ import { createClient } from '@supabase/supabase-js';
 import { requireAdmin } from '/src/admin-auth.js';
 import { localDateStr } from '/src/date-utils.js';
 import { readFiltersFromURL, writeFiltersToURL } from '/src/filter-state.js';
+import { subscribeRealtime, injectRealtimeStyles } from '/src/realtime.js';
 
 const sb = createClient(
   import.meta.env.VITE_SUPABASE_URL,
@@ -169,6 +171,9 @@ const sb = createClient(
   const session = await requireAdmin(sb);
   if (!session) { window.location.href = 'admin.html'; return; }
   init();
+  injectRealtimeStyles();
+  subscribeRealtime(sb, 'farm-analytics-live', ['farm_daily_logs', 'one_off_expenses'], load,
+    { indicatorId: 'rt-indicator' });
 })();
 
 /* ── State ── */
