@@ -56,6 +56,24 @@ Set all of these in **Supabase Dashboard → Edge Functions → Secrets**.
 Orders and revenue still come from your own database — the source of truth.
 `sync-ga4` only adds sessions/users/engagement/conversions context alongside it.
 
+### GA4 custom dimensions (required for Section Engagement / Scroll Depth)
+
+The site already fires `section_view` (param `section_name`) and `scroll_depth`
+(param `percent_scrolled`) events — see `src/analytics.js`. GA4 collects these
+automatically, but its Data API will only return them by name once they're
+registered as **custom dimensions**:
+
+1. **analytics.google.com** → gear icon (Admin) → the property → **Custom
+   definitions** → **Create custom dimensions**.
+2. Create one named **Section Name**, scope **Event**, event parameter
+   `section_name`.
+3. Create a second named **Scroll Percent**, scope **Event**, event parameter
+   `percent_scrolled`.
+4. New dimensions only apply to events from that point forward — data from
+   before registration won't backfill. `v_section_engagement_30d` and
+   `v_scroll_depth_30d` (Insights → Channels tab) will stay empty until both
+   are registered **and** `sync-ga4` has run at least once afterward.
+
 ---
 
 ## Deploying the functions
@@ -100,6 +118,7 @@ SELECT cron.schedule('sync-tiktok-daily',     '10 6 * * *', $$ SELECT net.http_p
 SELECT cron.schedule('sync-google-ads-daily', '20 6 * * *', $$ SELECT net.http_post(url := 'https://uiwmerejtrdrykqpumdu.supabase.co/functions/v1/sync-google-ads', headers := '{"Authorization":"Bearer ANON_KEY_HERE","x-cron-secret":"CRON_SECRET_HERE"}'::jsonb) $$);
 SELECT cron.schedule('sync-linkedin-daily',   '30 6 * * *', $$ SELECT net.http_post(url := 'https://uiwmerejtrdrykqpumdu.supabase.co/functions/v1/sync-linkedin',   headers := '{"Authorization":"Bearer ANON_KEY_HERE","x-cron-secret":"CRON_SECRET_HERE"}'::jsonb) $$);
 SELECT cron.schedule('sync-whatsapp-daily',   '40 6 * * *', $$ SELECT net.http_post(url := 'https://uiwmerejtrdrykqpumdu.supabase.co/functions/v1/sync-whatsapp',   headers := '{"Authorization":"Bearer ANON_KEY_HERE","x-cron-secret":"CRON_SECRET_HERE"}'::jsonb) $$);
+SELECT cron.schedule('sync-ga4-daily',        '50 6 * * *', $$ SELECT net.http_post(url := 'https://uiwmerejtrdrykqpumdu.supabase.co/functions/v1/sync-ga4',        headers := '{"Authorization":"Bearer ANON_KEY_HERE","x-cron-secret":"CRON_SECRET_HERE"}'::jsonb) $$);
 ```
 
 6:00 UTC = 12:00 noon Dhaka — yesterday's numbers are final on every
