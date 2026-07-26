@@ -155,6 +155,10 @@
     .ai-spinner{width:14px;height:14px;border:2px solid rgba(196,154,60,.2);border-top-color:var(--al);border-radius:50%;animation:spin .8s linear infinite;}
     .ai-note{font-size:11.5px;color:var(--cl);line-height:1.8;margin-top:12px;}
     .ai-note code{background:rgba(255,255,255,.06);padding:1px 6px;border-radius:4px;font-size:10.5px;}
+    .ai-note a{color:var(--al);}
+    .conn-badge{font-family:'Syne','Hind Siliguri',sans-serif;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:6px 12px;border-radius:99px;border:1px solid var(--border);color:var(--cl);}
+    .conn-badge.ready{border-color:rgba(95,207,128,.35);color:var(--green);}
+    .conn-badge.missing{border-color:rgba(224,90,43,.35);color:var(--red);}
 
     .toast-wrap{position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;gap:8px;}
     .toast{padding:12px 18px;border-radius:8px;font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;animation:fadeUp .3s ease;}
@@ -171,7 +175,7 @@
       .chart-wrap{height:210px;}
     }
   </style>
-  <script type="module" crossorigin src="/assets/insights-csK4p30m.js"></script>
+  <script type="module" crossorigin src="/assets/insights-JERqe5Jl.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
   <link rel="modulepreload" crossorigin href="/assets/admin-auth-Bm8-hV4r.js">
   <link rel="modulepreload" crossorigin href="/assets/admin-nav-srJleF5r.js">
@@ -444,25 +448,28 @@
           <div class="fg">
             <label for="ai-provider">Provider</label>
             <select id="ai-provider">
-              <option value="ollama">Ollama (local, free, private)</option>
-              <option value="openai">OpenAI-compatible API (Groq / Gemini / etc.)</option>
+              <option value="openai">Hosted API — Groq (recommended, free, no install)</option>
+              <option value="ollama">Ollama (local, on-device, requires install)</option>
             </select>
           </div>
-          <div class="fg"><label for="ai-url">Endpoint URL</label><input type="text" id="ai-url" placeholder="http://localhost:11434"></div>
-          <div class="fg"><label for="ai-model">Model</label><input type="text" id="ai-model" placeholder="llama3.2"></div>
-          <div class="fg"><label for="ai-key">API Key <span class="label-opt">(not needed for Ollama)</span></label><input type="password" id="ai-key" placeholder="PLACEHOLDER — only for hosted APIs"></div>
+          <div class="fg"><label for="ai-url">Endpoint URL</label><input type="text" id="ai-url" placeholder="https://api.groq.com/openai"></div>
+          <div class="fg"><label for="ai-model">Model</label><input type="text" id="ai-model" placeholder="llama-3.1-8b-instant"></div>
+          <div class="fg"><label for="ai-key">API Key <span class="label-opt">(not needed for Ollama)</span></label><input type="password" id="ai-key" placeholder="Paste your Groq API key"></div>
         </div>
         <div class="form-actions">
           <button type="button" class="btn primary" id="ai-generate">✦ Analyse My Business</button>
           <button type="button" class="btn" id="ai-save-cfg">Save Config</button>
+          <span class="conn-badge" id="ai-conn-badge"></span>
         </div>
         <p class="ai-note">
-          <strong>Ollama (recommended):</strong> free and 100% on-device. Install from
-          <code>ollama.com</code>, then run <code>ollama pull llama3.2</code>. For the browser to reach it,
-          start it with CORS open: <code>OLLAMA_ORIGINS="*" ollama serve</code> (Mac: run
-          <code>launchctl setenv OLLAMA_ORIGINS "*"</code> once, then restart Ollama).<br>
-          <strong>Hosted fallback:</strong> any OpenAI-compatible endpoint works — e.g. Groq
-          (free tier) with URL <code>https://api.groq.com/openai</code> and model <code>llama-3.1-8b-instant</code>.
+          <strong>Groq (recommended):</strong> free, hosted, works immediately — no software to install.
+          Get a free key at <a href="https://console.groq.com/keys" target="_blank" rel="noopener noreferrer">console.groq.com/keys</a>,
+          paste it above, then click Save Config. Any other OpenAI-compatible endpoint works too.<br>
+          <strong>Ollama (private alternative):</strong> 100% on-device, nothing leaves this computer, but
+          requires installing software first. Install from <code>ollama.com</code>, then run
+          <code>ollama pull llama3.2</code>. For the browser to reach it, start it with CORS open:
+          <code>OLLAMA_ORIGINS="*" ollama serve</code> (Mac: run <code>launchctl setenv OLLAMA_ORIGINS "*"</code>
+          once, then restart Ollama).
         </p>
       </div>
 

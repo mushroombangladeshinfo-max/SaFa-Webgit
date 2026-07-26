@@ -155,6 +155,10 @@
     .ai-spinner{width:14px;height:14px;border:2px solid rgba(196,154,60,.2);border-top-color:var(--al);border-radius:50%;animation:spin .8s linear infinite;}
     .ai-note{font-size:11.5px;color:var(--cl);line-height:1.8;margin-top:12px;}
     .ai-note code{background:rgba(255,255,255,.06);padding:1px 6px;border-radius:4px;font-size:10.5px;}
+    .ai-note a{color:var(--al);}
+    .conn-badge{font-family:'Syne','Hind Siliguri',sans-serif;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:6px 12px;border-radius:99px;border:1px solid var(--border);color:var(--cl);}
+    .conn-badge.ready{border-color:rgba(95,207,128,.35);color:var(--green);}
+    .conn-badge.missing{border-color:rgba(224,90,43,.35);color:var(--red);}
 
     .toast-wrap{position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;gap:8px;}
     .toast{padding:12px 18px;border-radius:8px;font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;animation:fadeUp .3s ease;}
@@ -437,25 +441,28 @@
           <div class="fg">
             <label for="ai-provider">Provider</label>
             <select id="ai-provider">
-              <option value="ollama">Ollama (local, free, private)</option>
-              <option value="openai">OpenAI-compatible API (Groq / Gemini / etc.)</option>
+              <option value="openai">Hosted API — Groq (recommended, free, no install)</option>
+              <option value="ollama">Ollama (local, on-device, requires install)</option>
             </select>
           </div>
-          <div class="fg"><label for="ai-url">Endpoint URL</label><input type="text" id="ai-url" placeholder="http://localhost:11434"></div>
-          <div class="fg"><label for="ai-model">Model</label><input type="text" id="ai-model" placeholder="llama3.2"></div>
-          <div class="fg"><label for="ai-key">API Key <span class="label-opt">(not needed for Ollama)</span></label><input type="password" id="ai-key" placeholder="PLACEHOLDER — only for hosted APIs"></div>
+          <div class="fg"><label for="ai-url">Endpoint URL</label><input type="text" id="ai-url" placeholder="https://api.groq.com/openai"></div>
+          <div class="fg"><label for="ai-model">Model</label><input type="text" id="ai-model" placeholder="llama-3.1-8b-instant"></div>
+          <div class="fg"><label for="ai-key">API Key <span class="label-opt">(not needed for Ollama)</span></label><input type="password" id="ai-key" placeholder="Paste your Groq API key"></div>
         </div>
         <div class="form-actions">
           <button type="button" class="btn primary" id="ai-generate">✦ Analyse My Business</button>
           <button type="button" class="btn" id="ai-save-cfg">Save Config</button>
+          <span class="conn-badge" id="ai-conn-badge"></span>
         </div>
         <p class="ai-note">
-          <strong>Ollama (recommended):</strong> free and 100% on-device. Install from
-          <code>ollama.com</code>, then run <code>ollama pull llama3.2</code>. For the browser to reach it,
-          start it with CORS open: <code>OLLAMA_ORIGINS="*" ollama serve</code> (Mac: run
-          <code>launchctl setenv OLLAMA_ORIGINS "*"</code> once, then restart Ollama).<br>
-          <strong>Hosted fallback:</strong> any OpenAI-compatible endpoint works — e.g. Groq
-          (free tier) with URL <code>https://api.groq.com/openai</code> and model <code>llama-3.1-8b-instant</code>.
+          <strong>Groq (recommended):</strong> free, hosted, works immediately — no software to install.
+          Get a free key at <a href="https://console.groq.com/keys" target="_blank" rel="noopener noreferrer">console.groq.com/keys</a>,
+          paste it above, then click Save Config. Any other OpenAI-compatible endpoint works too.<br>
+          <strong>Ollama (private alternative):</strong> 100% on-device, nothing leaves this computer, but
+          requires installing software first. Install from <code>ollama.com</code>, then run
+          <code>ollama pull llama3.2</code>. For the browser to reach it, start it with CORS open:
+          <code>OLLAMA_ORIGINS="*" ollama serve</code> (Mac: run <code>launchctl setenv OLLAMA_ORIGINS "*"</code>
+          once, then restart Ollama).
         </p>
       </div>
 
@@ -1105,23 +1112,41 @@
 
     function loadAiCfg() {
       const saved = JSON.parse(localStorage.getItem('safaAiCfg') || 'null')
-                 || { provider: 'ollama', ...AI_DEFAULTS.ollama, key: '' };
+                 || { provider: 'openai', ...AI_DEFAULTS.openai, key: '' };
       $ai('ai-provider').value = saved.provider;
       $ai('ai-url').value      = saved.url;
       $ai('ai-model').value    = saved.model;
       $ai('ai-key').value      = saved.key || '';
+      updateConnBadge();
     }
     function saveAiCfg() {
       localStorage.setItem('safaAiCfg', JSON.stringify({
         provider: $ai('ai-provider').value, url: $ai('ai-url').value.trim(),
         model: $ai('ai-model').value.trim(), key: $ai('ai-key').value.trim(),
       }));
+      updateConnBadge();
       toast('AI config saved');
     }
+    /* Pre-flight readiness — tells the user before they click "Analyse"
+       whether this will actually work, instead of only failing after a
+       round trip. Ollama can't be pinged without a network call on every
+       keystroke, so it's shown as ready-to-try; the hosted path can be
+       checked for real since a missing key is a guaranteed failure. */
+    function updateConnBadge() {
+      const badge = $ai('ai-conn-badge');
+      const provider = $ai('ai-provider').value;
+      if (provider === 'openai' && !$ai('ai-key').value.trim()) {
+        badge.textContent = 'API key needed'; badge.className = 'conn-badge missing';
+      } else {
+        badge.textContent = 'Ready'; badge.className = 'conn-badge ready';
+      }
+    }
     $ai('ai-save-cfg').addEventListener('click', saveAiCfg);
+    $ai('ai-key').addEventListener('input', updateConnBadge);
     $ai('ai-provider').addEventListener('change', () => {
       const d = AI_DEFAULTS[$ai('ai-provider').value];
       $ai('ai-url').value = d.url; $ai('ai-model').value = d.model;
+      updateConnBadge();
     });
 
     function buildAiPrompt() {
@@ -1155,6 +1180,14 @@ Use the actual numbers. Keep it under 350 words. No preamble.`;
                     model: $ai('ai-model').value.trim(), key: $ai('ai-key').value.trim() };
       const out = $ai('ai-output'), status = $ai('ai-status');
       out.classList.remove('visible');
+
+      /* Pre-flight — catch the guaranteed failure before a round trip */
+      if (cfg.provider === 'openai' && !cfg.key) {
+        out.innerHTML = `<strong>API key needed.</strong> Get a free one at <a href="https://console.groq.com/keys" target="_blank" rel="noopener noreferrer">console.groq.com/keys</a>, paste it into the API Key field above, then click Save Config and try again.`;
+        out.classList.add('visible');
+        return;
+      }
+
       status.classList.add('visible');
       $ai('ai-status-text').textContent = `Asking ${cfg.model}…`;
 
@@ -1174,7 +1207,13 @@ Use the actual numbers. Keep it under 350 words. No preamble.`;
             headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${cfg.key}` },
             body: JSON.stringify({ model: cfg.model, messages }),
           });
-          if (!r.ok) throw new Error(`API replied ${r.status}`);
+          if (!r.ok) {
+            const hint = r.status === 401 ? 'Invalid API key — check it was pasted correctly and saved.'
+                       : r.status === 429 ? 'Rate limited by the provider — wait a moment and try again.'
+                       : r.status === 404 ? `Model "${cfg.model}" not found at this endpoint — check the model name.`
+                       : `API replied ${r.status}.`;
+            throw new Error(hint);
+          }
           text = (await r.json()).choices?.[0]?.message?.content;
         }
         if (!text) throw new Error('Empty response');
@@ -1187,7 +1226,7 @@ Use the actual numbers. Keep it under 350 words. No preamble.`;
       } catch (e) {
         out.innerHTML = cfg.provider === 'ollama'
           ? `<strong>Couldn't reach Ollama.</strong>\nChecklist:\n· Is Ollama running? (\`ollama serve\`)\n· Model pulled? (\`ollama pull ${cfg.model}\`)\n· CORS open? Run once: \`launchctl setenv OLLAMA_ORIGINS "*"\` then restart Ollama.\n\nError: ${e.message}`
-          : `<strong>API call failed.</strong> Check the URL, model name and API key.\n\nError: ${e.message}`;
+          : `<strong>Couldn't get a response.</strong>\n${e.message}`;
         out.classList.add('visible');
       } finally {
         status.classList.remove('visible');
