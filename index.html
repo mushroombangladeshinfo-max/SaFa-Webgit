@@ -248,8 +248,11 @@
       <li><a href="recipes.html">রেসিপি</a></li>
     </ul>
     <div class="nav-right">
-      <!-- Admin shortcut — hidden by default, shown only for master admin emails by auth-nav.js -->
-      <a href="admin.html" class="nav-icon nav-admin-link" id="nav-admin-link"
+      <!-- Admin shortcut — hidden by default, shown only for master admin emails by auth-nav.js.
+           Goes straight to home.html (Overview/summary), not admin.html (Orders) — home.html
+           checks its own session independently, so an already-authenticated admin lands on
+           the actual dashboard summary in one click instead of detouring through Orders. -->
+      <a href="home.html" class="nav-icon nav-admin-link" id="nav-admin-link"
          aria-label="Admin Dashboard" title="Admin Dashboard">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
              stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">

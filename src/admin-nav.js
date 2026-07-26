@@ -117,6 +117,15 @@ function injectStyles() {
 export function mountAdminNav({ page, supabase, email, lastLogin }) {
   injectStyles();
 
+  /* Idempotent: tear down any previously-mounted copy first. Auth flows
+     commonly fire checkAuth()-style re-entry more than once (an explicit
+     post-login call plus the SIGNED_IN listener, or a cached session
+     firing SIGNED_IN on page load) — without this guard, a second call
+     stacks a duplicate header instead of replacing the first. */
+  document.querySelector('header.an')?.remove();
+  document.getElementById('an-mobile-drawer')?.remove();
+  document.getElementById('an-palette-overlay')?.remove();
+
   /* ── Build topbar HTML ── */
   const navLinksHTML = NAV_LINKS.map(l => `
     <a href="${l.href}" class="an-link${page === l.key ? ' active' : ''}" aria-current="${page === l.key ? 'page' : 'false'}">
