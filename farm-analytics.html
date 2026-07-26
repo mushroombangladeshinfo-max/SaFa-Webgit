@@ -41,7 +41,7 @@ body{font-family:'DM Sans','Hind Siliguri',sans-serif;background:var(--g900);col
 .content{max-width:1300px;margin:0 auto;padding:28px 28px 60px}
 
 /* ── Metric cards ── */
-.metrics-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+.metrics-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px}
 .metric-card{background:var(--g800);border:1px solid var(--border);border-radius:var(--r);padding:18px 20px}
 .metric-lbl{font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:rgba(245,239,230,.35);margin-bottom:8px}
 .metric-val{font-family:'Cormorant Garamond','Hind Siliguri',serif;font-size:32px;font-weight:300;color:var(--c);line-height:1;margin-bottom:4px}
@@ -115,11 +115,6 @@ body{font-family:'DM Sans','Hind Siliguri',sans-serif;background:var(--g900);col
       <div class="metric-val" id="m-net">—</div>
       <div class="metric-sub">revenue minus expenses</div>
     </div>
-    <div class="metric-card">
-      <div class="metric-lbl">Avg QC Pass Rate</div>
-      <div class="metric-val" id="m-qc">—</div>
-      <div class="metric-sub">quality control average</div>
-    </div>
   </div>
 
   <!-- Charts -->
@@ -135,12 +130,6 @@ body{font-family:'DM Sans','Hind Siliguri',sans-serif;background:var(--g900);col
       <div class="chart-title">Revenue vs Expenses</div>
       <div class="chart-sub">Daily financial performance (৳)</div>
       <div class="chart-wrap"><canvas id="chart-finance"></canvas></div>
-    </div>
-    <!-- QC Pass Rate -->
-    <div class="chart-card">
-      <div class="chart-title">QC Pass Rate</div>
-      <div class="chart-sub">Daily quality control (%) — 80% target line</div>
-      <div class="chart-wrap"><canvas id="chart-qc"></canvas></div>
     </div>
     <!-- Product revenue split -->
     <div class="chart-card">
@@ -287,20 +276,10 @@ function renderMetrics() {
   const totalExp     = _data.reduce((s,r) => s + rowExpenses(r), 0) + oneOffTotal();
   const net          = totalRev - totalExp;
 
-  // QC average
-  const qcDays = _data.filter(r => dn(r,'qc_pass') + dn(r,'qc_fail') > 0);
-  const avgQC  = qcDays.length
-    ? qcDays.reduce((s,r) => {
-        const t = dn(r,'qc_pass') + dn(r,'qc_fail');
-        return s + (t > 0 ? dn(r,'qc_pass')/t*100 : 0);
-      }, 0) / qcDays.length
-    : null;
-
   const hasAnyData = _data.length > 0 || _oneOff.length > 0;
   setMetric('m-harvest', _data.length > 0 ? totalHarvest.toFixed(1)+' kg' : '—', totalHarvest > 0 ? 'green' : '');
   setMetric('m-revenue', totalRev > 0 ? fmt(totalRev) : '—', 'gold');
   setMetric('m-net', hasAnyData ? fmt(net) : '—', net >= 0 ? 'green' : 'red');
-  setMetric('m-qc', avgQC !== null ? avgQC.toFixed(1)+'%' : '—', avgQC >= 80 ? 'green' : avgQC !== null ? 'red' : '');
 }
 
 function setMetric(id, val, cls) {
@@ -316,7 +295,7 @@ function renderCharts() {
   const hasAnyData = _data.length > 0 || _oneOff.length > 0;
 
   if (!hasAnyData) {
-    ['chart-harvest','chart-finance','chart-qc','chart-products'].forEach(id => {
+    ['chart-harvest','chart-finance','chart-products'].forEach(id => {
       destroyChart(id);
       const wrap = document.getElementById(id).parentElement;
       document.getElementById(id).style.display = 'none';
@@ -351,11 +330,11 @@ function renderCharts() {
     options: chartOpts({ yLabel:'৳', prefix:'৳', groupBars:true })
   });
 
-  // Harvest/QC/Products have no one-off-expense equivalent, so they stay
+  // Harvest/Products have no one-off-expense equivalent, so they stay
   // on farm_daily_logs' own dates. Only hide them specifically if that
   // source is empty (a period with only a one-off expense, no farm log).
   if (_data.length === 0) {
-    ['chart-harvest','chart-qc','chart-products'].forEach(id => {
+    ['chart-harvest','chart-products'].forEach(id => {
       destroyChart(id);
       const wrap = document.getElementById(id).parentElement;
       document.getElementById(id).style.display = 'none';
@@ -388,24 +367,6 @@ function renderCharts() {
       ]
     },
     options: chartOpts({ yLabel:'kg', prefix:'' })
-  });
-
-  // ── QC Pass Rate ──
-  destroyChart('chart-qc');
-  const qcRates = _data.map(r => {
-    const t = dn(r,'qc_pass') + dn(r,'qc_fail');
-    return t > 0 ? +(dn(r,'qc_pass')/t*100).toFixed(1) : null;
-  });
-  charts['chart-qc'] = new Chart(document.getElementById('chart-qc'), {
-    type: 'line',
-    data: {
-      labels,
-      datasets: [
-        { label:'QC Pass %', data:qcRates, borderColor:'#d9b254', backgroundColor:'rgba(217,178,84,.08)', fill:true, tension:.3, pointRadius:4, pointBackgroundColor:'#d9b254', borderWidth:2, spanGaps:true },
-        { label:'Target (80%)', data:labels.map(()=>80), borderColor:'rgba(224,82,82,.5)', borderDash:[6,4], borderWidth:1.5, pointRadius:0, fill:false },
-      ]
-    },
-    options: chartOpts({ yLabel:'%', prefix:'', yMax:100, yMin:0 })
   });
 
   // ── Revenue by product (donut) ──
