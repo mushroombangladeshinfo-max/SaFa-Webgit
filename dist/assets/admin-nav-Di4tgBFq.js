@@ -1,49 +1,4 @@
-/* ============================================================
-   src/admin-nav.js
-   Shared admin navigation — mounted on every admin page.
-   Usage:
-     import { mountAdminNav } from '/src/admin-nav.js';
-     // After auth resolves:
-     mountAdminNav({ page: 'orders', supabase, email: 'you@example.com' });
-   page values: 'orders' | 'customers' | 'products' | 'expenses' | 'pipeline' | 'farm'
-============================================================ */
-
-const NAV_LINKS = [
-  { key: 'home',      href: 'home.html',      label: 'Overview',  icon: '🏠' },
-  { key: 'orders',    href: 'admin.html',     label: 'Orders',    icon: '📦' },
-  { key: 'customers', href: 'customers.html',  label: 'Customers', icon: '👤' },
-  { key: 'products',  href: 'products.html',   label: 'Products',  icon: '🍄' },
-  { key: 'expenses',  href: 'expenses.html',   label: 'Expenses',  icon: '💰' },
-  { key: 'pipeline',  href: 'pipeline.html',   label: 'B2B',       icon: '🤝' },
-  { key: 'insights',  href: 'insights.html',   label: 'Insights',  icon: '📊' },
-];
-
-const FARM_LINKS = [
-  { href: 'quick-log.html',      label: '⚡ Quick Log'      },
-  { href: 'farm-analytics.html', label: '📈 Farm Analytics' },
-  { href: 'dashboard.html',      label: '📡 IoT Dashboard'  },
-];
-
-/* Searchable via Cmd+K palette — every backend destination in one place,
-   with keyword aliases so e.g. "sales" finds Orders. */
-const SEARCH_INDEX = [
-  { href: 'home.html',           label: 'Overview',       icon: '🏠', hint: 'Dashboard & KPIs',        keywords: 'home dashboard summary kpi' },
-  { href: 'admin.html',          label: 'Orders',         icon: '📦', hint: 'Manage customer orders',   keywords: 'sales orders shipping fulfillment' },
-  { href: 'customers.html',      label: 'Customers',      icon: '👤', hint: 'Customer directory',       keywords: 'customers users contacts crm' },
-  { href: 'products.html',       label: 'Products',       icon: '🍄', hint: 'Catalog & inventory',      keywords: 'products catalog inventory stock' },
-  { href: 'expenses.html',       label: 'Expenses',       icon: '💰', hint: 'Costs & P&L',              keywords: 'expenses costs finance pnl profit loss' },
-  { href: 'pipeline.html',       label: 'B2B',            icon: '🤝', hint: 'Wholesale pipeline',       keywords: 'b2b pipeline wholesale deals leads' },
-  { href: 'insights.html',       label: 'Insights',       icon: '📊', hint: 'AI analyst & trends',      keywords: 'insights analytics ai reports trends' },
-  { href: 'quick-log.html',      label: 'Quick Log',      icon: '⚡', hint: 'Mobile daily farm log',    keywords: 'quick log daily farm mobile harvest' },
-  { href: 'farm-analytics.html', label: 'Farm Analytics',  icon: '📈', hint: 'Growth & yield charts',    keywords: 'farm analytics yield growth charts' },
-  { href: 'dashboard.html',      label: 'IoT Dashboard',  icon: '📡', hint: 'Simulated sensor preview', keywords: 'iot dashboard sensors demo' },
-];
-
-function injectStyles() {
-  if (document.getElementById('admin-nav-styles')) return;
-  const s = document.createElement('style');
-  s.id = 'admin-nav-styles';
-  s.textContent = `
+const w=[{key:"home",href:"home.html",label:"Overview",icon:"🏠"},{key:"orders",href:"admin.html",label:"Orders",icon:"📦"},{key:"customers",href:"customers.html",label:"Customers",icon:"👤"},{key:"products",href:"products.html",label:"Products",icon:"🍄"},{key:"expenses",href:"expenses.html",label:"Expenses",icon:"💰"},{key:"pipeline",href:"pipeline.html",label:"B2B",icon:"🤝"},{key:"insights",href:"insights.html",label:"Insights",icon:"📊"}],L=[{href:"quick-log.html",label:"⚡ Quick Log"},{href:"farm-analytics.html",label:"📈 Farm Analytics"},{href:"dashboard.html",label:"📡 IoT Dashboard"}],E=[{href:"home.html",label:"Overview",icon:"🏠",hint:"Dashboard & KPIs",keywords:"home dashboard summary kpi"},{href:"admin.html",label:"Orders",icon:"📦",hint:"Manage customer orders",keywords:"sales orders shipping fulfillment"},{href:"customers.html",label:"Customers",icon:"👤",hint:"Customer directory",keywords:"customers users contacts crm"},{href:"products.html",label:"Products",icon:"🍄",hint:"Catalog & inventory",keywords:"products catalog inventory stock"},{href:"expenses.html",label:"Expenses",icon:"💰",hint:"Costs & P&L",keywords:"expenses costs finance pnl profit loss"},{href:"pipeline.html",label:"B2B",icon:"🤝",hint:"Wholesale pipeline",keywords:"b2b pipeline wholesale deals leads"},{href:"insights.html",label:"Insights",icon:"📊",hint:"AI analyst & trends",keywords:"insights analytics ai reports trends"},{href:"quick-log.html",label:"Quick Log",icon:"⚡",hint:"Mobile daily farm log",keywords:"quick log daily farm mobile harvest"},{href:"farm-analytics.html",label:"Farm Analytics",icon:"📈",hint:"Growth & yield charts",keywords:"farm analytics yield growth charts"},{href:"dashboard.html",label:"IoT Dashboard",icon:"📡",hint:"Simulated sensor preview",keywords:"iot dashboard sensors demo"}];function D(){if(document.getElementById("admin-nav-styles"))return;const o=document.createElement("style");o.id="admin-nav-styles",o.textContent=`
     .an{background:#0d1f12;border-bottom:1px solid rgba(255,255,255,.07);height:56px;display:flex;align-items:center;padding:0 24px;gap:16px;position:sticky;top:0;z-index:200;font-family:'DM Sans',sans-serif;}
     .an-logo{display:flex;align-items:center;gap:6px;text-decoration:none;flex-shrink:0;}
     .an-logo-main{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:#f5efe6;}
@@ -110,24 +65,10 @@ function injectStyles() {
       .an-burger{display:flex;}
       .an-right .an-logout{display:none;}
     }
-  `;
-  document.head.appendChild(s);
-}
-
-export function mountAdminNav({ page, supabase, email, lastLogin }) {
-  injectStyles();
-
-  /* ── Build topbar HTML ── */
-  const navLinksHTML = NAV_LINKS.map(l => `
-    <a href="${l.href}" class="an-link${page === l.key ? ' active' : ''}" aria-current="${page === l.key ? 'page' : 'false'}">
-      <span class="an-link-icon">${l.icon}</span>${l.label}
-    </a>`).join('');
-
-  const farmLinksHTML = FARM_LINKS.map(l =>
-    `<a href="${l.href}">${l.label}</a>`
-  ).join('');
-
-  const html = `
+  `,document.head.appendChild(o)}function B({page:o,supabase:z,email:M,lastLogin:f}){D();const $=w.map(e=>`
+    <a href="${e.href}" class="an-link${o===e.key?" active":""}" aria-current="${o===e.key?"page":"false"}">
+      <span class="an-link-icon">${e.icon}</span>${e.label}
+    </a>`).join(""),S=L.map(e=>`<a href="${e.href}">${e.label}</a>`).join(""),I=`
     <header class="an" role="banner">
       <a href="home.html" class="an-logo">
         <span class="an-logo-main">SaFa</span>
@@ -137,14 +78,14 @@ export function mountAdminNav({ page, supabase, email, lastLogin }) {
       </a>
       <div class="an-sep" aria-hidden="true"></div>
       <nav class="an-links" aria-label="Admin navigation">
-        ${navLinksHTML}
+        ${$}
         <div class="an-drop">
           <button type="button" class="an-drop-trigger" id="an-farm-btn" aria-haspopup="true" aria-expanded="false">
             <span class="an-link-icon">🌿</span>Farm
             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
           </button>
           <div class="an-drop-menu" id="an-farm-menu" role="menu">
-            ${farmLinksHTML}
+            ${S}
           </div>
         </div>
       </nav>
@@ -154,9 +95,9 @@ export function mountAdminNav({ page, supabase, email, lastLogin }) {
           <span class="an-search-label">Search</span>
           <span class="an-search-kbd">⌘K</span>
         </button>
-        ${lastLogin ? `<span class="an-last">${lastLogin}</span>` : ''}
+        ${f?`<span class="an-last">${f}</span>`:""}
         <span class="an-dot" title="Live"></span>
-        <span class="an-email">${email || ''}</span>
+        <span class="an-email">${M||""}</span>
         <button type="button" class="an-logout" id="an-logout-btn">Log Out</button>
       </div>
       <button type="button" class="an-burger" id="an-burger" aria-label="Menu" aria-expanded="false">
@@ -165,13 +106,13 @@ export function mountAdminNav({ page, supabase, email, lastLogin }) {
     </header>
     <!-- Mobile drawer -->
     <div class="an-mobile-drawer" id="an-mobile-drawer" role="navigation" aria-label="Mobile navigation">
-      ${NAV_LINKS.map(l => `
-        <a href="${l.href}" class="an-link${page === l.key ? ' active' : ''}">
-          <span class="an-link-icon">${l.icon}</span>${l.label}
-        </a>`).join('')}
+      ${w.map(e=>`
+        <a href="${e.href}" class="an-link${o===e.key?" active":""}">
+          <span class="an-link-icon">${e.icon}</span>${e.label}
+        </a>`).join("")}
       <div style="height:1px;background:rgba(255,255,255,.06);margin:8px 0;"></div>
       <div style="font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(245,239,230,.2);padding:4px 16px;">Farm Tools</div>
-      ${FARM_LINKS.map(l => `<a href="${l.href}" class="an-link" style="letter-spacing:0;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:400;text-transform:none;">${l.label}</a>`).join('')}
+      ${L.map(e=>`<a href="${e.href}" class="an-link" style="letter-spacing:0;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:400;text-transform:none;">${e.label}</a>`).join("")}
       <div style="height:1px;background:rgba(255,255,255,.06);margin:8px 0;"></div>
       <button type="button" class="an-link" id="an-logout-mobile" style="color:rgba(245,239,230,.4);">Log Out</button>
     </div>
@@ -185,127 +126,11 @@ export function mountAdminNav({ page, supabase, email, lastLogin }) {
         </div>
         <div class="an-palette-list" id="an-palette-list"></div>
       </div>
-    </div>`;
-
-  /* ── Mount ── */
-  const wrap = document.createElement('div');
-  wrap.innerHTML = html;
-  document.body.prepend(...wrap.children);
-
-  /* ── Farm dropdown ── */
-  const farmBtn  = document.getElementById('an-farm-btn');
-  const farmMenu = document.getElementById('an-farm-menu');
-  farmBtn?.addEventListener('click', (e) => {
-    e.stopPropagation();
-    const open = farmMenu.classList.toggle('open');
-    farmBtn.classList.toggle('open', open);
-    farmBtn.setAttribute('aria-expanded', open);
-  });
-  document.addEventListener('click', () => {
-    farmMenu?.classList.remove('open');
-    farmBtn?.classList.remove('open');
-    farmBtn?.setAttribute('aria-expanded', 'false');
-  });
-
-  /* ── Mobile hamburger ── */
-  const burger = document.getElementById('an-burger');
-  const drawer = document.getElementById('an-mobile-drawer');
-  burger?.addEventListener('click', () => {
-    const open = drawer.classList.toggle('open');
-    burger.setAttribute('aria-expanded', open);
-  });
-
-  /* ── Logout ── */
-  async function doLogout() {
-    await supabase.auth.signOut();
-    window.location.href = 'admin.html';
-  }
-  document.getElementById('an-logout-btn')?.addEventListener('click', doLogout);
-  document.getElementById('an-logout-mobile')?.addEventListener('click', doLogout);
-
-  /* ── Command palette (Cmd/Ctrl+K) ── */
-  const overlay   = document.getElementById('an-palette-overlay');
-  const input     = document.getElementById('an-palette-input');
-  const list      = document.getElementById('an-palette-list');
-  let results     = SEARCH_INDEX.filter(p => p.href !== currentFile());
-  let activeIndex = 0;
-
-  function currentFile() {
-    return location.pathname.split('/').pop() || 'home.html';
-  }
-
-  function renderResults() {
-    if (!results.length) {
-      list.innerHTML = `<div class="an-palette-empty">No pages match that search.</div>`;
-      return;
-    }
-    list.innerHTML = results.map((p, i) => `
-      <a href="${p.href}" class="an-palette-item${i === activeIndex ? ' active' : ''}" data-idx="${i}">
-        <span class="an-palette-item-icon">${p.icon}</span>
+    </div>`,m=document.createElement("div");m.innerHTML=I,document.body.prepend(...m.children);const s=document.getElementById("an-farm-btn"),b=document.getElementById("an-farm-menu");s?.addEventListener("click",e=>{e.stopPropagation();const a=b.classList.toggle("open");s.classList.toggle("open",a),s.setAttribute("aria-expanded",a)}),document.addEventListener("click",()=>{b?.classList.remove("open"),s?.classList.remove("open"),s?.setAttribute("aria-expanded","false")});const u=document.getElementById("an-burger"),C=document.getElementById("an-mobile-drawer");u?.addEventListener("click",()=>{const e=C.classList.toggle("open");u.setAttribute("aria-expanded",e)});async function h(){await z.auth.signOut(),window.location.href="admin.html"}document.getElementById("an-logout-btn")?.addEventListener("click",h),document.getElementById("an-logout-mobile")?.addEventListener("click",h);const r=document.getElementById("an-palette-overlay"),l=document.getElementById("an-palette-input"),c=document.getElementById("an-palette-list");let n=E.filter(e=>e.href!==x()),t=0;function x(){return location.pathname.split("/").pop()||"home.html"}function p(){if(!n.length){c.innerHTML='<div class="an-palette-empty">No pages match that search.</div>';return}c.innerHTML=n.map((e,a)=>`
+      <a href="${e.href}" class="an-palette-item${a===t?" active":""}" data-idx="${a}">
+        <span class="an-palette-item-icon">${e.icon}</span>
         <span>
-          <div class="an-palette-item-label">${p.label}</div>
-          <div class="an-palette-item-hint">${p.hint}</div>
+          <div class="an-palette-item-label">${e.label}</div>
+          <div class="an-palette-item-hint">${e.hint}</div>
         </span>
-      </a>`).join('');
-  }
-
-  function filterResults(query) {
-    const q = query.trim().toLowerCase();
-    const pool = SEARCH_INDEX.filter(p => p.href !== currentFile());
-    results = !q ? pool : pool.filter(p =>
-      p.label.toLowerCase().includes(q) || p.keywords.includes(q) ||
-      q.split(/\s+/).every(term => p.keywords.includes(term) || p.label.toLowerCase().includes(term))
-    );
-    activeIndex = 0;
-    renderResults();
-  }
-
-  function openPalette() {
-    overlay.classList.add('open');
-    input.value = '';
-    filterResults('');
-    setTimeout(() => input.focus(), 0);
-  }
-  function closePalette() {
-    overlay.classList.remove('open');
-  }
-
-  document.getElementById('an-search-btn')?.addEventListener('click', openPalette);
-
-  document.addEventListener('keydown', (e) => {
-    const isCmdK = (e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k';
-    if (isCmdK) {
-      e.preventDefault();
-      overlay.classList.contains('open') ? closePalette() : openPalette();
-    } else if (e.key === 'Escape' && overlay.classList.contains('open')) {
-      closePalette();
-    }
-  });
-
-  overlay.addEventListener('mousedown', (e) => {
-    if (e.target === overlay) closePalette();
-  });
-
-  input.addEventListener('input', () => filterResults(input.value));
-
-  input.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowDown') {
-      e.preventDefault();
-      if (results.length) { activeIndex = (activeIndex + 1) % results.length; renderResults(); }
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault();
-      if (results.length) { activeIndex = (activeIndex - 1 + results.length) % results.length; renderResults(); }
-    } else if (e.key === 'Enter') {
-      e.preventDefault();
-      const target = results[activeIndex];
-      if (target) window.location.href = target.href;
-    }
-  });
-
-  list.addEventListener('mousemove', (e) => {
-    const item = e.target.closest('.an-palette-item');
-    if (!item) return;
-    const idx = Number(item.dataset.idx);
-    if (idx !== activeIndex) { activeIndex = idx; renderResults(); }
-  });
-}
+      </a>`).join("")}function y(e){const a=e.trim().toLowerCase(),d=E.filter(i=>i.href!==x());n=a?d.filter(i=>i.label.toLowerCase().includes(a)||i.keywords.includes(a)||a.split(/\s+/).every(v=>i.keywords.includes(v)||i.label.toLowerCase().includes(v))):d,t=0,p()}function k(){r.classList.add("open"),l.value="",y(""),setTimeout(()=>l.focus(),0)}function g(){r.classList.remove("open")}document.getElementById("an-search-btn")?.addEventListener("click",k),document.addEventListener("keydown",e=>{(e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==="k"?(e.preventDefault(),r.classList.contains("open")?g():k()):e.key==="Escape"&&r.classList.contains("open")&&g()}),r.addEventListener("mousedown",e=>{e.target===r&&g()}),l.addEventListener("input",()=>y(l.value)),l.addEventListener("keydown",e=>{if(e.key==="ArrowDown")e.preventDefault(),n.length&&(t=(t+1)%n.length,p());else if(e.key==="ArrowUp")e.preventDefault(),n.length&&(t=(t-1+n.length)%n.length,p());else if(e.key==="Enter"){e.preventDefault();const a=n[t];a&&(window.location.href=a.href)}}),c.addEventListener("mousemove",e=>{const a=e.target.closest(".an-palette-item");if(!a)return;const d=Number(a.dataset.idx);d!==t&&(t=d,p())})}export{B as m};

@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Overview — SaFa Naturals Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;}
+    :root{--bg:#060d09;--bg2:#0d1f12;--bg3:#122018;--border:rgba(255,255,255,.07);--c:#f5efe6;--cm:rgba(245,239,230,.6);--cl:rgba(245,239,230,.35);--al:#c49a3c;--green:#5fcf80;--red:#e05a2b;}
+    html{scroll-behavior:smooth;}
+    body{font-family:'DM Sans','Hind Siliguri',sans-serif;background:var(--bg);color:var(--c);min-height:100vh;margin:0;-webkit-font-smoothing:antialiased;}
+    @media (prefers-reduced-motion: reduce){html{scroll-behavior:auto;}}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+    .page{max-width:1280px;margin:0 auto;padding:28px 24px 64px;animation:fadeUp .3s ease;}
+    .page-header{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:12px;}
+    .page-title{font-family:'Syne','Hind Siliguri',sans-serif;font-size:24px;font-weight:700;color:var(--c);margin:0;}
+    .page-title em{font-style:italic;color:var(--al);}
+    .page-sub{font-size:12px;color:var(--cl);margin-top:4px;}
+
+    /* KPI strip */
+    .kpi-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;}
+    @media(max-width:800px){.kpi-strip{grid-template-columns:repeat(2,1fr);}}
+    .kpi-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px 18px;}
+    a.kpi-card,a.panel{display:block;text-decoration:none;color:inherit;transition:border-color .18s,background .18s,transform .12s;}
+    a.kpi-card:hover,a.panel:hover{border-color:rgba(196,154,60,.35);background:var(--bg3);}
+    a.kpi-card:active,a.panel:active{transform:scale(.99);}
+    .panel-chevron{margin-left:auto;color:var(--cl);flex-shrink:0;transition:transform .18s,color .18s;}
+    a.panel:hover .panel-chevron{color:var(--al);transform:translateX(2px);}
+    .kpi-lbl{font-family:'Syne','Hind Siliguri',sans-serif;font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--cl);margin-bottom:6px;}
+    .kpi-val{font-family:'DM Mono','Hind Siliguri',monospace;font-size:22px;font-weight:500;color:var(--c);}
+    .kpi-val.green{color:var(--green);}
+    .kpi-val.gold{color:var(--al);}
+    .kpi-val.red{color:var(--red);}
+    .kpi-sub{font-size:11px;color:var(--cl);margin-top:3px;}
+
+    /* Layout grids */
+    .grid-main{display:grid;grid-template-columns:1.2fr 1fr;gap:16px;margin-bottom:16px;}
+    @media(max-width:900px){.grid-main{grid-template-columns:1fr;}}
+    .grid-two{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+    @media(max-width:900px){.grid-two{grid-template-columns:1fr;}}
+
+    .panel{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:18px 20px;}
+    .panel-title{font-family:'Syne','Hind Siliguri',sans-serif;font-size:13px;font-weight:700;color:var(--c);display:flex;align-items:center;gap:8px;margin-bottom:4px;}
+    .panel-sub{font-size:11px;color:var(--cl);margin-bottom:14px;}
+    .panel-head{display:flex;align-items:center;margin-bottom:4px;}
+
+    /* Split card (Harvest vs Sold) */
+    .tw-panel{margin-bottom:16px;}
+    .tw-split{display:flex;align-items:stretch;gap:20px;margin-top:6px;}
+    @media(max-width:600px){.tw-split{flex-direction:column;gap:14px;}}
+    .tw-side{flex:1;text-align:center;padding:8px 0;}
+    .tw-side-lbl{font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--cl);margin-bottom:8px;}
+    .tw-side-val{font-family:'DM Mono','Hind Siliguri',monospace;font-size:26px;font-weight:500;color:var(--c);}
+    .tw-side-val.gold{color:var(--al);}
+    .tw-side-sub{font-size:11px;color:var(--cl);margin-top:4px;}
+    .tw-div{width:1px;background:var(--border);flex-shrink:0;}
+    @media(max-width:600px){.tw-div{width:100%;height:1px;}}
+
+    /* Attention list */
+    .att-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.05);}
+    .att-item:last-child{border-bottom:none;}
+    .att-dot{width:7px;height:7px;border-radius:50%;margin-top:5px;flex-shrink:0;}
+    .att-dot.crit{background:var(--red);}
+    .att-dot.warn{background:var(--al);}
+    .att-body{flex:1;min-width:0;}
+    .att-text{font-size:13px;color:var(--c);}
+    .att-meta{font-size:11px;color:var(--cl);margin-top:2px;}
+    .att-action{font-size:11px;color:var(--al);text-decoration:none;white-space:nowrap;align-self:center;}
+    .att-action:hover{text-decoration:underline;}
+    .att-empty{text-align:center;padding:24px 10px;}
+    .att-empty-icon{font-size:26px;margin-bottom:6px;}
+    .att-empty-text{font-size:12px;color:var(--cl);}
+
+    /* Row-style summary lines */
+    .rl-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:13px;gap:10px;}
+    .rl-row:last-child{border-bottom:none;}
+    .rl-val{font-family:'DM Mono','Hind Siliguri',monospace;color:var(--al);font-weight:500;white-space:nowrap;}
+    .empty-mini{text-align:center;padding:20px 10px;font-size:12px;color:var(--cl);}
+
+    /* Dormant B2C status strip */
+    a.b2c-strip{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px 20px;margin-bottom:16px;flex-wrap:wrap;text-decoration:none;color:inherit;transition:border-color .18s,background .18s;}
+    a.b2c-strip:hover{border-color:rgba(196,154,60,.35);background:var(--bg3);}
+    .b2c-strip-text{font-size:12px;color:var(--cl);}
+    .b2c-strip-text strong{color:var(--cm);font-weight:500;}
+
+    /* Quick links */
+    .ql-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;}
+    @media(max-width:900px){.ql-row{grid-template-columns:repeat(2,1fr);}}
+    .ql-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px;text-decoration:none;display:flex;align-items:center;gap:12px;transition:border-color .18s,background .18s;}
+    .ql-card:hover{border-color:rgba(196,154,60,.35);background:var(--bg3);}
+    .ql-icon{font-size:20px;}
+    .ql-title{font-size:13px;font-weight:500;color:var(--c);}
+    .ql-sub{font-size:10px;color:var(--cl);margin-top:1px;}
+  </style>
+  <script type="module" crossorigin src="/assets/home-Bd6gR7bp.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="/assets/admin-auth-Bm8-hV4r.js">
+  <link rel="modulepreload" crossorigin href="/assets/admin-nav-Di4tgBFq.js">
+  <link rel="modulepreload" crossorigin href="/assets/date-utils-BQiP-iFW.js">
+  <link rel="modulepreload" crossorigin href="/assets/realtime-D7K--cdb.js">
+</head>
+<body>
+
+  <div class="page">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Farm <em>Overview</em></h1>
+        <div class="page-sub" id="page-date">—</div>
+      </div>
+      <span class="rt-indicator" id="rt-indicator"><span class="rt-dot"></span>Live</span>
+    </div>
+
+    <!-- KPI strip — B2B-first, since that's the real revenue channel right now -->
+    <div class="kpi-strip">
+      <a href="pipeline.html" class="kpi-card" aria-label="B2B revenue, last 30 days — open B2B Customers">
+        <div class="kpi-lbl">B2B Revenue (30d)</div>
+        <div class="kpi-val green" id="k-b2b-revenue">—</div>
+        <div class="kpi-sub" id="k-b2b-revenue-sub">Real sales, not estimates</div>
+      </a>
+      <a href="pipeline.html" class="kpi-card" aria-label="Days since last B2B sale — open B2B Customers">
+        <div class="kpi-lbl">Days Since Last B2B Sale</div>
+        <div class="kpi-val gold" id="k-b2b-days">—</div>
+        <div class="kpi-sub" id="k-b2b-days-sub"></div>
+      </a>
+      <a href="farm-analytics.html" class="kpi-card" aria-label="Harvest, last 30 days — open Farm Analytics">
+        <div class="kpi-lbl">Harvest (30d)</div>
+        <div class="kpi-val" id="k-harvest">—</div>
+        <div class="kpi-sub" id="k-harvest-sub">Fresh, kg</div>
+      </a>
+      <a href="#attention-list" class="kpi-card" aria-label="Needs attention — jump to the attention panel below">
+        <div class="kpi-lbl">Needs Attention</div>
+        <div class="kpi-val" id="k-attention">—</div>
+        <div class="kpi-sub" id="k-attention-sub">See panel below</div>
+      </a>
+    </div>
+
+    <!-- Harvest vs Sold, current calendar month -->
+    <a href="farm-analytics.html" class="panel tw-panel" aria-label="Harvest vs sold this month — open Farm Analytics">
+      <div class="panel-head"><div class="panel-title">📅 <span id="tw-month-label">This Month</span></div><svg class="panel-chevron" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg></div>
+      <div class="panel-sub">Production vs. what actually sold this calendar month so far.</div>
+      <div class="tw-split">
+        <div class="tw-side">
+          <div class="tw-side-lbl">🌾 Harvest</div>
+          <div class="tw-side-val" id="tw-harvest-kg">—</div>
+          <div class="tw-side-sub">Fresh, kg</div>
+        </div>
+        <div class="tw-div"></div>
+        <div class="tw-side">
+          <div class="tw-side-lbl">💰 Sold</div>
+          <div class="tw-side-val gold" id="tw-sold-kg">—</div>
+          <div class="tw-side-sub" id="tw-sold-rev">Fresh + dried + powder + B2B, kg</div>
+        </div>
+      </div>
+    </a>
+
+    <!-- Attention + B2B -->
+    <div class="grid-main">
+      <div class="panel">
+        <div class="panel-head"><div class="panel-title">🔔 Needs Your Attention</div></div>
+        <div class="panel-sub">Overdue B2B check-ins, suppliers due for restock, unresolved spawn/farm quality issues, low stock — pulled from real data.</div>
+        <div id="attention-list"><div class="empty-mini">Loading…</div></div>
+      </div>
+
+      <a href="pipeline.html" class="panel" aria-label="B2B summary — open B2B Customers">
+        <div class="panel-head">
+          <div class="panel-title">🤝 B2B</div>
+          <svg class="panel-chevron" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+        </div>
+        <div class="panel-sub">Your active buyer relationship.</div>
+        <div id="b2b-summary"><div class="empty-mini">Loading…</div></div>
+      </a>
+    </div>
+
+    <!-- Suppliers + Marketing -->
+    <div class="grid-two">
+      <a href="expenses.html#suppliers" class="panel" aria-label="Suppliers — open Expenses, Suppliers tab">
+        <div class="panel-head">
+          <div class="panel-title">🌱 Suppliers</div>
+          <svg class="panel-chevron" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+        </div>
+        <div class="panel-sub">Days since last spawn purchase, per supplier.</div>
+        <div id="suppliers-summary"><div class="empty-mini">Loading…</div></div>
+      </a>
+
+      <a href="insights.html" class="panel" aria-label="Marketing summary — open Insights">
+        <div class="panel-head">
+          <div class="panel-title">📣 Marketing</div>
+          <svg class="panel-chevron" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+        </div>
+        <div class="panel-sub">Organic reach &amp; engagement, last 30 days — no paid campaigns running.</div>
+        <div id="marketing-summary"><div class="empty-mini">Loading…</div></div>
+      </a>
+    </div>
+
+    <!-- Farm Production + Net Position (slower-moving monthly trend) -->
+    <div class="grid-two">
+      <a href="farm-analytics.html" class="panel" aria-label="Farm production summary — open Farm Analytics">
+        <div class="panel-head">
+          <div class="panel-title">🌿 Farm Production</div>
+          <svg class="panel-chevron" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+        </div>
+        <div class="panel-sub">Last 30 days.</div>
+        <div id="farm-summary"><div class="empty-mini">Loading…</div></div>
+      </a>
+
+      <a href="insights.html" class="panel" aria-label="Net position summary — open Insights">
+        <div class="panel-head">
+          <div class="panel-title">💵 Net Position</div>
+          <svg class="panel-chevron" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+        </div>
+        <div class="panel-sub">Revenue − costs − ad spend, last 30 days.</div>
+        <div id="net-summary"><div class="empty-mini">Loading…</div></div>
+      </a>
+    </div>
+
+    <!-- B2C: dormant for now, kept minimal on purpose -->
+    <a href="admin.html" class="b2c-strip" aria-label="Website B2C status — open Orders">
+      <div class="b2c-strip-text">🌐 Website (B2C): <strong id="b2c-status">—</strong></div>
+      <svg class="panel-chevron" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+    </a>
+
+    <!-- Quick links -->
+    <div class="ql-row">
+      <a href="quick-log.html" class="ql-card"><span class="ql-icon">⚡</span><div><div class="ql-title">Quick Log</div><div class="ql-sub">Daily farm entry</div></div></a>
+      <a href="pipeline.html" class="ql-card"><span class="ql-icon">🤝</span><div><div class="ql-title">B2B Customers</div><div class="ql-sub">Leads & pipeline</div></div></a>
+      <a href="expenses.html#suppliers" class="ql-card"><span class="ql-icon">🌱</span><div><div class="ql-title">Suppliers</div><div class="ql-sub">Spawn purchases</div></div></a>
+      <a href="farm-analytics.html" class="ql-card"><span class="ql-icon">📈</span><div><div class="ql-title">Farm Analytics</div><div class="ql-sub">Harvest & revenue</div></div></a>
+      <a href="insights.html" class="ql-card"><span class="ql-icon">📊</span><div><div class="ql-title">Insights</div><div class="ql-sub">Channels & P&amp;L</div></div></a>
+    </div>
+  </div>
+
+</body>
+</html>

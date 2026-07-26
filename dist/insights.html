@@ -75,6 +75,10 @@
 
     /* ── Tables ── */
     .table-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:20px;}
+    .eng-bar-wrap{display:flex;align-items:center;gap:8px;}
+    .eng-bar-track{flex:1;height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;min-width:60px;}
+    .eng-bar-fill{height:100%;background:var(--al);border-radius:3px;}
+    .eng-bar-pct{font-size:11px;color:var(--cl);width:34px;text-align:right;flex-shrink:0;}
     .table-toolbar{display:flex;align-items:center;justify-content:space-between;padding:13px 18px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:10px;}
     .table-title{font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--cl);}
     .scroll-x{overflow-x:auto;}
@@ -167,10 +171,13 @@
       .chart-wrap{height:210px;}
     }
   </style>
-  <script type="module" crossorigin src="/assets/insights-B9bRQAwE.js"></script>
+  <script type="module" crossorigin src="/assets/insights-4TZmiw5q.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
   <link rel="modulepreload" crossorigin href="/assets/admin-auth-Bm8-hV4r.js">
-  <link rel="modulepreload" crossorigin href="/assets/admin-nav-DxntCGRp.js">
+  <link rel="modulepreload" crossorigin href="/assets/admin-nav-Di4tgBFq.js">
+  <link rel="modulepreload" crossorigin href="/assets/date-utils-BQiP-iFW.js">
+  <link rel="modulepreload" crossorigin href="/assets/filter-state-BDSbD5N3.js">
+  <link rel="modulepreload" crossorigin href="/assets/realtime-D7K--cdb.js">
 </head>
 <body>
 
@@ -180,6 +187,7 @@
         <div class="page-title">Business <span>Insights</span></div>
         <div class="page-sub">Marketing · Sales · Production — one picture</div>
       </div>
+      <span class="rt-indicator" id="rt-indicator"><span class="rt-dot"></span>Live</span>
     </div>
 
     <!-- Shown only if the warehouse migration hasn't been run yet -->
@@ -216,6 +224,7 @@
         <button type="button" class="range-btn" data-days="30">30 Days</button>
         <button type="button" class="range-btn active" data-days="90">90 Days</button>
         <button type="button" class="range-btn" data-days="365">1 Year</button>
+        <button type="button" class="range-btn" data-days="1095">3 Years</button>
       </div>
 
       <div class="kpi-grid">
@@ -303,6 +312,32 @@
               <th class="r">Orders</th><th class="r">Revenue</th><th class="r">AOV</th><th class="r">Cancelled/Returned</th>
             </tr></thead>
             <tbody id="attribution-tbody"><tr><td colspan="8"><div class="empty-state"><div class="empty-icon">🔗</div>No attributed orders yet — this fills in as customers check out through UTM-tagged links.</div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-toolbar">
+          <span class="table-title">Section Engagement — which content actually gets read</span>
+        </div>
+        <p class="section-sub tight">Last 30 days. Ranked within each page against that page's own best-seen section — a low bar means visitors aren't scrolling to (or aren't interested in) that part of the page.</p>
+        <div class="scroll-x">
+          <table>
+            <thead><tr><th>Page</th><th>Section</th><th class="r">Views</th><th>vs. top section</th></tr></thead>
+            <tbody id="section-eng-tbody"><tr><td colspan="4"><div class="empty-state"><div class="empty-icon">📊</div>No section data yet — register the "Section Name" custom dimension in GA4 Admin, then check back after the next sync.</div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-toolbar">
+          <span class="table-title">Scroll Depth — how far people get before leaving</span>
+        </div>
+        <p class="section-sub tight">Last 30 days, per page. Sessions reaching each scroll milestone — a sharp drop between two milestones marks where the page loses people.</p>
+        <div class="scroll-x">
+          <table>
+            <thead><tr><th>Page</th><th class="r">25%</th><th class="r">50%</th><th class="r">75%</th><th class="r">90%</th></tr></thead>
+            <tbody id="scroll-depth-tbody"><tr><td colspan="5"><div class="empty-state"><div class="empty-icon">📉</div>No scroll data yet — register the "Scroll Percent" custom dimension in GA4 Admin, then check back after the next sync.</div></td></tr></tbody>
           </table>
         </div>
       </div>

@@ -1028,6 +1028,7 @@ img {
               border-color 0.22s,
               box-shadow 0.22s cubic-bezier(0.4,0,0.2,1);
 }
+.pl-card:not(.pl-card-coming) { cursor: pointer; }
 .pl-card:hover {
   transform: translateY(-6px);
   border-color: rgba(196, 154, 60, 0.3);

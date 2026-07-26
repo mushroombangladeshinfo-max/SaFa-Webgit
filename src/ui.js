@@ -457,6 +457,27 @@ export function initAddToCartButtons() {
   console.log(`[SaFa] Wired ${buttons.length} add-to-cart button(s)`);
 }
 
+/**
+ * Makes the whole product card clickable (industry-standard card
+ * pattern), not just the image/title links. Clicks on real interactive
+ * children (add-to-cart button, WhatsApp link, image/title links) are
+ * left alone — only clicks on the "dead space" (description, price,
+ * meta) navigate to the product page. Delegated so it works for any
+ * number of .pl-card elements without per-card listeners.
+ */
+export function initProductCardLinks() {
+  const grid = document.querySelector('.pl-grid');
+  if (!grid) return;
+
+  grid.addEventListener('click', (e) => {
+    const card = e.target.closest('.pl-card:not(.pl-card-coming)');
+    if (!card) return;
+    if (e.target.closest('a, button')) return; /* let the real control handle its own click */
+    const id = card.dataset.id;
+    if (id) window.location.href = `product.html?id=${id}`;
+  });
+}
+
 
 /* ============================================================
    6. TOAST NOTIFICATIONS

@@ -124,46 +124,12 @@
     .login-security svg { width:10px; height:10px; }
     .banner-icon { flex-shrink:0; }
 
-    /* Last login in topbar */
-    .topbar-last { font-size:10px; color:rgba(245,239,230,.28); font-family:'DM Sans','Hind Siliguri',sans-serif; }
-
     @media (max-width:860px) { .login-brand { display:none; } .login-form-panel { width:100%; padding:44px 28px; } }
     @media (max-width:400px) { .login-form-panel { padding:32px 18px; } }
 
     /* ════════════════ DASHBOARD SHELL ════════════════ */
     .dash-page { display:none; min-height:100vh; }
 
-    /* Top bar */
-    .topbar { background:var(--g800); border-bottom:1px solid rgba(255,255,255,.06); padding:0 32px; height:60px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:200; }
-    .topbar-left { display:flex; align-items:center; gap:14px; }
-    .topbar-logo { display:flex; flex-direction:column; align-items:center; text-decoration:none; padding:6px 16px; border:1px solid rgba(255,255,255,.1); border-radius:100px; background:rgba(255,255,255,.03); transition:background .2s, transform .2s; }
-    .topbar-logo:hover { background:rgba(255,255,255,.08); transform:translateY(-1px); }
-    .tl-main { font-family:'Syne','Hind Siliguri',sans-serif; font-size:18px; font-weight:700; color:var(--c); line-height:1; }
-    .tl-sub  { font-family:'Syne','Hind Siliguri',sans-serif; font-size:7px; font-weight:700; letter-spacing:.22em; text-transform:uppercase; color:var(--al); }
-    .topbar-pill { font-family:'Syne','Hind Siliguri',sans-serif; font-size:8px; font-weight:700; letter-spacing:.18em; text-transform:uppercase; color:var(--a); background:rgba(196,154,60,.1); border:1px solid rgba(196,154,60,.2); border-radius:20px; padding:3px 10px; }
-    .topbar-right { display:flex; align-items:center; gap:8px; }
-    .topbar-admin-email { color:rgba(245,239,230,.38); font-family:'DM Mono','Hind Siliguri',monospace; font-size:10px; }
-    .topbar-dot { width:6px; height:6px; border-radius:50%; background:#5fcf80; flex-shrink:0; animation:live-pulse 2.4s ease-in-out infinite; }
-    @keyframes live-pulse { 0%,100%{box-shadow:0 0 0 0 rgba(95,207,128,.5)} 50%{box-shadow:0 0 0 4px rgba(95,207,128,0)} }
-    /* ── Topbar divider ── */
-    .tb-sep { width:1px; height:20px; background:rgba(255,255,255,.08); flex-shrink:0; margin:0 4px; }
-    /* ── Nav links (Farm Log, IoT Dashboard) — borderless ghost style ── */
-    .tb-nav { display:flex; align-items:center; gap:2px; }
-    .tb-nav-link { display:inline-flex; align-items:center; gap:5px; padding:7px 11px; border-radius:6px; font-family:'Syne','Hind Siliguri',sans-serif; font-size:9px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:rgba(245,239,230,.38); text-decoration:none; background:none; border:none; cursor:pointer; transition:color .18s,background .18s; white-space:nowrap; }
-    .tb-nav-link svg { opacity:.4; flex-shrink:0; transition:opacity .18s; }
-    .tb-nav-link:hover { color:var(--c); background:rgba(255,255,255,.06); }
-    .tb-nav-link:hover svg { opacity:.8; }
-    /* ── Quick Log CTA — prominent amber pill ── */
-    .tb-quick { display:inline-flex; align-items:center; gap:6px; padding:7px 14px; border-radius:6px; background:rgba(217,178,84,.13); border:1px solid rgba(217,178,84,.28); color:var(--al); text-decoration:none; transition:all .18s; white-space:nowrap; flex-shrink:0; }
-    .tb-quick:hover { background:rgba(217,178,84,.22); border-color:rgba(217,178,84,.45); transform:translateY(-1px); box-shadow:0 4px 16px rgba(217,178,84,.12); }
-    .tb-quick-icon { font-size:11px; }
-    .tb-quick-label { font-family:'Hind Siliguri',sans-serif; font-size:12px; font-weight:600; letter-spacing:0; }
-    /* ── Log Out — minimal, de-emphasised ── */
-    .tb-logout { display:inline-flex; align-items:center; gap:5px; padding:6px 10px; border-radius:6px; background:none; border:none; color:rgba(245,239,230,.28); font-family:'Syne','Hind Siliguri',sans-serif; font-size:9px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; cursor:pointer; transition:color .18s,background .18s; }
-    .tb-logout:hover { color:var(--red,#e05252); background:rgba(224,82,82,.07); }
-    .tb-logout svg { opacity:.5; flex-shrink:0; }
-    /* Responsive: collapse nav links on mobile, keep CTA + logout */
-    @media(max-width:900px) { .tb-nav,.topbar-last,.topbar-admin-email,.tb-sep:first-of-type { display:none!important; } }
     /* Keep old class for any stray references */
     .topbar-btn { font-family:'Syne','Hind Siliguri',sans-serif; font-size:9px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:rgba(245,239,230,.45); background:none; border:1px solid rgba(255,255,255,.1); border-radius:5px; padding:7px 14px; cursor:pointer; transition:all .2s; text-decoration:none; display:inline-flex; align-items:center; gap:5px; }
     .topbar-btn:hover { color:var(--c); background:rgba(255,255,255,.06); }
@@ -497,8 +463,6 @@
     @media (max-width:900px)  { .od-grid { grid-template-columns:1fr; } .dash-content { padding:24px 20px 48px; } }
     @media (max-width:700px)  {
       .stats-grid { grid-template-columns:1fr 1fr; }
-      .topbar { padding:0 20px; }
-      .topbar-admin-email { display:none; }
       .orders-table th:nth-child(3), .orders-table td:nth-child(3),
       .orders-table th:nth-child(5), .orders-table td:nth-child(5) { display:none; }
     }
@@ -662,63 +626,6 @@
   <!-- ════════════ DASHBOARD ════════════ -->
   <div class="dash-page" id="dash-page">
 
-    <!-- Top bar -->
-    <header class="topbar">
-      <div class="topbar-left">
-        <a href="index.html" class="topbar-logo">
-          <span class="tl-main">SaFa</span>
-          <span class="tl-sub">Naturals</span>
-        </a>
-        <span class="topbar-pill">Admin</span>
-      </div>
-      <div class="topbar-right">
-        <!-- Status: last login + live dot + email -->
-        <span class="topbar-last" id="topbar-last"></span>
-        <span class="topbar-dot" title="Live"></span>
-        <span class="topbar-admin-email" id="topbar-email"></span>
-
-        <div class="tb-sep"></div>
-
-        <!-- Secondary nav links -->
-        <nav class="tb-nav" aria-label="Admin tools">
-          <a href="customers.html" class="tb-nav-link">
-            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg>
-            Customers
-          </a>
-          <a href="products.html" class="tb-nav-link">
-            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
-            Products
-          </a>
-          <a href="expenses.html" class="tb-nav-link">
-            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            Expenses
-          </a>
-          <a href="pipeline.html" class="tb-nav-link">
-            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"/></svg>
-            Pipeline
-          </a>
-          <a href="farm-analytics.html" class="tb-nav-link">
-            <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625z"/></svg>
-            Farm
-          </a>
-        </nav>
-
-        <div class="tb-sep"></div>
-
-        <!-- Quick Log CTA — primary mobile action, stands out -->
-        <a href="quick-log.html" class="tb-quick" title="মোবাইলে দ্রুত দৈনিক লগ করুন">
-          <span class="tb-quick-icon">⚡</span>
-          <span class="tb-quick-label">দ্রুত লগ</span>
-        </a>
-
-        <!-- Log Out — de-emphasised -->
-        <button type="button" class="tb-logout" id="logout-btn">
-          <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"/></svg>
-          Log Out
-        </button>
-      </div>
-    </header>
-
     <!-- Main -->
     <div class="dash-content">
 
@@ -742,7 +649,7 @@
           <div class="qa-icon">📊</div>
           <div class="qa-text">
             <div class="qa-title">IoT Dashboard</div>
-            <div class="qa-sub">Live sensor readings</div>
+            <div class="qa-sub">Simulated preview — no sensors yet</div>
           </div>
           <svg class="qa-arrow" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
         </a>
@@ -1380,6 +1287,7 @@
     import { ADMIN_EMAILS, requireAdmin } from '/src/admin-auth.js';
     import { localDateStr }            from '/src/date-utils.js';
     import { readFiltersFromURL, writeFiltersToURL } from '/src/filter-state.js';
+    import { mountAdminNav }           from '/src/admin-nav.js';
 
     /* ── Config ── */
     const SELLER_WA = '8801970099378';
@@ -1655,11 +1563,17 @@
     function showLoginPage() {
       document.getElementById('login-page').classList.remove('panel-hidden');
       document.getElementById('dash-page').style.display = 'none';
+      /* Tear down the mounted admin nav (header lives outside dash-page) so
+         a later showDashboard() call doesn't mount a duplicate copy. */
+      document.querySelector('header.an')?.remove();
+      document.getElementById('an-mobile-drawer')?.remove();
+      document.getElementById('an-palette-overlay')?.remove();
     }
 
     /* Detect session expiry while dashboard is open */
     supabase.auth.onAuthStateChange((event) => {
       if (event === 'SIGNED_OUT' && _dashVisible) {
+        if (S.realtimeSub) supabase.removeChannel(S.realtimeSub);
         _dashVisible = false;
         showLoginPage();
         switchLoginTab('password');
@@ -1673,16 +1587,16 @@
       _dashVisible = true;
       document.getElementById('login-page').classList.add('panel-hidden');
       document.getElementById('dash-page').style.display = 'block';
-      document.getElementById('topbar-email').textContent = user.email;
 
       /* Last login time */
-      const lastEl = document.getElementById('topbar-last');
-      if (lastEl && user.last_sign_in_at) {
+      let lastLogin = '';
+      if (user.last_sign_in_at) {
         const diff = Date.now() - new Date(user.last_sign_in_at).getTime();
         const h = Math.floor(diff / 3600000);
         const d = Math.floor(diff / 86400000);
-        lastEl.textContent = d >= 1 ? `Last login: ${d}d ago` : h >= 1 ? `Last login: ${h}h ago` : 'Last login: just now';
+        lastLogin = d >= 1 ? `Last login: ${d}d ago` : h >= 1 ? `Last login: ${h}h ago` : 'Last login: just now';
       }
+      mountAdminNav({ page: 'orders', supabase, email: user.email, lastLogin });
 
       const now = new Date().toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
       document.getElementById('dash-subtitle').textContent = now;
@@ -1691,13 +1605,6 @@
       fetchOrders();
       startRealtime();
     }
-
-    document.getElementById('logout-btn').addEventListener('click', async () => {
-      if (S.realtimeSub) supabase.removeChannel(S.realtimeSub);
-      _dashVisible = false;
-      await supabase.auth.signOut();
-      location.reload();
-    });
 
     /* ── Stats ── */
     async function fetchStats() {

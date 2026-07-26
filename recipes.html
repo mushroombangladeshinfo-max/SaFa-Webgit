@@ -458,6 +458,7 @@
       border-radius: 14px;
       overflow: hidden;
       transition: border-color 0.3s, box-shadow 0.3s;
+      cursor: pointer;
     }
     .rp-featured:hover {
       border-color: rgba(196,154,60,0.28);
@@ -591,6 +592,7 @@
       display: flex;
       flex-direction: column;
       transition: border-color 0.3s, transform 0.3s, box-shadow 0.3s;
+      cursor: pointer;
     }
     .rp-card:hover {
       border-color: rgba(196,154,60,0.22);
@@ -1661,7 +1663,7 @@
            FEATURED: Mushroom Biryani
            Image: Mushroom Biryani.png
       ══════════════════════════════════════════════ -->
-      <div class="rp-featured fi" data-category="rice" data-cuisine="bd">
+      <div class="rp-featured fi" data-category="rice" data-cuisine="bd" onclick="openRecipe('biryani')">
 
         <div class="rp-featured-img">
           <img src="/Mushroom Biryani.png" alt="Mushroom Biryani"
@@ -1696,7 +1698,7 @@
             </button>
             <!-- Quick add — adds the main ingredient to cart -->
             <button type="button" class="btn-ghost-dark btn-quick-add"
-                    onclick="window.addToCart(
+                    onclick="event.stopPropagation();window.addToCart(
                       'Fresh Oyster Mushrooms',350,
                       'fresh_oyster','1kg',
                       'SaFa Fresh Oyster Mushroom.png'
@@ -1713,7 +1715,7 @@
            CARD 1: Mushroom Bhuna
            Image: Mushroom Bhuna.png
       ══════════════════════════════════════════════ -->
-      <div class="rp-card fi" data-category="curry" data-cuisine="bd">
+      <div class="rp-card fi" data-category="curry" data-cuisine="bd" onclick="openRecipe('bhuna')">
         <div class="rp-card-img">
           <div class="rp-card-img-inner">
             <img src="/Mushroom Bhuna.png" alt="Mushroom Bhuna"
@@ -1756,7 +1758,7 @@
            CARD 2: Creamy Mushroom Soup
            Image: Mushroom Soup.png
       ══════════════════════════════════════════════ -->
-      <div class="rp-card fi" data-category="soup" data-cuisine="bd">
+      <div class="rp-card fi" data-category="soup" data-cuisine="bd" onclick="openRecipe('soup')">
         <div class="rp-card-img">
           <div class="rp-card-img-inner">
             <img src="/Mushroom Soup.png" alt="Creamy Mushroom Soup"
@@ -1799,7 +1801,7 @@
            CARD 3: Mushroom Chop
            Image: Mushroom Chop.png
       ══════════════════════════════════════════════ -->
-      <div class="rp-card fi" data-category="snack" data-cuisine="bd">
+      <div class="rp-card fi" data-category="snack" data-cuisine="bd" onclick="openRecipe('chop')">
         <div class="rp-card-img">
           <div class="rp-card-img-inner">
             <img src="/Mushroom Chop.png" alt="Mushroom Chop"
@@ -1842,7 +1844,7 @@
            CARD 4: Mushroom Masoor Daal
            Image: Mushroom Daal.png
       ══════════════════════════════════════════════ -->
-      <div class="rp-card fi" data-category="curry" data-cuisine="bd">
+      <div class="rp-card fi" data-category="curry" data-cuisine="bd" onclick="openRecipe('daal')">
         <div class="rp-card-img">
           <div class="rp-card-img-inner">
             <img src="/Mushroom Daal.png" alt="Mushroom Masoor Daal"
@@ -1885,7 +1887,7 @@
            CARD 5: Mushroom Stir Fry
            Image: Mushroom Bhaji.png
       ══════════════════════════════════════════════ -->
-      <div class="rp-card fi" data-category="dry" data-cuisine="bd">
+      <div class="rp-card fi" data-category="dry" data-cuisine="bd" onclick="openRecipe('bhaji')">
         <div class="rp-card-img">
           <div class="rp-card-img-inner">
             <img src="/Mushroom Bhaji.png" alt="Mushroom Stir Fry"
@@ -1928,7 +1930,7 @@
            CARD 6: Mushroom Khichuri
            Image: Mushroom Khichuri.png
       ══════════════════════════════════════════════ -->
-      <div class="rp-card fi" data-category="rice" data-cuisine="bd">
+      <div class="rp-card fi" data-category="rice" data-cuisine="bd" onclick="openRecipe('khichuri')">
         <div class="rp-card-img">
           <div class="rp-card-img-inner">
             <img src="/Mushroom Khichuri.png" alt="Mushroom Khichuri"
@@ -1971,7 +1973,7 @@
            CARD 7: Mushroom Singara
            Image: Mushroom Singara.png
       ══════════════════════════════════════════════ -->
-      <div class="rp-card fi" data-category="snack" data-cuisine="bd">
+      <div class="rp-card fi" data-category="snack" data-cuisine="bd" onclick="openRecipe('singara')">
         <div class="rp-card-img">
           <div class="rp-card-img-inner">
             <img src="/Mushroom Singara.png" alt="Mushroom Singara"
@@ -2014,7 +2016,7 @@
            CARD 8: Immunity Boost Smoothie
            Image: Mushroom Smoothie.png
       ══════════════════════════════════════════════ -->
-      <div class="rp-card fi" data-category="drink" data-cuisine="drink">
+      <div class="rp-card fi" data-category="drink" data-cuisine="drink" onclick="openRecipe('smoothie')">
         <div class="rp-card-img">
           <div class="rp-card-img-inner">
             <img src="/Immunity Boost Smoothie.png" alt="Immunity Boost Smoothie"
@@ -2054,7 +2056,7 @@
 
 
       <!-- CARD 9: Mushroom Butter Masala (Indian) -->
-      <div class="rp-card fi" data-category="curry" data-cuisine="indian">
+      <div class="rp-card fi" data-category="curry" data-cuisine="indian" onclick="openRecipe('buttermasala')">
         <div class="rp-card-img">
           <div class="rp-card-img-inner">
             <img src="/Mushroom Butter Masala.png" alt="Mushroom Butter Masala" onerror="this.remove()">
@@ -2078,7 +2080,7 @@
       </div>
 
       <!-- CARD 10: Mushroom Palak (Indian) -->
-      <div class="rp-card fi" data-category="curry" data-cuisine="indian">
+      <div class="rp-card fi" data-category="curry" data-cuisine="indian" onclick="openRecipe('palak')">
         <div class="rp-card-img">
           <div class="rp-card-img-inner">
             <img src="/Mushroom Palak.png" alt="Mushroom Palak" onerror="this.remove()">
@@ -2102,7 +2104,7 @@
       </div>
 
       <!-- CARD 11: Thai Basil Mushroom -->
-      <div class="rp-card fi" data-category="dry" data-cuisine="thai">
+      <div class="rp-card fi" data-category="dry" data-cuisine="thai" onclick="openRecipe('thaibasil')">
         <div class="rp-card-img">
           <div class="rp-card-img-inner">
             <img src="/Thai Basil Mushroom.png" alt="Thai Basil Mushroom" onerror="this.remove()">
@@ -2126,7 +2128,7 @@
       </div>
 
       <!-- CARD 12: Tom Kha Mushroom -->
-      <div class="rp-card fi" data-category="soup" data-cuisine="thai">
+      <div class="rp-card fi" data-category="soup" data-cuisine="thai" onclick="openRecipe('tomkha')">
         <div class="rp-card-img">
           <div class="rp-card-img-inner">
             <img src="/Tom Kha Mushroom.png" alt="Tom Kha Mushroom Soup" onerror="this.remove()">
@@ -2150,7 +2152,7 @@
       </div>
 
       <!-- CARD 13: Mushroom Fried Rice (Chinese) -->
-      <div class="rp-card fi" data-category="rice" data-cuisine="chinese">
+      <div class="rp-card fi" data-category="rice" data-cuisine="chinese" onclick="openRecipe('friedrice')">
         <div class="rp-card-img">
           <div class="rp-card-img-inner">
             <img src="/Mushroom Fried Rice.png" alt="Mushroom Fried Rice" onerror="this.remove()">

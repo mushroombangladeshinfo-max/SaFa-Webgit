@@ -70,6 +70,12 @@ body{font-family:'DM Sans','Hind Siliguri',sans-serif;background:var(--bg);color
 .live-chip{display:flex;align-items:center;gap:7px;font-size:.72rem;color:var(--txt2)}
 .live-dot{width:7px;height:7px;border-radius:50%;background:var(--g);flex-shrink:0;position:relative}
 .live-dot::after{content:'';position:absolute;inset:-3px;border-radius:50%;border:1.5px solid var(--g);opacity:0;animation:livepulse 2.2s ease-in-out infinite;will-change:opacity}
+.live-chip.demo{color:var(--gold)}
+.live-chip.demo .live-dot{background:var(--gold);animation:none}
+.live-chip.demo .live-dot::after{display:none}
+.demo-banner{display:flex;align-items:center;gap:10px;background:var(--golddim);border:1px solid rgba(201,168,76,.35);border-radius:var(--r2);padding:11px 16px;margin-bottom:18px;font-size:.82rem;color:var(--txt)}
+.demo-banner strong{color:var(--gold)}
+.demo-banner svg{flex-shrink:0;width:18px;height:18px;color:var(--gold)}
 @keyframes livepulse{0%,100%{opacity:0}45%,55%{opacity:.55}}
 .sb-clock{font-family:'DM Mono','Hind Siliguri',monospace;font-size:.72rem;color:var(--txt3)}
 
@@ -384,9 +390,9 @@ body{font-family:'DM Sans','Hind Siliguri',sans-serif;background:var(--bg);color
   </nav>
 
   <div class="sb-footer">
-    <div class="live-chip">
+    <div class="live-chip demo">
       <div class="live-dot"></div>
-      <span>Live · Updates every 5s</span>
+      <span>Demo Mode · Simulated data</span>
     </div>
     <div class="sb-clock" id="sb-clock">--:--:--</div>
   </div>
@@ -409,12 +415,17 @@ body{font-family:'DM Sans','Hind Siliguri',sans-serif;background:var(--bg);color
 
   <div class="content">
 
+    <div class="demo-banner">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/></svg>
+      <span><strong>Demo Mode:</strong> all room readings, batches, and alerts on this page are simulated for preview — no IoT sensors are connected yet. Only the Outdoor Weather panel below uses live data.</span>
+    </div>
+
     <!-- ══════════════════════════════════
          SECTION: OVERVIEW
     ══════════════════════════════════ -->
     <div class="section active fin" id="section-overview">
       <div class="sh">
-        <div><div class="sh-title">Farm Overview</div><div class="sh-sub">Real-time status across all grow rooms</div></div>
+        <div><div class="sh-title">Farm Overview</div><div class="sh-sub">Simulated preview — no sensors connected yet</div></div>
         <div class="sh-right">
           <span id="ov-date" class="topbar-meta"></span>
           <button type="button" class="btn-add" onclick="openAlertModal()">
@@ -995,10 +1006,34 @@ CREATE POLICY "admin_all" ON alert_log         FOR ALL TO authenticated USING (t
 // with async calls to your Supabase tables:
 //   const { data } = await supabase.from('sensor_readings').select('*').order('created_at',{ascending:false}).limit(288)
 
+// Local Y-M-D, not toISOString() — that converts to UTC and shifts the
+// date backward for timezones ahead of UTC (Bangladesh is +6). This block
+// isn't a module, so it can't import src/date-utils.js — same fix inlined.
+function localDateStr(d = new Date()) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+// `active:false` hides a room from every card, dropdown, and count on this
+// page without deleting its config — flip it back to true (or remove the
+// key) once that room actually comes into use.
 const ROOMS = {
-  A: { name:'Room A', species:'Fresh Oyster', temp:24.5, humidity:89, co2:850,  o2:20.2, airflow:0.42, vpd:0.38 },
-  B: { name:'Room B', species:'Dried Batch',  temp:26.1, humidity:92, co2:1150, o2:19.8, airflow:0.31, vpd:0.29 },
-  C: { name:'Room C', species:'Spawn Prep',   temp:23.8, humidity:87, co2:780,  o2:20.5, airflow:0.55, vpd:0.44 },
+  A: { name:'Room A', species:'Clean Spawn',          temp:24.5, humidity:89, co2:850,  o2:20.2, airflow:0.42, vpd:0.38, active:true  },
+  B: { name:'Room B', species:'Mold/Infected Spawn',  temp:26.1, humidity:92, co2:1150, o2:19.8, airflow:0.31, vpd:0.29, active:true  },
+  C: { name:'Room C', species:'Not in use',           temp:23.8, humidity:87, co2:780,  o2:20.5, airflow:0.55, vpd:0.44, active:false },
+}
+const activeRoomEntries = () => Object.entries(ROOMS).filter(([,r]) => r.active !== false)
+const activeRoomKeys    = () => activeRoomEntries().map(([k]) => k)
+
+// Hides inactive rooms' tab buttons (static HTML in the Environment
+// section) and steers the selected room away from a hidden one.
+function applyRoomVisibility() {
+  document.querySelectorAll('#room-tabs [data-room]').forEach(btn => {
+    btn.style.display = (ROOMS[btn.dataset.room]?.active === false) ? 'none' : ''
+  })
+  if (ROOMS[selectedRoom]?.active === false) {
+    const fallback = activeRoomKeys()[0]
+    if (fallback) selectRoom(fallback)
+  }
 }
 
 const OPTIMAL = {
@@ -1566,7 +1601,7 @@ function initCharts() {
 function patchRoomCards() {
   const badgeMap = {ok:'b-ok', warn:'b-warn', crit:'b-crit'}
   const lblMap   = {ok:'Optimal', warn:'Warning', crit:'Critical'}
-  Object.entries(ROOMS).forEach(([k, r]) => {
+  activeRoomEntries().forEach(([k, r]) => {
     const ts = getStatus('temp', r.temp)
     const hs = getStatus('humidity', r.humidity)
     const cs = getStatus('co2', r.co2)
@@ -1635,14 +1670,15 @@ function simulateLiveData() {
 //  EXPORT CSV
 // ══════════════════════════════════════
 function exportCSV() {
-  const now   = new Date().toISOString().slice(0,19).replace('T',' ')
-  const date  = now.slice(0,10)
+  const _n = new Date()
+  const now   = `${localDateStr(_n)} ${String(_n.getHours()).padStart(2,'0')}:${String(_n.getMinutes()).padStart(2,'0')}:${String(_n.getSeconds()).padStart(2,'0')}`
+  const date  = localDateStr(_n)
   let csv = ''
 
   /* ── Section 1: Current sensor snapshot ── */
   csv += 'SENSOR SNAPSHOT\n'
   csv += 'Timestamp,Room,Temperature (°C),Humidity (%RH),CO2 (ppm),O2 (%),Airflow (m/s),VPD (kPa)\n'
-  Object.entries(ROOMS).forEach(([k,r]) => {
+  activeRoomEntries().forEach(([k,r]) => {
     csv += [now, `"${r.name}"`, r.temp, r.humidity, r.co2, r.o2, r.airflow, r.vpd].join(',') + '\n'
   })
 
@@ -1816,7 +1852,7 @@ const STAGES = ['Inoculated','Colonising','Spawn Complete','Pinning','Fruiting',
 function openBatchModal(idx) {
   const isEdit = idx !== undefined
   const b = isEdit ? {...BATCHES[idx]} : { id:'', species:'', room:'A', stage:'Inoculated', col:0, days:0, est:30, status:'ok' }
-  const roomOpts = Object.entries(ROOMS).map(([k,r]) =>
+  const roomOpts = activeRoomEntries().map(([k,r]) =>
     `<option value="${k}" ${b.room===k?'selected':''}>${r.name}</option>`).join('')
   const stageOpts = STAGES.map(s =>
     `<option value="${s}" ${b.stage===s?'selected':''}>${s}</option>`).join('')
@@ -1876,12 +1912,12 @@ function openBatchModal(idx) {
 // ══════════════════════════════════════
 function openHarvestModal(idx) {
   const isEdit = idx !== undefined
-  const today  = new Date().toISOString().slice(0, 10)
+  const today  = localDateStr()
   const h = isEdit ? {...HARVEST_LOG[idx]}
     : { batch:'', flush:1, date:today, kg:'', be:'', room:'A', notes:'' }
   const batchOpts = BATCHES.map(b =>
     `<option value="${b.id}" ${h.batch===b.id?'selected':''}>${b.id}</option>`).join('')
-  const roomOpts = Object.entries(ROOMS).map(([k,r]) =>
+  const roomOpts = activeRoomEntries().map(([k,r]) =>
     `<option value="${k}" ${h.room===k?'selected':''}>${r.name}</option>`).join('')
   openModal(isEdit ? `Edit Harvest · ${h.batch} F${h.flush}` : 'Log Harvest Event', `
     <div class="form-g2">
@@ -1935,7 +1971,7 @@ function openHarvestModal(idx) {
 //  MODAL: ALERT
 // ══════════════════════════════════════
 function openAlertModal() {
-  const roomOpts = Object.entries(ROOMS).map(([k,r]) =>
+  const roomOpts = activeRoomEntries().map(([k,r]) =>
     `<option value="${k}">${r.name}</option>`).join('')
   openModal('Add Alert', `
     <div class="form-group"><label class="form-label">Message</label>
@@ -2058,7 +2094,7 @@ function renderHarvestLog() {
 // Override renderRoomCards to add edit icon
 function renderRoomCards() {
   const wrap = document.getElementById('room-cards'); if (!wrap) return
-  wrap.innerHTML = Object.entries(ROOMS).map(([k, r]) => {
+  wrap.innerHTML = activeRoomEntries().map(([k, r]) => {
     const ts = getStatus('temp',r.temp), hs = getStatus('humidity',r.humidity), cs = getStatus('co2',r.co2)
     const overall = [ts,hs,cs].includes('crit') ? 'crit' : [ts,hs,cs].includes('warn') ? 'warn' : 'ok'
     const badgeMap = {ok:'b-ok',warn:'b-warn',crit:'b-crit'}
@@ -2134,6 +2170,8 @@ setInterval(fetchWeather, 30 * 60 * 1000) /* refresh every 30 min */
 // ══════════════════════════════════════
 document.addEventListener('DOMContentLoaded', () => {
   loadData()
+  applyRoomVisibility()
+  const kr = document.getElementById('kpi-rooms'); if (kr) kr.textContent = activeRoomKeys().length
   renderRoomCards()
   renderAlerts()
   renderGauges()

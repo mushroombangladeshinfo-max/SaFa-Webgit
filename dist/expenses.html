@@ -26,7 +26,7 @@
 
     /* ── Layout ── */
     .page{max-width:1200px;margin:0 auto;padding:28px 24px 64px;}
-    .page-header{margin-bottom:24px;}
+    .page-header{margin-bottom:24px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;}
     .page-title{font-family:'Syne','Hind Siliguri',sans-serif;font-size:22px;font-weight:700;color:var(--c);margin:0 0 4px;}
     .page-sub{font-size:12px;color:var(--cl);}
 
@@ -49,6 +49,11 @@
 
     /* ── Filter bar ── */
     .filter-bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:20px;}
+    .f-preset-btn{font-family:'DM Sans','Hind Siliguri',sans-serif;font-size:11px;font-weight:600;padding:7px 11px;border-radius:5px;cursor:pointer;border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.03);color:rgba(245,239,230,.55);transition:all .15s;white-space:nowrap;}
+    .f-preset-btn:hover{border-color:rgba(196,154,60,.35);color:var(--al);background:rgba(196,154,60,.06);}
+    .f-preset-btn.active{border-color:rgba(196,154,60,.5);color:var(--al);background:rgba(196,154,60,.11);}
+    .f-clear-btn{font-family:'Syne','Hind Siliguri',sans-serif;font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(245,239,230,.38);background:none;border:none;cursor:pointer;padding:6px 4px;transition:color .2s;}
+    .f-clear-btn:hover{color:var(--al);}
     .filter-select,.filter-input{background:var(--bg2);border:1px solid var(--border);border-radius:6px;color:var(--c);font-family:'DM Sans','Hind Siliguri',sans-serif;font-size:13px;padding:8px 12px;outline:none;}
     .filter-select:focus,.filter-input:focus{border-color:rgba(196,154,60,.4);}
     .btn{font-family:'Syne','Hind Siliguri',sans-serif;font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:9px 16px;border-radius:6px;border:1px solid var(--border);background:rgba(255,255,255,.04);color:var(--cl);cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:6px;}
@@ -123,17 +128,23 @@
     .label-optional{opacity:.5;font-weight:400;text-transform:none;letter-spacing:0;}
     .readonly-preview{padding:9px 11px;border-radius:6px;border:1px solid var(--border);background:var(--bg3);color:var(--al);font-family:'DM Mono','Hind Siliguri',monospace;font-size:13px;}
   </style>
-  <script type="module" crossorigin src="/assets/expenses-Cgr6lsW6.js"></script>
+  <script type="module" crossorigin src="/assets/expenses-DT6XGql7.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
   <link rel="modulepreload" crossorigin href="/assets/admin-auth-Bm8-hV4r.js">
-  <link rel="modulepreload" crossorigin href="/assets/admin-nav-DxntCGRp.js">
+  <link rel="modulepreload" crossorigin href="/assets/admin-nav-Di4tgBFq.js">
+  <link rel="modulepreload" crossorigin href="/assets/date-utils-BQiP-iFW.js">
+  <link rel="modulepreload" crossorigin href="/assets/filter-state-BDSbD5N3.js">
+  <link rel="modulepreload" crossorigin href="/assets/realtime-D7K--cdb.js">
 </head>
 <body>
 
   <div class="page">
     <div class="page-header">
-      <div class="page-title">Expense <span class="al-color">Tracker</span></div>
-      <div class="page-sub">Daily farm expenses + one-off capital costs</div>
+      <div>
+        <div class="page-title">Expense <span class="al-color">Tracker</span></div>
+        <div class="page-sub">Daily farm expenses + one-off capital costs</div>
+      </div>
+      <span class="rt-indicator" id="rt-indicator"><span class="rt-dot"></span>Live</span>
     </div>
 
     <!-- Tabs -->
@@ -169,6 +180,10 @@
 
       <!-- Filter -->
       <div class="filter-bar">
+        <button type="button" class="f-preset-btn" id="daily-preset-today" onclick="setDailyPreset('today')">Today</button>
+        <button type="button" class="f-preset-btn" id="daily-preset-this_week" onclick="setDailyPreset('this_week')">This Week</button>
+        <button type="button" class="f-preset-btn active" id="daily-preset-this_month" onclick="setDailyPreset('this_month')">This Month</button>
+        <button type="button" class="f-preset-btn" id="daily-preset-this_year" onclick="setDailyPreset('this_year')">This Year</button>
         <input type="date" class="filter-input" id="daily-from" aria-label="From date" title="From date">
         <input type="date" class="filter-input" id="daily-to" aria-label="To date" title="To date">
         <button type="button" class="btn" id="daily-filter-btn">Apply</button>
@@ -260,6 +275,24 @@
           <button type="button" class="btn primary" id="oe-save-btn">Save Expense</button>
           <button type="button" class="btn" id="oe-cancel-btn">Cancel</button>
         </div>
+      </div>
+
+      <!-- Filter -->
+      <div class="filter-bar">
+        <input type="text" class="filter-input" id="oe-search" placeholder="Search description or vendor…">
+        <select class="filter-select" id="oe-filter-cat">
+          <option value="">All Categories</option>
+          <option>Equipment</option>
+          <option>Rent</option>
+          <option>Repair</option>
+          <option>Utilities</option>
+          <option>Marketing</option>
+          <option>Transport</option>
+          <option>Other</option>
+        </select>
+        <input type="date" class="filter-input" id="oe-from" title="From date">
+        <input type="date" class="filter-input" id="oe-to" title="To date">
+        <button type="button" class="f-clear-btn" id="oe-clear-btn">✕ Clear</button>
       </div>
 
       <!-- KPIs -->

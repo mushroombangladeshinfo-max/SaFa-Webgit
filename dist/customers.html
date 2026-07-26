@@ -34,10 +34,16 @@
     /* ── Toolbar ── */
     .toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:18px;}
     .f-search{background:var(--bg2);border:1px solid var(--border);border-radius:6px;color:var(--c);font-family:'DM Sans','Hind Siliguri',sans-serif;font-size:13px;padding:9px 13px;outline:none;min-width:220px;}
+    .filter-date-sep{color:var(--cl);font-size:12px;}
     .f-search:focus{border-color:rgba(196,154,60,.4);}
     .f-select{background:var(--bg2);border:1px solid var(--border);border-radius:6px;color:var(--c);font-family:'DM Sans','Hind Siliguri',sans-serif;font-size:13px;padding:9px 12px;outline:none;cursor:pointer;}
     .f-action-btn{font-family:'Syne','Hind Siliguri',sans-serif;font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:9px 16px;border-radius:5px;cursor:pointer;transition:all .2s;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.03);color:rgba(245,239,230,.65);display:inline-flex;align-items:center;gap:6px;}
     .f-action-btn:hover{border-color:rgba(255,255,255,.25);color:var(--c);background:rgba(255,255,255,.06);}
+    .f-preset-btn{font-family:'DM Sans','Hind Siliguri',sans-serif;font-size:11px;font-weight:600;padding:7px 11px;border-radius:5px;cursor:pointer;border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.03);color:rgba(245,239,230,.55);transition:all .15s;white-space:nowrap;}
+    .f-preset-btn:hover{border-color:rgba(196,154,60,.35);color:var(--al);background:rgba(196,154,60,.06);}
+    .f-preset-btn.active{border-color:rgba(196,154,60,.5);color:var(--al);background:rgba(196,154,60,.11);}
+    .f-clear-btn{font-family:'Syne','Hind Siliguri',sans-serif;font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(245,239,230,.38);background:none;border:none;cursor:pointer;padding:6px 4px;transition:color .2s;}
+    .f-clear-btn:hover{color:var(--al);}
     .f-action-btn.green-btn{color:var(--green);border-color:rgba(95,207,128,.25);background:rgba(95,207,128,.05);}
     .f-action-btn.green-btn:hover{background:rgba(95,207,128,.12);border-color:rgba(95,207,128,.5);}
     .result-count{font-size:12px;color:var(--cl);margin-left:auto;}
@@ -90,16 +96,20 @@
     .toast.info{background:#122018;border:1px solid rgba(196,154,60,.3);color:var(--al);}
     .toast.error{background:#1e0d08;border:1px solid rgba(224,90,43,.3);color:var(--red);}
   </style>
-  <script type="module" crossorigin src="/assets/customers-DsVizZWM.js"></script>
+  <script type="module" crossorigin src="/assets/customers-C_1na_32.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
   <link rel="modulepreload" crossorigin href="/assets/admin-auth-Bm8-hV4r.js">
-  <link rel="modulepreload" crossorigin href="/assets/admin-nav-DxntCGRp.js">
+  <link rel="modulepreload" crossorigin href="/assets/admin-nav-Di4tgBFq.js">
+  <link rel="modulepreload" crossorigin href="/assets/date-utils-BQiP-iFW.js">
+  <link rel="modulepreload" crossorigin href="/assets/filter-state-BDSbD5N3.js">
+  <link rel="modulepreload" crossorigin href="/assets/realtime-D7K--cdb.js">
 </head>
 <body>
 
   <div class="page">
     <div class="page-header">
       <h1 class="page-title">Customer <em>Directory</em></h1>
+      <span class="rt-indicator" id="rt-indicator"><span class="rt-dot"></span>Live</span>
       <button class="f-action-btn" id="export-btn">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
         Export CSV
@@ -128,6 +138,13 @@
         <option value="repeat">Repeat (2+ orders)</option>
         <option value="new">New (1 order)</option>
       </select>
+      <button type="button" class="f-preset-btn" id="preset-today" onclick="setPreset('today')">Today</button>
+      <button type="button" class="f-preset-btn" id="preset-this_week" onclick="setPreset('this_week')">This Week</button>
+      <button type="button" class="f-preset-btn" id="preset-this_month" onclick="setPreset('this_month')">This Month</button>
+      <input type="date" class="f-search" id="date-from" title="Last order from">
+      <span class="filter-date-sep">to</span>
+      <input type="date" class="f-search" id="date-to" title="Last order to">
+      <button type="button" class="f-clear-btn" id="clear-filters-btn">✕ Clear</button>
       <span class="result-count" id="result-count"></span>
     </div>
 

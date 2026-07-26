@@ -42,6 +42,7 @@ import {
   updateTotals,
   updateCheckoutQty,
   initAddToCartButtons,
+  initProductCardLinks,
 } from './ui.js';
 
 
@@ -111,6 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initProductFilters();   /* index.html product grid filter tabs        */
   initFadeObserver();     /* .fi elements fade in on scroll             */
   initAddToCartButtons(); /* Wire data-* add-to-cart buttons            */
+  initProductCardLinks(); /* Whole product card navigates to detail page */
   renderItems();          /* checkout.html order summary (no-op elsewhere) */
   syncProductPrices();    /* Patch prices + stock from Supabase           */
 

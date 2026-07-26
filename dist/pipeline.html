@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <link rel="icon" type="image/png" href="/favicon.png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>B2B Pipeline — SaFa Naturals</title>
+  <title>B2B Customers — SaFa Naturals</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -50,6 +50,13 @@
     .filter-select,.search-input{background:var(--bg2);border:1px solid var(--border);border-radius:6px;color:var(--c);font-family:'DM Sans','Hind Siliguri',sans-serif;font-size:13px;padding:8px 12px;outline:none;}
     .filter-select:focus,.search-input:focus{border-color:rgba(196,154,60,.4);}
     .search-input{min-width:200px;}
+    .filter-date-sep{color:var(--cl);font-size:12px;}
+    .search-input.date-narrow{min-width:0;}
+    .f-preset-btn{font-family:'DM Sans','Hind Siliguri',sans-serif;font-size:11px;font-weight:600;padding:7px 11px;border-radius:5px;cursor:pointer;border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.03);color:rgba(245,239,230,.55);transition:all .15s;white-space:nowrap;}
+    .f-preset-btn:hover{border-color:rgba(196,154,60,.35);color:var(--al);background:rgba(196,154,60,.06);}
+    .f-preset-btn.active{border-color:rgba(196,154,60,.5);color:var(--al);background:rgba(196,154,60,.11);}
+    .f-clear-btn{font-family:'Syne','Hind Siliguri',sans-serif;font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(245,239,230,.38);background:none;border:none;cursor:pointer;padding:6px 4px;transition:color .2s;}
+    .f-clear-btn:hover{color:var(--al);}
 
     /* ── Add / Edit modal ── */
     .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:500;padding:20px;}
@@ -99,19 +106,23 @@
     .scroll-x{overflow-x:auto;}
     .th-r{text-align:right;}
   </style>
-  <script type="module" crossorigin src="/assets/pipeline-5Ges4f_8.js"></script>
+  <script type="module" crossorigin src="/assets/pipeline-o65H8KaC.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
   <link rel="modulepreload" crossorigin href="/assets/admin-auth-Bm8-hV4r.js">
-  <link rel="modulepreload" crossorigin href="/assets/admin-nav-DxntCGRp.js">
+  <link rel="modulepreload" crossorigin href="/assets/admin-nav-Di4tgBFq.js">
+  <link rel="modulepreload" crossorigin href="/assets/date-utils-BQiP-iFW.js">
+  <link rel="modulepreload" crossorigin href="/assets/filter-state-BDSbD5N3.js">
+  <link rel="modulepreload" crossorigin href="/assets/realtime-D7K--cdb.js">
 </head>
 <body>
 
   <div class="page">
     <div class="page-header">
       <div>
-        <div class="page-title">B2B <span class="al-color">Pipeline</span></div>
+        <div class="page-title">B2B <span class="al-color">Customers</span></div>
         <div class="page-sub">Restaurants, hotels, cafes, retailers — track every lead</div>
       </div>
+      <span class="rt-indicator" id="rt-indicator"><span class="rt-dot"></span>Live</span>
       <button class="btn primary" id="add-lead-btn">+ Add Lead</button>
     </div>
 
@@ -143,8 +154,16 @@
         <option>Cafe</option>
         <option>Pharmacy</option>
         <option>Retailer</option>
+        <option>Wholesaler</option>
         <option>Other</option>
       </select>
+      <button type="button" class="f-preset-btn" id="preset-today" onclick="setPreset('today')">Today</button>
+      <button type="button" class="f-preset-btn" id="preset-this_week" onclick="setPreset('this_week')">This Week</button>
+      <button type="button" class="f-preset-btn" id="preset-this_month" onclick="setPreset('this_month')">This Month</button>
+      <input type="date" class="search-input date-narrow" id="date-from" title="Last contact from">
+      <span class="filter-date-sep">to</span>
+      <input type="date" class="search-input date-narrow" id="date-to" title="Last contact to">
+      <button type="button" class="f-clear-btn" id="clear-filters-btn">✕ Clear</button>
       <button class="btn" id="export-btn">↓ CSV</button>
     </div>
 
@@ -206,6 +225,7 @@
             <option>Cafe</option>
             <option>Pharmacy</option>
             <option>Retailer</option>
+            <option>Wholesaler</option>
             <option>Other</option>
           </select>
         </div>
