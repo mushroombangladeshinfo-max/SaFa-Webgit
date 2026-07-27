@@ -17,21 +17,28 @@
   <meta property="og:site_name"   content="SaFa Naturals" />
   <link rel="icon" type="image/png" href="/favicon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Hind+Siliguri:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Syne:wght@600;700;800&family=DM+Sans:wght@400;500;600;700&family=Hind+Siliguri:wght@400;500;600&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+    /* Same token NAMES this file already used throughout (--green, --cream,
+       --ink, etc.) but remapped to the site's real dark-theme palette from
+       style.css (--g900/--c/--t/--a family) — this page previously defined
+       its own disconnected light theme, so a customer checking an order
+       landed on what read as a different product mid-purchase-anxiety. */
     :root {
-      --green:   #1a472a;
-      --green2:  #2d6a4f;
-      --leaf:    #52b788;
-      --cream:   #faf7f2;
-      --white:   #ffffff;
-      --ink:     #1c1c1e;
-      --muted:   #6b7280;
-      --border:  #e5e7eb;
-      --shadow:  0 4px 24px rgba(0,0,0,.08);
+      --green:   #b85c38;  /* was dark green — now terracotta, the site's real primary CTA/accent */
+      --green2:  #d0724f;  /* terracotta hover/light, gradient partner for --green */
+      --leaf:    #d9b254;  /* light gold accent — active/success highlight states */
+      --cream:   #060d09;  /* was light cream — now the site's actual dark page background */
+      --white:   #0e1a13;  /* was white card bg — now the dark card-level background */
+      --ink:     #f5efe6;  /* was near-black text — now the site's warm off-white text */
+      --muted:   #d4cdc4;  /* muted text, raised for WCAG AA on dark bg */
+      --border:  rgba(255,255,255,.1);
+      --shadow:  0 4px 24px rgba(0,0,0,.4);
       --radius:  16px;
+      --fd: 'Cormorant Garamond', 'Hind Siliguri', serif;   /* display / headings */
+      --fl: 'Syne', 'Hind Siliguri', sans-serif;             /* labels / UI / buttons */
     }
 
     html { scroll-behavior: smooth; }
@@ -45,39 +52,15 @@
       flex-direction: column;
     }
 
-    /* ── NAV ── */
-    nav {
-      position: sticky; top: 0; z-index: 100;
-      background: var(--green);
-      padding: 0 24px;
-      height: 62px;
-      display: flex; align-items: center; justify-content: space-between;
-      box-shadow: 0 2px 12px rgba(0,0,0,.18);
-    }
-    .nav-brand {
-      display: flex; align-items: center; gap: 10px;
-      text-decoration: none;
-    }
-    .nav-brand img { height: 36px; border-radius: 8px; }
-    .nav-brand span {
-      font-size: 1.15rem; font-weight: 700; color: #fff;
-      letter-spacing: -.3px;
-    }
-    .nav-back {
-      display: flex; align-items: center; gap: 6px;
-      color: rgba(255,255,255,.8); text-decoration: none;
-      font-size: .9rem; font-weight: 500;
-      transition: color .2s;
-    }
-    .nav-back:hover { color: #fff; }
-    .nav-back svg { width: 16px; height: 16px; }
-
-    /* ── HERO ── */
+    /* ── HERO ──
+       Clears the shared fixed nav (110px/96px convention, matching
+       account.html's .ac-page) since the nav is no longer part of normal
+       document flow here. */
     .hero {
       background: linear-gradient(135deg, var(--green) 0%, var(--green2) 100%);
       color: #fff;
       text-align: center;
-      padding: 56px 24px 48px;
+      padding: 150px 24px 48px;
       position: relative;
       overflow: hidden;
     }
@@ -98,8 +81,9 @@
     }
     .hero-icon svg { width: 32px; height: 32px; }
     .hero h1 {
-      font-size: clamp(1.6rem, 5vw, 2.2rem);
-      font-weight: 700; letter-spacing: -.5px;
+      font-family: var(--fd);
+      font-size: clamp(2rem, 6vw, 2.6rem);
+      font-weight: 600; letter-spacing: -.5px;
       margin-bottom: 10px;
     }
     .hero p {
@@ -157,16 +141,16 @@
       font-size: 1rem; /* ≥16px — stops iOS Safari auto-zoom on focus */
       font-family: 'DM Sans', 'Hind Siliguri', sans-serif;
       color: var(--ink);
-      background: var(--cream);
+      background: rgba(255,255,255,.04);
       transition: border-color .2s, box-shadow .2s;
       outline: none;
     }
     .field input:focus {
       border-color: var(--leaf);
-      box-shadow: 0 0 0 3px rgba(82,183,136,.15);
-      background: #fff;
+      box-shadow: 0 0 0 3px rgba(217,178,84,.18);
+      background: rgba(255,255,255,.07);
     }
-    .field input::placeholder { color: #b0b8c1; }
+    .field input::placeholder { color: rgba(245,239,230,.3); }
 
     .btn-track {
       width: 100%;
@@ -200,15 +184,24 @@
 
     /* ── ERROR ── */
     .error-banner {
-      background: #fef2f2; border: 1.5px solid #fca5a5;
-      color: #dc2626; border-radius: 10px;
+      background: rgba(224,90,43,.08); border: 1.5px solid rgba(224,90,43,.35);
+      color: #ff9166; border-radius: 10px;
       padding: 13px 16px;
       font-size: .875rem; font-weight: 500;
-      display: none; align-items: center; gap: 8px;
+      display: none; flex-direction: column; gap: 8px;
       margin-top: 14px;
     }
     .error-banner.show { display: flex; }
+    .error-banner-row { display: flex; align-items: center; gap: 8px; }
     .error-banner svg { width: 18px; height: 18px; flex-shrink: 0; }
+    /* Immediate next step for an anxious customer, not just the unrelated
+       floating WhatsApp button elsewhere on the page. */
+    .error-banner-wa {
+      margin-left: 26px; /* aligns under the text, past the icon+gap */
+      font-size: .8rem; font-weight: 700;
+      color: #25d366; text-decoration: none;
+    }
+    .error-banner-wa:hover { text-decoration: underline; }
 
     /* ── RESULT CARD ── */
     .result-card {
@@ -250,12 +243,14 @@
       letter-spacing: .3px; white-space: nowrap;
       flex-shrink: 0;
     }
-    .badge-pending    { background: #fef9c3; color: #854d0e; }
-    .badge-confirmed  { background: #dbeafe; color: #1d4ed8; }
-    .badge-processing { background: #ede9fe; color: #6d28d9; }
-    .badge-shipped    { background: #d1fae5; color: #065f46; }
-    .badge-delivered  { background: #dcfce7; color: #14532d; }
-    .badge-cancelled  { background: #fee2e2; color: #991b1b; }
+    /* Tinted-border-on-dark pattern (not filled pastel bg) — matches how
+       the rest of the site's dark UI represents status badges. */
+    .badge-pending    { background: rgba(234,179,8,.12);  color: #fbbf24; }
+    .badge-confirmed  { background: rgba(59,130,246,.12); color: #60a5fa; }
+    .badge-processing { background: rgba(139,92,246,.12); color: #a78bfa; }
+    .badge-shipped    { background: rgba(16,185,129,.12); color: #34d399; }
+    .badge-delivered  { background: rgba(34,197,94,.12);  color: #4ade80; }
+    .badge-cancelled  { background: rgba(224,90,43,.12);  color: #ff9166; }
 
     /* ── PROGRESS STEPPER ── */
     .stepper {
@@ -312,14 +307,14 @@
 
     /* ── CANCELLED STATE ── */
     .cancelled-banner {
-      background: #fef2f2;
+      background: rgba(224,90,43,.08);
       padding: 16px 20px;
       display: flex; align-items: center; gap: 12px;
       border-radius: 10px;
       margin-top: 8px;
     }
-    .cancelled-banner svg { width: 24px; height: 24px; color: #dc2626; flex-shrink: 0; }
-    .cancelled-banner p { font-size: .875rem; color: #991b1b; font-weight: 500; }
+    .cancelled-banner svg { width: 24px; height: 24px; color: #ff9166; flex-shrink: 0; }
+    .cancelled-banner p { font-size: .875rem; color: #ff9166; font-weight: 500; }
 
     /* ── DETAIL BODY ── */
     .detail-body { padding: 24px 28px; }
@@ -361,14 +356,17 @@
     }
     .item-qty {
       font-size: .8rem; color: var(--muted);
-      background: var(--cream); border-radius: 6px;
+      background: rgba(255,255,255,.06); border-radius: 6px;
       padding: 2px 8px; font-weight: 600;
     }
     .item-price { font-size: .9rem; font-weight: 700; color: var(--green); }
 
-    /* ── TOTALS ── */
+    /* ── TOTALS ──
+       Uses a lighter tint than the card, not --cream (the page-background
+       token) — this box needs to stand out from its card, not recede into
+       it. */
     .totals {
-      background: var(--cream);
+      background: rgba(255,255,255,.04);
       border-radius: 10px;
       padding: 14px 16px;
       margin-bottom: 24px;
@@ -412,26 +410,26 @@
       cursor: pointer; text-decoration: none;
       transition: background .2s, transform .15s;
     }
-    .btn-home:hover { background: #eff7f3; transform: translateY(-1px); }
+    .btn-home:hover { background: rgba(255,255,255,.06); transform: translateY(-1px); }
 
     /* ── TIPS ── */
     .tips {
-      background: #f0fdf4;
-      border: 1.5px solid #bbf7d0;
+      background: rgba(95,207,128,.06);
+      border: 1.5px solid rgba(95,207,128,.22);
       border-radius: 12px;
       padding: 16px 20px;
       margin-top: 24px;
     }
     .tips h4 {
       font-size: .85rem; font-weight: 700;
-      color: #15803d; margin-bottom: 10px;
+      color: #5fcf80; margin-bottom: 10px;
       display: flex; align-items: center; gap: 6px;
     }
     .tips ul {
       list-style: none; display: flex; flex-direction: column; gap: 6px;
     }
     .tips li {
-      font-size: .82rem; color: #166534;
+      font-size: .82rem; color: rgba(245,239,230,.75);
       font-family: 'Hind Siliguri', sans-serif;
       display: flex; align-items: flex-start; gap: 8px;
     }
@@ -449,35 +447,49 @@
     footer a { color: var(--green); text-decoration: none; font-weight: 600; }
 
     @media (max-width: 480px) {
-      .hero { padding: 40px 16px 36px; }
+      .hero { padding: 130px 16px 36px; }
       .search-card, .detail-body { padding: 24px 20px; }
       .status-header { padding: 20px 20px 16px; }
       .info-grid { grid-template-columns: 1fr; gap: 10px; }
       .step-label { font-size: .68rem; }
     }
   </style>
-  <script type="module" crossorigin src="/assets/track-CVAevHr2.js"></script>
+  <script type="module" crossorigin src="/assets/track-OaMDvyr4.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
   <link rel="modulepreload" crossorigin href="/assets/index-B-jIxwbw.js">
+  <link rel="modulepreload" crossorigin href="/assets/supabase-DFvBSl1A.js">
+  <link rel="modulepreload" crossorigin href="/assets/main-DHnC8REm.js">
+  <link rel="stylesheet" crossorigin href="/assets/supabase-CSaExd_Q.css">
 </head>
 <body>
   <!-- Google Tag Manager (noscript) -->
   <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PXG7HDXG" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <!-- End Google Tag Manager (noscript) -->
 
-<!-- NAV -->
-<nav>
-  <a href="/" class="nav-brand">
-    <img src="/favicon.png" alt="SaFa Naturals" />
-    <span>SaFa Naturals</span>
-  </a>
-  <a href="/" class="nav-back">
-    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
-    </svg>
-    হোমপেজ
-  </a>
+<!-- NAV (shared component, matches every other customer-facing page) -->
+<nav class="nav scrolled" id="nav">
+  <a href="index.html" class="nav-logo"><span class="logo-main">SaFa</span><span class="logo-sub">Naturals</span></a>
+  <ul class="nav-links">
+    <li><a href="index.html#products">Shop</a></li>
+    <li><a href="index.html#benefits">কেন মাশরুম</a></li>
+    <li><a href="index.html#story">Our Story</a></li>
+    <li><a href="recipes.html">Recipes</a></li>
+  </ul>
+  <div class="nav-right">
+    <button type="button" class="nav-icon" onclick="window.toggleCart()" aria-label="Open cart">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+      <span class="nav-dot"></span>
+    </button>
+    <button type="button" class="hamburger" id="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+  </div>
 </nav>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="index.html#products" onclick="window.closeMenu()">Shop</a>
+  <a href="index.html#benefits" onclick="window.closeMenu()">কেন মাশরুম</a>
+  <a href="index.html#story"    onclick="window.closeMenu()">Our Story</a>
+  <a href="recipes.html"        onclick="window.closeMenu()">Recipes</a>
+</div>
 
 <!-- HERO -->
 <div class="hero">
@@ -530,18 +542,23 @@
       </div>
     </div>
 
-    <button class="btn-track" id="btn-track" onclick="trackOrder()">
+    <button type="button" class="btn-track" id="btn-track" onclick="trackOrder()">
       <div class="spinner" id="spinner"></div>
       <span class="btn-label">অর্ডার খুঁজুন</span>
     </button>
 
     <div class="error-banner" id="error-banner">
-      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-        <circle cx="12" cy="12" r="10"/>
-        <line x1="12" y1="8" x2="12" y2="12"/>
-        <line x1="12" y1="16" x2="12.01" y2="16"/>
-      </svg>
-      <span id="error-text">কিছু একটা সমস্যা হয়েছে।</span>
+      <div class="error-banner-row">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        <span id="error-text">কিছু একটা সমস্যা হয়েছে।</span>
+      </div>
+      <a class="error-banner-wa" href="https://wa.me/+8801970099378?text=আমার%20অর্ডার%20খুঁজে%20পাচ্ছি%20না%2C%20সাহায্য%20করবেন%3F&utm_source=whatsapp&utm_medium=track_order&utm_campaign=order_not_found" target="_blank" rel="noopener">
+        সমস্যা হচ্ছে? WhatsApp-এ সরাসরি জিজ্ঞাসা করুন →
+      </a>
     </div>
   </div>
 
@@ -566,7 +583,7 @@
 </main>
 
 <footer>
-  &copy; 2024 SaFa Naturals. সকল স্বত্ব সংরক্ষিত।
+  &copy; 2026 SaFa Naturals. সকল স্বত্ব সংরক্ষিত।
   <br/>
   <a href="/">হোম</a> &nbsp;·&nbsp; <a href="/account.html">অ্যাকাউন্ট</a>
 </footer>

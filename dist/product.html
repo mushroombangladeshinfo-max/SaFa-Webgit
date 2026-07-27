@@ -35,17 +35,23 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+    /* Same token NAMES this file already used throughout (--green, --cream,
+       --ink, etc.) but remapped to the site's real dark-theme palette from
+       style.css (--g900/--c/--t/--a family) — this page previously defined
+       its own disconnected light theme, and since it's the highest-traffic
+       page on the whole site, every purchase-funnel visit landed on what
+       read as a different product. */
     :root {
-      --green:  #1a472a;
-      --green2: #2d6a4f;
-      --leaf:   #52b788;
-      --gold:   #c9a84c;
-      --cream:  #faf7f2;
-      --white:  #ffffff;
-      --ink:    #1c1c1e;
-      --muted:  #6b7280;
-      --border: #e5e7eb;
-      --shadow: 0 4px 24px rgba(0,0,0,.07);
+      --green:  #b85c38;  /* was dark green — now terracotta, the site's real primary CTA/accent */
+      --green2: #d0724f;  /* terracotta hover/light, gradient partner for --green */
+      --leaf:   #d9b254;  /* light gold accent — active/success highlight states */
+      --gold:   #c49a3c;  /* matches style.css's real --a gold token almost exactly */
+      --cream:  #060d09;  /* was light cream — now the site's actual dark page background */
+      --white:  #0e1a13;  /* was white card bg — now the dark card-level background */
+      --ink:    #f5efe6;  /* was near-black text — now the site's warm off-white text */
+      --muted:  #d4cdc4;  /* muted text, raised for WCAG AA on dark bg */
+      --border: rgba(255,255,255,.1);
+      --shadow: 0 4px 24px rgba(0,0,0,.4);
       --r:      14px;
     }
 
@@ -160,9 +166,9 @@
       font-size: .72rem; font-weight: 700; letter-spacing: .3px;
       padding: 3px 9px; border-radius: 20px;
     }
-    .stock-badge.in-stock  { background: #f0fdf4; color: var(--green); border: 1px solid #bbf7d0; }
-    .stock-badge.low-stock { background: #fffbeb; color: #b45309;     border: 1px solid #fde68a; }
-    .stock-badge.out-stock { background: #fef2f2; color: #b91c1c;     border: 1px solid #fecaca; }
+    .stock-badge.in-stock  { background: rgba(95,207,128,.1);  color: #4ade80; border: 1px solid rgba(95,207,128,.3); }
+    .stock-badge.low-stock { background: rgba(234,179,8,.1);   color: #fbbf24; border: 1px solid rgba(234,179,8,.3); }
+    .stock-badge.out-stock { background: rgba(224,90,43,.1);   color: #ff9166; border: 1px solid rgba(224,90,43,.35); }
 
     /* Price */
     .price-row {
@@ -190,8 +196,8 @@
     .prod-tag {
       font-size: .7rem; font-weight: 700; letter-spacing: .5px;
       padding: 4px 10px; border-radius: 20px;
-      background: #f0fdf4; color: var(--green);
-      border: 1px solid #bbf7d0;
+      background: rgba(184,92,56,.1); color: var(--green);
+      border: 1px solid rgba(184,92,56,.3);
     }
 
     /* Qty + Cart */
@@ -232,7 +238,9 @@
     .btn-add-cart:hover { opacity: .92; transform: translateY(-1px); }
     .btn-add-cart:active { transform: translateY(0); }
     .btn-add-cart.added {
-      background: linear-gradient(135deg, var(--leaf), #40916c);
+      /* Success state needs to stay green regardless of theme — --leaf is
+         now a gold accent color, not green, so it can't be reused here. */
+      background: linear-gradient(135deg, #5fcf80, #40916c);
     }
     .btn-add-cart svg { width: 18px; height: 18px; }
 
@@ -265,7 +273,7 @@
     /* Coming soon overlay */
     .coming-overlay {
       position: absolute; inset: 0;
-      background: rgba(250,247,242,.85);
+      background: rgba(6,13,9,.85);
       display: flex; align-items: center; justify-content: center;
       flex-direction: column; gap: 8px;
       -webkit-backdrop-filter: blur(2px);
@@ -326,7 +334,7 @@
     @media (max-width: 640px) { .about-grid { grid-template-columns: 1fr; } }
     .about-desc {
       font-size: 1rem; line-height: 1.8;
-      color: #374151;
+      color: var(--ink);
       font-family: 'Hind Siliguri', sans-serif;
     }
     .about-benefits { list-style: none; display: flex; flex-direction: column; gap: 12px; }
@@ -408,7 +416,7 @@
       font-size: .95rem; font-weight: 700; margin-bottom: 4px;
     }
     .how-content p {
-      font-size: .85rem; color: #4b5563; line-height: 1.6;
+      font-size: .85rem; color: var(--muted); line-height: 1.6;
       font-family: 'Hind Siliguri', sans-serif;
     }
 
@@ -454,7 +462,7 @@
     .review-stars { color: var(--gold); font-size: .9rem; }
     .review-date { font-size: .75rem; color: var(--muted); margin-top: 2px; }
     .review-body {
-      font-size: .875rem; color: #374151;
+      font-size: .875rem; color: var(--ink);
       line-height: 1.7;
       font-family: 'Hind Siliguri', sans-serif;
     }
@@ -489,7 +497,7 @@
     }
     .star-btn {
       background: none; border: none; cursor: pointer;
-      font-size: 1.6rem; color: #d1d5db;
+      font-size: 1.6rem; color: rgba(245,239,230,.25);
       transition: color .15s, transform .15s;
       padding: 2px;
     }
@@ -504,13 +512,13 @@
       width: 100%; padding: 11px 14px;
       border: 1.5px solid var(--border); border-radius: 8px;
       font-family: 'DM Sans', 'Hind Siliguri', sans-serif; font-size: .9rem;
-      color: var(--ink); background: var(--cream);
+      color: var(--ink); background: rgba(255,255,255,.04);
       outline: none; transition: border-color .2s;
       resize: none;
     }
     .rf-field input:focus, .rf-field textarea:focus {
       border-color: var(--leaf);
-      background: #fff;
+      background: rgba(255,255,255,.07);
     }
     .rf-row { display: flex; gap: 12px; }
     .rf-row .rf-field { flex: 1; }
@@ -645,7 +653,7 @@
       .star-btn { font-size: 1.9rem; padding: 6px; }
     }
   </style>
-  <script type="module" crossorigin src="/assets/product-Ozr0beL-.js"></script>
+  <script type="module" crossorigin src="/assets/product-t5ua8td9.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
   <link rel="modulepreload" crossorigin href="/assets/index-B-jIxwbw.js">
   <link rel="modulepreload" crossorigin href="/assets/supabase-DFvBSl1A.js">
