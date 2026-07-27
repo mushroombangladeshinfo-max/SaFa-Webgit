@@ -749,6 +749,22 @@
       width: 100%;
     }
     .rp-card-btn:hover { background: var(--t); color: #fff; border-color: var(--t); }
+    /* Card actions row — quick-add existed on the featured card only;
+       every regular card previously forced a full modal open just to
+       add its one ingredient to cart. */
+    .rp-card-actions { display: flex; gap: 8px; }
+    .rp-card-actions .rp-card-btn { flex: 1; width: auto; }
+    .rp-card-quick-add {
+      flex-shrink: 0; width: 40px;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: rgba(245,239,230,0.72);
+      font-family: var(--fl); font-size: 15px; font-weight: 700;
+      border-radius: 5px; cursor: pointer;
+      transition: background 0.2s, color 0.2s, border-color 0.2s;
+    }
+    .rp-card-quick-add:hover { background: rgba(196,154,60,.15); border-color: rgba(196,154,60,.4); color: var(--al); }
 
 
     /* ─────────────────────────────────────────────────────
@@ -1256,7 +1272,12 @@
       .rp-filters         { padding: 12px 22px; flex-wrap: nowrap; overflow-x: auto; top: 68px; }
       .rp-filters::-webkit-scrollbar { display: none; }
       .rp-filter-btn      { padding: 11px 18px; font-size: 11px; flex-shrink: 0; } /* ≥40px tall tap target */
-      .rp-cuisine-pill    { padding: 11px 18px; }
+      /* Same horizontal-scroll-strip treatment as .rp-filters above — this
+         row never got the fix, so its 6 pills stacked into 2-3 rows and
+         ate extra vertical space right below the fold. */
+      .rp-cuisine-row     { flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start; padding: 0 22px; margin-left: -22px; margin-right: -22px; }
+      .rp-cuisine-row::-webkit-scrollbar { display: none; }
+      .rp-cuisine-pill    { padding: 11px 18px; flex-shrink: 0; }
       .rp-section         { padding: 44px 22px; }
       .rp-grid            { grid-template-columns: 1fr; }
       .rp-featured        { grid-column: 1; }
@@ -1504,7 +1525,7 @@
       <!-- Fresh Oyster -->
       <div class="rp-product-card">
         <div class="rp-product-img">
-          <img src="/SaFa Fresh Oyster Mushroom.png" alt="Fresh Oyster Mushroom" onerror="this.remove()">
+          <img loading="lazy" src="/SaFa Fresh Oyster Mushroom.png" alt="Fresh Oyster Mushroom" onerror="this.remove()">
           <span class="rp-product-emoji">🍄</span>
         </div>
         <div class="rp-product-info">
@@ -1522,7 +1543,7 @@
       <!-- Dried Oyster -->
       <div class="rp-product-card">
         <div class="rp-product-img">
-          <img src="/SaFa Dried Oyster Mushroom.png" alt="Dried Oyster Mushroom" onerror="this.remove()">
+          <img loading="lazy" src="/SaFa Dried Oyster Mushroom.png" alt="Dried Oyster Mushroom" onerror="this.remove()">
           <span class="rp-product-emoji">🌿</span>
         </div>
         <div class="rp-product-info">
@@ -1540,7 +1561,7 @@
       <!-- Mushroom Powder -->
       <div class="rp-product-card">
         <div class="rp-product-img">
-          <img src="/SaFa Oyster Mushroom Powder.png" alt="Oyster Mushroom Powder" onerror="this.remove()">
+          <img loading="lazy" src="/SaFa Oyster Mushroom Powder.png" alt="Oyster Mushroom Powder" onerror="this.remove()">
           <span class="rp-product-emoji">🫙</span>
         </div>
         <div class="rp-product-info">
@@ -1558,7 +1579,7 @@
       <!-- r4.png — Button Mushroom (coming soon) -->
       <div class="rp-product-card">
         <div class="rp-product-img">
-          <img src="r4.png" alt="Button Mushroom" onerror="this.remove()">
+          <img loading="lazy" src="r4.png" alt="Button Mushroom" onerror="this.remove()">
           <span class="rp-product-emoji">🍄</span>
           <span class="rp-product-coming">Soon</span>
         </div>
@@ -1577,7 +1598,7 @@
       <!-- r5.png — Bundle Pack -->
       <div class="rp-product-card">
         <div class="rp-product-img">
-          <img src="r5.png" alt="SaFa Bundle Pack" onerror="this.remove()">
+          <img loading="lazy" src="r5.png" alt="SaFa Bundle Pack" onerror="this.remove()">
           <span class="rp-product-emoji">🎁</span>
         </div>
         <div class="rp-product-info">
@@ -1643,7 +1664,7 @@
   <section class="rp-section">
 
     <span class="rp-section-eyebrow">রান্নাঘর থেকে</span>
-    <h2 class="rp-section-title">৯টি রেসিপি, <em>একটি ফার্মের স্বাদ</em></h2>
+    <h2 class="rp-section-title">১৪টি রেসিপি, <em>একটি ফার্মের স্বাদ</em></h2>
 
     <!-- ── VIDEO PLAYER ──
          window.playRV() exposed by main.js.
@@ -1718,7 +1739,7 @@
       <div class="rp-card fi" data-category="curry" data-cuisine="bd" onclick="openRecipe('bhuna')">
         <div class="rp-card-img">
           <div class="rp-card-img-inner">
-            <img src="/Mushroom Bhuna.png" alt="Mushroom Bhuna"
+            <img loading="lazy" src="/Mushroom Bhuna.png" alt="Mushroom Bhuna"
                  onerror="this.remove()">
             <span class="rp-card-emoji">🍄</span>
           </div>
@@ -1747,9 +1768,12 @@
               <span class="rp-meta-label">Rating</span>
             </div>
           </div>
-          <button type="button" class="rp-card-btn" onclick="openRecipe('bhuna')">
+          <div class="rp-card-actions">
+            <button type="button" class="rp-card-btn" onclick="openRecipe('bhuna')">
             রেসিপি দেখুন →
           </button>
+            <button type="button" class="rp-card-quick-add" onclick="event.stopPropagation();window.addToCart('Fresh Oyster Mushrooms',350,'fresh_oyster','1kg','SaFa Fresh Oyster Mushroom.png')" aria-label="Add Fresh Oyster Mushrooms to cart">+</button>
+          </div>
         </div>
       </div>
 
@@ -1761,7 +1785,7 @@
       <div class="rp-card fi" data-category="soup" data-cuisine="bd" onclick="openRecipe('soup')">
         <div class="rp-card-img">
           <div class="rp-card-img-inner">
-            <img src="/Mushroom Soup.png" alt="Creamy Mushroom Soup"
+            <img loading="lazy" src="/Mushroom Soup.png" alt="Creamy Mushroom Soup"
                  onerror="this.remove()">
             <span class="rp-card-emoji">🥣</span>
           </div>
@@ -1790,9 +1814,12 @@
               <span class="rp-meta-label">Rating</span>
             </div>
           </div>
-          <button type="button" class="rp-card-btn" onclick="openRecipe('soup')">
+          <div class="rp-card-actions">
+            <button type="button" class="rp-card-btn" onclick="openRecipe('soup')">
             রেসিপি দেখুন →
           </button>
+            <button type="button" class="rp-card-quick-add" onclick="event.stopPropagation();window.addToCart('Oyster Mushroom Powder',350,'mushroom_powder','100g','SaFa Oyster Mushroom Powder.png')" aria-label="Add Oyster Mushroom Powder to cart">+</button>
+          </div>
         </div>
       </div>
 
@@ -1804,7 +1831,7 @@
       <div class="rp-card fi" data-category="snack" data-cuisine="bd" onclick="openRecipe('chop')">
         <div class="rp-card-img">
           <div class="rp-card-img-inner">
-            <img src="/Mushroom Chop.png" alt="Mushroom Chop"
+            <img loading="lazy" src="/Mushroom Chop.png" alt="Mushroom Chop"
                  onerror="this.remove()">
             <span class="rp-card-emoji">🫓</span>
           </div>
@@ -1833,9 +1860,12 @@
               <span class="rp-meta-label">Rating</span>
             </div>
           </div>
-          <button type="button" class="rp-card-btn" onclick="openRecipe('chop')">
+          <div class="rp-card-actions">
+            <button type="button" class="rp-card-btn" onclick="openRecipe('chop')">
             রেসিপি দেখুন →
           </button>
+            <button type="button" class="rp-card-quick-add" onclick="event.stopPropagation();window.addToCart('Fresh Oyster Mushrooms',350,'fresh_oyster','1kg','SaFa Fresh Oyster Mushroom.png')" aria-label="Add Fresh Oyster Mushrooms to cart">+</button>
+          </div>
         </div>
       </div>
 
@@ -1847,7 +1877,7 @@
       <div class="rp-card fi" data-category="curry" data-cuisine="bd" onclick="openRecipe('daal')">
         <div class="rp-card-img">
           <div class="rp-card-img-inner">
-            <img src="/Mushroom Daal.png" alt="Mushroom Masoor Daal"
+            <img loading="lazy" src="/Mushroom Daal.png" alt="Mushroom Masoor Daal"
                  onerror="this.remove()">
             <span class="rp-card-emoji">🫕</span>
           </div>
@@ -1876,9 +1906,12 @@
               <span class="rp-meta-label">Rating</span>
             </div>
           </div>
-          <button type="button" class="rp-card-btn" onclick="openRecipe('daal')">
+          <div class="rp-card-actions">
+            <button type="button" class="rp-card-btn" onclick="openRecipe('daal')">
             রেসিপি দেখুন →
           </button>
+            <button type="button" class="rp-card-quick-add" onclick="event.stopPropagation();window.addToCart('Dried Oyster Mushroom',280,'dried_oyster','100g','SaFa Dried Oyster Mushroom.png')" aria-label="Add Dried Oyster Mushroom to cart">+</button>
+          </div>
         </div>
       </div>
 
@@ -1890,7 +1923,7 @@
       <div class="rp-card fi" data-category="dry" data-cuisine="bd" onclick="openRecipe('bhaji')">
         <div class="rp-card-img">
           <div class="rp-card-img-inner">
-            <img src="/Mushroom Bhaji.png" alt="Mushroom Stir Fry"
+            <img loading="lazy" src="/Mushroom Bhaji.png" alt="Mushroom Stir Fry"
                  onerror="this.remove()">
             <span class="rp-card-emoji">🌿</span>
           </div>
@@ -1919,9 +1952,12 @@
               <span class="rp-meta-label">Rating</span>
             </div>
           </div>
-          <button type="button" class="rp-card-btn" onclick="openRecipe('bhaji')">
+          <div class="rp-card-actions">
+            <button type="button" class="rp-card-btn" onclick="openRecipe('bhaji')">
             রেসিপি দেখুন →
           </button>
+            <button type="button" class="rp-card-quick-add" onclick="event.stopPropagation();window.addToCart('Fresh Oyster Mushrooms',350,'fresh_oyster','1kg','SaFa Fresh Oyster Mushroom.png')" aria-label="Add Fresh Oyster Mushrooms to cart">+</button>
+          </div>
         </div>
       </div>
 
@@ -1933,7 +1969,7 @@
       <div class="rp-card fi" data-category="rice" data-cuisine="bd" onclick="openRecipe('khichuri')">
         <div class="rp-card-img">
           <div class="rp-card-img-inner">
-            <img src="/Mushroom Khichuri.png" alt="Mushroom Khichuri"
+            <img loading="lazy" src="/Mushroom Khichuri.png" alt="Mushroom Khichuri"
                  onerror="this.remove()">
             <span class="rp-card-emoji">🍲</span>
           </div>
@@ -1962,9 +1998,12 @@
               <span class="rp-meta-label">Rating</span>
             </div>
           </div>
-          <button type="button" class="rp-card-btn" onclick="openRecipe('khichuri')">
+          <div class="rp-card-actions">
+            <button type="button" class="rp-card-btn" onclick="openRecipe('khichuri')">
             রেসিপি দেখুন →
           </button>
+            <button type="button" class="rp-card-quick-add" onclick="event.stopPropagation();window.addToCart('Fresh Oyster Mushrooms',350,'fresh_oyster','1kg','SaFa Fresh Oyster Mushroom.png')" aria-label="Add Fresh Oyster Mushrooms to cart">+</button>
+          </div>
         </div>
       </div>
 
@@ -1976,7 +2015,7 @@
       <div class="rp-card fi" data-category="snack" data-cuisine="bd" onclick="openRecipe('singara')">
         <div class="rp-card-img">
           <div class="rp-card-img-inner">
-            <img src="/Mushroom Singara.png" alt="Mushroom Singara"
+            <img loading="lazy" src="/Mushroom Singara.png" alt="Mushroom Singara"
                  onerror="this.remove()">
             <span class="rp-card-emoji">🥟</span>
           </div>
@@ -2005,9 +2044,12 @@
               <span class="rp-meta-label">Rating</span>
             </div>
           </div>
-          <button type="button" class="rp-card-btn" onclick="openRecipe('singara')">
+          <div class="rp-card-actions">
+            <button type="button" class="rp-card-btn" onclick="openRecipe('singara')">
             রেসিপি দেখুন →
           </button>
+            <button type="button" class="rp-card-quick-add" onclick="event.stopPropagation();window.addToCart('Fresh Oyster Mushrooms',350,'fresh_oyster','1kg','SaFa Fresh Oyster Mushroom.png')" aria-label="Add Fresh Oyster Mushrooms to cart">+</button>
+          </div>
         </div>
       </div>
 
@@ -2019,7 +2061,7 @@
       <div class="rp-card fi" data-category="drink" data-cuisine="drink" onclick="openRecipe('smoothie')">
         <div class="rp-card-img">
           <div class="rp-card-img-inner">
-            <img src="/Immunity Boost Smoothie.png" alt="Immunity Boost Smoothie"
+            <img loading="lazy" src="/Immunity Boost Smoothie.png" alt="Immunity Boost Smoothie"
                  onerror="this.remove()">
             <span class="rp-card-emoji">🥤</span>
           </div>
@@ -2048,9 +2090,12 @@
               <span class="rp-meta-label">Rating</span>
             </div>
           </div>
-          <button type="button" class="rp-card-btn" onclick="openRecipe('smoothie')">
+          <div class="rp-card-actions">
+            <button type="button" class="rp-card-btn" onclick="openRecipe('smoothie')">
             রেসিপি দেখুন →
           </button>
+            <button type="button" class="rp-card-quick-add" onclick="event.stopPropagation();window.addToCart('Oyster Mushroom Powder',350,'mushroom_powder','100g','SaFa Oyster Mushroom Powder.png')" aria-label="Add Oyster Mushroom Powder to cart">+</button>
+          </div>
         </div>
       </div>
 
@@ -2059,7 +2104,7 @@
       <div class="rp-card fi" data-category="curry" data-cuisine="indian" onclick="openRecipe('buttermasala')">
         <div class="rp-card-img">
           <div class="rp-card-img-inner">
-            <img src="/Mushroom Butter Masala.png" alt="Mushroom Butter Masala" onerror="this.remove()">
+            <img loading="lazy" src="/Mushroom Butter Masala.png" alt="Mushroom Butter Masala" onerror="this.remove()">
             <span class="rp-card-emoji">🫕</span>
           </div>
           <span class="rp-card-badge rp-badge-medium">Medium</span>
@@ -2075,7 +2120,10 @@
             <div class="rp-meta-item"><span class="rp-meta-val">4</span><span class="rp-meta-label">Serves</span></div>
             <div class="rp-meta-item"><span class="rp-meta-val">★4.9</span><span class="rp-meta-label">Rating</span></div>
           </div>
-          <button type="button" class="rp-card-btn" onclick="openRecipe('buttermasala')">রেসিপি দেখুন →</button>
+          <div class="rp-card-actions">
+            <button type="button" class="rp-card-btn" onclick="openRecipe('buttermasala')">রেসিপি দেখুন →</button>
+            <button type="button" class="rp-card-quick-add" onclick="event.stopPropagation();window.addToCart('Fresh Oyster Mushrooms',350,'fresh_oyster','1kg','SaFa Fresh Oyster Mushroom.png')" aria-label="Add Fresh Oyster Mushrooms to cart">+</button>
+          </div>
         </div>
       </div>
 
@@ -2083,7 +2131,7 @@
       <div class="rp-card fi" data-category="curry" data-cuisine="indian" onclick="openRecipe('palak')">
         <div class="rp-card-img">
           <div class="rp-card-img-inner">
-            <img src="/Mushroom Palak.png" alt="Mushroom Palak" onerror="this.remove()">
+            <img loading="lazy" src="/Mushroom Palak.png" alt="Mushroom Palak" onerror="this.remove()">
             <span class="rp-card-emoji">🥬</span>
           </div>
           <span class="rp-card-badge rp-badge-easy">Easy</span>
@@ -2099,7 +2147,10 @@
             <div class="rp-meta-item"><span class="rp-meta-val">4</span><span class="rp-meta-label">Serves</span></div>
             <div class="rp-meta-item"><span class="rp-meta-val">★4.7</span><span class="rp-meta-label">Rating</span></div>
           </div>
-          <button type="button" class="rp-card-btn" onclick="openRecipe('palak')">রেসিপি দেখুন →</button>
+          <div class="rp-card-actions">
+            <button type="button" class="rp-card-btn" onclick="openRecipe('palak')">রেসিপি দেখুন →</button>
+            <button type="button" class="rp-card-quick-add" onclick="event.stopPropagation();window.addToCart('Fresh Oyster Mushrooms',350,'fresh_oyster','1kg','SaFa Fresh Oyster Mushroom.png')" aria-label="Add Fresh Oyster Mushrooms to cart">+</button>
+          </div>
         </div>
       </div>
 
@@ -2107,7 +2158,7 @@
       <div class="rp-card fi" data-category="dry" data-cuisine="thai" onclick="openRecipe('thaibasil')">
         <div class="rp-card-img">
           <div class="rp-card-img-inner">
-            <img src="/Thai Basil Mushroom.png" alt="Thai Basil Mushroom" onerror="this.remove()">
+            <img loading="lazy" src="/Thai Basil Mushroom.png" alt="Thai Basil Mushroom" onerror="this.remove()">
             <span class="rp-card-emoji">🌿</span>
           </div>
           <span class="rp-card-badge rp-badge-easy">Easy</span>
@@ -2123,7 +2174,10 @@
             <div class="rp-meta-item"><span class="rp-meta-val">2</span><span class="rp-meta-label">Serves</span></div>
             <div class="rp-meta-item"><span class="rp-meta-val">★4.9</span><span class="rp-meta-label">Rating</span></div>
           </div>
-          <button type="button" class="rp-card-btn" onclick="openRecipe('thaibasil')">রেসিপি দেখুন →</button>
+          <div class="rp-card-actions">
+            <button type="button" class="rp-card-btn" onclick="openRecipe('thaibasil')">রেসিপি দেখুন →</button>
+            <button type="button" class="rp-card-quick-add" onclick="event.stopPropagation();window.addToCart('Fresh Oyster Mushrooms',350,'fresh_oyster','1kg','SaFa Fresh Oyster Mushroom.png')" aria-label="Add Fresh Oyster Mushrooms to cart">+</button>
+          </div>
         </div>
       </div>
 
@@ -2131,7 +2185,7 @@
       <div class="rp-card fi" data-category="soup" data-cuisine="thai" onclick="openRecipe('tomkha')">
         <div class="rp-card-img">
           <div class="rp-card-img-inner">
-            <img src="/Tom Kha Mushroom.png" alt="Tom Kha Mushroom Soup" onerror="this.remove()">
+            <img loading="lazy" src="/Tom Kha Mushroom.png" alt="Tom Kha Mushroom Soup" onerror="this.remove()">
             <span class="rp-card-emoji">🥥</span>
           </div>
           <span class="rp-card-badge rp-badge-medium">Medium</span>
@@ -2147,7 +2201,10 @@
             <div class="rp-meta-item"><span class="rp-meta-val">4</span><span class="rp-meta-label">Serves</span></div>
             <div class="rp-meta-item"><span class="rp-meta-val">★4.8</span><span class="rp-meta-label">Rating</span></div>
           </div>
-          <button type="button" class="rp-card-btn" onclick="openRecipe('tomkha')">রেসিপি দেখুন →</button>
+          <div class="rp-card-actions">
+            <button type="button" class="rp-card-btn" onclick="openRecipe('tomkha')">রেসিপি দেখুন →</button>
+            <button type="button" class="rp-card-quick-add" onclick="event.stopPropagation();window.addToCart('Oyster Mushroom Powder',350,'mushroom_powder','100g','SaFa Oyster Mushroom Powder.png')" aria-label="Add Oyster Mushroom Powder to cart">+</button>
+          </div>
         </div>
       </div>
 
@@ -2155,7 +2212,7 @@
       <div class="rp-card fi" data-category="rice" data-cuisine="chinese" onclick="openRecipe('friedrice')">
         <div class="rp-card-img">
           <div class="rp-card-img-inner">
-            <img src="/Mushroom Fried Rice.png" alt="Mushroom Fried Rice" onerror="this.remove()">
+            <img loading="lazy" src="/Mushroom Fried Rice.png" alt="Mushroom Fried Rice" onerror="this.remove()">
             <span class="rp-card-emoji">🍳</span>
           </div>
           <span class="rp-card-badge rp-badge-easy">Easy</span>
@@ -2171,7 +2228,10 @@
             <div class="rp-meta-item"><span class="rp-meta-val">3</span><span class="rp-meta-label">Serves</span></div>
             <div class="rp-meta-item"><span class="rp-meta-val">★4.8</span><span class="rp-meta-label">Rating</span></div>
           </div>
-          <button type="button" class="rp-card-btn" onclick="openRecipe('friedrice')">রেসিপি দেখুন →</button>
+          <div class="rp-card-actions">
+            <button type="button" class="rp-card-btn" onclick="openRecipe('friedrice')">রেসিপি দেখুন →</button>
+            <button type="button" class="rp-card-quick-add" onclick="event.stopPropagation();window.addToCart('Dried Oyster Mushroom',280,'dried_oyster','100g','SaFa Dried Oyster Mushroom.png')" aria-label="Add Dried Oyster Mushroom to cart">+</button>
+          </div>
         </div>
       </div>
 
@@ -3047,8 +3107,10 @@
       const addBtn = document.getElementById('modalAddBtn');
       if (addBtn) {
         addBtn.onclick = () => {
+          /* Don't force-close the modal — the site-wide 'cart-item-added'
+             toast (wired in src/ui.js) already confirms the add; a reader
+             partway through the recipe shouldn't get ejected from it. */
           window.addToCart(p.name, p.price, p.id, p.unit, p.image);
-          window.closeRecipe();
         };
       }
 
@@ -3058,7 +3120,7 @@
       /* ── Show modal ── */
       const modal = document.getElementById('recipeModal');
       if (!modal) return;
-      
+
       modal.classList.add('open');
       document._savedScrollY = window.scrollY;
       document.body.style.overflow = 'hidden';
@@ -3067,17 +3129,40 @@
       /* Scroll modal to top */
       const modalPanel = document.querySelector('.rp-modal');
       if (modalPanel) modalPanel.scrollTop = 0;
+
+      /* Focus management — move focus into the modal (Escape already
+         closes it elsewhere), and remember what to return focus to. */
+      document._recipeModalReturnFocus = document.activeElement;
+      document.querySelector('.rp-modal-close')?.focus();
     }
 
-    /** Closes the recipe modal and restores scroll position. */
+    /** Closes the recipe modal and restores scroll position + focus. */
     window.closeRecipe = function() {
       const modal = document.getElementById('recipeModal');
       if (modal) modal.classList.remove('open');
-      
+
       document.body.style.overflow = '';
       document.body.style.top = '';
       window.scrollTo({ top: document._savedScrollY || 0, behavior: 'instant' });
+      document._recipeModalReturnFocus?.focus();
     }
+
+    /* Keyboard focus trap — while the modal is open, Tab/Shift+Tab cycles
+       only through elements inside it instead of reaching the dimmed
+       page behind the overlay. */
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'Tab') return;
+      const modal = document.getElementById('recipeModal');
+      if (!modal || !modal.classList.contains('open')) return;
+      const focusable = modal.querySelectorAll('button, a[href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+      if (!focusable.length) return;
+      const first = focusable[0], last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault(); last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault(); first.focus();
+      }
+    });
 
     /**
      * Closes modal when clicking the dark overlay behind it.
@@ -3144,38 +3229,58 @@
       });
     }
 
-    function initRecipeFilters() {
+    /* Category (tabs) and cuisine (pills) used to be two independent
+       filters that reset each other on click — a user could never
+       combine e.g. "Thai" + "Soup". Now tracked as compound AND state,
+       so both can be active at once. */
+    let activeCategory = 'all';
+    let activeCuisine  = 'all';
+    const cuisineLabels = { bd: 'বাংলাদেশি', indian: 'ভারতীয়', thai: 'থাই', chinese: 'চাইনিজ', drink: 'পানীয়' };
+
+    function applyFilters() {
       const btns    = Array.from(document.querySelectorAll('.rp-filter-btn'));
+      const pills   = Array.from(document.querySelectorAll('.rp-cuisine-pill'));
       const cards   = Array.from(document.querySelectorAll('#recipeGrid [data-category]'));
       const emptyEl = document.getElementById('recipeEmpty');
       const countEl = document.getElementById('cuisineCount');
+
+      btns.forEach(b => {
+        b.classList.toggle('active', b.dataset.filter === activeCategory);
+        b.setAttribute('aria-selected', b.dataset.filter === activeCategory);
+      });
+      pills.forEach(p => {
+        p.classList.toggle('active', p.dataset.cuisine === activeCuisine);
+        p.setAttribute('aria-selected', p.dataset.cuisine === activeCuisine);
+      });
+
+      const visible = [];
+      cards.forEach(card => {
+        const matchCategory = activeCategory === 'all' || card.dataset.category === activeCategory;
+        const matchCuisine  = activeCuisine === 'all' || card.dataset.cuisine === activeCuisine;
+        const match = matchCategory && matchCuisine;
+        card.style.display = match ? '' : 'none';
+        if (match) visible.push(card);
+      });
+
+      if (emptyEl) emptyEl.style.display = visible.length === 0 ? 'block' : 'none';
+      if (countEl) {
+        countEl.textContent = (activeCategory === 'all' && activeCuisine === 'all')
+          ? ''
+          : activeCuisine !== 'all'
+            ? `${visible.length} টি ${cuisineLabels[activeCuisine] || ''} রেসিপি পাওয়া গেছে`
+            : `${visible.length} টি রেসিপি পাওয়া গেছে`;
+      }
+      animateCards(visible);
+    }
+
+    function initRecipeFilters() {
+      const btns = Array.from(document.querySelectorAll('.rp-filter-btn'));
       if (!btns.length) return;
 
-      function applyFilter(filter) {
-        btns.forEach(b => {
-          b.classList.toggle('active', b.dataset.filter === filter);
-          b.setAttribute('aria-selected', b.dataset.filter === filter);
-        });
-
-        /* Reset cuisine pills to "all" */
-        document.querySelectorAll('.rp-cuisine-pill').forEach(p => {
-          p.classList.toggle('active', p.dataset.cuisine === 'all');
-          p.setAttribute('aria-selected', p.dataset.cuisine === 'all');
-        });
-        if (countEl) countEl.textContent = '';
-
-        const visible = [];
-        cards.forEach(card => {
-          const match = filter === 'all' || card.dataset.category === filter;
-          card.style.display = match ? '' : 'none';
-          if (match) visible.push(card);
-        });
-
-        if (emptyEl) emptyEl.style.display = visible.length === 0 ? 'block' : 'none';
-        animateCards(visible);
-      }
-
-      btns.forEach(btn => btn.addEventListener('click', () => applyFilter(btn.dataset.filter)));
+      btns.forEach(btn => btn.addEventListener('click', () => {
+        activeCategory = btn.dataset.filter;
+        applyFilters();
+      }));
 
       btns.forEach((btn, i) => {
         btn.addEventListener('keydown', e => {
@@ -3187,51 +3292,21 @@
     }
 
     function initCuisinePills() {
-      const pills   = Array.from(document.querySelectorAll('.rp-cuisine-pill'));
-      const cards   = Array.from(document.querySelectorAll('#recipeGrid [data-category]'));
-      const emptyEl = document.getElementById('recipeEmpty');
-      const countEl = document.getElementById('cuisineCount');
+      const pills = Array.from(document.querySelectorAll('.rp-cuisine-pill'));
       if (!pills.length) return;
 
-      const cuisineLabels = { bd: 'বাংলাদেশি', indian: 'ভারতীয়', thai: 'থাই', chinese: 'চাইনিজ', drink: 'পানীয়' };
-
-      function applyCuisine(cuisine) {
-        pills.forEach(p => {
-          p.classList.toggle('active', p.dataset.cuisine === cuisine);
-          p.setAttribute('aria-selected', p.dataset.cuisine === cuisine);
-        });
-
-        /* Reset category tabs to "all" */
-        document.querySelectorAll('.rp-filter-btn').forEach(b => {
-          b.classList.toggle('active', b.dataset.filter === 'all');
-          b.setAttribute('aria-selected', b.dataset.filter === 'all');
-        });
-
-        const visible = [];
-        cards.forEach(card => {
-          const match = cuisine === 'all' || card.dataset.cuisine === cuisine;
-          card.style.display = match ? '' : 'none';
-          if (match) visible.push(card);
-        });
-
-        if (emptyEl) emptyEl.style.display = visible.length === 0 ? 'block' : 'none';
-        if (countEl) {
-          countEl.textContent = cuisine === 'all'
-            ? ''
-            : `${visible.length} টি ${cuisineLabels[cuisine] || ''} রেসিপি পাওয়া গেছে`;
-        }
-        animateCards(visible);
-
-        /* Scroll to recipe grid */
-        if (cuisine !== 'all') {
+      pills.forEach(pill => pill.addEventListener('click', () => {
+        activeCuisine = pill.dataset.cuisine;
+        applyFilters();
+        /* Cuisine pills sit below the grid — scroll up to see the
+           (now filtered) results, same as before. */
+        if (activeCuisine !== 'all') {
           setTimeout(() => {
             document.getElementById('recipeGrid')
               ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
           }, 80);
         }
-      }
-
-      pills.forEach(pill => pill.addEventListener('click', () => applyCuisine(pill.dataset.cuisine)));
+      }));
 
       pills.forEach((pill, i) => {
         pill.addEventListener('keydown', e => {
