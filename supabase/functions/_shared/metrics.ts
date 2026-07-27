@@ -153,6 +153,44 @@ export async function upsertScrollDepth(rows: ScrollDepthRow[]): Promise<void> {
   }
 }
 
+/** One day-row destined for public.weather_daily. */
+export interface WeatherRow {
+  weather_date:            string;   // 'YYYY-MM-DD'
+  temp_min_c?:              number;
+  temp_max_c?:              number;
+  temp_day_avg_c?:          number;
+  temp_night_avg_c?:        number;
+  humidity_day_avg_pct?:    number;
+  humidity_night_avg_pct?:  number;
+  precipitation_mm?:        number;
+  conditions?:               string;
+}
+
+/** Insert-or-update rows into weather_daily. */
+export async function upsertWeather(rows: WeatherRow[]): Promise<void> {
+  if (!rows.length) return;
+  const url = Deno.env.get('SUPABASE_URL');
+  const key = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+  if (!url || !key) throw new Error('Supabase env vars missing (deploy via supabase CLI)');
+
+  const res = await fetch(
+    `${url}/rest/v1/weather_daily?on_conflict=weather_date`,
+    {
+      method: 'POST',
+      headers: {
+        apikey: key,
+        Authorization: `Bearer ${key}`,
+        'Content-Type': 'application/json',
+        Prefer: 'resolution=merge-duplicates,return=minimal',
+      },
+      body: JSON.stringify(rows.map((r) => ({ ...r, source: 'open-meteo' }))),
+    },
+  );
+  if (!res.ok) {
+    throw new Error(`weather_daily upsert failed (${res.status}): ${await res.text()}`);
+  }
+}
+
 /** Stamp channel_accounts.last_synced so the dashboard shows sync health. */
 export async function touchLastSynced(channel: string): Promise<void> {
   const url = Deno.env.get('SUPABASE_URL');

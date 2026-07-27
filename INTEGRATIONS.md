@@ -18,7 +18,12 @@ over the same rows automatically.** No migration, nothing breaks.
  Website (GA4) ────────► sync-ga4 ──────────┘
  Manual entry / CSV ───────────────────────────────────┘
  Orders · farm logs · expenses · IoT sensors ──► SQL views (v_kpi_daily, …)
+ Farm weather (Open-Meteo) ──► sync-weather ──► weather_daily (one row/day)
 ```
+
+`sync-weather` is the one exception to "connect it with API keys" below —
+Open-Meteo needs no signup, no key, nothing to configure. It's already
+deployed and scheduled; see its own section further down.
 
 Each sync function runs once a day, pulls **yesterday's** numbers, and
 upserts one row per channel. Re-running is always safe (idempotent).
@@ -119,6 +124,7 @@ SELECT cron.schedule('sync-google-ads-daily', '20 6 * * *', $$ SELECT net.http_p
 SELECT cron.schedule('sync-linkedin-daily',   '30 6 * * *', $$ SELECT net.http_post(url := 'https://uiwmerejtrdrykqpumdu.supabase.co/functions/v1/sync-linkedin',   headers := '{"Authorization":"Bearer ANON_KEY_HERE","x-cron-secret":"CRON_SECRET_HERE"}'::jsonb) $$);
 SELECT cron.schedule('sync-whatsapp-daily',   '40 6 * * *', $$ SELECT net.http_post(url := 'https://uiwmerejtrdrykqpumdu.supabase.co/functions/v1/sync-whatsapp',   headers := '{"Authorization":"Bearer ANON_KEY_HERE","x-cron-secret":"CRON_SECRET_HERE"}'::jsonb) $$);
 SELECT cron.schedule('sync-ga4-daily',        '50 6 * * *', $$ SELECT net.http_post(url := 'https://uiwmerejtrdrykqpumdu.supabase.co/functions/v1/sync-ga4',        headers := '{"Authorization":"Bearer ANON_KEY_HERE","x-cron-secret":"CRON_SECRET_HERE"}'::jsonb) $$);
+SELECT cron.schedule('sync-weather-daily',    '0 7 * * *',  $$ SELECT net.http_post(url := 'https://uiwmerejtrdrykqpumdu.supabase.co/functions/v1/sync-weather',   headers := '{"Authorization":"Bearer ANON_KEY_HERE"}'::jsonb) $$);
 ```
 
 6:00 UTC = 12:00 noon Dhaka — yesterday's numbers are final on every
@@ -130,6 +136,31 @@ platform by then.
 2. Test with the curl command → check a row appeared in `marketing_metrics`.
 3. In the Insights page (or SQL), set `channel_accounts.sync_enabled = TRUE`
    for that channel — the dashboard then shows it as "auto-synced".
+
+## Farm weather (`sync-weather`) — already live, no setup needed
+
+Deployed and scheduled as of 2026-07-28. Unlike every other sync above, this
+one needs **zero configuration** — Open-Meteo (open-meteo.com) is free and
+keyless, so there's no secrets table entry and no 3-step ritual to run.
+
+Pulls day (06:00–17:59 local) vs night (18:00–05:59 local) temperature and
+humidity, plus total rainfall, for the farm's own coordinates (Sirajganj,
+24.4539°N 89.7006°E), and writes one row per day to `public.weather_daily`.
+Also auto-classifies each day into the same normal/hot/rainy/cold/humid/
+stormy vocabulary the old manual "আজকের আবহাওয়া" dropdown in quick-log.html
+used — that dropdown had 0 of 4 entries ever filled in, so this replaces it
+outright rather than trying to get the habit to stick.
+
+Existing farm data only goes back a few days, so there's nothing to
+correlate against yet — once `farm_daily_logs` (harvest, QC/contamination)
+has a few weeks of entries, join it to `weather_daily` on date to check
+things like "does contamination spike on humid/rainy stretches?"
+
+```bash
+# Manual test / backfill (works up to ~92 days back on the free endpoint)
+curl -X POST "https://uiwmerejtrdrykqpumdu.supabase.co/functions/v1/sync-weather?date=2026-07-20" \
+  -H "Authorization: Bearer <YOUR_ANON_KEY>"
+```
 
 Manual entries you made earlier for the same days are simply overwritten by
 API data (same day + channel = same row). History stays consistent.

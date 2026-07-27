@@ -614,14 +614,9 @@ function formOps() {
 }
 
 function formNotes() {
-  const wOpts = [['','— বেছে নিন'],['normal','স্বাভাবিক'],['hot','গরম'],['rainy','বৃষ্টি'],['cold','ঠান্ডা'],['humid','বেশি আর্দ্র'],['stormy','ঝড়']];
   const strs  = [1,2,3,4,5].map(i=>`<span class="star${S.rating>=i?' on':''}" data-v="${i}" onclick="setStar(${i})">⭐</span>`).join('');
   const sLbl  = ['','খুব খারাপ','খারাপ','মোটামুটি','ভালো','অনেক ভালো'];
   return `<div class="cards">
-    <div class="sec-lbl">আজকের আবহাওয়া</div>
-    <select class="sel" id="f-n-weather" onchange="S.d['n-weather']=this.value">
-      ${wOpts.map(([v,l])=>`<option value="${v}"${S.d['n-weather']===v?' selected':''}>${l}</option>`).join('')}
-    </select>
     <div class="sec-lbl">আজকের দিনটা কেমন ছিল?</div>
     <div class="stars">${strs}</div>
     <div class="star-lbl" id="star-lbl">${S.rating ? sLbl[S.rating] : 'একটা তারা বেছে নিন'}</div>
@@ -910,7 +905,7 @@ async function submit() {
     op_shifts:dn2('op-shifts'), op_new_batches:dn2('op-new-batches'), op_done_batches:dn2('op-done-batches'),
     op_bags_removed:dn2('op-bags-removed'), op_energy_kwh:dn2('op-energy-kwh'),
     op_issue:S.tog.opIssue, op_issue_desc:ds('op-issue-desc'),
-    n_weather:ds('n-weather'), n_overall_rating:dn2('n-overall-rating'),
+    n_overall_rating:dn2('n-overall-rating'),
     n_observations:ds('n-observations'), n_tomorrow:ds('n-tomorrow'), n_unusual:ds('n-unusual'),
   };
 
