@@ -154,6 +154,15 @@
     .rating-num { font-size: .9rem; font-weight: 700; }
     .rating-count { font-size: .8rem; color: var(--muted); }
     .rating-sep { width: 1px; height: 14px; background: var(--border); }
+    /* Stock status — data already existed per-product but was never
+       rendered, silently dropping a real trust/urgency signal. */
+    .stock-badge {
+      font-size: .72rem; font-weight: 700; letter-spacing: .3px;
+      padding: 3px 9px; border-radius: 20px;
+    }
+    .stock-badge.in-stock  { background: #f0fdf4; color: var(--green); border: 1px solid #bbf7d0; }
+    .stock-badge.low-stock { background: #fffbeb; color: #b45309;     border: 1px solid #fde68a; }
+    .stock-badge.out-stock { background: #fef2f2; color: #b91c1c;     border: 1px solid #fecaca; }
 
     /* Price */
     .price-row {
@@ -636,13 +645,13 @@
       .star-btn { font-size: 1.9rem; padding: 6px; }
     }
   </style>
-  <script type="module" crossorigin src="/assets/product-xQASl8bv.js"></script>
+  <script type="module" crossorigin src="/assets/product-Ozr0beL-.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
   <link rel="modulepreload" crossorigin href="/assets/index-B-jIxwbw.js">
-  <link rel="modulepreload" crossorigin href="/assets/supabase-D397If-S.js">
-  <link rel="modulepreload" crossorigin href="/assets/main-BrOlyfOk.js">
-  <link rel="modulepreload" crossorigin href="/assets/auth-nav-DuWsYFiL.js">
-  <link rel="stylesheet" crossorigin href="/assets/supabase-DED9bWmw.css">
+  <link rel="modulepreload" crossorigin href="/assets/supabase-DFvBSl1A.js">
+  <link rel="modulepreload" crossorigin href="/assets/main-DHnC8REm.js">
+  <link rel="modulepreload" crossorigin href="/assets/auth-nav-BrcI-9mF.js">
+  <link rel="stylesheet" crossorigin href="/assets/supabase-CSaExd_Q.css">
 </head>
 <body>
   <!-- Google Tag Manager (noscript) -->

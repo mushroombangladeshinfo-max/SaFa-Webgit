@@ -381,16 +381,27 @@ img {
 .nav-admin-link { display: none; }
 .footer-admin-link { opacity: .28; font-size: .85em; }
 
-/* Red dot indicator on cart icon */
+/* Cart item-count badge on the nav cart icon — was a plain dot with no
+   quantity, so customers couldn't tell at a glance how many items were
+   already in the cart. */
 .nav-dot {
+  display: none; /* JS sets to 'flex' when count > 0 */
   position: absolute;
-  top: 4px;
-  right: 4px;
-  width: 7px;
-  height: 7px;
+  top: -2px;
+  right: -4px;
+  min-width: 15px;
+  height: 15px;
+  padding: 0 3px;
   border-radius: 50%;
   background: var(--t);
   border: 1.5px solid var(--g900);
+  align-items: center;
+  justify-content: center;
+  font-family: var(--fl);
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1;
+  color: #fff;
 }
 
 /* CTA button in nav */

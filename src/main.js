@@ -116,11 +116,12 @@ document.addEventListener('DOMContentLoaded', () => {
   renderItems();          /* checkout.html order summary (no-op elsewhere) */
   syncProductPrices();    /* Patch prices + stock from Supabase           */
 
-  /* Update nav cart dot count on every page load */
+  /* Update nav cart badge (item count, not just a dot) on every page load */
   const navDot = document.querySelector('.nav-dot');
   if (navDot) {
     const count = getCartCount();
-    navDot.style.display = count > 0 ? 'block' : 'none';
+    navDot.textContent = count > 99 ? '99+' : String(count);
+    navDot.style.display = count > 0 ? 'flex' : 'none';
   }
 
 });
