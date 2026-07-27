@@ -1,6 +1,6 @@
 const CACHE_NAME = 'safa-admin-cache-v1';
 const urlsToCache = [
-  '/admin.html',
+  '/orders.html',
   '/style.css'
 ];
 
