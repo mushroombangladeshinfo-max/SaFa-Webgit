@@ -110,9 +110,26 @@
     .order-card { border-bottom:1px solid rgba(255,255,255,.05); transition:background .2s; }
     .order-card:last-child { border-bottom:none; }
     .order-card:hover { background:rgba(255,255,255,.02); }
-    .order-card-header { display:flex; justify-content:space-between; align-items:center; padding:14px 20px; cursor:pointer; }
+    .order-card-header { padding:14px 20px; cursor:pointer; }
+    .order-card-top { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
     .order-card-id { font-family:'Syne','Hind Siliguri',sans-serif; font-size:10px; font-weight:700; letter-spacing:.1em; color:var(--c); }
     .order-card-meta { font-size:11px; color:rgba(245,239,230,.45); margin-top:3px; }
+    /* Item summary visible without expanding — was hidden behind a click,
+       forcing a customer scanning "what did I buy" to expand every row. */
+    .order-card-preview { font-size:11.5px; color:rgba(245,239,230,.4); margin-top:4px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:100%; }
+    /* Compact progress stepper — same status data as the pill, but a pill
+       alone only shows the current word, not how far along the order is.
+       Matches track.html's stepper concept, condensed for a repeated list. */
+    .mini-stepper { display:flex; align-items:center; margin-top:14px; }
+    .mini-step { flex:1; display:flex; flex-direction:column; align-items:center; position:relative; }
+    .mini-step::before { content:''; position:absolute; top:4px; left:-50%; width:100%; height:2px; background:rgba(255,255,255,.08); z-index:0; }
+    .mini-step:first-child::before { display:none; }
+    .mini-step.done::before { background:#5fcf80; }
+    .mini-dot { width:9px; height:9px; border-radius:50%; background:rgba(255,255,255,.12); z-index:1; transition:background .3s; }
+    .mini-step.done .mini-dot { background:#5fcf80; }
+    .mini-step.active .mini-dot { background:var(--al); box-shadow:0 0 0 3px rgba(217,178,84,.25); }
+    .mini-step-label { font-size:8.5px; color:rgba(245,239,230,.3); margin-top:5px; text-align:center; }
+    .mini-step.done .mini-step-label, .mini-step.active .mini-step-label { color:rgba(245,239,230,.55); }
     .order-status-pill { font-family:'Syne','Hind Siliguri',sans-serif; font-size:9px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; padding:4px 10px; border-radius:20px; flex-shrink:0; }
     .status-pending   { background:rgba(217,178,84,.12); color:var(--al); border:1px solid rgba(217,178,84,.2); }
     .status-confirmed { background:rgba(95,207,128,.12); color:#5fcf80; border:1px solid rgba(95,207,128,.2); }
@@ -121,7 +138,7 @@
     .status-delivered { background:rgba(255,255,255,.08); color:rgba(255,255,255,.65); border:1px solid rgba(255,255,255,.1); }
     .status-cancelled { background:rgba(184,92,56,.12); color:var(--tl); border:1px solid rgba(184,92,56,.2); }
     .status-returned  { background:rgba(184,92,56,.08); color:rgba(184,92,56,.8); border:1px solid rgba(184,92,56,.15); }
-    .order-card-body { padding:0 20px 16px; }
+    .order-card-body { padding:12px 20px 16px; border-top:1px solid rgba(255,255,255,.05); }
     .order-items-preview { font-size:13px; color:rgba(245,239,230,.65); line-height:1.65; margin-bottom:14px; padding-top:12px; border-top:1px solid rgba(255,255,255,.05); }
     .order-total { font-family:'Cormorant Garamond','Hind Siliguri',serif; font-size:20px; font-weight:300; color:var(--al); margin-bottom:14px; }
     .order-actions { display:flex; gap:8px; flex-wrap:wrap; }
@@ -677,6 +694,20 @@
     });
 
     /* ── Fetch orders ── */
+    /* Compact status stepper — condensed version of track.html's full
+       icon-labeled stepper, sized for a repeated order-list context. */
+    const STATUS_ORDER = ['pending','confirmed','processing','shipped','delivered'];
+    const STATUS_LABELS = { pending:'Placed', confirmed:'Confirmed', processing:'Processing', shipped:'Shipped', delivered:'Delivered' };
+    function miniStepperHtml(status) {
+      const s = (status||'pending').toLowerCase();
+      if (s === 'cancelled' || s === 'returned') return '';
+      const currentIdx = STATUS_ORDER.indexOf(s);
+      return `<div class="mini-stepper">${STATUS_ORDER.map((key, i) => {
+        const cls = i < currentIdx ? 'done' : i === currentIdx ? 'active' : '';
+        return `<div class="mini-step ${cls}"><div class="mini-dot"></div><div class="mini-step-label">${STATUS_LABELS[key]}</div></div>`;
+      }).join('')}</div>`;
+    }
+
     async function fetchAndDisplayOrders(user) {
       const listEl = document.getElementById('order-history-list');
       if (!listEl) return;
@@ -689,7 +720,10 @@
         const totalSpent = orders.reduce((s,o) => s + (o.total_amount||0), 0);
         document.getElementById('stat-orders').textContent = orders.length || '0';
         document.getElementById('stat-spent').textContent  = `৳${totalSpent.toLocaleString()}`;
-        document.getElementById('stat-status').textContent = orders.length ? cap(orders[0]?.status) : '—';
+        const statusEl = document.getElementById('stat-status');
+        statusEl.textContent = orders.length ? cap(orders[0]?.status) : '—';
+        const STATUS_TEXT_COLOR = { pending:'var(--al)', confirmed:'#5fcf80', processing:'#3c9ac4', shipped:'#3c9ac4', delivered:'rgba(255,255,255,.85)', cancelled:'var(--tl)', returned:'rgba(184,92,56,.8)' };
+        statusEl.style.color = orders.length ? (STATUS_TEXT_COLOR[(orders[0]?.status||'').toLowerCase()] || 'var(--c)') : 'var(--c)';
         const badge = document.getElementById('order-count-badge');
         if (badge) badge.textContent = `${orders.length} order${orders.length !== 1 ? 's' : ''}`;
 
@@ -713,15 +747,17 @@
           return `
             <div class="order-card">
               <div class="order-card-header" onclick="toggleOrderBody('${order.id}')">
-                <div>
-                  <div class="order-card-id">#${order.order_number}</div>
-                  <div class="order-card-meta">${date} · ৳${(order.total_amount||0).toLocaleString()}</div>
+                <div class="order-card-top">
+                  <div>
+                    <div class="order-card-id">#${order.order_number}</div>
+                    <div class="order-card-meta">${date} · ৳${(order.total_amount||0).toLocaleString()}</div>
+                    <div class="order-card-preview">${preview||'No items'}</div>
+                  </div>
+                  <span class="order-status-pill ${sc}">${cap(order.status||'pending')}</span>
                 </div>
-                <span class="order-status-pill ${sc}">${cap(order.status||'pending')}</span>
+                ${miniStepperHtml(order.status)}
               </div>
               <div class="order-card-body" id="body-${order.id}" style="display:none;">
-                <div class="order-items-preview">${preview||'No items'}</div>
-                <div class="order-total">৳${(order.total_amount||0).toLocaleString()}</div>
                 <div class="order-actions">
                   <button type="button" class="order-btn" onclick="openOrderModal('${order.id}')">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
@@ -862,7 +898,7 @@
       document.getElementById('acc-avatar').textContent      = displayName[0].toUpperCase();
       document.getElementById('acc-phone').textContent       = phone || 'Not provided';
       showEditBanner('profile-banner', '✓ Profile updated!', 'success');
-      setTimeout(() => toggleProfileEdit(), 1200);
+      setTimeout(() => toggleProfileEdit(), 2800); /* was 1200ms — read as a flicker rather than a confirmation */
     };
 
     window.toggleAddressEdit = function() {
@@ -913,7 +949,7 @@
       document.getElementById('addr-thana').textContent    = thana;
       document.getElementById('addr-full').textContent     = address || '—';
       showEditBanner('address-banner', '✓ Address saved!', 'success');
-      setTimeout(() => toggleAddressEdit(), 1200);
+      setTimeout(() => toggleAddressEdit(), 2800); /* was 1200ms — read as a flicker rather than a confirmation */
     };
   </script>
 

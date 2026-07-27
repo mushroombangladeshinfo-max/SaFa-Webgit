@@ -109,9 +109,26 @@
     .order-card { border-bottom:1px solid rgba(255,255,255,.05); transition:background .2s; }
     .order-card:last-child { border-bottom:none; }
     .order-card:hover { background:rgba(255,255,255,.02); }
-    .order-card-header { display:flex; justify-content:space-between; align-items:center; padding:14px 20px; cursor:pointer; }
+    .order-card-header { padding:14px 20px; cursor:pointer; }
+    .order-card-top { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
     .order-card-id { font-family:'Syne','Hind Siliguri',sans-serif; font-size:10px; font-weight:700; letter-spacing:.1em; color:var(--c); }
     .order-card-meta { font-size:11px; color:rgba(245,239,230,.45); margin-top:3px; }
+    /* Item summary visible without expanding — was hidden behind a click,
+       forcing a customer scanning "what did I buy" to expand every row. */
+    .order-card-preview { font-size:11.5px; color:rgba(245,239,230,.4); margin-top:4px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:100%; }
+    /* Compact progress stepper — same status data as the pill, but a pill
+       alone only shows the current word, not how far along the order is.
+       Matches track.html's stepper concept, condensed for a repeated list. */
+    .mini-stepper { display:flex; align-items:center; margin-top:14px; }
+    .mini-step { flex:1; display:flex; flex-direction:column; align-items:center; position:relative; }
+    .mini-step::before { content:''; position:absolute; top:4px; left:-50%; width:100%; height:2px; background:rgba(255,255,255,.08); z-index:0; }
+    .mini-step:first-child::before { display:none; }
+    .mini-step.done::before { background:#5fcf80; }
+    .mini-dot { width:9px; height:9px; border-radius:50%; background:rgba(255,255,255,.12); z-index:1; transition:background .3s; }
+    .mini-step.done .mini-dot { background:#5fcf80; }
+    .mini-step.active .mini-dot { background:var(--al); box-shadow:0 0 0 3px rgba(217,178,84,.25); }
+    .mini-step-label { font-size:8.5px; color:rgba(245,239,230,.3); margin-top:5px; text-align:center; }
+    .mini-step.done .mini-step-label, .mini-step.active .mini-step-label { color:rgba(245,239,230,.55); }
     .order-status-pill { font-family:'Syne','Hind Siliguri',sans-serif; font-size:9px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; padding:4px 10px; border-radius:20px; flex-shrink:0; }
     .status-pending   { background:rgba(217,178,84,.12); color:var(--al); border:1px solid rgba(217,178,84,.2); }
     .status-confirmed { background:rgba(95,207,128,.12); color:#5fcf80; border:1px solid rgba(95,207,128,.2); }
@@ -120,7 +137,7 @@
     .status-delivered { background:rgba(255,255,255,.08); color:rgba(255,255,255,.65); border:1px solid rgba(255,255,255,.1); }
     .status-cancelled { background:rgba(184,92,56,.12); color:var(--tl); border:1px solid rgba(184,92,56,.2); }
     .status-returned  { background:rgba(184,92,56,.08); color:rgba(184,92,56,.8); border:1px solid rgba(184,92,56,.15); }
-    .order-card-body { padding:0 20px 16px; }
+    .order-card-body { padding:12px 20px 16px; border-top:1px solid rgba(255,255,255,.05); }
     .order-items-preview { font-size:13px; color:rgba(245,239,230,.65); line-height:1.65; margin-bottom:14px; padding-top:12px; border-top:1px solid rgba(255,255,255,.05); }
     .order-total { font-family:'Cormorant Garamond','Hind Siliguri',serif; font-size:20px; font-weight:300; color:var(--al); margin-bottom:14px; }
     .order-actions { display:flex; gap:8px; flex-wrap:wrap; }
@@ -228,7 +245,7 @@
       .modal-content { max-height:90vh; max-height:90dvh; }
     }
   </style>
-  <script type="module" crossorigin src="/assets/account-CMw38-0o.js"></script>
+  <script type="module" crossorigin src="/assets/account-CDrAcHhg.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
   <link rel="modulepreload" crossorigin href="/assets/index-B-jIxwbw.js">
   <link rel="modulepreload" crossorigin href="/assets/supabase-DFvBSl1A.js">
