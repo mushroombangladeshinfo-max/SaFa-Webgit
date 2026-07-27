@@ -3,7 +3,7 @@
    SaFa Naturals — Shared Admin Auth
    ─────────────────────────────────────────────────────────
    Single source of truth for admin email list.
-   Imported by admin.html and quick-log.html so adding a new
+   Imported by orders.html and quick-log.html so adding a new
    admin only requires editing this one file.
 
    NOTE: This is a UI routing gate only — it prevents

@@ -7,7 +7,7 @@ export default defineConfig({
       input: {
         main:      './index.html',
         home:      './home.html',
-        admin:     './admin.html',
+        orders:    './orders.html',
         dashboard: './dashboard.html',
         product:   './product.html',
         recipes:   './recipes.html',

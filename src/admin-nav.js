@@ -10,7 +10,7 @@
 
 const NAV_LINKS = [
   { key: 'home',      href: 'home.html',      label: 'Overview',  icon: '🏠' },
-  { key: 'orders',    href: 'admin.html',     label: 'Orders',    icon: '📦' },
+  { key: 'orders',    href: 'orders.html',     label: 'Orders',    icon: '📦' },
   { key: 'customers', href: 'customers.html',  label: 'Customers', icon: '👤' },
   { key: 'products',  href: 'products.html',   label: 'Products',  icon: '🍄' },
   { key: 'expenses',  href: 'expenses.html',   label: 'Expenses',  icon: '💰' },
@@ -28,7 +28,7 @@ const FARM_LINKS = [
    with keyword aliases so e.g. "sales" finds Orders. */
 const SEARCH_INDEX = [
   { href: 'home.html',           label: 'Overview',       icon: '🏠', hint: 'Dashboard & KPIs',        keywords: 'home dashboard summary kpi' },
-  { href: 'admin.html',          label: 'Orders',         icon: '📦', hint: 'Manage customer orders',   keywords: 'sales orders shipping fulfillment' },
+  { href: 'orders.html',          label: 'Orders',         icon: '📦', hint: 'Manage customer orders',   keywords: 'sales orders shipping fulfillment' },
   { href: 'customers.html',      label: 'Customers',      icon: '👤', hint: 'Customer directory',       keywords: 'customers users contacts crm' },
   { href: 'products.html',       label: 'Products',       icon: '🍄', hint: 'Catalog & inventory',      keywords: 'products catalog inventory stock' },
   { href: 'expenses.html',       label: 'Expenses',       icon: '💰', hint: 'Costs & P&L',              keywords: 'expenses costs finance pnl profit loss' },
@@ -227,7 +227,7 @@ export function mountAdminNav({ page, supabase, email, lastLogin }) {
   /* ── Logout ── */
   async function doLogout() {
     await supabase.auth.signOut();
-    window.location.href = 'admin.html';
+    window.location.href = 'orders.html';
   }
   document.getElementById('an-logout-btn')?.addEventListener('click', doLogout);
   document.getElementById('an-logout-mobile')?.addEventListener('click', doLogout);

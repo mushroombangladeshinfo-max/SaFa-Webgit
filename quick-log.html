@@ -995,7 +995,7 @@ document.getElementById('hdr-back').style.visibility = 'hidden';
 
 (async () => {
   const session = await requireAdmin(sb);
-  if (!session) { window.location.href = 'admin.html'; return; }
+  if (!session) { window.location.href = 'orders.html'; return; }
 
   S.userEmail             = session.user.email;
   S.d['log-date']         = localDateStr();

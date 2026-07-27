@@ -489,7 +489,7 @@
 
     /* ── Auth ── */
     const session = await requireAdmin(sb);
-    if (!session) { window.location.href = 'admin.html'; }
+    if (!session) { window.location.href = 'orders.html'; }
     const userEmail = session.user.email;
     mountAdminNav({ page: 'expenses', supabase: sb, email: userEmail });
 

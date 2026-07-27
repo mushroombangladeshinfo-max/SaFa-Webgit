@@ -281,7 +281,7 @@
     );
 
     const session = await requireAdmin(sb);
-    if (!session) { window.location.href = 'admin.html'; }
+    if (!session) { window.location.href = 'orders.html'; }
     mountAdminNav({ page: 'pipeline', supabase: sb, email: session.user.email });
     const userEmail = session.user.email;
 

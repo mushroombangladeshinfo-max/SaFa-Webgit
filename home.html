@@ -224,7 +224,7 @@
     </div>
 
     <!-- B2C: dormant for now, kept minimal on purpose -->
-    <a href="admin.html" class="b2c-strip" aria-label="Website B2C status — open Orders">
+    <a href="orders.html" class="b2c-strip" aria-label="Website B2C status — open Orders">
       <div class="b2c-strip-text">🌐 Website (B2C): <strong id="b2c-status">—</strong></div>
       <svg class="panel-chevron" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
     </a>
@@ -249,7 +249,7 @@
     const sb = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY);
 
     const session = await requireAdmin(sb);
-    if (!session) { window.location.href = 'admin.html'; }
+    if (!session) { window.location.href = 'orders.html'; }
 
     mountAdminNav({ page: 'home', supabase: sb, email: session.user.email });
 
@@ -507,7 +507,7 @@
           sev: daysSince(o.created_at) > 2 ? 'crit' : 'warn',
           text: 'An order is still processing',
           meta: `${relOrderTime(o.created_at)} · ${fmt(o.total_amount)}`,
-          href: 'admin.html',
+          href: 'orders.html',
         });
       });
     }

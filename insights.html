@@ -547,7 +547,7 @@
 
     /* ── Auth gate ── */
     const session = await requireAdmin(sb);
-    if (!session) { window.location.href = 'admin.html'; }
+    if (!session) { window.location.href = 'orders.html'; }
     mountAdminNav({ page: 'insights', supabase: sb, email: session.user.email });
 
     /* ── Channel identity: fixed color + label (validated palette) ── */

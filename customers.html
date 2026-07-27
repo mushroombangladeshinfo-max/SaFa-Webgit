@@ -178,7 +178,7 @@
     const sb = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY);
 
     const session = await requireAdmin(sb);
-    if (!session) { window.location.href = 'admin.html'; }
+    if (!session) { window.location.href = 'orders.html'; }
 
     mountAdminNav({ page: 'customers', supabase: sb, email: session.user.email });
 

@@ -164,7 +164,7 @@ const sb = createClient(
 /* ── Auth ── */
 (async () => {
   const session = await requireAdmin(sb);
-  if (!session) { window.location.href = 'admin.html'; return; }
+  if (!session) { window.location.href = 'orders.html'; return; }
   init();
   injectRealtimeStyles();
   subscribeRealtime(sb, 'farm-analytics-live', ['farm_daily_logs', 'one_off_expenses'], load,

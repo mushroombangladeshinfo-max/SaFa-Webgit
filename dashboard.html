@@ -7,7 +7,7 @@
 <link rel="icon" type="image/png" href="/favicon.png"/>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Syne:wght@600;700;800&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<!-- Auth guard: hides UI until session verified, redirects to admin.html if not admin -->
+<!-- Auth guard: hides UI until session verified, redirects to orders.html if not admin -->
 <style>html.auth-checking *:not(style) { visibility:hidden !important; }</style>
 <script type="module">
   import { createClient } from '@supabase/supabase-js';
@@ -16,7 +16,7 @@
   (async () => {
     const sb = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_ANON_KEY);
     const session = await requireAdmin(sb);
-    if (!session) { window.location.replace('admin.html'); }
+    if (!session) { window.location.replace('orders.html'); }
     else           { document.documentElement.classList.remove('auth-checking'); }
   })();
 </script>

@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <link rel="icon" type="image/png" href="/favicon.png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin — SaFa Naturals</title>
+  <title>Orders — SaFa Naturals</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1469,7 +1469,7 @@
         btn.innerHTML = orig;
         btn.disabled  = false;
       } else {
-        checkAuth();
+        checkAuth(true);
       }
     });
 
@@ -1482,7 +1482,7 @@
       btn.disabled = true;
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
-        options: { redirectTo: window.location.origin + '/admin.html' },
+        options: { redirectTo: window.location.origin + '/orders.html' },
       });
       /* On success, Supabase redirects to Google immediately — non-admin
          rejection happens in checkAuth() after the redirect returns. */
@@ -1528,7 +1528,7 @@
       btn.disabled  = true;
 
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: window.location.origin + '/admin.html',
+        redirectTo: window.location.origin + '/orders.html',
       });
 
       btn.innerHTML = orig;
@@ -1544,9 +1544,10 @@
     /* ── Auth state ── */
     let _dashVisible = false;
 
-    async function checkAuth() {
+    async function checkAuth(fresh = false) {
       const session = await requireAdmin(supabase);
       if (session) {
+        if (fresh) { window.location.href = 'home.html'; return; }
         showDashboard(session.user);
       } else {
         const { data: { session: raw } } = await supabase.auth.getSession();
@@ -1580,7 +1581,7 @@
         showBanner('pw-banner', 'Your session expired. Please sign in again.', 'error');
       }
       /* Handle magic link / password reset redirect */
-      if (event === 'SIGNED_IN') checkAuth();
+      if (event === 'SIGNED_IN') checkAuth(true);
     });
 
     function showDashboard(user) {
