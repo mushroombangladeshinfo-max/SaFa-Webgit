@@ -662,6 +662,10 @@
       font-size: 9px; letter-spacing: .1em;
     }
 
+    /* Mobile-only persistent total bar — hidden on desktop, where the
+       sticky Order Summary card already keeps the total in view. */
+    .mobile-total-bar { display: none; }
+
     /* ── Responsive ── */
     @media (max-width: 768px) {
       .co-header  { padding: 14px 20px; }
@@ -672,6 +676,24 @@
       .co-sticky  { position: static !important; }
       .co-card    { border-radius: 10px; }
       .trust-badges { gap: 14px; }
+
+      .mobile-total-bar {
+        display: flex; align-items: center; justify-content: space-between;
+        position: fixed; left: 0; right: 0; bottom: 0;
+        padding: 12px 20px calc(12px + env(safe-area-inset-bottom, 0px));
+        background: var(--g800); border-top: 1px solid rgba(255,255,255,.08);
+        box-shadow: 0 -6px 20px rgba(0,0,0,.25);
+        z-index: 500;
+      }
+      .mobile-total-label {
+        font-family: 'Syne', 'Hind Siliguri', sans-serif; font-size: 10px; font-weight: 700;
+        letter-spacing: .1em; text-transform: uppercase; color: var(--cd);
+      }
+      .mobile-total-amount {
+        font-family: 'Syne', 'Hind Siliguri', sans-serif; font-size: 19px; font-weight: 700; color: var(--al);
+      }
+      /* Clear the new bottom bar instead of overlapping it */
+      .wa-floating-btn { bottom: calc(68px + env(safe-area-inset-bottom, 0px)); }
 
       /* 16px inputs stop iOS Safari auto-zooming on focus — critical on
          the conversion page where every field gets tapped */
@@ -689,8 +711,6 @@
       /* Qty steppers rendered inline by ui.js at 26px — enlarge for thumbs */
       .order-item button { width: 36px !important; height: 36px !important; font-size: 17px !important; }
       .submit-btn { padding: 18px; font-size: 12px; }
-      /* Keep the WhatsApp float clear of the submit area's trust badges */
-      .wa-floating-btn { bottom: calc(20px + env(safe-area-inset-bottom, 0px)); }
     }
     @media (max-width: 420px) {
       .co-steps { overflow-x: auto; }
@@ -779,7 +799,7 @@
           <div class="co-card-body">
 
             <!-- Error banner -->
-            <div class="error-banner" id="errorBanner" role="alert" aria-live="polite">
+            <div class="error-banner" id="errorBanner" role="alert" aria-live="polite" tabindex="-1">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
               <span id="errorText">Please fill in all required fields.</span>
             </div>
@@ -884,7 +904,7 @@
             <h2>Payment</h2>
           </div>
           <div class="co-card-body">
-            <div class="payment-pill" role="radio" aria-checked="true" tabindex="0">
+            <div class="payment-pill">
               <div class="payment-icon" aria-hidden="true">💵</div>
               <div>
                 <div class="payment-name">Cash on Delivery</div>
@@ -953,7 +973,7 @@
 
             <!-- Terms -->
             <div class="terms-row">
-              <input type="checkbox" id="termsCheck" checked aria-required="true">
+              <input type="checkbox" id="termsCheck" aria-required="true">
               <label for="termsCheck">
                 I agree to the <a href="index.html#faq" target="_blank" rel="noopener">Terms &amp; Conditions</a> and <a href="index.html#faq" target="_blank" rel="noopener">Privacy Policy</a>.
               </label>
@@ -1093,25 +1113,35 @@
       document.getElementById('errorBanner').classList.remove('visible','shake');
     }
 
-    function setFieldError(fieldId, errorId, bannerMsg) {
+    function setFieldError(fieldId, errorId) {
       const field = document.getElementById(fieldId);
       const err   = document.getElementById(errorId);
-      if (field) field.classList.add('error');
+      if (field) { field.classList.add('error'); field.setAttribute('aria-invalid', 'true'); }
       if (err)   err.classList.add('visible');
-      showBanner(bannerMsg);
-      field?.scrollIntoView({ behavior:'smooth', block:'center' });
     }
 
     function clearFieldError(fieldId) {
       const field = document.getElementById(fieldId);
       const err   = document.getElementById(`${fieldId}-error`);
-      if (field) field.classList.remove('error');
+      if (field) { field.classList.remove('error'); field.setAttribute('aria-invalid', 'false'); }
       if (err)   err.classList.remove('visible');
     }
 
     function clearAllErrors() {
       hideBanner();
       REQUIRED_FIELDS.forEach(id => clearFieldError(id));
+    }
+
+    /* Persists whatever's currently in the required fields, regardless of
+       whether the order has been placed yet. */
+    function saveDraft() {
+      localStorage.setItem('safaCheckout', JSON.stringify({
+        custName:     document.getElementById('custName')?.value.trim() || '',
+        custPhone:    getRawPhone(),
+        custDistrict: document.getElementById('custDistrict')?.value || '',
+        custThana:    document.getElementById('custThana')?.value.trim() || '',
+        custAddress:  document.getElementById('custAddress')?.value.trim() || '',
+      }));
     }
 
     function validateForm() {
@@ -1123,13 +1153,28 @@
       const address  = document.getElementById('custAddress').value.trim();
       const terms    = document.getElementById('termsCheck').checked;
 
-      if (!name)               { setFieldError('custName',    'custName-error',    'Full name is required.');                         return false; }
-      if (!phone)              { setFieldError('custPhone',   'custPhone-error',   'Phone number is required.');                      return false; }
-      if (!validatePhone(phone)){ setFieldError('custPhone',  'custPhone-error',   'Enter a valid BD number (01XXXXXXXXX).');         return false; }
-      if (!district)           { setFieldError('custDistrict','custDistrict-error','Please select your district.');                   return false; }
-      if (!thana)              { setFieldError('custThana',   'custThana-error',   'Thana / Area is required.');                      return false; }
-      if (!address)            { setFieldError('custAddress', 'custAddress-error', 'Full delivery address is required.');             return false; }
-      if (!terms)              { showBanner('Please accept the Terms & Conditions to continue.');                                      return false; }
+      /* Collect every invalid field at once — so a customer with 3 empty
+         fields sees all 3 highlighted immediately instead of fixing and
+         resubmitting one at a time. */
+      const errors = [];
+      if (!name)                       errors.push(['custName',     'custName-error']);
+      if (!phone)                      errors.push(['custPhone',    'custPhone-error']);
+      else if (!validatePhone(phone))  errors.push(['custPhone',    'custPhone-error']);
+      if (!district)                   errors.push(['custDistrict', 'custDistrict-error']);
+      if (!thana)                      errors.push(['custThana',    'custThana-error']);
+      if (!address)                    errors.push(['custAddress',  'custAddress-error']);
+
+      if (errors.length) {
+        errors.forEach(([fieldId, errorId]) => setFieldError(fieldId, errorId));
+        showBanner(errors.length === 1
+          ? 'Please fix the highlighted field.'
+          : `Please fix the ${errors.length} highlighted fields.`);
+        const firstInvalid = document.getElementById(errors[0][0]);
+        firstInvalid?.scrollIntoView({ behavior:'smooth', block:'center' });
+        firstInvalid?.focus({ preventScroll: true });
+        return false;
+      }
+      if (!terms)              { showBanner('Please accept the Terms & Conditions to continue.'); return false; }
       if (!Object.keys(window.getCart()).length) { showBanner('Your cart is empty. Add items before placing an order.'); return false; }
       return true;
     }
@@ -1216,7 +1261,6 @@
         /* GA4: purchase — fires after Supabase confirms the order insert */
         trackPurchase(orderId, total, Object.entries(cart));
 
-        localStorage.setItem('safaCheckout', JSON.stringify({ custName:name, custPhone:phone, custDistrict:district, custThana:thana, custAddress:address }));
         localStorage.removeItem('safaCart');
         localStorage.removeItem('activeCoupon');
 
@@ -1234,6 +1278,14 @@
             ? 'Database not ready. Contact us on WhatsApp to place your order manually.'
             : 'Something went wrong. Please try again or contact us on WhatsApp.'
         );
+        /* Unlike field-validation errors (which scroll to the specific bad
+           field), a submission failure has no single field to point at —
+           the banner itself is the only feedback, so make sure it's seen
+           even though the submit button lives in the sticky column that
+           collapses to static positioning on mobile. */
+        const banner = document.getElementById('errorBanner');
+        banner?.scrollIntoView({ behavior:'smooth', block:'center' });
+        banner?.focus();
       }
     }
 
@@ -1508,7 +1560,10 @@
         updateCounter();
       }
 
-      /* Live validation clearing + progress */
+      /* Live validation clearing + progress + draft autosave.
+         Saves on every keystroke (not just after a successful order) so a
+         failed submission or accidental tab close doesn't lose everything
+         the customer typed. */
       REQUIRED_FIELDS.forEach(id => {
         const field = document.getElementById(id);
         if (!field) return;
@@ -1518,6 +1573,7 @@
             if (id !== 'custPhone' && this.value.trim().length > 2) flashFieldOk(id);
             updateFormProgress();
             updateDeliveryProgress();
+            saveDraft();
           });
         });
       });
@@ -1590,14 +1646,23 @@
       } else {
         discLine.classList.remove('visible');
       }
+      syncMobileTotalBar();
     }
 
-    /* Monkey-patch updateTotals so discount is always re-applied */
+    /* Monkey-patch updateTotals so discount is always re-applied — this in
+       turn keeps the mobile sticky total bar synced too (refreshDiscountUI
+       calls syncMobileTotalBar at the end). */
     const _origUpdateTotals = window.updateTotals;
     window.updateTotals = function (subtotal) {
       if (_origUpdateTotals) _origUpdateTotals(subtotal);
       refreshDiscountUI();
     };
+
+    function syncMobileTotalBar() {
+      const src = document.getElementById('totalVal');
+      const dst = document.getElementById('mobileTotalVal');
+      if (src && dst) dst.textContent = src.textContent;
+    }
 
     async function applyCoupon() {
       const input = document.getElementById('couponInput');
@@ -1667,6 +1732,14 @@
 
     window.processOrder = processOrder;
   </script>
+
+  <!-- Persistent total, mobile only — the real Order Summary card sits
+       below the whole shipping form once stacked, so without this a
+       customer filling in their address never sees a running total. -->
+  <div class="mobile-total-bar" id="mobileTotalBar" aria-hidden="true">
+    <span class="mobile-total-label">Total</span>
+    <span class="mobile-total-amount" id="mobileTotalVal">৳0</span>
+  </div>
 
   <a href="https://wa.me/+8801970099378"
      class="wa-floating-btn"
