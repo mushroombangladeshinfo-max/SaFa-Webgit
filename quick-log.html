@@ -188,7 +188,7 @@ input[type="date"].date-nat::-webkit-calendar-picker-indicator{filter:invert(.7)
       </div>
       <div class="prog-track"><div class="prog-bar" id="prog-bar" style="width:9%"></div></div>
     </div>
-    <a href="admin.html" class="hdr-close" aria-label="বন্ধ করুন">✕</a>
+    <a href="home.html" class="hdr-close" aria-label="বন্ধ করুন">✕</a>
   </header>
 
   <div id="wrap"></div>
@@ -923,12 +923,12 @@ async function submit() {
     ok.innerHTML = `<div class="ok-wrap">
       <div class="ok-icon">✅</div>
       <div class="ok-title">Log জমা হয়েছে!</div>
-      <div class="ok-sub">সফলভাবে save হয়েছে।<br>Admin panel-এ ফিরে যাচ্ছেন…</div>
+      <div class="ok-sub">সফলভাবে save হয়েছে।<br>Home-এ ফিরে যাচ্ছেন…</div>
     </div>`;
     wrap.appendChild(ok);
     requestAnimationFrame(() => requestAnimationFrame(() => ok.classList.remove('in-r')));
     setTimeout(() => old?.remove(), 260);
-    setTimeout(() => window.location.href = 'admin.html', 2800);
+    setTimeout(() => window.location.href = 'home.html', 2800);
 
   } catch(err) {
     btn.disabled = false;

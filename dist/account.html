@@ -510,8 +510,12 @@
         </div>
       </div>
 
-      <!-- Admin shortcut — hidden by default, shown only for admin emails -->
-      <a href="admin.html" class="acc-admin-btn" id="acc-admin-shortcut">
+      <!-- Admin shortcut — hidden by default, shown only for admin emails.
+           Goes to home.html (Overview), not admin.html (Orders) — same
+           reasoning as the nav icon in index.html: home.html is the real
+           backend "home," admin.html is just one nav destination among
+           others now. -->
+      <a href="home.html" class="acc-admin-btn" id="acc-admin-shortcut">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
         Go to Admin Dashboard
       </a>
