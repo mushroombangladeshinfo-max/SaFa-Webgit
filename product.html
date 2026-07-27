@@ -120,6 +120,40 @@
       transition: transform .5s cubic-bezier(.4,0,.2,1);
     }
     .img-wrap:hover img { transform: scale(1.04); }
+    /* Real tap-to-zoom instead of a hover-only CSS scale (which does
+       nothing on mobile, where most orders happen). */
+    .img-zoomable { cursor: zoom-in; }
+    .img-zoom-hint {
+      position: absolute; bottom: 16px; right: 16px;
+      width: 34px; height: 34px; border-radius: 50%;
+      background: rgba(6,13,9,.65); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
+      pointer-events: none;
+    }
+    .img-lightbox {
+      display: none; position: fixed; inset: 0; z-index: 2000;
+      background: rgba(6,13,9,.92);
+      align-items: center; justify-content: center;
+      padding: 40px 20px;
+      -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
+    }
+    .img-lightbox.open { display: flex; animation: fadeIn .2s ease; }
+    .img-lightbox img {
+      max-width: min(90vw, 720px); max-height: 85vh;
+      width: auto; height: auto;
+      border-radius: 12px;
+      box-shadow: 0 24px 64px rgba(0,0,0,.5);
+    }
+    .img-lightbox-close {
+      position: absolute; top: 20px; right: 20px;
+      width: 40px; height: 40px; border-radius: 50%;
+      background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2);
+      color: #fff; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background .2s;
+    }
+    .img-lightbox-close:hover { background: rgba(255,255,255,.2); }
     .img-badges {
       position: absolute; top: 16px; left: 16px;
       display: flex; flex-direction: column; gap: 6px;
@@ -258,6 +292,34 @@
     }
     .btn-wa-small:hover { opacity: .9; }
     .btn-wa-small svg { width: 18px; height: 18px; }
+
+    /* Cross-sell — a lightweight nudge right at the buy box, since the
+       full related-products grid at the bottom of the page is easy to
+       never scroll to on a long mobile page. */
+    .cross-sell-nudge { margin-bottom: 20px; }
+    .cross-sell-label {
+      font-size: .72rem; font-weight: 700; letter-spacing: .5px;
+      text-transform: uppercase; color: var(--muted);
+      margin-bottom: 10px; display: block;
+    }
+    .cross-sell-item {
+      display: flex; align-items: center; gap: 12px;
+      background: var(--white); border-radius: 12px; padding: 10px;
+      box-shadow: var(--shadow);
+    }
+    .cross-sell-item img { width: 48px; height: 48px; border-radius: 8px; object-fit: cover; flex-shrink: 0; }
+    .cross-sell-info { flex: 1; min-width: 0; }
+    .cross-sell-name { font-size: .85rem; font-weight: 600; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .cross-sell-price { font-size: .8rem; color: var(--green); font-weight: 700; }
+    .cross-sell-add {
+      flex-shrink: 0; padding: 8px 14px;
+      background: none; border: 1.5px solid var(--green); color: var(--green);
+      border-radius: 8px; font-size: .75rem; font-weight: 700;
+      font-family: 'DM Sans', 'Hind Siliguri', sans-serif;
+      cursor: pointer; white-space: nowrap;
+      transition: background .2s, color .2s;
+    }
+    .cross-sell-add:hover { background: var(--green); color: #fff; }
 
     /* Trust badges */
     .trust-strip {
@@ -708,6 +770,14 @@
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
+<!-- IMAGE LIGHTBOX -->
+<div class="img-lightbox" id="img-lightbox" role="dialog" aria-modal="true" aria-label="Product image" onclick="if(event.target===this)closeImageZoom()">
+  <button type="button" class="img-lightbox-close" onclick="closeImageZoom()" aria-label="Close">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M18 6L6 18M6 6l12 12"/></svg>
+  </button>
+  <img id="img-lightbox-img" src="" alt="" />
+</div>
+
 <!-- WhatsApp float -->
 <a href="https://wa.me/+8801970099378?utm_source=whatsapp&utm_medium=floating_btn&utm_campaign=product_page" class="wa-floating-btn" target="_blank" rel="noopener" aria-label="WhatsApp">
   <div class="wa-content">
@@ -1043,11 +1113,15 @@ function renderProduct(p) {
     <!-- PRODUCT HERO -->
     <section class="product-hero">
       <!-- Image -->
-      <div class="img-wrap">
+      <div class="img-wrap${p.coming ? '' : ' img-zoomable'}"${p.coming ? '' : ` onclick="openImageZoom('${p.image}','${p.name.replace(/'/g, "\\'")}')" role="button" tabindex="0" onkeydown="if(event.key==='Enter')openImageZoom('${p.image}','${p.name.replace(/'/g, "\\'")}')"`}>
         <div class="img-badges">
           ${p.badges.map(b => `<span class="img-badge ${b.cls}">${b.label}</span>`).join('')}
         </div>
         <img src="${p.image}" alt="${p.name}" loading="eager" />
+        ${!p.coming ? `
+          <div class="img-zoom-hint" aria-hidden="true">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" d="M21 21l-4.35-4.35M11 8v6M8 11h6"/></svg>
+          </div>` : ''}
         ${p.coming ? `
           <div class="coming-overlay">
             <span>COMING SOON</span>
@@ -1115,6 +1189,19 @@ function renderProduct(p) {
               WhatsApp-এ অর্ডার করুন
             </a>
           </div>`}
+
+        ${!p.coming && related.length ? `
+        <div class="cross-sell-nudge">
+          <span class="cross-sell-label">প্রায়ই একসাথে কেনা হয়</span>
+          <div class="cross-sell-item">
+            <img src="${related[0].image}" alt="${related[0].name}" loading="lazy" />
+            <div class="cross-sell-info">
+              <div class="cross-sell-name">${related[0].name}</div>
+              <div class="cross-sell-price">৳${related[0].price}</div>
+            </div>
+            <button type="button" class="cross-sell-add" onclick="window.addCrossSellItem('${related[0].id}')">+ যোগ করুন</button>
+          </div>
+        </div>` : ''}
 
         <div class="trust-strip">
           <div class="trust-item">
@@ -1292,6 +1379,36 @@ function renderProduct(p) {
     $('qty-display').textContent = qty
   }
 
+  /* Image zoom lightbox — replaces the old hover-only CSS scale, which
+     did nothing on mobile (where most orders happen). */
+  let _zoomReturnFocus = null
+  window.openImageZoom = function(src, alt) {
+    const lb = $('img-lightbox')
+    $('img-lightbox-img').src = src
+    $('img-lightbox-img').alt = alt || ''
+    lb.classList.add('open')
+    _zoomReturnFocus = document.activeElement
+    $('img-lightbox').querySelector('.img-lightbox-close')?.focus()
+    document.body.style.overflow = 'hidden'
+  }
+  window.closeImageZoom = function() {
+    $('img-lightbox').classList.remove('open')
+    document.body.style.overflow = ''
+    _zoomReturnFocus?.focus()
+  }
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && $('img-lightbox').classList.contains('open')) window.closeImageZoom()
+  })
+
+  function updateNavCartBadge() {
+    const dot = document.querySelector('.nav-dot')
+    if (dot && window.getCartCount) {
+      const count = window.getCartCount()
+      dot.textContent = count > 99 ? '99+' : String(count)
+      dot.style.display = 'flex'
+    }
+  }
+
   /* Add to cart */
   window.doAddToCart = function() {
     const btn = $('btn-add')
@@ -1306,14 +1423,16 @@ function renderProduct(p) {
       btn.classList.remove('added')
       btn.innerHTML = `<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg> কার্টে যোগ করুন`
     }, 2500)
+    updateNavCartBadge()
+  }
 
-    /* Update nav cart badge */
-    const dot = document.querySelector('.nav-dot')
-    if (dot && window.getCartCount) {
-      const count = window.getCartCount()
-      dot.textContent = count > 99 ? '99+' : String(count)
-      dot.style.display = 'flex'
-    }
+  /* Cross-sell nudge quick-add (near the buy box) */
+  window.addCrossSellItem = function(id) {
+    const item = PRODUCTS[id]
+    if (!item || !window.addToCart) return
+    window.addToCart(item.name, item.price, item.id, item.unit, item.image.replace('/', ''))
+    toast(`${item.name} কার্টে যোগ হয়েছে ✓`, 'green')
+    updateNavCartBadge()
   }
 
   /* Tab switching */
