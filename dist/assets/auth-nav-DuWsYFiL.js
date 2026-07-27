@@ -1,4 +1,4 @@
-import{s}from"./supabase-D5irchOV.js";const c=["mushroombangladesh.info@gmail.com","quazishaab@gmail.com","abrarfahim.nsu@gmail.com"];async function i(){try{const{data:{user:a}}=await s.auth.getUser();if(!a)return;const t=a.user_metadata?.first_name||a.email.split("@")[0],e=document.getElementById("nav-account-link");if(e&&(e.outerHTML=`
+import{s}from"./supabase-D397If-S.js";const c=["mushroombangladesh.info@gmail.com","quazishaab@gmail.com","abrarfahim.nsu@gmail.com"];async function i(){try{const{data:{user:a}}=await s.auth.getUser();if(!a)return;const t=a.user_metadata?.first_name||a.email.split("@")[0],e=document.getElementById("nav-account-link");if(e&&(e.outerHTML=`
         <a href="account.html" class="nav-user-pill">
           <div class="nav-avatar">${t[0].toUpperCase()}</div>
           <span class="nav-user-name">${t}</span>

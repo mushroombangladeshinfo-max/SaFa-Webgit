@@ -33,14 +33,29 @@ export async function syncProductPrices() {
       /* Effective price customers pay */
       const effectivePrice = p.discount_price || p.price;
 
+      /* Fade price/stock out before patching, then back in — a silent
+         mid-glance text swap (e.g. ৳350 → ৳299, "In Stock" → "Out of
+         Stock") reads as a bait-and-switch on a COD site where trust is
+         the whole value prop. This makes the change read as "refreshing." */
+      const fadeSwap = (el, apply) => {
+        if (!el) return;
+        el.classList.add('price-syncing');
+        setTimeout(() => {
+          apply();
+          el.classList.remove('price-syncing');
+        }, 200);
+      };
+
       /* Update price display */
       if (priceEl && p.price) {
-        if (p.discount_price) {
-          priceEl.innerHTML =
-            `<s class="pl-price-orig">৳${p.price}</s> <span class="pl-price-disc">৳${p.discount_price}</span>`;
-        } else {
-          priceEl.textContent = `${p.price} ৳`;
-        }
+        fadeSwap(priceEl, () => {
+          if (p.discount_price) {
+            priceEl.innerHTML =
+              `<s class="pl-price-orig">৳${p.price}</s> <span class="pl-price-disc">৳${p.discount_price}</span>`;
+          } else {
+            priceEl.textContent = `${p.price} ৳`;
+          }
+        });
       }
 
       /* Update add-to-cart button's effective price */
@@ -51,11 +66,13 @@ export async function syncProductPrices() {
       /* Reflect stock status */
       if (stockEl && p.inventory_count !== undefined) {
         if (p.inventory_count === 0) {
-          stockEl.textContent = 'Out of Stock';
-          stockEl.style.color = '#e05a2b';
-          if (cartBtn) { cartBtn.disabled = true; cartBtn.textContent = 'Out of Stock'; }
+          fadeSwap(stockEl, () => {
+            stockEl.textContent = 'Out of Stock';
+            stockEl.style.color = '#e05a2b';
+            if (cartBtn) { cartBtn.disabled = true; cartBtn.textContent = 'Out of Stock'; }
+          });
         } else if (p.inventory_count <= 10) {
-          stockEl.textContent = 'Limited Stock';
+          fadeSwap(stockEl, () => { stockEl.textContent = 'Limited Stock'; });
         }
       }
     });

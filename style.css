@@ -188,6 +188,9 @@ img {
   100% { transform: scale(1); }
 }
 
+/* ── Hidden SVG sprite container — for <symbol>/<use> icon defs ── */
+.svg-sprite-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+
 /* ── Scroll Fade-In Utility ──
    Add .fi to any element.
    JS IntersectionObserver adds .show when in viewport.
@@ -1015,6 +1018,9 @@ img {
   grid-template-columns: repeat(3, 1fr);
   gap: 28px;
 }
+/* 4 cards in a 3-column grid leaves the trailing card alone in a mostly
+   empty row — give it more room instead of floating next to dead space. */
+.pl-grid > .pl-card:last-child { grid-column: span 2; }
 
 /* ── Product card ── */
 .pl-card {
@@ -1117,7 +1123,13 @@ img {
   color: var(--tl);
   margin-bottom: 6px;
   line-height: 1;
+  transition: opacity .2s ease;
 }
+/* Live price/stock sync (src/products.js) briefly fades content out and
+   back in instead of silently swapping text under the shopper's eyes —
+   reads as "refreshing," not a bait-and-switch. */
+.pl-price.price-syncing,
+.pl-stock.price-syncing { opacity: 0; }
 .pl-price-orig {
   opacity: .45;
   font-size: .65em;
@@ -1137,7 +1149,7 @@ img {
 }
 .pl-star      { color: var(--a); font-size: 12px; }
 .pl-rev-count { color: rgba(245, 239, 230, 0.55); font-weight: 300; }
-.pl-stock     { color: var(--tl); font-weight: 600; }
+.pl-stock     { color: var(--tl); font-weight: 600; transition: opacity .2s ease; }
 .pl-stock.orange { color: var(--al); }
 .pl-unit {
   font-size: 11px;
@@ -1149,7 +1161,10 @@ img {
 /* ── Products responsive ── */
 @media (max-width: 1100px) {
   .products-premium { padding: 76px 36px; }
+  /* 4 cards in 2 columns is already a clean 2+2 — the span-2 orphan fix
+     above is only needed at the 3-column desktop width. */
   .pl-grid { grid-template-columns: repeat(2, 1fr); }
+  .pl-grid > .pl-card:last-child { grid-column: span 1; }
 }
 @media (max-width: 768px) {
   .products-premium { padding: 60px 20px; }
@@ -1230,6 +1245,10 @@ img {
   gap: 56px 40px;
   margin-bottom: 80px;
 }
+/* 5 cards in a 2-column grid leaves the trailing card alone — since
+   .be-card is already a horizontal icon+text layout (not a narrow
+   vertical card), spanning full width reads naturally, not stretched. */
+.be-grid > .be-card:last-child { grid-column: 1 / -1; }
 .be-card {
   position: relative;
   display: flex;
@@ -1869,13 +1888,16 @@ img {
 .vnb-text { font-size: 15px; font-weight: 500; color: rgba(245, 239, 230, 0.75); }
 .vnb-text em { font-style: normal; color: var(--al); }
 .vnb-wa {
+  /* Matches .btn-wa-card's treatment (product cards, the highest-traffic
+     WhatsApp CTA) — one consistent look for WhatsApp buttons site-wide,
+     using the same radius token as the primary .btn-gold CTA. */
   display: inline-flex;
   align-items: center;
   gap: 7px;
   padding: 10px 20px;
-  background: rgba(37, 211, 102, 0.12);
-  border: 1px solid rgba(37, 211, 102, 0.28);
-  border-radius: 8px;
+  background: transparent;
+  border: 1px solid rgba(37, 211, 102, 0.35);
+  border-radius: 4px;
   color: #25d366;
   text-decoration: none;
   font-family: var(--fl);
@@ -1884,10 +1906,10 @@ img {
   letter-spacing: 0.1em;
   text-transform: uppercase;
   white-space: nowrap;
-  transition: all 0.2s;
+  transition: background .18s, border-color .18s;
   flex-shrink: 0;
 }
-.vnb-wa:hover { background: rgba(37, 211, 102, 0.18); border-color: rgba(37, 211, 102, 0.45); }
+.vnb-wa:hover { background: rgba(37, 211, 102, 0.08); border-color: rgba(37, 211, 102, 0.5); }
 .vnb-wa svg { width: 15px; height: 15px; }
 /* Responsive */
 @media (max-width: 992px) {
@@ -2444,22 +2466,26 @@ img {
   line-height: 1.5;
 }
 .faq-cta-wa {
+  /* Matches .btn-wa-card's treatment (product cards, the highest-traffic
+     WhatsApp CTA) — one consistent look for WhatsApp buttons site-wide,
+     using the same radius token as the primary .btn-gold CTA. */
   display: inline-flex;
   align-items: center;
   gap: 8px;
   padding: 12px 22px;
-  background: #25d366;
-  color: #fff;
-  border-radius: 10px;
+  background: transparent;
+  border: 1px solid rgba(37, 211, 102, 0.35);
+  color: #25d366;
+  border-radius: 4px;
   text-decoration: none;
   font-family: 'Syne', 'Hind Siliguri', sans-serif;
   font-size: 13px;
   font-weight: 700;
   white-space: nowrap;
-  transition: opacity 0.2s;
+  transition: background .18s, border-color .18s;
   flex-shrink: 0;
 }
-.faq-cta-wa:hover { opacity: 0.88; }
+.faq-cta-wa:hover { background: rgba(37, 211, 102, 0.08); border-color: rgba(37, 211, 102, 0.5); }
 .faq-cta-wa svg { width: 18px; height: 18px; flex-shrink: 0; }
 
 /* pl-card hover already defined in section 07 above */
@@ -2501,7 +2527,10 @@ img {
   .faq-cta-bar { flex-direction: column; align-items: flex-start; padding: 20px; }
   .faq-cta-wa { width: 100%; justify-content: center; padding: 14px 22px; }
   .faq-tabs { gap: 6px; }
-  .faq-tab-btn { font-size: 13px; padding: 10px 16px; } /* ≥40px tall tap target */
+  /* 44px minimum tap target (WCAG/Apple HIG), matching what the rest of
+     the site's touch targets already enforce (nav icons, hamburger) —
+     this one was previously 4px short. */
+  .faq-tab-btn { font-size: 13px; padding: 10px 16px; min-height: 44px; display: inline-flex; align-items: center; }
 }
 
 
@@ -2756,10 +2785,14 @@ footer::before {
 .f-nl-text strong { color: rgba(245, 239, 230, 0.92); font-weight: 400; }
 
 /* Email input wrapper */
-.f-input-wrap { position: relative; margin-bottom: 9px; }
+/* flex, not absolute-positioned-overlay — the button's label now discloses
+   the WhatsApp redirect ("WhatsApp-এ পাঠান" vs the old 4-character "যোগ
+   দিন"), so it needs room to grow instead of a fixed-width assumption. */
+.f-input-wrap { position: relative; margin-bottom: 9px; display: flex; gap: 8px; }
 .f-email {
-  width: 100%;
-  padding: 12px 76px 12px 13px;
+  flex: 1;
+  min-width: 0;
+  padding: 12px 13px;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.08);
   color: rgba(245, 239, 230, 0.88);
@@ -2776,21 +2809,19 @@ footer::before {
   background: rgba(255, 255, 255, 0.06);
 }
 .f-join {
-  position: absolute;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  padding: 0 13px;
+  flex-shrink: 0;
+  padding: 0 14px;
   background: var(--t);
   border: none;
   color: rgba(245, 239, 230, 0.95);
   font-family: var(--fl);
   font-size: 10px;
   font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  text-transform: none; /* keep "WhatsApp" readable, not WHATSAPP */
+  white-space: nowrap;
   cursor: pointer;
-  border-radius: 0 3px 3px 0;
+  border-radius: 3px;
   transition: background 0.2s;
 }
 .f-join:hover { background: var(--tl); }
