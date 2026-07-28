@@ -1,20 +1,30 @@
 /* src/ai-client.js
    Shared BYO-key AI client — used by insights.html's AI Analyst and
    home.html's assistant. Every call goes straight from the browser to
-   the provider; no backend, no server-held key, no per-message cost. */
+   the provider; no server-held key, no per-message cost.
+
+   Config (provider/url/model/key) lives in the ai_settings table, one
+   shared row for the whole admin team (RLS: admins only) — not per-browser
+   localStorage. Whoever sets a key up first, it works for every admin on
+   any device from then on; the old localStorage version meant a new
+   browser/device always started blank even though someone else had already
+   configured one. */
 
 export const AI_DEFAULTS = {
   ollama: { url: 'http://localhost:11434', model: 'llama3.2' },
   openai: { url: 'https://api.groq.com/openai', model: 'llama-3.1-8b-instant' },
 };
 
-export function loadAiCfg() {
-  return JSON.parse(localStorage.getItem('safaAiCfg') || 'null')
-      || { provider: 'openai', ...AI_DEFAULTS.openai, key: '' };
+export async function loadAiCfg(supabase) {
+  const { data } = await supabase.from('ai_settings').select('provider,url,model,api_key').eq('id', true).maybeSingle();
+  if (data) return { provider: data.provider, url: data.url, model: data.model, key: data.api_key || '' };
+  return { provider: 'openai', ...AI_DEFAULTS.openai, key: '' };
 }
 
-export function saveAiCfg(cfg) {
-  localStorage.setItem('safaAiCfg', JSON.stringify(cfg));
+export async function saveAiCfg(supabase, cfg) {
+  await supabase.from('ai_settings')
+    .update({ provider: cfg.provider, url: cfg.url, model: cfg.model, api_key: cfg.key })
+    .eq('id', true);
 }
 
 /* Sends `messages` ([{role,content}]) to whichever provider `cfg` names,

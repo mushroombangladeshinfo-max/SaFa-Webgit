@@ -1102,21 +1102,22 @@
        renders its analysis. Two providers:
          · ollama  → local, free, private (http://localhost:11434)
          · openai  → any OpenAI-compatible endpoint (Groq free tier, etc.)
-       Config lives in this browser's localStorage — the API key never
-       touches the database. */
+       Config lives in ai_settings — one shared row (admins only, via RLS)
+       for the whole team, so a key set up once works for every admin on
+       any device instead of each browser needing its own. */
     const aiSnapshot = { overview: null, channels: [], pnl: [], operations: null };
     const $ai = (id) => document.getElementById(id);
 
-    function loadAiCfgUI() {
-      const saved = loadAiCfg();
+    async function loadAiCfgUI() {
+      const saved = await loadAiCfg(sb);
       $ai('ai-provider').value = saved.provider;
       $ai('ai-url').value      = saved.url;
       $ai('ai-model').value    = saved.model;
       $ai('ai-key').value      = saved.key || '';
       updateConnBadge();
     }
-    function saveAiCfgUI() {
-      saveAiCfg({
+    async function saveAiCfgUI() {
+      await saveAiCfg(sb, {
         provider: $ai('ai-provider').value, url: $ai('ai-url').value.trim(),
         model: $ai('ai-model').value.trim(), key: $ai('ai-key').value.trim(),
       });
@@ -1327,7 +1328,7 @@ Use the actual numbers. Keep it under 350 words. No preamble.`;
       loadOverview(); loadChannels(); loadOrderAttribution(); loadSiteEngagement(); loadPnl(); loadOperations(); loadRecent();
     }
     document.getElementById('me-date').value = localDateStr();
-    loadAiCfgUI();
+    await loadAiCfgUI();
     await loadChannelState();
     await loadMetricsCache();
     loadOverview(); loadChannels(); loadOrderAttribution(); loadSiteEngagement(); loadPnl(); loadOperations(); loadConnections(); loadRecent();

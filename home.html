@@ -920,7 +920,8 @@
       { indicatorId: 'rt-indicator' });
 
     /* ── AI Assistant: floating chat, config shared with Insights' AI
-       Analyst (same localStorage key via src/ai-client.js). Business data
+       Analyst (same ai_settings table row via src/ai-client.js — one
+       config for the whole admin team, not per-browser). Business data
        is fetched once per panel-open into a compact snapshot and injected
        into the system prompt — read-only, the assistant never writes to
        the database. ── */
@@ -936,16 +937,16 @@
         badge.textContent = 'Ready'; badge.className = 'ai-conn-badge ready';
       }
     }
-    function aiLoadCfgUI() {
-      const saved = loadAiCfg();
+    async function aiLoadCfgUI() {
+      const saved = await loadAiCfg(sb);
       $ai('ai-provider').value = saved.provider;
       $ai('ai-url').value      = saved.url;
       $ai('ai-model').value    = saved.model;
       $ai('ai-key').value      = saved.key || '';
       aiUpdateConnBadge();
     }
-    function aiSaveCfgUI() {
-      saveAiCfg({
+    async function aiSaveCfgUI() {
+      await saveAiCfg(sb, {
         provider: $ai('ai-provider').value, url: $ai('ai-url').value.trim(),
         model: $ai('ai-model').value.trim(), key: $ai('ai-key').value.trim(),
       });
@@ -959,7 +960,7 @@
       aiUpdateConnBadge();
     });
     $ai('ai-settings-toggle').addEventListener('click', () => $ai('ai-settings-row').classList.toggle('hidden'));
-    aiLoadCfgUI();
+    await aiLoadCfgUI();
 
     // Reads the same `dash` object the dashboard's own load*() functions
     // already populate — no separate queries, and it covers everything
@@ -998,7 +999,7 @@ When asked about the business, use these real numbers directly rather than guess
     async function aiSend(text) {
       text = text.trim();
       if (!text) return;
-      const cfg = loadAiCfg();
+      const cfg = await loadAiCfg(sb);
       aiMessages.push({ role:'user', content:text });
       aiRenderMessages();
       aiPersist();
