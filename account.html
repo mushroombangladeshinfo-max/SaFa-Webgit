@@ -664,7 +664,7 @@
     window.handleLogout = async () => { await supabase.auth.signOut(); location.href = 'index.html'; };
 
     /* ── Session check ── */
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       const authView    = document.getElementById('auth-view');
       const accountView = document.getElementById('account-view');
       if (!session) { authView.style.display = 'block'; return; }
@@ -691,6 +691,12 @@
       if (ADMIN_EMAILS.includes(session.user.email)) {
         document.getElementById('acc-admin-shortcut').classList.add('visible');
       }
+
+      /* Link any guest orders placed with this same (confirmed) email
+         before they ever created an account — safe because Supabase only
+         grants a session for a confirmed email, so this can't be spoofed
+         by claiming someone else's address. No-ops after the first run. */
+      try { await supabase.rpc('claim_guest_orders'); } catch { /* non-fatal */ }
 
       fetchAndDisplayOrders(session.user);
     });
