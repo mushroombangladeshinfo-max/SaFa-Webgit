@@ -16,7 +16,21 @@ export const ADMIN_EMAILS = [
   'mushroombangladesh.info@gmail.com',
   'quazishaab@gmail.com',
   'abrarfahim.nsu@gmail.com',
+  'sunnymarjuk@gmail.com',
 ];
+
+/* Personal names for the two founders' own emails. Any other admin email
+   (shared/common inboxes either founder might use) falls back to a joint
+   greeting rather than guessing which of the two is actually signed in. */
+const FOUNDER_NAMES = {
+  'abrarfahim.nsu@gmail.com': 'Fahim',
+  'sunnymarjuk@gmail.com': 'Sunny Bhai',
+};
+const JOINT_NAME = 'Fahim & Sunny Bhai';
+
+export function founderName(email) {
+  return FOUNDER_NAMES[email] || JOINT_NAME;
+}
 
 /**
  * Returns the active session if the current user is an admin,

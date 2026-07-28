@@ -153,7 +153,7 @@
   <div class="page">
     <div class="page-header">
       <div>
-        <h1 class="page-title">Farm <em>Overview</em></h1>
+        <h1 class="page-title" id="page-greeting">Farm <em>Overview</em></h1>
         <div class="page-sub" id="page-date">—</div>
       </div>
       <div class="header-right">
@@ -327,7 +327,7 @@
 
   <script type="module">
     import { createClient }  from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-    import { requireAdmin }  from '/src/admin-auth.js';
+    import { requireAdmin, founderName } from '/src/admin-auth.js';
     import { mountAdminNav } from '/src/admin-nav.js';
     import { localDateStr, daysAgoStr as daysAgo } from '/src/date-utils.js';
     import { subscribeRealtime, injectRealtimeStyles } from '/src/realtime.js';
@@ -337,6 +337,7 @@
 
     const session = await requireAdmin(sb);
     if (!session) { window.location.href = 'orders.html'; }
+    const userName = founderName(session.user.email);
 
     mountAdminNav({ page: 'home', supabase: sb, email: session.user.email });
 
@@ -355,6 +356,12 @@
 
     document.getElementById('page-date').textContent =
       new Date().toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+
+    function timeGreeting() {
+      const h = new Date().getHours();
+      return h < 5 ? 'Up early' : h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+    }
+    document.getElementById('page-greeting').innerHTML = `${timeGreeting()}, <em>${userName}</em>`;
 
     const attentionItems = [];
     // Compact per-section summaries, filled in by each load*() function as it
@@ -723,19 +730,20 @@
     }
 
     function aiSystemPrompt(snap) {
-      return `You are the SaFa Assistant, embedded in the backend dashboard of SaFa Naturals, an organic mushroom farm and e-commerce brand in Bangladesh (currency: BDT ৳). You're happy to chat about anything, but you're especially useful for questions about the business.
+      const who = userName.includes('&') ? 'the two co-founders' : `${userName}, a co-founder`;
+      return `You are the personal assistant to ${who} of SaFa Naturals, an organic mushroom farm and e-commerce brand in Bangladesh (currency: BDT ৳). You work closely with them day to day and know the business well — talk like a sharp, trusted right hand who has a real stake in the farm doing well, not a generic support bot. Address them by name when it feels natural, not in every message.
 
-Live snapshot (JSON), current as of today:
+Live snapshot (JSON) of the business right now:
 ${JSON.stringify(snap)}
 
-When asked about the business, use these real numbers directly rather than guessing. If something isn't in the snapshot, say so instead of making it up. Keep answers short and conversational, not a formal report.`;
+When asked about the business, use these real numbers directly rather than guessing. If something isn't in the snapshot, say so plainly instead of making it up. Keep answers short, direct, and conversational — not a formal report.`;
     }
 
     function aiRenderMessages() {
       const el = $ai('ai-messages');
       el.innerHTML = aiMessages.length
         ? aiMessages.map(m => `<div class="ai-msg ai-msg-${m.role}">${renderAiText(m.content)}</div>`).join('')
-        : `<div class="ai-empty">Ask about today's numbers, or anything else.</div>`;
+        : `<div class="ai-empty">${timeGreeting()}, ${userName}. Ask about today's numbers, or anything else.</div>`;
       el.scrollTop = el.scrollHeight;
     }
     function aiPersist() { sessionStorage.setItem('safaAiChatHistory', JSON.stringify(aiMessages)); }

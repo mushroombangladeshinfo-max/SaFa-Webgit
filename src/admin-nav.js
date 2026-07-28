@@ -8,6 +8,8 @@
    page values: 'orders' | 'customers' | 'products' | 'expenses' | 'pipeline' | 'farm'
 ============================================================ */
 
+import { founderName } from './admin-auth.js';
+
 const NAV_LINKS = [
   { key: 'home',      href: 'home.html',      label: 'Overview',  icon: '🏠' },
   { key: 'orders',    href: 'orders.html',     label: 'Orders',    icon: '📦' },
@@ -93,6 +95,10 @@ function injectStyles() {
     .an-dot{width:6px;height:6px;border-radius:50%;background:#5fcf80;flex-shrink:0;animation:an-pulse 2.4s ease-in-out infinite;}
     @keyframes an-pulse{0%,100%{box-shadow:0 0 0 0 rgba(95,207,128,.5)}50%{box-shadow:0 0 0 4px rgba(95,207,128,0)}}
     .an-email{font-family:'DM Mono',monospace;font-size:10px;color:rgba(245,239,230,.28);}
+    .an-user{display:flex;align-items:center;gap:7px;}
+    .an-avatar{width:22px;height:22px;border-radius:50%;background:rgba(196,154,60,.16);border:1px solid rgba(196,154,60,.3);color:#c49a3c;font-family:'Syne',sans-serif;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .an-name{font-family:'DM Sans',sans-serif;font-size:11.5px;color:rgba(245,239,230,.6);white-space:nowrap;}
+    @media(max-width:900px){.an-name{display:none;}}
     .an-last{font-family:'DM Sans',sans-serif;font-size:10px;color:rgba(245,239,230,.28);white-space:nowrap;}
     .an-logout{font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;background:none;border:none;color:rgba(245,239,230,.25);cursor:pointer;padding:5px 8px;border-radius:5px;transition:color .18s;}
     .an-logout:hover{color:rgba(245,239,230,.7);}
@@ -116,6 +122,9 @@ function injectStyles() {
 
 export function mountAdminNav({ page, supabase, email, lastLogin }) {
   injectStyles();
+
+  const name = founderName(email);
+  const initials = name.includes('&') ? 'F·S' : name.charAt(0);
 
   /* Idempotent: tear down any previously-mounted copy first. Auth flows
      commonly fire checkAuth()-style re-entry more than once (an explicit
@@ -165,7 +174,10 @@ export function mountAdminNav({ page, supabase, email, lastLogin }) {
         </button>
         ${lastLogin ? `<span class="an-last">${lastLogin}</span>` : ''}
         <span class="an-dot" title="Live"></span>
-        <span class="an-email">${email || ''}</span>
+        <span class="an-user" title="${email || ''}">
+          <span class="an-avatar">${initials}</span>
+          <span class="an-name">${name}</span>
+        </span>
         <button type="button" class="an-logout" id="an-logout-btn">Log Out</button>
       </div>
       <button type="button" class="an-burger" id="an-burger" aria-label="Menu" aria-expanded="false">
