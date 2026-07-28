@@ -266,7 +266,7 @@
         <div class="panel-title">🌦️ Outside Weather <span class="hero-net-sub">Last 7 days</span></div>
         <a href="farm-analytics.html" class="weather-full-link" aria-label="Open Farm Analytics for the full weather trend">Full trend →</a>
       </div>
-      <div class="panel-sub">Day (6am–6pm) vs night average temperature, Kazipur farm.</div>
+      <div class="panel-sub">Day (6am–6pm) vs night average temperature, Kazipur farm. Shaded band = oyster mushroom's ideal range — rooms currently track outside temperature (no climate control yet), so this doubles as a room-temp check.</div>
       <div class="weather-chart-wrap"><canvas id="chart-home-weather"></canvas></div>
       <div class="weather-week-avg hidden" id="weather-week-avg"></div>
     </div>
@@ -641,13 +641,23 @@
       avgEl.classList.remove('hidden');
 
       const labels = data.map(r => new Date(r.weather_date).toLocaleDateString('en-GB', { weekday:'short', day:'numeric' }));
+
+      // Oyster mushroom's ideal range (~20-28°C, tropical/subtropical
+      // strains) drawn as a shaded band. Since the rooms currently have no
+      // climate control and just track outside temperature 1:1, this
+      // outside-weather chart doubles as a room-temperature check — worth
+      // seeing at a glance whether the farm is running hot, not just what
+      // the weather was.
+      const IDEAL_MIN = 20, IDEAL_MAX = 28;
       _homeWeatherChart?.destroy();
       _homeWeatherChart = new Chart(canvas, {
         type: 'line',
         data: {
           labels,
           datasets: [
-            { label:'Day', data: data.map(r => r.temp_day_avg_c), borderColor:'#d9b254', backgroundColor:'rgba(217,178,84,.1)', fill:true, tension:.35, pointRadius:3, borderWidth:2 },
+            { label:'Ideal min', data: labels.map(() => IDEAL_MIN), borderColor:'transparent', backgroundColor:'transparent', pointRadius:0, borderWidth:0, fill:false },
+            { label:`Ideal range (${IDEAL_MIN}–${IDEAL_MAX}°C)`, data: labels.map(() => IDEAL_MAX), borderColor:'transparent', backgroundColor:'rgba(95,207,128,.08)', pointRadius:0, borderWidth:0, fill:'-1' },
+            { label:'Day', data: data.map(r => r.temp_day_avg_c), borderColor:'#d9b254', backgroundColor:'rgba(217,178,84,.1)', fill:false, tension:.35, pointRadius:3, borderWidth:2 },
             { label:'Night', data: data.map(r => r.temp_night_avg_c), borderColor:'#7ba3ff', backgroundColor:'transparent', tension:.35, pointRadius:3, borderWidth:2, borderDash:[4,3] },
           ]
         },
@@ -655,9 +665,12 @@
           responsive: true, maintainAspectRatio: false,
           interaction: { mode:'index', intersect:false },
           plugins: {
-            legend: { labels:{ color:'rgba(245,239,230,.55)', boxWidth:10, padding:10, font:{size:10} } },
+            legend: {
+              labels:{ color:'rgba(245,239,230,.55)', boxWidth:10, padding:10, font:{size:10}, filter: item => item.text !== 'Ideal min' }
+            },
             tooltip: {
               backgroundColor:'rgba(14,26,19,.95)', borderColor:'rgba(255,255,255,.1)', borderWidth:1, padding:9,
+              filter: item => item.dataset.label !== 'Ideal min' && !item.dataset.label.startsWith('Ideal range'),
               callbacks: { label: ctx => ` ${ctx.dataset.label}: ${ctx.raw}°C` }
             }
           },
