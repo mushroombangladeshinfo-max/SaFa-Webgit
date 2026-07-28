@@ -186,6 +186,11 @@
     .weather-week-avg{margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.05);font-size:12px;color:var(--cl);}
     .weather-week-avg strong{color:var(--c);font-weight:600;}
     .weather-sub-divider{height:1px;background:rgba(255,255,255,.06);margin:18px 0 14px;}
+    .weather-status-row{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 2px;}
+    .status-chip{font-size:11px;padding:4px 10px;border-radius:99px;font-weight:600;white-space:nowrap;}
+    .status-chip.good{background:rgba(95,207,128,.14);color:var(--green);}
+    .status-chip.warn{background:rgba(196,154,60,.16);color:var(--al);}
+    .status-chip.bad{background:rgba(224,90,43,.16);color:var(--red);}
 
     /* "Ask SaFa AI" dashboard card */
     .ai-quick-row{display:flex;gap:8px;margin-top:4px;}
@@ -268,11 +273,13 @@
         <a href="farm-analytics.html" class="weather-full-link" aria-label="Open Farm Analytics for the full weather trend">Full trend →</a>
       </div>
       <div class="panel-sub">Day (6am–6pm) vs night average temperature, Kazipur farm. Shaded band = oyster mushroom's ideal range — rooms currently track outside temperature (no climate control yet), so this doubles as a room-temp check.</div>
+      <div class="weather-status-row hidden" id="weather-status"></div>
       <div class="weather-chart-wrap"><canvas id="chart-home-weather"></canvas></div>
       <div class="weather-week-avg hidden" id="weather-week-avg"></div>
 
       <div class="weather-sub-divider"></div>
       <div class="panel-sub">Relative humidity. High humidity (80–90%) is needed for fruiting — below ~70% risks drying/cracking, above ~95% (with heat) raises contamination risk.</div>
+      <div class="weather-status-row hidden" id="humidity-status"></div>
       <div class="weather-chart-wrap"><canvas id="chart-home-humidity"></canvas></div>
       <div class="weather-week-avg hidden" id="humidity-week-avg"></div>
     </div>
@@ -618,7 +625,59 @@
       dash.weather = { date: data.weather_date, range_c: `${data.temp_min_c}–${data.temp_max_c}`, conditions: c };
     }
 
-    /* ── 7-day weather trend: day vs night average temperature ── */
+    /* ── 7-day weather trend: day vs night, temperature + humidity, each
+       against an ideal-range band. Shared renderer for both charts:
+       - band edges are visible dashed lines, not just a faint fill
+       - individual points are highlighted red when outside the band
+       - a plain-language status chip states the verdict outright, so a
+         founder doesn't have to interpret a line-vs-band comparison ── */
+    function renderBandChart(canvas, labels, dayData, nightData, idealMin, idealMax, unit) {
+      const dotColor = v => (v < idealMin || v > idealMax) ? '#e05a2b' : '#d9b254';
+      const nightDotColor = v => (v < idealMin || v > idealMax) ? '#e05a2b' : '#7ba3ff';
+      const chart = new Chart(canvas, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [
+            { label:'Ideal min', data: labels.map(() => idealMin), borderColor:'rgba(95,207,128,.35)', backgroundColor:'transparent', pointRadius:0, borderWidth:1, borderDash:[3,3], fill:false },
+            { label:`Ideal range (${idealMin}–${idealMax}${unit})`, data: labels.map(() => idealMax), borderColor:'rgba(95,207,128,.35)', backgroundColor:'rgba(95,207,128,.13)', pointRadius:0, borderWidth:1, borderDash:[3,3], fill:'-1' },
+            { label:'Day', data: dayData, borderColor:'#d9b254', backgroundColor:'transparent', fill:false, tension:.35, pointRadius:4, borderWidth:2, pointBackgroundColor: dayData.map(dotColor), pointBorderColor: dayData.map(dotColor) },
+            { label:'Night', data: nightData, borderColor:'#7ba3ff', backgroundColor:'transparent', tension:.35, pointRadius:4, borderWidth:2, borderDash:[4,3], pointBackgroundColor: nightData.map(nightDotColor), pointBorderColor: nightData.map(nightDotColor) },
+          ]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          interaction: { mode:'index', intersect:false },
+          plugins: {
+            legend: {
+              labels:{ color:'rgba(245,239,230,.55)', boxWidth:10, padding:10, font:{size:10}, filter: item => item.text !== 'Ideal min' }
+            },
+            tooltip: {
+              backgroundColor:'rgba(14,26,19,.95)', borderColor:'rgba(255,255,255,.1)', borderWidth:1, padding:9,
+              filter: item => item.dataset.label !== 'Ideal min' && !item.dataset.label.startsWith('Ideal range'),
+              callbacks: { label: ctx => ` ${ctx.dataset.label}: ${ctx.raw}${unit}` }
+            }
+          },
+          scales: {
+            x: { ticks:{ color:'rgba(245,239,230,.5)', font:{size:9.5} }, grid:{ display:false } },
+            y: { ticks:{ color:'rgba(245,239,230,.5)', font:{size:9.5}, callback:v=>`${v}${unit}` }, grid:{ color:'rgba(255,255,255,.05)' } },
+          }
+        }
+      });
+      const countIn = arr => arr.filter(v => v >= idealMin && v <= idealMax).length;
+      return { chart, inRangeDay: countIn(dayData), inRangeNight: countIn(nightData), total: dayData.length };
+    }
+
+    function renderStatusChips(el, inRangeDay, inRangeNight, total) {
+      const chip = (label, inRange) => {
+        const sev = inRange === total ? 'good' : inRange === 0 ? 'bad' : 'warn';
+        const icon = sev === 'good' ? '🟢' : sev === 'warn' ? '🟡' : '🔴';
+        return `<span class="status-chip ${sev}">${icon} ${label}: ${inRange}/${total} days in range</span>`;
+      };
+      el.innerHTML = chip('Day', inRangeDay) + chip('Night', inRangeNight);
+      el.classList.remove('hidden');
+    }
+
     let _homeWeatherChart = null, _homeHumidityChart = null;
     async function loadWeatherChart() {
       const { data, error } = await sb.from('weather_daily')
@@ -638,6 +697,7 @@
       if (error || !data || !data.length) {
         canvas.style.display = 'none';
         avgEl.classList.add('hidden');
+        document.getElementById('weather-status').classList.add('hidden');
         const d = document.createElement('div');
         d.className = 'weather-chart-empty';
         d.textContent = 'No weather data yet.';
@@ -645,6 +705,7 @@
 
         humCanvas.style.display = 'none';
         humAvgEl.classList.add('hidden');
+        document.getElementById('humidity-status').classList.add('hidden');
         const d2 = document.createElement('div');
         d2.className = 'weather-chart-empty';
         d2.textContent = 'No weather data yet.';
@@ -662,83 +723,28 @@
       const labels = data.map(r => new Date(r.weather_date).toLocaleDateString('en-GB', { weekday:'short', day:'numeric' }));
 
       // Oyster mushroom's ideal range (~20-28°C, tropical/subtropical
-      // strains) drawn as a shaded band. Since the rooms currently have no
-      // climate control and just track outside temperature 1:1, this
-      // outside-weather chart doubles as a room-temperature check — worth
-      // seeing at a glance whether the farm is running hot, not just what
-      // the weather was.
+      // strains). Since the rooms currently have no climate control and
+      // just track outside temperature 1:1, this doubles as a
+      // room-temperature check — worth seeing at a glance whether the
+      // farm is running hot, not just what the weather was.
       const IDEAL_MIN = 20, IDEAL_MAX = 28;
       _homeWeatherChart?.destroy();
-      _homeWeatherChart = new Chart(canvas, {
-        type: 'line',
-        data: {
-          labels,
-          datasets: [
-            { label:'Ideal min', data: labels.map(() => IDEAL_MIN), borderColor:'transparent', backgroundColor:'transparent', pointRadius:0, borderWidth:0, fill:false },
-            { label:`Ideal range (${IDEAL_MIN}–${IDEAL_MAX}°C)`, data: labels.map(() => IDEAL_MAX), borderColor:'transparent', backgroundColor:'rgba(95,207,128,.08)', pointRadius:0, borderWidth:0, fill:'-1' },
-            { label:'Day', data: data.map(r => r.temp_day_avg_c), borderColor:'#d9b254', backgroundColor:'rgba(217,178,84,.1)', fill:false, tension:.35, pointRadius:3, borderWidth:2 },
-            { label:'Night', data: data.map(r => r.temp_night_avg_c), borderColor:'#7ba3ff', backgroundColor:'transparent', tension:.35, pointRadius:3, borderWidth:2, borderDash:[4,3] },
-          ]
-        },
-        options: {
-          responsive: true, maintainAspectRatio: false,
-          interaction: { mode:'index', intersect:false },
-          plugins: {
-            legend: {
-              labels:{ color:'rgba(245,239,230,.55)', boxWidth:10, padding:10, font:{size:10}, filter: item => item.text !== 'Ideal min' }
-            },
-            tooltip: {
-              backgroundColor:'rgba(14,26,19,.95)', borderColor:'rgba(255,255,255,.1)', borderWidth:1, padding:9,
-              filter: item => item.dataset.label !== 'Ideal min' && !item.dataset.label.startsWith('Ideal range'),
-              callbacks: { label: ctx => ` ${ctx.dataset.label}: ${ctx.raw}°C` }
-            }
-          },
-          scales: {
-            x: { ticks:{ color:'rgba(245,239,230,.5)', font:{size:9.5} }, grid:{ display:false } },
-            y: { ticks:{ color:'rgba(245,239,230,.5)', font:{size:9.5}, callback:v=>`${v}°C` }, grid:{ color:'rgba(255,255,255,.05)' } },
-          }
-        }
-      });
+      const tempResult = renderBandChart(canvas, labels, data.map(r => r.temp_day_avg_c), data.map(r => r.temp_night_avg_c), IDEAL_MIN, IDEAL_MAX, '°C');
+      _homeWeatherChart = tempResult.chart;
+      renderStatusChips(document.getElementById('weather-status'), tempResult.inRangeDay, tempResult.inRangeNight, tempResult.total);
 
-      // Same treatment as temperature: oyster mushroom needs high humidity
-      // (~80-90%) to fruit well, and since rooms track outside conditions
-      // right now, this is a real room-humidity check too.
+      // Same treatment for humidity: oyster mushroom needs ~80-90% RH to
+      // fruit well, and since rooms track outside conditions right now,
+      // this is a real room-humidity check too.
       const humDayAvg = avgOf('humidity_day_avg_pct'), humNightAvg = avgOf('humidity_night_avg_pct');
       humAvgEl.innerHTML = `${data.length}-day average: <strong>${humDayAvg.toFixed(0)}%</strong> day · <strong>${humNightAvg.toFixed(0)}%</strong> night`;
       humAvgEl.classList.remove('hidden');
 
       const HUM_IDEAL_MIN = 80, HUM_IDEAL_MAX = 90;
       _homeHumidityChart?.destroy();
-      _homeHumidityChart = new Chart(humCanvas, {
-        type: 'line',
-        data: {
-          labels,
-          datasets: [
-            { label:'Ideal min', data: labels.map(() => HUM_IDEAL_MIN), borderColor:'transparent', backgroundColor:'transparent', pointRadius:0, borderWidth:0, fill:false },
-            { label:`Ideal range (${HUM_IDEAL_MIN}–${HUM_IDEAL_MAX}%)`, data: labels.map(() => HUM_IDEAL_MAX), borderColor:'transparent', backgroundColor:'rgba(95,207,128,.08)', pointRadius:0, borderWidth:0, fill:'-1' },
-            { label:'Day', data: data.map(r => r.humidity_day_avg_pct), borderColor:'#5fcf80', backgroundColor:'transparent', fill:false, tension:.35, pointRadius:3, borderWidth:2 },
-            { label:'Night', data: data.map(r => r.humidity_night_avg_pct), borderColor:'#7ba3ff', backgroundColor:'transparent', tension:.35, pointRadius:3, borderWidth:2, borderDash:[4,3] },
-          ]
-        },
-        options: {
-          responsive: true, maintainAspectRatio: false,
-          interaction: { mode:'index', intersect:false },
-          plugins: {
-            legend: {
-              labels:{ color:'rgba(245,239,230,.55)', boxWidth:10, padding:10, font:{size:10}, filter: item => item.text !== 'Ideal min' }
-            },
-            tooltip: {
-              backgroundColor:'rgba(14,26,19,.95)', borderColor:'rgba(255,255,255,.1)', borderWidth:1, padding:9,
-              filter: item => item.dataset.label !== 'Ideal min' && !item.dataset.label.startsWith('Ideal range'),
-              callbacks: { label: ctx => ` ${ctx.dataset.label}: ${ctx.raw}%` }
-            }
-          },
-          scales: {
-            x: { ticks:{ color:'rgba(245,239,230,.5)', font:{size:9.5} }, grid:{ display:false } },
-            y: { min:0, max:100, ticks:{ color:'rgba(245,239,230,.5)', font:{size:9.5}, callback:v=>`${v}%` }, grid:{ color:'rgba(255,255,255,.05)' } },
-          }
-        }
-      });
+      const humResult = renderBandChart(humCanvas, labels, data.map(r => r.humidity_day_avg_pct), data.map(r => r.humidity_night_avg_pct), HUM_IDEAL_MIN, HUM_IDEAL_MAX, '%');
+      _homeHumidityChart = humResult.chart;
+      renderStatusChips(document.getElementById('humidity-status'), humResult.inRangeDay, humResult.inRangeNight, humResult.total);
     }
 
     /* ── This calendar month: harvest vs. sold, side by side ── */
