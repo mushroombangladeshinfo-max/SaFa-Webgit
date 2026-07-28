@@ -170,7 +170,7 @@
       <div class="panel-head"><div class="panel-title">✦ Ask SaFa AI</div></div>
       <div class="panel-sub">About today's numbers, or anything else.</div>
       <form class="ai-quick-row" id="ai-quick-form">
-        <input type="text" id="ai-quick-input" placeholder="e.g. How much did we harvest this week?" autocomplete="off">
+        <input type="text" id="ai-quick-input" placeholder="e.g. How much have we harvested this month?" autocomplete="off">
         <button type="submit">Ask</button>
       </form>
     </div>
@@ -296,7 +296,7 @@
 
   <!-- AI Assistant: floating launcher + chat panel -->
   <button type="button" class="ai-fab" id="ai-fab" aria-label="Open SaFa AI assistant" aria-expanded="false">✦</button>
-  <div class="ai-chat-panel hidden" id="ai-chat-panel" role="dialog" aria-label="SaFa AI assistant">
+  <div class="ai-chat-panel hidden" id="ai-chat-panel" role="dialog" aria-label="SaFa AI assistant" aria-modal="true">
     <div class="ai-chat-head">
       <div class="ai-chat-title">✦ SaFa Assistant</div>
       <div class="ai-chat-head-actions">
@@ -305,13 +305,13 @@
       </div>
     </div>
     <div class="ai-settings-row hidden" id="ai-settings-row">
-      <select id="ai-provider">
+      <select id="ai-provider" aria-label="AI provider">
         <option value="openai">Groq (hosted, free)</option>
         <option value="ollama">Ollama (local)</option>
       </select>
-      <input type="text" id="ai-model" placeholder="Model">
-      <input type="text" id="ai-url" placeholder="Endpoint URL">
-      <input type="password" id="ai-key" placeholder="API Key">
+      <input type="text" id="ai-model" placeholder="Model" aria-label="Model name">
+      <input type="text" id="ai-url" placeholder="Endpoint URL" aria-label="Endpoint URL">
+      <input type="password" id="ai-key" placeholder="API Key" aria-label="API key">
       <div class="ai-settings-full">
         <button type="button" id="ai-save-cfg">Save</button>
         <span class="ai-conn-badge" id="ai-conn-badge"></span>
@@ -320,7 +320,7 @@
     <div class="ai-messages" id="ai-messages"></div>
     <div class="ai-typing hidden" id="ai-typing"><span class="ai-dot"></span><span class="ai-dot"></span><span class="ai-dot"></span></div>
     <form class="ai-chat-input-row" id="ai-chat-form">
-      <textarea id="ai-chat-input" rows="1" placeholder="Ask anything…"></textarea>
+      <textarea id="ai-chat-input" rows="1" placeholder="Ask anything…" aria-label="Message"></textarea>
       <button type="submit" class="ai-chat-send" id="ai-chat-send" aria-label="Send">➤</button>
     </form>
   </div>
@@ -357,6 +357,10 @@
       new Date().toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
 
     const attentionItems = [];
+    // Compact per-section summaries, filled in by each load*() function as it
+    // resolves — the single source of truth the AI assistant reads from
+    // instead of running its own separate queries (see aiCurrentSnapshot()).
+    const dash = {};
 
     /* ── B2B: buyer identity (b2b_pipeline) + real transaction history (farm_daily_logs) ── */
     async function loadB2B() {
@@ -383,6 +387,7 @@
         <div class="rl-row"><span>Buyer</span><span class="rl-val">${buyerNames || 'No won buyer yet'}</span></div>
         <div class="rl-row"><span>Last Sale</span><span class="rl-val">${last ? lastDaysAgo + 'd ago' : '—'}</span></div>
         <div class="rl-row"><span>Revenue (30d)</span><span class="rl-val">${fmt(rev30)}</span></div>`;
+      dash.b2b = { revenue_30d_bdt: Math.round(rev30), days_since_last_sale: lastDaysAgo, buyers: buyerNames || null };
 
       // Attention: your real cadence is ~1-3 sales per 2 weeks (every 5-14
       // days on average) — flag once a gap clearly exceeds that.
@@ -404,6 +409,7 @@
       if (error || !data || !data.length) {
         document.getElementById('suppliers-summary').innerHTML =
           '<div class="empty-mini">No purchases logged yet — add them in Expenses → Suppliers.</div>';
+        dash.suppliers = [];
         return;
       }
 
@@ -418,6 +424,7 @@
         const d = daysSince(p.purchase_date);
         return `<div class="rl-row"><span>${name}</span><span class="rl-val">${d}d ago</span></div>`;
       }).join('');
+      dash.suppliers = rows.map(([name, p]) => ({ name, days_since_last_purchase: daysSince(p.purchase_date) }));
 
       // Attention: your real cadence is buying every 1-3 months (~30-90
       // days) — flag a supplier that's gone notably past that.
@@ -439,7 +446,8 @@
       const { data, error } = await sb.from('products')
         .select('id,name,inventory_count').eq('active', true).lt('inventory_count', 10)
         .order('inventory_count', { ascending:true });
-      if (error || !data) return;
+      if (error || !data) { dash.low_or_out_of_stock_products = []; return; }
+      dash.low_or_out_of_stock_products = data.map(p => `${p.name} (${p.inventory_count} left)`);
       data.forEach(p => {
         attentionItems.push({
           sev: p.inventory_count === 0 ? 'crit' : 'warn',
@@ -455,7 +463,7 @@
       const { data, error } = await sb.from('v_ops_daily')
         .select('day,harvest_fresh_kg,farm_revenue,farm_expenses,one_off_expenses')
         .gte('day', daysAgo(30)).order('day', { ascending:false });
-      if (error || !data) { document.getElementById('farm-summary').innerHTML = '<div class="empty-mini">No farm data yet.</div>'; return; }
+      if (error || !data) { document.getElementById('farm-summary').innerHTML = '<div class="empty-mini">No farm data yet.</div>'; dash.farm_30d = null; renderNet(); return; }
 
       const harvest  = data.reduce((s,r) => s + (Number(r.harvest_fresh_kg)||0), 0);
       const revenue  = data.reduce((s,r) => s + (Number(r.farm_revenue)||0), 0);
@@ -471,6 +479,11 @@
 
       window._farmRevenue30d = revenue;
       window._farmExpenses30d = expenses;
+      dash.farm_30d = { harvest_kg: Number(harvest.toFixed(2)), revenue_bdt: Math.round(revenue), expenses_bdt: Math.round(expenses) };
+      // loadMarketing() may resolve before or after this — whichever finishes
+      // last is the one whose renderNet() call actually sticks, so call it
+      // from both instead of only from loadMarketing().
+      renderNet();
 
       /* Contamination events in the raw log, unresolved (no contam_action noted).
          Note: this only tells you WHICH ROOM had a problem, not which spawn
@@ -495,7 +508,7 @@
       const { data, error } = await sb.from('weather_daily')
         .select('weather_date,temp_min_c,temp_max_c,humidity_day_avg_pct,conditions')
         .order('weather_date', { ascending:false }).limit(1).maybeSingle();
-      if (error || !data) return; // stays hidden — sync-weather may not have run yet
+      if (error || !data) { dash.weather = null; return; } // stays hidden — sync-weather may not have run yet
       const icons = { normal:'🌤️', hot:'☀️', rainy:'🌧️', cold:'🌥️', humid:'💧', stormy:'⛈️' };
       const labels = { normal:'Normal', hot:'Hot', rainy:'Rainy', cold:'Cool', humid:'Humid', stormy:'Stormy' };
       const c = data.conditions || 'normal';
@@ -503,6 +516,7 @@
       document.getElementById('weather-text').innerHTML =
         `${labels[c] || c} · <span class="w-temp">${Math.round(data.temp_min_c)}–${Math.round(data.temp_max_c)}°C</span>`;
       document.getElementById('weather-chip').classList.remove('hidden');
+      dash.weather = { date: data.weather_date, range_c: `${data.temp_min_c}–${data.temp_max_c}`, conditions: c };
     }
 
     /* ── This calendar month: harvest vs. sold, side by side ── */
@@ -532,6 +546,7 @@
 
       document.getElementById('tw-sold-kg').textContent = fmtKg(soldKg);
       document.getElementById('tw-sold-rev').textContent = soldKg > 0 ? `${fmt(soldRev)} · fresh + dried + powder + B2B` : 'Fresh + dried + powder + B2B, kg';
+      dash.this_month = { harvest_kg: Number(harvestKg.toFixed(2)), sold_kg: Number(soldKg.toFixed(2)), sold_revenue_bdt: Math.round(soldRev) };
     }
 
     /* ── Marketing: organic reach/engagement, not ad spend (no paid campaigns running) ── */
@@ -541,6 +556,7 @@
       if (error || !data || !data.length) {
         document.getElementById('marketing-summary').innerHTML = '<div class="empty-mini">No marketing data synced yet.</div>';
         window._adSpend30d = 0;
+        dash.marketing_30d = null;
         renderNet();
         return;
       }
@@ -561,6 +577,7 @@
         <div class="rl-row"><span>Followers</span><span class="rl-val">${followerTotal > 0 ? fmtN(followerTotal) : '—'}</span></div>`;
 
       window._adSpend30d = totalSpend;
+      dash.marketing_30d = { reach: totalReach, engagements: totalEngagements, followers: followerTotal || null, ad_spend_bdt: Math.round(totalSpend) };
       renderNet();
     }
 
@@ -572,12 +589,13 @@
         <div class="rl-row"><span>Income</span><span class="rl-val">${fmt(rev)}</span></div>
         <div class="rl-row"><span>Costs</span><span class="rl-val">${fmt(exp)}</span></div>
         <div class="rl-row"><span>Net</span><span class="rl-val" style="color:${net>=0?'var(--green)':'var(--red)'}">${fmt(net)}</span></div>`;
+      dash.net_30d = { income_bdt: Math.round(rev), costs_bdt: Math.round(exp), net_bdt: Math.round(net) };
     }
 
     /* ── B2C: dormant channel, kept to one honest line, not a full panel ── */
     async function loadB2C() {
       const { data, error } = await sb.from('orders').select('total_amount,status,created_at');
-      if (error || !data) { document.getElementById('b2c-status').textContent = 'No data'; return; }
+      if (error || !data) { document.getElementById('b2c-status').textContent = 'No data'; dash.b2c = null; return; }
 
       const monthCutoff = daysAgo(30);
       const recent = data.filter(o => o.created_at >= monthCutoff && o.status !== 'cancelled');
@@ -587,6 +605,13 @@
       document.getElementById('b2c-status').textContent = recent.length > 0
         ? `${recent.length} order${recent.length===1?'':'s'} in the last 30 days`
         : `Not yet an active channel — 0 orders in the last 30 days (${lifetime.length} lifetime, ${fmt(lifetimeRevenue)} total)`;
+      dash.b2c = {
+        orders_last_30d: recent.length,
+        lifetime_orders: lifetime.length,
+        lifetime_revenue_bdt: Math.round(lifetimeRevenue),
+        orders_pending: data.filter(o => o.status === 'pending').length,
+        orders_processing: data.filter(o => o.status === 'processing').length,
+      };
 
       /* Attention: orders stuck in processing — still relevant even while B2C is quiet */
       data.filter(o => o.status === 'processing').forEach(o => {
@@ -652,7 +677,7 @@
        the database. ── */
     const $ai = (id) => document.getElementById(id);
     let aiMessages = JSON.parse(sessionStorage.getItem('safaAiChatHistory') || '[]');
-    let aiSnapshot = null, aiSnapshotPromise = null;
+    let aiLastFocused = null;
 
     function aiUpdateConnBadge() {
       const badge = $ai('ai-conn-badge');
@@ -687,32 +712,14 @@
     $ai('ai-settings-toggle').addEventListener('click', () => $ai('ai-settings-row').classList.toggle('hidden'));
     aiLoadCfgUI();
 
-    async function aiBuildSnapshot() {
-      const monthCutoff = daysAgo(30);
-      const [b2bRes, farmRes, stockRes, ordersRes, weatherRes] = await Promise.all([
-        sb.from('farm_daily_logs').select('log_date,s_b2b_value').not('s_b2b_name', 'is', null).gte('log_date', monthCutoff),
-        sb.from('v_ops_daily').select('day,harvest_fresh_kg').gte('day', monthCutoff),
-        sb.from('products').select('name,inventory_count').eq('active', true).lt('inventory_count', 10),
-        sb.from('orders').select('status').neq('status', 'cancelled'),
-        sb.from('weather_daily').select('weather_date,temp_min_c,temp_max_c,conditions').order('weather_date', { ascending:false }).limit(1).maybeSingle(),
-      ]);
-      const b2bRevenue30d = (b2bRes.data || []).reduce((s,r) => s + (Number(r.s_b2b_value)||0), 0);
-      const harvest30d = (farmRes.data || []).reduce((s,r) => s + (Number(r.harvest_fresh_kg)||0), 0);
-      const orders = ordersRes.data || [];
-      const weather = weatherRes.data;
-      return {
-        today: new Date().toISOString().slice(0,10),
-        b2b_revenue_30d_bdt: Math.round(b2bRevenue30d),
-        harvest_30d_kg: Number(harvest30d.toFixed(2)),
-        low_or_out_of_stock_products: (stockRes.data || []).map(p => `${p.name} (${p.inventory_count} left)`),
-        orders_pending: orders.filter(o => o.status === 'pending').length,
-        orders_processing: orders.filter(o => o.status === 'processing').length,
-        latest_weather: weather ? { date: weather.weather_date, range_c: `${weather.temp_min_c}–${weather.temp_max_c}`, conditions: weather.conditions } : null,
-      };
-    }
-    function aiEnsureSnapshot() {
-      if (!aiSnapshotPromise) aiSnapshotPromise = aiBuildSnapshot().then(s => aiSnapshot = s);
-      return aiSnapshotPromise;
+    // Reads the same `dash` object the dashboard's own load*() functions
+    // already populate — no separate queries, and it covers everything
+    // visible on the page (B2B, suppliers, marketing, net position, this
+    // month's harvest-vs-sold), not just a narrow hand-picked subset. Always
+    // current: since dash is updated live by the realtime refresh, a message
+    // sent later in a long-open session reflects the latest numbers.
+    function aiCurrentSnapshot() {
+      return { today: new Date().toISOString().slice(0,10), ...dash };
     }
 
     function aiSystemPrompt(snap) {
@@ -754,8 +761,7 @@ When asked about the business, use these real numbers directly rather than guess
       $ai('ai-typing').classList.remove('hidden');
       $ai('ai-chat-send').disabled = true;
       try {
-        await aiEnsureSnapshot();
-        const payload = [{ role:'system', content: aiSystemPrompt(aiSnapshot) }, ...aiMessages];
+        const payload = [{ role:'system', content: aiSystemPrompt(aiCurrentSnapshot()) }, ...aiMessages];
         const reply = await chatComplete(cfg, payload);
         aiMessages.push({ role:'assistant', content: reply });
         aiRenderMessages();
@@ -769,20 +775,38 @@ When asked about the business, use these real numbers directly rather than guess
     }
 
     function aiOpenPanel() {
+      aiLastFocused = document.activeElement;
       $ai('ai-chat-panel').classList.remove('hidden');
       $ai('ai-fab').setAttribute('aria-expanded', 'true');
       aiRenderMessages();
-      aiEnsureSnapshot();
       $ai('ai-chat-input').focus();
     }
     function aiClosePanel() {
       $ai('ai-chat-panel').classList.add('hidden');
       $ai('ai-fab').setAttribute('aria-expanded', 'false');
+      aiLastFocused?.focus();
     }
     $ai('ai-fab').addEventListener('click', () => {
       $ai('ai-chat-panel').classList.contains('hidden') ? aiOpenPanel() : aiClosePanel();
     });
     $ai('ai-chat-close').addEventListener('click', aiClosePanel);
+
+    // Escape closes the panel; Tab/Shift+Tab is trapped inside it while open
+    // so keyboard focus can't slip into the page behind it.
+    function aiFocusable() {
+      return Array.from($ai('ai-chat-panel').querySelectorAll('button, input, select, textarea'))
+        .filter(el => el.offsetParent !== null && !el.disabled);
+    }
+    document.addEventListener('keydown', e => {
+      if ($ai('ai-chat-panel').classList.contains('hidden')) return;
+      if (e.key === 'Escape') { aiClosePanel(); return; }
+      if (e.key !== 'Tab') return;
+      const focusable = aiFocusable();
+      if (!focusable.length) return;
+      const first = focusable[0], last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    });
 
     $ai('ai-chat-form').addEventListener('submit', e => {
       e.preventDefault();

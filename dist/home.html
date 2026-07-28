@@ -147,7 +147,7 @@
     .ai-quick-row input:focus{outline:none;border-color:rgba(196,154,60,.4);}
     .ai-quick-row button{background:var(--al);color:var(--bg);border:none;padding:0 18px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;}
   </style>
-  <script type="module" crossorigin src="/assets/home-DqnsPvyl.js"></script>
+  <script type="module" crossorigin src="/assets/home-BNCWnpwO.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
   <link rel="modulepreload" crossorigin href="/assets/admin-auth-Bm8-hV4r.js">
   <link rel="modulepreload" crossorigin href="/assets/admin-nav-CjaoRbXH.js">
@@ -177,7 +177,7 @@
       <div class="panel-head"><div class="panel-title">✦ Ask SaFa AI</div></div>
       <div class="panel-sub">About today's numbers, or anything else.</div>
       <form class="ai-quick-row" id="ai-quick-form">
-        <input type="text" id="ai-quick-input" placeholder="e.g. How much did we harvest this week?" autocomplete="off">
+        <input type="text" id="ai-quick-input" placeholder="e.g. How much have we harvested this month?" autocomplete="off">
         <button type="submit">Ask</button>
       </form>
     </div>
@@ -303,7 +303,7 @@
 
   <!-- AI Assistant: floating launcher + chat panel -->
   <button type="button" class="ai-fab" id="ai-fab" aria-label="Open SaFa AI assistant" aria-expanded="false">✦</button>
-  <div class="ai-chat-panel hidden" id="ai-chat-panel" role="dialog" aria-label="SaFa AI assistant">
+  <div class="ai-chat-panel hidden" id="ai-chat-panel" role="dialog" aria-label="SaFa AI assistant" aria-modal="true">
     <div class="ai-chat-head">
       <div class="ai-chat-title">✦ SaFa Assistant</div>
       <div class="ai-chat-head-actions">
@@ -312,13 +312,13 @@
       </div>
     </div>
     <div class="ai-settings-row hidden" id="ai-settings-row">
-      <select id="ai-provider">
+      <select id="ai-provider" aria-label="AI provider">
         <option value="openai">Groq (hosted, free)</option>
         <option value="ollama">Ollama (local)</option>
       </select>
-      <input type="text" id="ai-model" placeholder="Model">
-      <input type="text" id="ai-url" placeholder="Endpoint URL">
-      <input type="password" id="ai-key" placeholder="API Key">
+      <input type="text" id="ai-model" placeholder="Model" aria-label="Model name">
+      <input type="text" id="ai-url" placeholder="Endpoint URL" aria-label="Endpoint URL">
+      <input type="password" id="ai-key" placeholder="API Key" aria-label="API key">
       <div class="ai-settings-full">
         <button type="button" id="ai-save-cfg">Save</button>
         <span class="ai-conn-badge" id="ai-conn-badge"></span>
@@ -327,7 +327,7 @@
     <div class="ai-messages" id="ai-messages"></div>
     <div class="ai-typing hidden" id="ai-typing"><span class="ai-dot"></span><span class="ai-dot"></span><span class="ai-dot"></span></div>
     <form class="ai-chat-input-row" id="ai-chat-form">
-      <textarea id="ai-chat-input" rows="1" placeholder="Ask anything…"></textarea>
+      <textarea id="ai-chat-input" rows="1" placeholder="Ask anything…" aria-label="Message"></textarea>
       <button type="submit" class="ai-chat-send" id="ai-chat-send" aria-label="Send">➤</button>
     </form>
   </div>
