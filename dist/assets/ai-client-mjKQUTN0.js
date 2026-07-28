@@ -1,0 +1,8 @@
+const l={ollama:{url:"http://localhost:11434",model:"llama3.2"},openai:{url:"https://api.groq.com/openai",model:"llama-3.1-8b-instant"}};function s(){return JSON.parse(localStorage.getItem("safaAiCfg")||"null")||{provider:"openai",...l.openai,key:""}}function i(e){localStorage.setItem("safaAiCfg",JSON.stringify(e))}async function m(e,a){if(e.provider==="ollama"){const o=await fetch(`${e.url}/api/chat`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:e.model,messages:a,stream:!1})});if(!o.ok)throw new Error(`Ollama replied ${o.status}`);const r=(await o.json()).message?.content;if(!r)throw new Error("Empty response");return r}const t=await fetch(`${e.url}/v1/chat/completions`,{method:"POST",headers:{"Content-Type":"application/json",Authorization:`Bearer ${e.key}`},body:JSON.stringify({model:e.model,messages:a})});if(!t.ok){const o=t.status===401?"Invalid API key — check it was pasted correctly and saved.":t.status===429?"Rate limited by the provider — wait a moment and try again.":t.status===404?`Model "${e.model}" not found at this endpoint — check the model name.`:`API replied ${t.status}.`;throw new Error(o)}const n=(await t.json()).choices?.[0]?.message?.content;if(!n)throw new Error("Empty response");return n}function p(e,a){return e.provider==="ollama"?`**Couldn't reach Ollama.**
+Checklist:
+· Is Ollama running? (\`ollama serve\`)
+· Model pulled? (\`ollama pull ${e.model}\`)
+· CORS open? Run once: \`launchctl setenv OLLAMA_ORIGINS "*"\` then restart Ollama.
+
+Error: ${a.message}`:`**Couldn't get a response.**
+${a.message}`}function c(e){return e.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>")}export{l as A,m as c,p as f,s as l,c as r,i as s};

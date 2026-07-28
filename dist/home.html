@@ -101,13 +101,59 @@
     .ql-icon{font-size:20px;}
     .ql-title{font-size:13px;font-weight:500;color:var(--c);}
     .ql-sub{font-size:10px;color:var(--cl);margin-top:1px;}
+
+    /* ── AI Assistant: floating launcher + chat panel ── */
+    .ai-fab{position:fixed;bottom:24px;right:24px;width:52px;height:52px;border-radius:50%;background:var(--al);color:var(--bg);border:none;font-size:20px;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.4);z-index:450;transition:transform .15s;display:flex;align-items:center;justify-content:center;}
+    .ai-fab:hover{transform:scale(1.06);}
+    .ai-fab:active{transform:scale(.96);}
+    .ai-chat-panel{position:fixed;bottom:88px;right:24px;width:360px;max-width:calc(100vw - 32px);height:520px;max-height:calc(100vh - 120px);background:var(--bg2);border:1px solid var(--border);border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,.5);z-index:450;display:flex;flex-direction:column;overflow:hidden;}
+    .ai-chat-panel.hidden{display:none;}
+    .ai-chat-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border);flex-shrink:0;}
+    .ai-chat-title{font-family:'Syne','Hind Siliguri',sans-serif;font-size:13px;font-weight:700;color:var(--c);}
+    .ai-chat-head-actions{display:flex;gap:6px;}
+    .ai-chat-icon-btn{background:none;border:none;color:var(--cl);font-size:14px;cursor:pointer;padding:4px 6px;border-radius:6px;line-height:1;}
+    .ai-chat-icon-btn:hover{color:var(--c);background:var(--bg3);}
+    .ai-settings-row{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:12px 16px;border-bottom:1px solid var(--border);flex-shrink:0;}
+    .ai-settings-row.hidden{display:none;}
+    .ai-settings-row select,.ai-settings-row input{background:var(--bg3);border:1px solid var(--border);color:var(--c);font-size:11px;padding:6px 8px;border-radius:6px;font-family:inherit;}
+    .ai-settings-full{grid-column:span 2;display:flex;align-items:center;gap:8px;}
+    .ai-settings-full button{background:var(--al);color:var(--bg);border:none;font-size:11px;font-weight:600;padding:6px 12px;border-radius:6px;cursor:pointer;}
+    .ai-conn-badge{font-size:10px;padding:2px 8px;border-radius:99px;}
+    .ai-conn-badge.ready{background:rgba(95,207,128,.15);color:var(--green);}
+    .ai-conn-badge.missing{background:rgba(224,90,43,.15);color:var(--red);}
+    .ai-messages{flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:10px;}
+    .ai-msg{max-width:85%;padding:9px 12px;border-radius:12px;font-size:12.5px;line-height:1.55;white-space:pre-wrap;}
+    .ai-msg-user{align-self:flex-end;background:var(--al);color:var(--bg);border-bottom-right-radius:3px;}
+    .ai-msg-assistant{align-self:flex-start;background:var(--bg3);color:var(--cm);border:1px solid var(--border);border-bottom-left-radius:3px;}
+    .ai-msg-assistant strong{color:var(--c);}
+    .ai-msg-error{align-self:flex-start;background:rgba(224,90,43,.1);color:var(--red);border:1px solid rgba(224,90,43,.25);font-size:11.5px;}
+    .ai-empty{text-align:center;padding:30px 14px;color:var(--cl);font-size:12px;}
+    .ai-typing{display:flex;gap:4px;padding:0 16px 10px;flex-shrink:0;}
+    .ai-typing.hidden{display:none;}
+    .ai-dot{width:6px;height:6px;border-radius:50%;background:var(--cl);animation:aiBounce 1.2s infinite ease-in-out;}
+    .ai-dot:nth-child(2){animation-delay:.15s;}
+    .ai-dot:nth-child(3){animation-delay:.3s;}
+    @keyframes aiBounce{0%,60%,100%{transform:translateY(0);opacity:.4;}30%{transform:translateY(-4px);opacity:1;}}
+    .ai-chat-input-row{display:flex;gap:8px;padding:12px 14px;border-top:1px solid var(--border);flex-shrink:0;}
+    .ai-chat-input-row textarea{flex:1;resize:none;background:var(--bg3);border:1px solid var(--border);color:var(--c);border-radius:8px;padding:8px 10px;font-size:12.5px;font-family:inherit;max-height:80px;}
+    .ai-chat-input-row textarea:focus{outline:none;border-color:rgba(196,154,60,.4);}
+    .ai-chat-send{background:var(--al);color:var(--bg);border:none;width:34px;height:34px;border-radius:8px;cursor:pointer;flex-shrink:0;font-size:14px;}
+    .ai-chat-send:disabled{opacity:.5;cursor:not-allowed;}
+    @media(max-width:480px){.ai-chat-panel{right:16px;bottom:80px;}.ai-fab{right:16px;bottom:16px;}}
+
+    /* "Ask SaFa AI" dashboard card */
+    .ai-quick-row{display:flex;gap:8px;margin-top:4px;}
+    .ai-quick-row input{flex:1;background:var(--bg3);border:1px solid var(--border);color:var(--c);border-radius:8px;padding:9px 12px;font-size:12.5px;font-family:inherit;}
+    .ai-quick-row input:focus{outline:none;border-color:rgba(196,154,60,.4);}
+    .ai-quick-row button{background:var(--al);color:var(--bg);border:none;padding:0 18px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;}
   </style>
-  <script type="module" crossorigin src="/assets/home-CEnqhSgj.js"></script>
+  <script type="module" crossorigin src="/assets/home-DqnsPvyl.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
   <link rel="modulepreload" crossorigin href="/assets/admin-auth-Bm8-hV4r.js">
   <link rel="modulepreload" crossorigin href="/assets/admin-nav-CjaoRbXH.js">
   <link rel="modulepreload" crossorigin href="/assets/date-utils-BQiP-iFW.js">
   <link rel="modulepreload" crossorigin href="/assets/realtime-D7K--cdb.js">
+  <link rel="modulepreload" crossorigin href="/assets/ai-client-mjKQUTN0.js">
 </head>
 <body>
 
@@ -229,6 +275,16 @@
       </a>
     </div>
 
+    <!-- Ask SaFa AI: quick-ask entry point into the floating assistant panel -->
+    <div class="panel">
+      <div class="panel-head"><div class="panel-title">✦ Ask SaFa AI</div></div>
+      <div class="panel-sub">About today's numbers, or anything else.</div>
+      <form class="ai-quick-row" id="ai-quick-form">
+        <input type="text" id="ai-quick-input" placeholder="e.g. How much did we harvest this week?" autocomplete="off">
+        <button type="submit">Ask</button>
+      </form>
+    </div>
+
     <!-- B2C: dormant for now, kept minimal on purpose -->
     <a href="orders.html" class="b2c-strip" aria-label="Website B2C status — open Orders">
       <div class="b2c-strip-text">🌐 Website (B2C): <strong id="b2c-status">—</strong></div>
@@ -243,6 +299,37 @@
       <a href="farm-analytics.html" class="ql-card"><span class="ql-icon">📈</span><div><div class="ql-title">Farm Analytics</div><div class="ql-sub">Harvest & revenue</div></div></a>
       <a href="insights.html" class="ql-card"><span class="ql-icon">📊</span><div><div class="ql-title">Insights</div><div class="ql-sub">Channels & P&amp;L</div></div></a>
     </div>
+  </div>
+
+  <!-- AI Assistant: floating launcher + chat panel -->
+  <button type="button" class="ai-fab" id="ai-fab" aria-label="Open SaFa AI assistant" aria-expanded="false">✦</button>
+  <div class="ai-chat-panel hidden" id="ai-chat-panel" role="dialog" aria-label="SaFa AI assistant">
+    <div class="ai-chat-head">
+      <div class="ai-chat-title">✦ SaFa Assistant</div>
+      <div class="ai-chat-head-actions">
+        <button type="button" class="ai-chat-icon-btn" id="ai-settings-toggle" aria-label="AI settings" title="AI settings">⚙</button>
+        <button type="button" class="ai-chat-icon-btn" id="ai-chat-close" aria-label="Close assistant">✕</button>
+      </div>
+    </div>
+    <div class="ai-settings-row hidden" id="ai-settings-row">
+      <select id="ai-provider">
+        <option value="openai">Groq (hosted, free)</option>
+        <option value="ollama">Ollama (local)</option>
+      </select>
+      <input type="text" id="ai-model" placeholder="Model">
+      <input type="text" id="ai-url" placeholder="Endpoint URL">
+      <input type="password" id="ai-key" placeholder="API Key">
+      <div class="ai-settings-full">
+        <button type="button" id="ai-save-cfg">Save</button>
+        <span class="ai-conn-badge" id="ai-conn-badge"></span>
+      </div>
+    </div>
+    <div class="ai-messages" id="ai-messages"></div>
+    <div class="ai-typing hidden" id="ai-typing"><span class="ai-dot"></span><span class="ai-dot"></span><span class="ai-dot"></span></div>
+    <form class="ai-chat-input-row" id="ai-chat-form">
+      <textarea id="ai-chat-input" rows="1" placeholder="Ask anything…"></textarea>
+      <button type="submit" class="ai-chat-send" id="ai-chat-send" aria-label="Send">➤</button>
+    </form>
   </div>
 
 </body>
