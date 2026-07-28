@@ -167,6 +167,10 @@ export function mountAdminNav({ page, supabase, email, lastLogin }) {
         </div>
       </nav>
       <div class="an-right">
+        <a href="/" target="_blank" rel="noopener" class="an-search-btn" aria-label="View live site (opens in a new tab)" title="View live site">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" aria-hidden="true"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><path d="M15 3h6v6"/><path d="M10 14L21 3"/></svg>
+          <span class="an-search-label">View Site</span>
+        </a>
         <button type="button" class="an-search-btn" id="an-search-btn" aria-label="Search (Cmd+K)">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           <span class="an-search-label">Search</span>

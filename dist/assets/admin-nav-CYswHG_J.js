@@ -1,4 +1,4 @@
-import{f as A}from"./admin-auth-4ZiUUGs_.js";const E=[{key:"home",href:"home.html",label:"Overview",icon:"🏠"},{key:"orders",href:"orders.html",label:"Orders",icon:"📦"},{key:"customers",href:"customers.html",label:"Customers",icon:"👤"},{key:"products",href:"products.html",label:"Products",icon:"🍄"},{key:"expenses",href:"expenses.html",label:"Expenses",icon:"💰"},{key:"pipeline",href:"pipeline.html",label:"B2B",icon:"🤝"},{key:"insights",href:"insights.html",label:"Insights",icon:"📊"}],z=[{href:"quick-log.html",label:"⚡ Quick Log"},{href:"farm-analytics.html",label:"📈 Farm Analytics"},{href:"dashboard.html",label:"📡 IoT Dashboard"}],S=[{href:"home.html",label:"Overview",icon:"🏠",hint:"Dashboard & KPIs",keywords:"home dashboard summary kpi"},{href:"orders.html",label:"Orders",icon:"📦",hint:"Manage customer orders",keywords:"sales orders shipping fulfillment"},{href:"customers.html",label:"Customers",icon:"👤",hint:"Customer directory",keywords:"customers users contacts crm"},{href:"products.html",label:"Products",icon:"🍄",hint:"Catalog & inventory",keywords:"products catalog inventory stock"},{href:"expenses.html",label:"Expenses",icon:"💰",hint:"Costs & P&L",keywords:"expenses costs finance pnl profit loss"},{href:"pipeline.html",label:"B2B",icon:"🤝",hint:"Wholesale pipeline",keywords:"b2b pipeline wholesale deals leads"},{href:"insights.html",label:"Insights",icon:"📊",hint:"AI analyst & trends",keywords:"insights analytics ai reports trends"},{href:"quick-log.html",label:"Quick Log",icon:"⚡",hint:"Mobile daily farm log",keywords:"quick log daily farm mobile harvest"},{href:"farm-analytics.html",label:"Farm Analytics",icon:"📈",hint:"Growth & yield charts",keywords:"farm analytics yield growth charts"},{href:"dashboard.html",label:"IoT Dashboard",icon:"📡",hint:"Simulated sensor preview",keywords:"iot dashboard sensors demo"}];function K(){if(document.getElementById("admin-nav-styles"))return;const o=document.createElement("style");o.id="admin-nav-styles",o.textContent=`
+import{f as A}from"./admin-auth-4ZiUUGs_.js";const E=[{key:"home",href:"home.html",label:"Overview",icon:"🏠"},{key:"orders",href:"orders.html",label:"Orders",icon:"📦"},{key:"customers",href:"customers.html",label:"Customers",icon:"👤"},{key:"products",href:"products.html",label:"Products",icon:"🍄"},{key:"expenses",href:"expenses.html",label:"Expenses",icon:"💰"},{key:"pipeline",href:"pipeline.html",label:"B2B",icon:"🤝"},{key:"insights",href:"insights.html",label:"Insights",icon:"📊"}],M=[{href:"quick-log.html",label:"⚡ Quick Log"},{href:"farm-analytics.html",label:"📈 Farm Analytics"},{href:"dashboard.html",label:"📡 IoT Dashboard"}],S=[{href:"home.html",label:"Overview",icon:"🏠",hint:"Dashboard & KPIs",keywords:"home dashboard summary kpi"},{href:"orders.html",label:"Orders",icon:"📦",hint:"Manage customer orders",keywords:"sales orders shipping fulfillment"},{href:"customers.html",label:"Customers",icon:"👤",hint:"Customer directory",keywords:"customers users contacts crm"},{href:"products.html",label:"Products",icon:"🍄",hint:"Catalog & inventory",keywords:"products catalog inventory stock"},{href:"expenses.html",label:"Expenses",icon:"💰",hint:"Costs & P&L",keywords:"expenses costs finance pnl profit loss"},{href:"pipeline.html",label:"B2B",icon:"🤝",hint:"Wholesale pipeline",keywords:"b2b pipeline wholesale deals leads"},{href:"insights.html",label:"Insights",icon:"📊",hint:"AI analyst & trends",keywords:"insights analytics ai reports trends"},{href:"quick-log.html",label:"Quick Log",icon:"⚡",hint:"Mobile daily farm log",keywords:"quick log daily farm mobile harvest"},{href:"farm-analytics.html",label:"Farm Analytics",icon:"📈",hint:"Growth & yield charts",keywords:"farm analytics yield growth charts"},{href:"dashboard.html",label:"IoT Dashboard",icon:"📡",hint:"Simulated sensor preview",keywords:"iot dashboard sensors demo"}];function K(){if(document.getElementById("admin-nav-styles"))return;const o=document.createElement("style");o.id="admin-nav-styles",o.textContent=`
     .an{background:#0d1f12;border-bottom:1px solid rgba(255,255,255,.07);height:56px;display:flex;align-items:center;padding:0 24px;gap:16px;position:sticky;top:0;z-index:200;font-family:'DM Sans',sans-serif;}
     .an-logo{display:flex;align-items:center;gap:6px;text-decoration:none;flex-shrink:0;}
     .an-logo-main{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:#f5efe6;}
@@ -69,10 +69,10 @@ import{f as A}from"./admin-auth-4ZiUUGs_.js";const E=[{key:"home",href:"home.htm
       .an-burger{display:flex;}
       .an-right .an-logout{display:none;}
     }
-  `,document.head.appendChild(o)}function T({page:o,supabase:$,email:m,lastLogin:b}){K();const c=A(m),M=c.includes("&")?"F·S":c.charAt(0);document.querySelector("header.an")?.remove(),document.getElementById("an-mobile-drawer")?.remove(),document.getElementById("an-palette-overlay")?.remove();const I=E.map(e=>`
+  `,document.head.appendChild(o)}function T({page:o,supabase:z,email:m,lastLogin:b}){K();const c=A(m),$=c.includes("&")?"F·S":c.charAt(0);document.querySelector("header.an")?.remove(),document.getElementById("an-mobile-drawer")?.remove(),document.getElementById("an-palette-overlay")?.remove();const I=E.map(e=>`
     <a href="${e.href}" class="an-link${o===e.key?" active":""}" aria-current="${o===e.key?"page":"false"}">
       <span class="an-link-icon">${e.icon}</span>${e.label}
-    </a>`).join(""),B=z.map(e=>`<a href="${e.href}">${e.label}</a>`).join(""),D=`
+    </a>`).join(""),B=M.map(e=>`<a href="${e.href}">${e.label}</a>`).join(""),C=`
     <header class="an" role="banner">
       <a href="home.html" class="an-logo">
         <span class="an-logo-main">SaFa</span>
@@ -94,6 +94,10 @@ import{f as A}from"./admin-auth-4ZiUUGs_.js";const E=[{key:"home",href:"home.htm
         </div>
       </nav>
       <div class="an-right">
+        <a href="/" target="_blank" rel="noopener" class="an-search-btn" aria-label="View live site (opens in a new tab)" title="View live site">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" aria-hidden="true"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><path d="M15 3h6v6"/><path d="M10 14L21 3"/></svg>
+          <span class="an-search-label">View Site</span>
+        </a>
         <button type="button" class="an-search-btn" id="an-search-btn" aria-label="Search (Cmd+K)">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           <span class="an-search-label">Search</span>
@@ -102,7 +106,7 @@ import{f as A}from"./admin-auth-4ZiUUGs_.js";const E=[{key:"home",href:"home.htm
         ${b?`<span class="an-last">${b}</span>`:""}
         <span class="an-dot" title="Live"></span>
         <span class="an-user" title="${m||""}">
-          <span class="an-avatar">${M}</span>
+          <span class="an-avatar">${$}</span>
           <span class="an-name">${c}</span>
         </span>
         <button type="button" class="an-logout" id="an-logout-btn">Log Out</button>
@@ -119,7 +123,7 @@ import{f as A}from"./admin-auth-4ZiUUGs_.js";const E=[{key:"home",href:"home.htm
         </a>`).join("")}
       <div style="height:1px;background:rgba(255,255,255,.06);margin:8px 0;"></div>
       <div style="font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(245,239,230,.2);padding:4px 16px;">Farm Tools</div>
-      ${z.map(e=>`<a href="${e.href}" class="an-link" style="letter-spacing:0;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:400;text-transform:none;">${e.label}</a>`).join("")}
+      ${M.map(e=>`<a href="${e.href}" class="an-link" style="letter-spacing:0;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:400;text-transform:none;">${e.label}</a>`).join("")}
       <div style="height:1px;background:rgba(255,255,255,.06);margin:8px 0;"></div>
       <button type="button" class="an-link" id="an-logout-mobile" style="color:rgba(245,239,230,.4);">Log Out</button>
     </div>
@@ -133,7 +137,7 @@ import{f as A}from"./admin-auth-4ZiUUGs_.js";const E=[{key:"home",href:"home.htm
         </div>
         <div class="an-palette-list" id="an-palette-list"></div>
       </div>
-    </div>`,u=document.createElement("div");u.innerHTML=D,document.body.prepend(...u.children);const s=document.getElementById("an-farm-btn"),h=document.getElementById("an-farm-menu");s?.addEventListener("click",e=>{e.stopPropagation();const a=h.classList.toggle("open");s.classList.toggle("open",a),s.setAttribute("aria-expanded",a)}),document.addEventListener("click",()=>{h?.classList.remove("open"),s?.classList.remove("open"),s?.setAttribute("aria-expanded","false")});const x=document.getElementById("an-burger"),C=document.getElementById("an-mobile-drawer");x?.addEventListener("click",()=>{const e=C.classList.toggle("open");x.setAttribute("aria-expanded",e)});async function y(){await $.auth.signOut(),window.location.href="orders.html"}document.getElementById("an-logout-btn")?.addEventListener("click",y),document.getElementById("an-logout-mobile")?.addEventListener("click",y);const r=document.getElementById("an-palette-overlay"),l=document.getElementById("an-palette-input"),g=document.getElementById("an-palette-list");let n=S.filter(e=>e.href!==k()),t=0;function k(){return location.pathname.split("/").pop()||"home.html"}function p(){if(!n.length){g.innerHTML='<div class="an-palette-empty">No pages match that search.</div>';return}g.innerHTML=n.map((e,a)=>`
+    </div>`,h=document.createElement("div");h.innerHTML=C,document.body.prepend(...h.children);const s=document.getElementById("an-farm-btn"),u=document.getElementById("an-farm-menu");s?.addEventListener("click",e=>{e.stopPropagation();const a=u.classList.toggle("open");s.classList.toggle("open",a),s.setAttribute("aria-expanded",a)}),document.addEventListener("click",()=>{u?.classList.remove("open"),s?.classList.remove("open"),s?.setAttribute("aria-expanded","false")});const x=document.getElementById("an-burger"),D=document.getElementById("an-mobile-drawer");x?.addEventListener("click",()=>{const e=D.classList.toggle("open");x.setAttribute("aria-expanded",e)});async function y(){await z.auth.signOut(),window.location.href="orders.html"}document.getElementById("an-logout-btn")?.addEventListener("click",y),document.getElementById("an-logout-mobile")?.addEventListener("click",y);const r=document.getElementById("an-palette-overlay"),l=document.getElementById("an-palette-input"),g=document.getElementById("an-palette-list");let n=S.filter(e=>e.href!==k()),t=0;function k(){return location.pathname.split("/").pop()||"home.html"}function p(){if(!n.length){g.innerHTML='<div class="an-palette-empty">No pages match that search.</div>';return}g.innerHTML=n.map((e,a)=>`
       <a href="${e.href}" class="an-palette-item${a===t?" active":""}" data-idx="${a}">
         <span class="an-palette-item-icon">${e.icon}</span>
         <span>

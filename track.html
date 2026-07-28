@@ -471,6 +471,16 @@
     <li><a href="recipes.html">Recipes</a></li>
   </ul>
   <div class="nav-right">
+    <!-- Admin shortcut — hidden by default, shown only for master admin emails by auth-nav.js. -->
+    <a href="home.html" class="nav-icon nav-admin-link" id="nav-admin-link"
+       aria-label="Admin Dashboard" title="Admin Dashboard">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+        <path d="M2 17l10 5 10-5"/>
+        <path d="M2 12l10 5 10-5"/>
+      </svg>
+    </a>
     <button type="button" class="nav-icon" onclick="window.toggleCart()" aria-label="Open cart">
       <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
       <span class="nav-dot"></span>
@@ -584,6 +594,7 @@
 </footer>
 
 <script type="module" src="/src/main.js"></script>
+<script type="module" src="/src/auth-nav.js"></script>
 <script type="module">
 import { createClient } from '@supabase/supabase-js'
 
