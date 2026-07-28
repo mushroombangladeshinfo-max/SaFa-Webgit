@@ -590,8 +590,8 @@
 
     /* ── This calendar month: harvest vs. sold, side by side ── */
     async function loadHarvestVsSold() {
-      document.getElementById('tw-month-label').textContent =
-        new Date().toLocaleDateString('en-GB', { month:'long', year:'numeric' });
+      const monthName = new Date().toLocaleDateString('en-GB', { month:'long' });
+      document.getElementById('tw-month-label').textContent = `${monthName} ${new Date().getFullYear()}`;
 
       const monthStart = startOfMonth();
       const [harvestRes, salesRes] = await Promise.all([
@@ -630,7 +630,7 @@
         fill.className = 'tw-st-fill' + (pct >= 70 ? '' : pct >= 40 ? ' warn' : ' low');
         document.getElementById('tw-st-label').innerHTML = pct >= 100
           ? `<strong>Selling faster than picking</strong> — moving stock from earlier months too`
-          : `<strong>${Math.round(pct)}%</strong> of this month's harvest sold so far`;
+          : `<strong>${Math.round(pct)}%</strong> of ${monthName}'s harvest sold so far`;
         stEl.classList.remove('hidden');
       } else {
         stEl.classList.add('hidden');
