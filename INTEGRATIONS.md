@@ -144,8 +144,10 @@ one needs **zero configuration** — Open-Meteo (open-meteo.com) is free and
 keyless, so there's no secrets table entry and no 3-step ritual to run.
 
 Pulls day (06:00–17:59 local) vs night (18:00–05:59 local) temperature and
-humidity, plus total rainfall, for the farm's own coordinates (Sirajganj,
-24.4539°N 89.7006°E), and writes one row per day to `public.weather_daily`.
+humidity, plus total rainfall, for the farm's own coordinates (Kazipur,
+Sirajganj — 24.6417°N 89.6500°E, corrected 2026-07-28; was wrongly set to
+Sirajganj town ~24km south), and writes one row per day to
+`public.weather_daily`.
 Also auto-classifies each day into the same normal/hot/rainy/cold/humid/
 stormy vocabulary the old manual "আজকের আবহাওয়া" dropdown in quick-log.html
 used — that dropdown had 0 of 4 entries ever filled in, so this replaces it

@@ -2,10 +2,12 @@
 // sync-weather — farm-location weather → weather_daily
 // ============================================================================
 // Pulls day/night temperature, humidity and rainfall for the farm's own
-// coordinates (Sirajganj, 24.4539°N 89.7006°E — matches the LocalBusiness
-// schema in index.html) from Open-Meteo. No API key, no signup, no secrets
-// to configure — this is the one sync function that "just works" with zero
-// setup, unlike the platform syncs which need OAuth/developer tokens.
+// coordinates (Kazipur, Sirajganj — 24.6417°N 89.6500°E, the Kazipur
+// upazila headquarters; corrected 2026-07-28, was wrongly set to
+// Sirajganj town/Sadar upazila ~24km south) from Open-Meteo. No API key,
+// no signup, no secrets to configure — this is the one sync function
+// that "just works" with zero setup, unlike the platform syncs which
+// need OAuth/developer tokens.
 //
 // Replaces the manual "আজকের আবহাওয়া" dropdown in quick-log.html, which
 // had 0 of 4 log entries ever filled in — a habit that was never going to
@@ -21,8 +23,8 @@
 
 import { upsertWeather, daysAgo, json, guard, type WeatherRow } from '../_shared/metrics.ts';
 
-const LATITUDE  = 24.4539;
-const LONGITUDE = 89.7006;
+const LATITUDE  = 24.6417;
+const LONGITUDE = 89.6500;
 const TIMEZONE  = 'Asia/Dhaka';
 
 // Local-hour boundaries splitting a day into "day" vs "night" buckets.
