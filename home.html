@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
     *,*::before,*::after{box-sizing:border-box;}
     :root{--bg:#060d09;--bg2:#0d1f12;--bg3:#122018;--border:rgba(255,255,255,.07);--c:#f5efe6;--cm:rgba(245,239,230,.6);--cl:rgba(245,239,230,.55);--al:#c49a3c;--green:#5fcf80;--red:#e05a2b;}
@@ -177,6 +178,12 @@
     .ai-chat-send:disabled{opacity:.5;cursor:not-allowed;}
     @media(max-width:480px){.ai-chat-panel{right:16px;bottom:80px;}.ai-fab{right:16px;bottom:16px;}}
 
+    /* Outside Weather — last 7 days */
+    .weather-chart-wrap{position:relative;height:180px;margin-top:4px;}
+    .weather-chart-empty{text-align:center;padding:44px 10px;font-size:12px;color:var(--cl);}
+    .weather-full-link{margin-left:auto;font-size:11px;color:var(--al);text-decoration:none;flex-shrink:0;}
+    .weather-full-link:hover{text-decoration:underline;}
+
     /* "Ask SaFa AI" dashboard card */
     .ai-quick-row{display:flex;gap:8px;margin-top:4px;}
     .ai-quick-row input{flex:1;background:var(--bg3);border:1px solid var(--border);color:var(--c);border-radius:8px;padding:9px 12px;font-size:12.5px;font-family:inherit;}
@@ -246,6 +253,20 @@
         <span class="hero-net-out" id="hero-net-costs">Costs —</span>
       </div>
     </a>
+
+    <!-- Outside Weather, last 7 days — day vs night, since weather is a
+         real input to farm decisions, not just a curiosity. Plain panel
+         (not a link-out card like its neighbors) since the chart itself
+         needs mouse interaction for tooltips — wrapping it in <a> would
+         make hovering to read a tooltip risk navigating away instead. -->
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title">🌦️ Outside Weather <span class="hero-net-sub">Last 7 days</span></div>
+        <a href="farm-analytics.html" class="weather-full-link" aria-label="Open Farm Analytics for the full weather trend">Full trend →</a>
+      </div>
+      <div class="panel-sub">Day (6am–6pm) vs night average temperature, farm location.</div>
+      <div class="weather-chart-wrap"><canvas id="chart-home-weather"></canvas></div>
+    </div>
 
     <!-- KPI strip — B2B-first, since that's the real revenue channel right now -->
     <div class="kpi-strip">
@@ -588,6 +609,56 @@
       dash.weather = { date: data.weather_date, range_c: `${data.temp_min_c}–${data.temp_max_c}`, conditions: c };
     }
 
+    /* ── 7-day weather trend: day vs night average temperature ── */
+    let _homeWeatherChart = null;
+    async function loadWeatherChart() {
+      const { data, error } = await sb.from('weather_daily')
+        .select('weather_date,temp_day_avg_c,temp_night_avg_c')
+        .gte('weather_date', daysAgo(7)).order('weather_date', { ascending:true });
+
+      const canvas = document.getElementById('chart-home-weather');
+      const wrap = canvas.parentElement;
+      wrap.querySelector('.weather-chart-empty')?.remove();
+
+      if (error || !data || !data.length) {
+        canvas.style.display = 'none';
+        const d = document.createElement('div');
+        d.className = 'weather-chart-empty';
+        d.textContent = 'No weather data yet.';
+        wrap.appendChild(d);
+        return;
+      }
+      canvas.style.display = '';
+
+      const labels = data.map(r => new Date(r.weather_date).toLocaleDateString('en-GB', { weekday:'short', day:'numeric' }));
+      _homeWeatherChart?.destroy();
+      _homeWeatherChart = new Chart(canvas, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [
+            { label:'Day', data: data.map(r => r.temp_day_avg_c), borderColor:'#d9b254', backgroundColor:'rgba(217,178,84,.1)', fill:true, tension:.35, pointRadius:3, borderWidth:2 },
+            { label:'Night', data: data.map(r => r.temp_night_avg_c), borderColor:'#7ba3ff', backgroundColor:'transparent', tension:.35, pointRadius:3, borderWidth:2, borderDash:[4,3] },
+          ]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          interaction: { mode:'index', intersect:false },
+          plugins: {
+            legend: { labels:{ color:'rgba(245,239,230,.55)', boxWidth:10, padding:10, font:{size:10} } },
+            tooltip: {
+              backgroundColor:'rgba(14,26,19,.95)', borderColor:'rgba(255,255,255,.1)', borderWidth:1, padding:9,
+              callbacks: { label: ctx => ` ${ctx.dataset.label}: ${ctx.raw}°C` }
+            }
+          },
+          scales: {
+            x: { ticks:{ color:'rgba(245,239,230,.5)', font:{size:9.5} }, grid:{ display:false } },
+            y: { ticks:{ color:'rgba(245,239,230,.5)', font:{size:9.5}, callback:v=>`${v}°C` }, grid:{ color:'rgba(255,255,255,.05)' } },
+          }
+        }
+      });
+    }
+
     /* ── This calendar month: harvest vs. sold, side by side ── */
     async function loadHarvestVsSold() {
       const monthName = new Date().toLocaleDateString('en-GB', { month:'long' });
@@ -746,7 +817,7 @@
     /* ── Load everything ── */
     async function reloadAll() {
       attentionItems.length = 0;
-      await Promise.all([loadB2B(), loadSuppliers(), loadStock(), loadFarm(), loadMarketing(), loadHarvestVsSold(), loadB2C(), loadWeather()]);
+      await Promise.all([loadB2B(), loadSuppliers(), loadStock(), loadFarm(), loadMarketing(), loadHarvestVsSold(), loadB2C(), loadWeather(), loadWeatherChart()]);
       renderAttention();
     }
     await reloadAll();
