@@ -65,6 +65,14 @@
     .tw-side-sub{font-size:11px;color:var(--cl);margin-top:4px;}
     .tw-div{width:1px;background:var(--border);flex-shrink:0;}
     @media(max-width:600px){.tw-div{width:100%;height:1px;}}
+    .tw-sell-through{margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,.05);}
+    .tw-sell-through.hidden{display:none;}
+    .tw-st-bar{height:6px;border-radius:99px;background:var(--bg3);overflow:hidden;}
+    .tw-st-fill{height:100%;border-radius:99px;background:var(--green);transition:width .6s ease;width:0%;}
+    .tw-st-fill.warn{background:var(--al);}
+    .tw-st-fill.low{background:var(--red);}
+    .tw-st-label{font-size:11.5px;color:var(--cl);margin-top:7px;}
+    .tw-st-label strong{color:var(--c);font-weight:600;}
 
     /* Attention list */
     .att-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.05);}
@@ -193,6 +201,41 @@
       </div>
     </div>
 
+    <!-- Ask SaFa AI: quick-ask entry point into the floating assistant panel -->
+    <div class="panel">
+      <div class="panel-head"><div class="panel-title">✦ Ask SaFa AI</div></div>
+      <div class="panel-sub">About today's numbers, or anything else.</div>
+      <form class="ai-quick-row" id="ai-quick-form">
+        <input type="text" id="ai-quick-input" placeholder="e.g. How much have we harvested this month?" autocomplete="off">
+        <button type="submit">Ask</button>
+      </form>
+    </div>
+
+    <!-- Harvest vs Sold, current calendar month — plus sell-through rate,
+         since for a perishable product "did it actually sell" matters as
+         much as "how much did we pick." -->
+    <a href="farm-analytics.html" class="panel tw-panel" aria-label="Harvest vs sold this month — open Farm Analytics">
+      <div class="panel-head"><div class="panel-title">🌾 <span id="tw-month-label">This Month</span></div><svg class="panel-chevron" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg></div>
+      <div class="panel-sub">Production vs. what actually sold this calendar month so far.</div>
+      <div class="tw-split">
+        <div class="tw-side">
+          <div class="tw-side-lbl">🌾 Harvest</div>
+          <div class="tw-side-val" id="tw-harvest-kg">—</div>
+          <div class="tw-side-sub">Fresh, kg</div>
+        </div>
+        <div class="tw-div"></div>
+        <div class="tw-side">
+          <div class="tw-side-lbl">💰 Sold</div>
+          <div class="tw-side-val gold" id="tw-sold-kg">—</div>
+          <div class="tw-side-sub" id="tw-sold-rev">Fresh + dried + powder + B2B, kg</div>
+        </div>
+      </div>
+      <div class="tw-sell-through hidden" id="tw-sell-through">
+        <div class="tw-st-bar"><div class="tw-st-fill" id="tw-st-fill"></div></div>
+        <div class="tw-st-label" id="tw-st-label">—</div>
+      </div>
+    </a>
+
     <!-- Hero: net position, the one number that says "how are we doing" -->
     <a href="insights.html" class="panel hero-net" aria-label="Net position, last 30 days — open Insights">
       <div class="hero-net-lbl">💵 Net Position <span class="hero-net-sub">Last 30 days</span></div>
@@ -203,16 +246,6 @@
         <span class="hero-net-out" id="hero-net-costs">Costs —</span>
       </div>
     </a>
-
-    <!-- Ask SaFa AI: quick-ask entry point into the floating assistant panel -->
-    <div class="panel">
-      <div class="panel-head"><div class="panel-title">✦ Ask SaFa AI</div></div>
-      <div class="panel-sub">About today's numbers, or anything else.</div>
-      <form class="ai-quick-row" id="ai-quick-form">
-        <input type="text" id="ai-quick-input" placeholder="e.g. How much have we harvested this month?" autocomplete="off">
-        <button type="submit">Ask</button>
-      </form>
-    </div>
 
     <!-- KPI strip — B2B-first, since that's the real revenue channel right now -->
     <div class="kpi-strip">
@@ -237,25 +270,6 @@
         <div class="kpi-sub" id="k-attention-sub">See panel below</div>
       </a>
     </div>
-
-    <!-- Harvest vs Sold, current calendar month -->
-    <a href="farm-analytics.html" class="panel tw-panel" aria-label="Harvest vs sold this month — open Farm Analytics">
-      <div class="panel-head"><div class="panel-title">📅 <span id="tw-month-label">This Month</span></div><svg class="panel-chevron" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg></div>
-      <div class="panel-sub">Production vs. what actually sold this calendar month so far.</div>
-      <div class="tw-split">
-        <div class="tw-side">
-          <div class="tw-side-lbl">🌾 Harvest</div>
-          <div class="tw-side-val" id="tw-harvest-kg">—</div>
-          <div class="tw-side-sub">Fresh, kg</div>
-        </div>
-        <div class="tw-div"></div>
-        <div class="tw-side">
-          <div class="tw-side-lbl">💰 Sold</div>
-          <div class="tw-side-val gold" id="tw-sold-kg">—</div>
-          <div class="tw-side-sub" id="tw-sold-rev">Fresh + dried + powder + B2B, kg</div>
-        </div>
-      </div>
-    </a>
 
     <!-- Attention + B2B -->
     <div class="grid-main">
@@ -602,6 +616,25 @@
       countUp(document.getElementById('tw-sold-kg'), soldKg, fmtKg);
       document.getElementById('tw-sold-rev').textContent = soldKg > 0 ? `${fmt(soldRev)} · fresh + dried + powder + B2B` : 'Fresh + dried + powder + B2B, kg';
       dash.this_month = { harvest_kg: Number(harvestKg.toFixed(2)), sold_kg: Number(soldKg.toFixed(2)), sold_revenue_bdt: Math.round(soldRev) };
+
+      // Sell-through: for a perishable product, unsold harvest is spoilage
+      // risk, not just a smaller number — worth a clearer signal than the
+      // two kg figures alone. Only shown once there's something to divide
+      // by; >100% means selling from stock harvested in an earlier month.
+      const stEl = document.getElementById('tw-sell-through');
+      if (harvestKg > 0) {
+        const pct = (soldKg / harvestKg) * 100;
+        const fillPct = Math.min(100, pct);
+        const fill = document.getElementById('tw-st-fill');
+        fill.style.width = fillPct + '%';
+        fill.className = 'tw-st-fill' + (pct >= 70 ? '' : pct >= 40 ? ' warn' : ' low');
+        document.getElementById('tw-st-label').innerHTML = pct >= 100
+          ? `<strong>Selling faster than picking</strong> — moving stock from earlier months too`
+          : `<strong>${Math.round(pct)}%</strong> of this month's harvest sold so far`;
+        stEl.classList.remove('hidden');
+      } else {
+        stEl.classList.add('hidden');
+      }
     }
 
     /* ── Marketing: organic reach/engagement, not ad spend (no paid campaigns running) ── */
