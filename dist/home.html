@@ -172,6 +172,16 @@
       </div>
     </div>
 
+    <!-- Ask SaFa AI: quick-ask entry point into the floating assistant panel -->
+    <div class="panel">
+      <div class="panel-head"><div class="panel-title">✦ Ask SaFa AI</div></div>
+      <div class="panel-sub">About today's numbers, or anything else.</div>
+      <form class="ai-quick-row" id="ai-quick-form">
+        <input type="text" id="ai-quick-input" placeholder="e.g. How much did we harvest this week?" autocomplete="off">
+        <button type="submit">Ask</button>
+      </form>
+    </div>
+
     <!-- KPI strip — B2B-first, since that's the real revenue channel right now -->
     <div class="kpi-strip">
       <a href="pipeline.html" class="kpi-card" aria-label="B2B revenue, last 30 days — open B2B Customers">
@@ -273,16 +283,6 @@
         <div class="panel-sub">Revenue − costs − ad spend, last 30 days.</div>
         <div id="net-summary"><div class="empty-mini">Loading…</div></div>
       </a>
-    </div>
-
-    <!-- Ask SaFa AI: quick-ask entry point into the floating assistant panel -->
-    <div class="panel">
-      <div class="panel-head"><div class="panel-title">✦ Ask SaFa AI</div></div>
-      <div class="panel-sub">About today's numbers, or anything else.</div>
-      <form class="ai-quick-row" id="ai-quick-form">
-        <input type="text" id="ai-quick-input" placeholder="e.g. How much did we harvest this week?" autocomplete="off">
-        <button type="submit">Ask</button>
-      </form>
     </div>
 
     <!-- B2C: dormant for now, kept minimal on purpose -->
