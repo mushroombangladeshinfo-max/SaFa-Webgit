@@ -152,6 +152,7 @@
     .orders-empty-icon { width:56px; height:56px; border-radius:50%; background:rgba(196,154,60,.08); border:1px solid rgba(196,154,60,.15); display:flex; align-items:center; justify-content:center; margin:0 auto 20px; font-size:24px; }
     .orders-empty-title { font-family:'Cormorant Garamond','Hind Siliguri',serif; font-size:22px; font-weight:300; color:var(--c); margin-bottom:8px; }
     .orders-empty-text { font-size:13px; color:rgba(245,239,230,.45); margin-bottom:24px; }
+    .orders-empty-text a { color:var(--al); }
 
     /* ── Profile editing ── */
     .edit-toggle-btn { font-family:'Syne','Hind Siliguri',sans-serif; font-size:9px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:rgba(196,154,60,.75); background:rgba(196,154,60,.07); border:1px solid rgba(196,154,60,.18); border-radius:5px; padding:5px 13px; cursor:pointer; transition:all .2s; }
@@ -732,8 +733,8 @@
           listEl.innerHTML = `
             <div class="orders-empty">
               <div class="orders-empty-icon">🛒</div>
-              <h3 class="orders-empty-title">No orders yet</h3>
-              <p class="orders-empty-text">Your order history will appear here once you place your first order.</p>
+              <h3 class="orders-empty-title">No orders on this account yet</h3>
+              <p class="orders-empty-text">Ordered without signing in? Guest orders aren't linked to your account automatically — <a href="track.html">track it by order number</a> instead.</p>
               <a href="index.html#products" class="btn-primary" style="display:inline-flex;gap:8px;">Browse Products <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
             </div>`;
           return;
