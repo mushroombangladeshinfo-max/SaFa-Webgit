@@ -87,11 +87,39 @@
     .rl-val{font-family:'DM Mono','Hind Siliguri',monospace;color:var(--al);font-weight:500;white-space:nowrap;}
     .empty-mini{text-align:center;padding:20px 10px;font-size:12px;color:var(--cl);}
 
+    /* Hero: net position — one dominant figure instead of equal-weight cards */
+    .hero-net{margin-bottom:16px;}
+    .hero-net-lbl{font-family:'Syne','Hind Siliguri',sans-serif;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--cl);margin-bottom:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+    .hero-net-sub{font-family:'DM Sans','Hind Siliguri',sans-serif;font-size:10.5px;font-weight:500;letter-spacing:normal;text-transform:none;color:var(--cl);opacity:.7;}
+    .hero-net-val{font-family:'DM Mono','Hind Siliguri',monospace;font-size:52px;font-weight:500;line-height:1;color:var(--c);}
+    .hero-net-val.pos{color:var(--green);}
+    .hero-net-val.neg{color:var(--red);}
+    .hero-net-break{margin-top:12px;font-size:13px;color:var(--cl);display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+    .hero-net-in{color:var(--green);font-weight:500;}
+    .hero-net-out{color:var(--red);font-weight:500;}
+    .hero-net-sep{color:var(--cl);opacity:.5;}
+    @media(max-width:600px){.hero-net-val{font-size:38px;}}
+
+    /* Skeleton loading — replaces centered "Loading…" text with shapes
+       matching the eventual content, so the page doesn't visually jump. */
+    @keyframes skelPulse{0%,100%{opacity:.35;}50%{opacity:.7;}}
+    .skel{background:var(--bg3);border-radius:4px;animation:skelPulse 1.4s ease-in-out infinite;display:inline-block;}
+    .skel-w-lg{width:46%;}
+    .skel-w-md{width:30%;}
+    .skel-w-sm{width:18%;}
+    .skel-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;}
+    .skel-row .skel{height:11px;}
+    .skel-att{display:flex;align-items:flex-start;gap:10px;padding:10px 0;}
+    .skel-att-dot{width:7px;height:7px;border-radius:50%;margin-top:5px;flex-shrink:0;}
+    .skel-att-body{flex:1;display:flex;flex-direction:column;gap:6px;}
+    .skel-att-body .skel{height:10px;}
+
     /* Dormant B2C status strip */
     a.b2c-strip{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px 20px;margin-bottom:16px;flex-wrap:wrap;text-decoration:none;color:inherit;transition:border-color .18s,background .18s;}
     a.b2c-strip:hover{border-color:rgba(196,154,60,.35);background:var(--bg3);}
     .b2c-strip-text{font-size:12px;color:var(--cl);}
     .b2c-strip-text strong{color:var(--cm);font-weight:500;}
+    .panel-solo{margin-bottom:16px;}
 
     /* Quick links */
     .ql-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;}
@@ -165,6 +193,17 @@
       </div>
     </div>
 
+    <!-- Hero: net position, the one number that says "how are we doing" -->
+    <a href="insights.html" class="panel hero-net" aria-label="Net position, last 30 days — open Insights">
+      <div class="hero-net-lbl">💵 Net Position <span class="hero-net-sub">Last 30 days</span></div>
+      <div class="hero-net-val" id="hero-net-val">—</div>
+      <div class="hero-net-break">
+        <span class="hero-net-in" id="hero-net-income">Income —</span>
+        <span class="hero-net-sep">·</span>
+        <span class="hero-net-out" id="hero-net-costs">Costs —</span>
+      </div>
+    </a>
+
     <!-- Ask SaFa AI: quick-ask entry point into the floating assistant panel -->
     <div class="panel">
       <div class="panel-head"><div class="panel-title">✦ Ask SaFa AI</div></div>
@@ -223,7 +262,7 @@
       <div class="panel">
         <div class="panel-head"><div class="panel-title">🔔 Needs Your Attention</div></div>
         <div class="panel-sub">Overdue B2B check-ins, suppliers due for restock, unresolved spawn/farm quality issues, low stock — pulled from real data.</div>
-        <div id="attention-list"><div class="empty-mini">Loading…</div></div>
+        <div id="attention-list"><div class="skel-att"><span class="skel skel-att-dot"></span><span class="skel-att-body"><span class="skel skel-w-lg"></span><span class="skel skel-w-md"></span></span></div><div class="skel-att"><span class="skel skel-att-dot"></span><span class="skel-att-body"><span class="skel skel-w-md"></span><span class="skel skel-w-sm"></span></span></div></div>
       </div>
 
       <a href="pipeline.html" class="panel" aria-label="B2B summary — open B2B Customers">
@@ -232,7 +271,7 @@
           <svg class="panel-chevron" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
         </div>
         <div class="panel-sub">Your active buyer relationship.</div>
-        <div id="b2b-summary"><div class="empty-mini">Loading…</div></div>
+        <div id="b2b-summary"><div class="skel-row"><span class="skel skel-w-lg"></span><span class="skel skel-w-sm"></span></div><div class="skel-row"><span class="skel skel-w-md"></span><span class="skel skel-w-sm"></span></div><div class="skel-row"><span class="skel skel-w-lg"></span><span class="skel skel-w-md"></span></div></div>
       </a>
     </div>
 
@@ -244,7 +283,7 @@
           <svg class="panel-chevron" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
         </div>
         <div class="panel-sub">Days since last spawn purchase, per supplier.</div>
-        <div id="suppliers-summary"><div class="empty-mini">Loading…</div></div>
+        <div id="suppliers-summary"><div class="skel-row"><span class="skel skel-w-lg"></span><span class="skel skel-w-sm"></span></div><div class="skel-row"><span class="skel skel-w-md"></span><span class="skel skel-w-sm"></span></div></div>
       </a>
 
       <a href="insights.html" class="panel" aria-label="Marketing summary — open Insights">
@@ -253,30 +292,21 @@
           <svg class="panel-chevron" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
         </div>
         <div class="panel-sub">Organic reach &amp; engagement, last 30 days — no paid campaigns running.</div>
-        <div id="marketing-summary"><div class="empty-mini">Loading…</div></div>
+        <div id="marketing-summary"><div class="skel-row"><span class="skel skel-w-md"></span><span class="skel skel-w-sm"></span></div><div class="skel-row"><span class="skel skel-w-lg"></span><span class="skel skel-w-sm"></span></div><div class="skel-row"><span class="skel skel-w-md"></span><span class="skel skel-w-md"></span></div></div>
       </a>
     </div>
 
-    <!-- Farm Production + Net Position (slower-moving monthly trend) -->
-    <div class="grid-two">
-      <a href="farm-analytics.html" class="panel" aria-label="Farm production summary — open Farm Analytics">
-        <div class="panel-head">
-          <div class="panel-title">🌿 Farm Production</div>
-          <svg class="panel-chevron" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
-        </div>
-        <div class="panel-sub">Last 30 days.</div>
-        <div id="farm-summary"><div class="empty-mini">Loading…</div></div>
-      </a>
-
-      <a href="insights.html" class="panel" aria-label="Net position summary — open Insights">
-        <div class="panel-head">
-          <div class="panel-title">💵 Net Position</div>
-          <svg class="panel-chevron" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
-        </div>
-        <div class="panel-sub">Revenue − costs − ad spend, last 30 days.</div>
-        <div id="net-summary"><div class="empty-mini">Loading…</div></div>
-      </a>
-    </div>
+    <!-- Farm Production (slower-moving monthly trend) — Net Position now
+         lives in the hero above, so this stands alone rather than pairing
+         with a now-redundant smaller copy of the same figure. -->
+    <a href="farm-analytics.html" class="panel panel-solo" aria-label="Farm production summary — open Farm Analytics">
+      <div class="panel-head">
+        <div class="panel-title">🌿 Farm Production</div>
+        <svg class="panel-chevron" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+      </div>
+      <div class="panel-sub">Last 30 days.</div>
+      <div id="farm-summary"><div class="skel-row"><span class="skel skel-w-lg"></span><span class="skel skel-w-sm"></span></div><div class="skel-row"><span class="skel skel-w-md"></span><span class="skel skel-w-sm"></span></div><div class="skel-row"><span class="skel skel-w-lg"></span><span class="skel skel-w-md"></span></div></div>
+    </a>
 
     <!-- B2C: dormant for now, kept minimal on purpose -->
     <a href="orders.html" class="b2c-strip" aria-label="Website B2C status — open Orders">
@@ -347,6 +377,23 @@
     const fmtN = n => (n || 0).toLocaleString('en-BD');
     const cap = s => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
     const daysSince = dateStr => Math.floor((Date.now() - new Date(dateStr).getTime()) / 864e5);
+
+    /* Animates a number from 0 up to its target on load/refresh instead of
+       snapping straight to the final value. Always counts from 0 rather
+       than diffing against the previous value — simple, and a nice "this
+       just updated" cue on a realtime-refreshing page. */
+    const prefersReducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    function countUp(el, target, formatter, duration = 700) {
+      if (prefersReducedMotion || !isFinite(target)) { el.textContent = formatter(target); return; }
+      const start = performance.now();
+      function tick(now) {
+        const t = Math.min(1, (now - start) / duration);
+        const eased = 1 - Math.pow(1 - t, 3);
+        el.textContent = formatter(target * eased);
+        if (t < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    }
     // First day of the current calendar month, local Y-M-D — rolls from
     // July to August etc. automatically, no hardcoded month.
     const startOfMonth = () => {
@@ -385,8 +432,9 @@
       const rev30 = sales.filter(s => s.log_date >= monthCutoff)
         .reduce((s,r) => s + (Number(r.s_b2b_value)||0), 0);
 
-      document.getElementById('k-b2b-revenue').textContent = fmt(rev30);
-      document.getElementById('k-b2b-days').textContent = lastDaysAgo !== null ? lastDaysAgo : '—';
+      countUp(document.getElementById('k-b2b-revenue'), rev30, fmt);
+      if (lastDaysAgo !== null) countUp(document.getElementById('k-b2b-days'), lastDaysAgo, n => Math.round(n));
+      else document.getElementById('k-b2b-days').textContent = '—';
       document.getElementById('k-b2b-days-sub').textContent = last ? `Last: ${last.log_date}` : 'No sales logged yet';
 
       const buyerNames = buyers.map(b => b.contact_name ? `${b.business_name} (${b.contact_name})` : b.business_name).join(', ');
@@ -477,7 +525,7 @@
       const expenses = data.reduce((s,r) => s + (Number(r.farm_expenses)||0), 0);
       const oneOff   = data.reduce((s,r) => s + (Number(r.one_off_expenses)||0), 0);
 
-      document.getElementById('k-harvest').textContent = fmtKg(harvest);
+      countUp(document.getElementById('k-harvest'), harvest, fmtKg);
       document.getElementById('farm-summary').innerHTML = `
         <div class="rl-row"><span>Harvest</span><span class="rl-val">${fmtKg(harvest)}</span></div>
         <div class="rl-row"><span>Farm Revenue</span><span class="rl-val">${fmt(revenue)}</span></div>
@@ -540,7 +588,7 @@
       ]);
 
       const harvestKg = (harvestRes.data || []).reduce((s,r) => s + (Number(r.harvest_fresh_kg)||0), 0);
-      document.getElementById('tw-harvest-kg').textContent = fmtKg(harvestKg);
+      countUp(document.getElementById('tw-harvest-kg'), harvestKg, fmtKg);
 
       const sales = salesRes.data || [];
       const soldKg = sales.reduce((s,r) =>
@@ -551,7 +599,7 @@
           + (Number(r.s_powder_kg)||0)*(Number(r.s_powder_price)||0)
           + (Number(r.s_b2b_value)||0), 0);
 
-      document.getElementById('tw-sold-kg').textContent = fmtKg(soldKg);
+      countUp(document.getElementById('tw-sold-kg'), soldKg, fmtKg);
       document.getElementById('tw-sold-rev').textContent = soldKg > 0 ? `${fmt(soldRev)} · fresh + dried + powder + B2B` : 'Fresh + dried + powder + B2B, kg';
       dash.this_month = { harvest_kg: Number(harvestKg.toFixed(2)), sold_kg: Number(soldKg.toFixed(2)), sold_revenue_bdt: Math.round(soldRev) };
     }
@@ -592,10 +640,12 @@
       const rev = (window._farmRevenue30d || 0);
       const exp = (window._farmExpenses30d || 0) + (window._adSpend30d || 0);
       const net = rev - exp;
-      document.getElementById('net-summary').innerHTML = `
-        <div class="rl-row"><span>Income</span><span class="rl-val">${fmt(rev)}</span></div>
-        <div class="rl-row"><span>Costs</span><span class="rl-val">${fmt(exp)}</span></div>
-        <div class="rl-row"><span>Net</span><span class="rl-val" style="color:${net>=0?'var(--green)':'var(--red)'}">${fmt(net)}</span></div>`;
+      const heroVal = document.getElementById('hero-net-val');
+      heroVal.classList.remove('pos', 'neg');
+      heroVal.classList.add(net >= 0 ? 'pos' : 'neg');
+      countUp(heroVal, net, fmt);
+      document.getElementById('hero-net-income').textContent = `Income ${fmt(rev)}`;
+      document.getElementById('hero-net-costs').textContent = `Costs ${fmt(exp)}`;
       dash.net_30d = { income_bdt: Math.round(rev), costs_bdt: Math.round(exp), net_bdt: Math.round(net) };
     }
 
@@ -642,7 +692,7 @@
       const sevRank = { crit:0, warn:1 };
       attentionItems.sort((a,b) => sevRank[a.sev] - sevRank[b.sev]);
 
-      document.getElementById('k-attention').textContent = attentionItems.length;
+      countUp(document.getElementById('k-attention'), attentionItems.length, n => Math.round(n));
       document.getElementById('k-attention').className = 'kpi-val ' + (attentionItems.some(a=>a.sev==='crit') ? 'red' : attentionItems.length ? 'gold' : 'green');
       document.getElementById('k-attention-sub').textContent =
         attentionItems.length ? `${attentionItems.filter(a=>a.sev==='crit').length} critical` : 'All clear';
