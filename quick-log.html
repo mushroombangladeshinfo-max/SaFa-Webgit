@@ -212,7 +212,7 @@ const S = window.S = {
   d:         {},      // fieldId → value string
   rooms:     [],      // ['A','B','C']
   phase:     {},      // stepId → 'form'  (user answered YES)
-  tog:       { contam:false, spawnBought:false, b2b:false, samples:false },
+  tog:       { spawnBought:false, newBatch:false, b2b:false, samples:false, fnf:false },
   userEmail: ''
 };
 
@@ -220,7 +220,7 @@ const S = window.S = {
 const STEPS = [
   { id:'rooms',      icon:'📅', title:'তারিখ ও রুম',         type:'rooms'  },
   { id:'harvest',    icon:'🍄', title:'Harvest',              type:'yn', q:'আজকে কি Harvest হয়েছে?'              },
-  { id:'qc',         icon:'✅', title:'Quality Check',        type:'yn', q:'আজকের Quality Check দিবেন?'          },
+  { id:'qc',         icon:'🦠', title:'Contamination',        type:'yn', q:'আজকে কি কোনো Contamination হয়েছে?'  },
   { id:'spawn',      icon:'🌱', title:'Spawn ও Substrate',   type:'yn', q:'আজকে কি Spawn বা Substrate কাজ হয়েছে?' },
   { id:'processing', icon:'⚙️', title:'Processing',          type:'yn', q:'আজকে কি Processing হয়েছে?'           },
   { id:'sales',      icon:'📦', title:'বিক্রি',              type:'yn', q:'আজকে কি বিক্রি হয়েছে?'              },
@@ -279,7 +279,7 @@ window.lc = function(calc) {
 };
 
 function calcH() {
-  const t = dn('h-fresh-a') + dn('h-fresh-b') + dn('h-fresh-rej');
+  const t = dn('h-fresh-a') + dn('h-fresh-rej');
   const el = document.getElementById('ht-tot');
   if (el) el.textContent = t.toFixed(2) + ' kg';
 }
@@ -323,7 +323,6 @@ function formHarvest() {
     <div class="sec-lbl">তাজা মাশরুম (kg)</div>
     <div class="cg3">
       ${sc('h-fresh-a',  'Grade A',  'kg', 0.1, 'h')}
-      ${sc('h-fresh-b',  'Grade B',  'kg', 0.1, 'h')}
       ${sc('h-fresh-rej','বাতিল',    'kg', 0.1, 'h')}
     </div>
     <div class="tot"><span class="tot-lbl">মোট তাজা</span><span class="tot-val" id="ht-tot">0.00 kg</span></div>
@@ -334,17 +333,14 @@ function formHarvest() {
       ${sc('h-recovered-kg','মোল্ড থেকে উদ্ধারকৃত','kg',0.01)}
     </div>
     <div class="divider"></div>
-    <div class="sec-lbl">প্রসেসড পণ্য (kg)</div>
-    <div class="cg2">
-      ${sc('h-dried', 'শুকনো', 'kg', 0.1)}
-      ${sc('h-powder','পাউডার','kg', 0.1)}
-    </div>
-    <div class="divider"></div>
     <div class="sec-lbl">Batch তথ্য</div>
     <div class="cg3">
       <div class="card">
-        <div class="card-lbl">Primary Batch</div>
-        <input class="ci-txt" type="text" id="f-h-primary-batch" value="${S.d['h-primary-batch']||''}" placeholder="BAT-2025-001" oninput="S.d['h-primary-batch']=this.value"/>
+        <div class="card-lbl">Batch</div>
+        <select class="sel-inline" id="f-h-primary-batch" onchange="onHarvestBatchChange(this)">
+          <option value="">—</option>
+          ${ACTIVE_BATCHES.map(b=>`<option value="${b.batch_number}"${S.d['h-primary-batch']===b.batch_number?' selected':''}>${b.batch_number} (Room ${b.room})</option>`).join('')}
+        </select>
       </div>
       <div class="card">
         <div class="card-lbl">Flush নম্বর</div>
@@ -360,24 +356,6 @@ function formHarvest() {
 
 function formQC() {
   return `<div class="cards">
-    <div class="sec-lbl">Quality Check ফলাফল (kg)</div>
-    <div class="cg3">
-      ${sc('qc-pass','Pass','kg',0.1)}
-      ${sc('qc-fail','Fail','kg',0.1)}
-      <div class="card">
-        <div class="card-lbl">Fail-এর কারণ</div>
-        <select class="sel-inline" id="f-qc-fail-reason" onchange="S.d['qc-fail-reason']=this.value">
-          <option value="">—</option>
-          ${[['overripe','বেশি পাকা'],['damaged','ক্ষতিগ্রস্ত'],['off-colour','রং ঠিক নেই'],['contaminated','দূষিত'],['undersize','আকারে ছোট'],['mixed','মিশ্রিত']].map(([v,l])=>`<option value="${v}"${S.d['qc-fail-reason']===v?' selected':''}>${l}</option>`).join('')}
-        </select>
-      </div>
-    </div>
-    <div class="divider"></div>
-    <div class="tog-row">
-      <span class="tog-lbl">আজকে কি Contamination হয়েছে?</span>
-      <label class="tog"><input type="checkbox" id="tog-contam" ${S.tog.contam?'checked':''} onchange="togC('contam',this)"/><span class="tog-track"></span></label>
-    </div>
-    <div class="cond${S.tog.contam?' show':''}" id="cond-contam">
       <div class="cg3" style="width:100%;max-width:460px">
         <div class="card">
           <div class="card-lbl">কোন রুম?</div>
@@ -403,7 +381,6 @@ function formQC() {
         <div class="card-lbl">ব্যবস্থা নেওয়া হয়েছে</div>
         <input class="ci-txt" type="text" id="f-qc-contam-action" value="${S.d['qc-contam-action']||''}" placeholder="যেমন: ব্যাগ সরানো হয়েছে, রুম জীবাণুমুক্ত করা হয়েছে..." oninput="S.d['qc-contam-action']=this.value"/>
       </div>
-    </div>
   </div>`;
 }
 
@@ -445,6 +422,28 @@ function formSpawn() {
           <option value="rice_straw">ধানের খড়</option>
           <option value="mixed">মিশ্রিত</option>
         </select>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="tog-row">
+      <span class="tog-lbl">নতুন Batch শুরু করবেন?</span>
+      <label class="tog"><input type="checkbox" id="tog-newbatch" ${S.tog.newBatch?'checked':''} onchange="togC('newBatch',this)"/><span class="tog-track"></span></label>
+    </div>
+    <div class="cond${S.tog.newBatch?' show':''}" id="cond-newbatch">
+      <div class="cg2" style="width:100%;max-width:460px">
+        <div class="card">
+          <div class="card-lbl">রুম</div>
+          <select class="sel-inline" id="f-nb-room" onchange="onNewBatchRoomChange(this)">
+            <option value="">—</option>
+            <option value="A"${S.d['nb-room']==='A'?' selected':''}>Room A</option>
+            <option value="B"${S.d['nb-room']==='B'?' selected':''}>Room B</option>
+            <option value="C"${S.d['nb-room']==='C'?' selected':''}>Room C</option>
+          </select>
+        </div>
+        <div class="card">
+          <div class="card-lbl">Batch নম্বর (auto)</div>
+          <div class="ci-txt" id="nb-batch-preview" style="display:flex;align-items:center;color:rgba(245,239,230,.5)">${S.d['nb-batch-number']||'—'}</div>
+        </div>
       </div>
     </div>
   </div>`;
@@ -499,7 +498,6 @@ function formSales() {
     <div class="tot"><span class="tot-lbl">মোট বিক্রয়</span><span class="tot-val" id="sale-tot">৳ 0</span></div>
     <div class="divider"></div>
     <div class="cg2">
-      ${sc('s-orders','Order পূরণ','টি',1)}
       ${sc('s-waste','নষ্ট/ফেরত','kg',0.1)}
     </div>
     <div class="tog-row">
@@ -522,6 +520,20 @@ function formSales() {
       <div class="card" id="b2b-other-wrap" style="display:${S.d['s-b2b-name'] && !B2B_BUYERS.some(b=>b.business_name===S.d['s-b2b-name'])?'':'none'};max-width:460px;width:100%;margin-top:10px">
         <div class="card-lbl">নাম লিখুন</div>
         <input class="ci-txt" type="text" id="f-s-b2b-name-other" value="${S.d['s-b2b-name-other']||''}" placeholder="ব্যবসার নাম" oninput="S.d['s-b2b-name-other']=this.value; S.d['s-b2b-name']=this.value;"/>
+      </div>
+    </div>
+    <div class="tog-row">
+      <span class="tog-lbl">আজ বন্ধু/পরিবারকে বিক্রি হয়েছে?</span>
+      <label class="tog"><input type="checkbox" id="tog-fnf" ${S.tog.fnf?'checked':''} onchange="togC('fnf',this)"/><span class="tog-track"></span></label>
+    </div>
+    <div class="cond${S.tog.fnf?' show':''}" id="cond-fnf">
+      <div class="cg3" style="width:100%;max-width:460px">
+        <div class="card">
+          <div class="card-lbl">কার কাছে</div>
+          <input class="ci-txt" type="text" id="f-fnf-name" value="${S.d['fnf-name']||''}" placeholder="নাম" oninput="S.d['fnf-name']=this.value"/>
+        </div>
+        ${sc('fnf-qty','পরিমাণ','kg',0.1)}
+        ${sc('fnf-value','মূল্য','৳',50)}
       </div>
     </div>
     <div class="tog-row">
@@ -631,17 +643,15 @@ function buildSlide(step) {
 
   /* Summary step */
   if (step.type === 'summary') {
-    const freshT = dn('h-fresh-a')+dn('h-fresh-b')+dn('h-fresh-rej');
+    const freshT = dn('h-fresh-a')+dn('h-fresh-rej');
     const rev    = dn('s-fresh-kg')*dn('s-fresh-price') + dn('s-dried-kg')*dn('s-dried-price') + dn('s-powder-kg')*dn('s-powder-price');
     const exp    = ['ex-spawn','ex-substrate','ex-packaging','ex-labor','ex-electricity','ex-transport','ex-water','ex-other'].reduce((s,id)=>s+dn(id),0);
     const net    = rev - exp;
-    const qcT    = dn('qc-pass')+dn('qc-fail');
     const stockT = dn('st-fresh')+dn('st-dried')+dn('st-powder');
     const rows   = [
       ['তারিখ',       S.d['log-date']||'—',                              ''],
       ['হার্ভেস্ট রুম', S.rooms.length ? S.rooms.join(', ') : '—',         ''],
       ['মোট তাজা',    freshT>0 ? freshT.toFixed(2)+' kg' : '—',           'g'],
-      ['QC পাশ হার',  qcT>0 ? ((dn('qc-pass')/qcT)*100).toFixed(0)+'%':'—','gold'],
       ['মোট বিক্রয়', rev>0 ? fmt(rev) : '—',                             'g'],
       ['মোট খরচ',    exp>0 ? fmt(exp) : '—',                             'r'],
       ['ক্লোজিং স্টক', stockT>0 ? stockT.toFixed(2)+' kg' : '—',           '']
@@ -778,7 +788,7 @@ function collect() {
   if (disp) S.d['log-date'] = disp.textContent;
 
   /* Toggles */
-  const tMap = { contam:'tog-contam', spawnBought:'tog-spawn', b2b:'tog-b2b', samples:'tog-samples' };
+  const tMap = { spawnBought:'tog-spawn', newBatch:'tog-newbatch', b2b:'tog-b2b', samples:'tog-samples', fnf:'tog-fnf' };
   Object.entries(tMap).forEach(([k,id]) => {
     const el = document.getElementById(id);
     if (el) S.tog[k] = el.checked;
@@ -795,10 +805,43 @@ window.togRoom = function(r) {
 
 window.togC = function(key, el) {
   S.tog[key] = el.checked;
-  const map = { contam:'cond-contam', spawnBought:'cond-spawn', b2b:'cond-b2b', samples:'cond-samples' };
+  const map = { spawnBought:'cond-spawn', newBatch:'cond-newbatch', b2b:'cond-b2b', samples:'cond-samples', fnf:'cond-fnf' };
   const c = document.getElementById(map[key]);
   if (c) c.classList.toggle('show', el.checked);
   if (key === 'spawnBought') calcSpn();
+};
+
+/* Batch number is auto-generated client-side as {room}-{YYMMDD}-{seq},
+   room-prefixed per standard agriculture traceability practice (a room
+   holds many batches across its shelves, so this isn't "one batch per
+   room" — the ID just makes the room legible at a glance without a join
+   for the common case). Sequence is next-available for that room+date,
+   queried live rather than guessed, so two batches started in the same
+   room on the same day never collide. */
+window.onNewBatchRoomChange = async function(sel) {
+  const room = sel.value;
+  const preview = document.getElementById('nb-batch-preview');
+  if (!room) { preview.textContent = '—'; S.d['nb-room'] = ''; S.d['nb-batch-number'] = ''; return; }
+  preview.textContent = 'হিসাব করা হচ্ছে…';
+  const dateStr = (S.d['log-date'] || localDateStr()).replace(/-/g,'').slice(2); // YYMMDD
+  const prefix = `${room}-${dateStr}-`;
+  const { data } = await sb.from('batches').select('batch_number').like('batch_number', prefix+'%');
+  const seqs = (data||[]).map(b => parseInt(b.batch_number.slice(prefix.length),10)).filter(n=>!isNaN(n));
+  const next = (seqs.length ? Math.max(...seqs) : 0) + 1;
+  const batchNumber = prefix + String(next).padStart(2,'0');
+  preview.textContent = batchNumber;
+  S.d['nb-room'] = room;
+  S.d['nb-batch-number'] = batchNumber;
+};
+
+/* Picking a batch already tells you the room (it's in the batch number
+   itself) — auto-check that room back on the Rooms step instead of making
+   it re-selected every time. Rooms stays independently editable for days
+   that span more than the primary batch's room. */
+window.onHarvestBatchChange = function(sel) {
+  S.d['h-primary-batch'] = sel.value;
+  const batch = ACTIVE_BATCHES.find(b => b.batch_number === sel.value);
+  if (batch && !S.rooms.includes(batch.room)) S.rooms.push(batch.room);
 };
 
 window.onB2BBuyerChange = function(sel) {
@@ -847,14 +890,12 @@ async function submit() {
   const payload = {
     log_date: S.d['log-date'] || localDateStr(),
     submitted_by: S.userEmail || null,
-    harvest_fresh_a:dn2('h-fresh-a'), harvest_fresh_b:dn2('h-fresh-b'), harvest_fresh_rej:dn2('h-fresh-rej'),
-    harvest_dried:dn2('h-dried'), harvest_powder:dn2('h-powder'),
+    harvest_fresh_a:dn2('h-fresh-a'), harvest_fresh_rej:dn2('h-fresh-rej'),
     harvest_healthy_kg:dn2('h-healthy-kg'), harvest_recovered_kg:dn2('h-recovered-kg'),
     harvest_rooms: S.rooms.length ? S.rooms : null,
     harvest_primary_batch:ds('h-primary-batch'), harvest_flush_num:dn2('h-flush-num'),
     harvest_bags_removed:dn2('h-bags-removed'),
-    qc_pass:dn2('qc-pass'), qc_fail:dn2('qc-fail'), qc_fail_reason:ds('qc-fail-reason'),
-    contam_event:S.tog.contam, contam_room:ds('qc-contam-room'), contam_type:ds('qc-contam-type'), contam_bags:dn2('qc-contam-bags'), contam_action:ds('qc-contam-action'),
+    contam_event:S.phase['qc']==='form', contam_room:ds('qc-contam-room'), contam_type:ds('qc-contam-type'), contam_bags:dn2('qc-contam-bags'), contam_action:ds('qc-contam-action'),
     spawn_bought_kg:dn2('sp-bought-kg'), spawn_price_per_kg:dn2('sp-price-per-kg'), spawn_supplier:ds('sp-supplier'),
     spawn_used_kg:dn2('sp-used-kg'), substrate_kg:dn2('sp-substrate-kg'), substrate_type:ds('sp-substrate-type'),
     bags_inoculated:dn2('sp-bags-inoculated'), bags_discarded:dn2('sp-bags-discarded'),
@@ -863,8 +904,9 @@ async function submit() {
     s_fresh_kg:dn2('s-fresh-kg'), s_fresh_price:dn2('s-fresh-price'),
     s_dried_kg:dn2('s-dried-kg'), s_dried_price:dn2('s-dried-price'),
     s_powder_kg:dn2('s-powder-kg'), s_powder_price:dn2('s-powder-price'),
-    s_orders:dn2('s-orders'), s_waste:dn2('s-waste'),
+    s_waste:dn2('s-waste'),
     s_b2b_name:ds('s-b2b-name'), s_b2b_qty:dn2('s-b2b-qty'), s_b2b_value:dn2('s-b2b-value'),
+    fnf_name:ds('fnf-name'), fnf_qty:dn2('fnf-qty'), fnf_value:dn2('fnf-value'),
     sample_fresh_kg:dn2('sample-fresh-kg'), sample_dried_kg:dn2('sample-dried-kg'),
     sample_powder_kg:dn2('sample-powder-kg'), sample_notes:ds('sample-notes'),
     st_fresh:dn2('st-fresh'), st_dried:dn2('st-dried'), st_powder:dn2('st-powder'),
@@ -877,6 +919,16 @@ async function submit() {
   };
 
   try {
+    if (S.d['nb-batch-number']) {
+      const { error: batchErr } = await sb.from('batches').insert({
+        batch_number: S.d['nb-batch-number'],
+        room: S.d['nb-room'],
+        spawn_date: S.d['log-date'] || localDateStr(),
+        substrate_type: S.d['sp-substrate-type'] || null
+      });
+      if (batchErr) throw batchErr;
+    }
+
     const { error } = await sb.from('farm_daily_logs').upsert(payload, { onConflict:'log_date' });
     if (error) throw error;
 
@@ -946,6 +998,15 @@ async function loadB2BBuyers() {
   } catch(_) { /* silent — dropdown falls back to Other/free-text only */ }
 }
 
+/* Active batches, for Harvest's batch dropdown. */
+let ACTIVE_BATCHES = [];
+async function loadActiveBatches() {
+  try {
+    const { data } = await sb.from('batches').select('batch_number,room').eq('status','active').order('batch_number');
+    ACTIVE_BATCHES = data || [];
+  } catch(_) { /* silent — dropdown just shows none yet */ }
+}
+
 /* ── Swipe gesture (horizontal swipe = next/back) ── */
 let _tx = 0, _ty = 0;
 document.getElementById('wrap').addEventListener('touchstart', e => {
@@ -979,7 +1040,7 @@ document.getElementById('hdr-back').style.visibility = 'hidden';
   S.d['s-fresh-price']    = '350';
   S.d['s-dried-price']    = '2800';
   S.d['s-powder-price']   = '3500';
-  await Promise.all([prefill(), loadB2BBuyers()]);
+  await Promise.all([prefill(), loadB2BBuyers(), loadActiveBatches()]);
 
   // Clear loading skeleton, then render first step
   document.getElementById('wrap').innerHTML = '';
