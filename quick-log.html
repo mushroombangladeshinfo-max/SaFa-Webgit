@@ -78,16 +78,6 @@ html,body{height:100%;font-family:'DM Sans','Hind Siliguri',sans-serif;backgroun
 .ci::-webkit-inner-spin-button,.ci::-webkit-outer-spin-button{display:none}
 .ci.sm{font-size:14px}
 
-/* Room cards */
-.rooms{display:flex;gap:10px;width:100%;max-width:360px}
-.rc{flex:1;padding:18px 8px 14px;border:2px solid rgba(255,255,255,.09);border-radius:12px;background:rgba(255,255,255,.03);cursor:pointer;text-align:center;transition:all .18s;-webkit-tap-highlight-color:transparent}
-.rc:active{transform:scale(.94)}
-.rc.sel{border-color:var(--green);background:rgba(95,207,128,.09)}
-.rc-letter{font-family:'Syne','Hind Siliguri',sans-serif;font-size:30px;font-weight:800;color:rgba(245,239,230,.18);transition:color .18s}
-.rc.sel .rc-letter{color:var(--green)}
-.rc-name{font-size:9px;text-transform:uppercase;letter-spacing:.5px;color:rgba(245,239,230,.18);margin-top:4px;transition:color .18s}
-.rc.sel .rc-name{color:rgba(95,207,128,.6)}
-
 /* Date chip */
 .date-chip{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:13px 18px;width:100%;max-width:360px}
 .date-txt{font-family:'DM Mono','Hind Siliguri',monospace;font-size:17px;flex:1;text-align:center}
@@ -218,7 +208,7 @@ const S = window.S = {
 
 /* ── Step definitions ── */
 const STEPS = [
-  { id:'rooms',      icon:'📅', title:'তারিখ ও রুম',         type:'rooms'  },
+  { id:'rooms',      icon:'📅', title:'তারিখ',                type:'rooms'  },
   { id:'harvest',    icon:'🍄', title:'Harvest',              type:'yn', q:'আজকে কি Harvest হয়েছে?'              },
   { id:'qc',         icon:'🦠', title:'Contamination',        type:'yn', q:'আজকে কি কোনো Contamination হয়েছে?'  },
   { id:'spawn',      icon:'🌱', title:'Spawn ও Substrate',   type:'yn', q:'আজকে কি Spawn বা Substrate কাজ হয়েছে?' },
@@ -359,7 +349,7 @@ function formQC() {
       <div class="cg3" style="width:100%;max-width:460px">
         <div class="card">
           <div class="card-lbl">কোন রুম?</div>
-          <select class="sel-inline" id="f-qc-contam-room" onchange="S.d['qc-contam-room']=this.value">
+          <select class="sel-inline" id="f-qc-contam-room" onchange="S.d['qc-contam-room']=this.value; recomputeRooms();">
             <option value="">—</option>
             <option>A</option><option>B</option><option>C</option>
             <option value="multiple">একাধিক</option>
@@ -620,14 +610,9 @@ const FORMS = {
 
 /* ── Build full slide HTML ── */
 function buildSlide(step) {
-  /* Rooms/date step */
+  /* Date step */
   if (step.type === 'rooms') {
-    const date  = S.d['log-date'] || localDateStr();
-    const rBtns = ['A','B','C'].map(r=>`
-      <div class="rc${S.rooms.includes(r)?' sel':''}" id="rc-${r}" onclick="togRoom('${r}')">
-        <div class="rc-letter">${r}</div>
-        <div class="rc-name">রুম ${r}</div>
-      </div>`).join('');
+    const date = S.d['log-date'] || localDateStr();
     return `
       <div class="step-icon">${step.icon}</div>
       <div class="step-q">${step.title}</div>
@@ -636,9 +621,7 @@ function buildSlide(step) {
         <span class="date-edit-btn" onclick="editDate()">✏️ বদলান</span>
       </div>
       <input type="date" id="date-nat" class="date-nat" value="${date}" onchange="dateChanged()"/>
-      <div class="step-sub">আজকে কোন রুম থেকে Harvest হয়েছে?</div>
-      <div class="rooms">${rBtns}</div>
-      <div style="font-size:11px;color:rgba(245,239,230,.22)">একাধিক রুম select করা যাবে</div>`;
+      <div class="step-sub" style="color:rgba(245,239,230,.3)">রুম স্বয়ংক্রিয়ভাবে যোগ হবে Batch ও Contamination থেকে</div>`;
   }
 
   /* Summary step */
@@ -796,11 +779,18 @@ function collect() {
 }
 
 /* ── Interactive helpers ── */
-window.togRoom = function(r) {
-  const i = S.rooms.indexOf(r);
-  if (i > -1) S.rooms.splice(i,1); else S.rooms.push(r);
-  const el = document.getElementById('rc-'+r);
-  if (el) el.classList.toggle('sel', S.rooms.includes(r));
+// harvest_rooms is no longer a manual multi-select — it's derived from
+// whichever room-carrying fields actually got filled (batch, new-batch,
+// contamination), recomputed fresh each time so it never carries stale
+// entries from an earlier selection the user has since changed.
+window.recomputeRooms = function() {
+  const set = new Set();
+  const batch = ACTIVE_BATCHES.find(b => b.batch_number === S.d['h-primary-batch']);
+  if (batch) set.add(batch.room);
+  if (S.d['nb-room']) set.add(S.d['nb-room']);
+  const cr = S.d['qc-contam-room'];
+  if (cr && cr !== 'multiple') set.add(cr);
+  S.rooms = Array.from(set);
 };
 
 window.togC = function(key, el) {
@@ -832,16 +822,15 @@ window.onNewBatchRoomChange = async function(sel) {
   preview.textContent = batchNumber;
   S.d['nb-room'] = room;
   S.d['nb-batch-number'] = batchNumber;
+  recomputeRooms();
 };
 
 /* Picking a batch already tells you the room (it's in the batch number
-   itself) — auto-check that room back on the Rooms step instead of making
-   it re-selected every time. Rooms stays independently editable for days
-   that span more than the primary batch's room. */
+   itself) — harvest_rooms derives from it automatically via
+   recomputeRooms() instead of being separately re-selected. */
 window.onHarvestBatchChange = function(sel) {
   S.d['h-primary-batch'] = sel.value;
-  const batch = ACTIVE_BATCHES.find(b => b.batch_number === sel.value);
-  if (batch && !S.rooms.includes(batch.room)) S.rooms.push(batch.room);
+  recomputeRooms();
 };
 
 window.onB2BBuyerChange = function(sel) {
