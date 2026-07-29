@@ -67,11 +67,23 @@ body{font-family:'DM Sans','Hind Siliguri',sans-serif;background:var(--g900);col
 .state-btn:hover{background:rgba(217,178,84,.2)}
 .chart-empty{display:flex;align-items:center;justify-content:center;height:100%;font-size:12px;color:rgba(245,239,230,.25)}
 
+/* ── Batch performance table ── */
+.batch-table{width:100%;border-collapse:collapse;font-size:11px}
+.batch-table th{text-align:left;font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:rgba(245,239,230,.35);padding:8px 10px;border-bottom:1px solid var(--border2);white-space:nowrap}
+.batch-table td{padding:9px 10px;border-bottom:1px solid var(--border);color:rgba(245,239,230,.8);white-space:nowrap}
+.batch-table tbody tr:last-child td{border-bottom:none}
+.batch-table tbody tr:hover td{background:rgba(255,255,255,.02)}
+.batch-table .be-val{font-family:'DM Mono',monospace;font-weight:700;color:var(--al)}
+.batch-table .be-val.na{color:rgba(245,239,230,.22);font-weight:400;font-family:inherit}
+.batch-status-pill{font-size:9px;padding:3px 9px;border-radius:99px;text-transform:uppercase;letter-spacing:.3px;font-weight:700}
+.batch-status-pill.active{background:rgba(95,207,128,.1);color:var(--green)}
+.batch-status-pill.retired{background:rgba(255,255,255,.05);color:rgba(245,239,230,.35)}
+
 /* Responsive */
 @media(max-width:1000px){.metrics-grid{grid-template-columns:repeat(2,1fr)}.charts-grid{grid-template-columns:1fr}}
 @media(max-width:600px){.metrics-grid{grid-template-columns:1fr 1fr}.topbar{padding:0 16px;gap:10px}.top-title{font-size:12px}.content{padding:18px 16px 40px}}
 </style>
-  <script type="module" crossorigin src="/assets/farmAnalytics-BqVxTlk8.js"></script>
+  <script type="module" crossorigin src="/assets/farmAnalytics-ayZ0jjWn.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
   <link rel="modulepreload" crossorigin href="/assets/index-B-jIxwbw.js">
   <link rel="modulepreload" crossorigin href="/assets/admin-auth-4ZiUUGs_.js">
@@ -151,6 +163,27 @@ body{font-family:'DM Sans','Hind Siliguri',sans-serif;background:var(--g900);col
       <div class="chart-title">Outside Weather</div>
       <div class="chart-sub">Day (6am–6pm) vs night temperature &amp; humidity, farm location</div>
       <div class="chart-wrap"><canvas id="chart-weather"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Batch Performance — independent of the date-range picker above,
+       since a batch's crop cycle runs for weeks and a 7-day window would
+       show a batch mid-cycle as if it underperformed. -->
+  <div class="chart-card" style="margin-top:16px">
+    <div class="chart-title">Batch Performance</div>
+    <div class="chart-sub">Biological Efficiency (BE%) — total fresh yield ÷ dry substrate weight, per batch, all-time</div>
+    <div style="overflow-x:auto">
+      <table class="batch-table">
+        <thead>
+          <tr>
+            <th>Batch</th><th>Room</th><th>Substrate</th><th>Spawn Date</th>
+            <th>Flushes</th><th>Total Fresh</th><th>BE%</th><th>Yield / Bag</th><th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="batch-tbody">
+          <tr><td colspan="9" style="text-align:center;color:rgba(245,239,230,.3);padding:24px">Loading…</td></tr>
+        </tbody>
+      </table>
     </div>
   </div>
 

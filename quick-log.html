@@ -479,6 +479,11 @@ function formSpawn() {
           <div class="ci-txt" id="nb-batch-preview" style="display:flex;align-items:center;color:rgba(245,239,230,.5)">${S.d['nb-batch-number']||'—'}</div>
         </div>
       </div>
+      <div class="cg2" style="width:100%;max-width:460px;margin-top:10px">
+        ${sc('nb-substrate-kg','Substrate ওজন (শুকনো)','kg',0.5)}
+        ${sc('nb-bags-count','ব্যাগ সংখ্যা','টি',1)}
+      </div>
+      <div style="font-size:11px;color:rgba(245,239,230,.3);width:100%;max-width:460px;margin-top:2px">এই তথ্য দিলে পরে এই Batch-এর Efficiency (BE%) ও প্রতি ব্যাগ ফলন হিসাব করা যাবে — না দিলেও Batch তৈরি হবে, শুধু হিসাবগুলো দেখানো যাবে না</div>
     </div>
   </div>`;
 }
@@ -975,7 +980,9 @@ async function submit() {
         batch_number: S.d['nb-batch-number'],
         room: S.d['nb-room'],
         spawn_date: S.d['log-date'] || localDateStr(),
-        substrate_type: S.d['sp-substrate-type'] || null
+        substrate_type: S.d['sp-substrate-type'] || null,
+        substrate_kg: dn2('nb-substrate-kg'),
+        bags_count: dn2('nb-bags-count')
       });
       if (batchErr) throw batchErr;
     }
