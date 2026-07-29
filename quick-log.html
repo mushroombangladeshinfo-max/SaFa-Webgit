@@ -125,13 +125,6 @@ input[type="date"].date-nat::-webkit-calendar-picker-indicator{filter:invert(.7)
 .tot.exp{background:var(--red-dim);border-color:rgba(224,82,82,.2)}
 .tot.exp .tot-val{color:var(--red)}
 
-/* Stars */
-.stars{display:flex;gap:10px;justify-content:center}
-.star{font-size:36px;cursor:pointer;opacity:.22;transition:opacity .15s,transform .15s;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
-.star.on{opacity:1;transform:scale(1.1)}
-.star:active{transform:scale(.9)}
-.star-lbl{font-size:13px;color:rgba(245,239,230,.4);font-family:'Hind Siliguri',sans-serif;min-height:20px}
-
 /* Yield tag */
 .yield-tag{font-family:'DM Mono','Hind Siliguri',monospace;font-size:11px;color:var(--al);min-height:16px}
 
@@ -218,9 +211,8 @@ const S = window.S = {
   step:      0,
   d:         {},      // fieldId → value string
   rooms:     [],      // ['A','B','C']
-  rating:    0,
   phase:     {},      // stepId → 'form'  (user answered YES)
-  tog:       { contam:false, spawnBought:false, b2b:false, samples:false, opIssue:false },
+  tog:       { contam:false, spawnBought:false, b2b:false, samples:false },
   userEmail: ''
 };
 
@@ -234,8 +226,7 @@ const STEPS = [
   { id:'sales',      icon:'📦', title:'বিক্রি',              type:'yn', q:'আজকে কি বিক্রি হয়েছে?'              },
   { id:'stock',      icon:'📊', title:'Closing Stock',       type:'yn', q:'আজকের Closing Stock দিবেন?'           },
   { id:'expenses',   icon:'💰', title:'খরচের হিসাব',         type:'yn', q:'আজকে কোনো খরচ হয়েছে?'              },
-  { id:'ops',        icon:'🏭', title:'Operations',          type:'yn', q:'আজকের Operation তথ্য দিবেন?'          },
-  { id:'notes',      icon:'📝', title:'নোট ও রেটিং',        type:'yn', q:'আজকের রেটিং ও মন্তব্য দিবেন?'       },
+  { id:'notes',      icon:'📝', title:'নোট',                 type:'yn', q:'আজকের মন্তব্য দিবেন?'               },
   { id:'summary',    icon:'📋', title:'Summary',             type:'summary'                                       }
 ];
 const N = STEPS.length;
@@ -350,7 +341,7 @@ function formHarvest() {
     </div>
     <div class="divider"></div>
     <div class="sec-lbl">Batch তথ্য</div>
-    <div class="cg2">
+    <div class="cg3">
       <div class="card">
         <div class="card-lbl">Primary Batch</div>
         <input class="ci-txt" type="text" id="f-h-primary-batch" value="${S.d['h-primary-batch']||''}" placeholder="BAT-2025-001" oninput="S.d['h-primary-batch']=this.value"/>
@@ -362,6 +353,7 @@ function formHarvest() {
           ${[1,2,3,4,5].map(i=>`<option value="${i}"${S.d['h-flush-num']==i?' selected':''}>${i}ম Flush</option>`).join('')}
         </select>
       </div>
+      ${sc('h-bags-removed','চক্রের শেষে সরানো ব্যাগ','টি',1)}
     </div>
   </div>`;
 }
@@ -518,10 +510,18 @@ function formSales() {
       <div class="cg3" style="width:100%;max-width:460px">
         <div class="card">
           <div class="card-lbl">B2B Client</div>
-          <input class="ci-txt" type="text" id="f-s-b2b-name" value="${S.d['s-b2b-name']||''}" placeholder="রেস্টুরেন্ট…" oninput="S.d['s-b2b-name']=this.value"/>
+          <select class="sel-inline" id="f-s-b2b-buyer-select" onchange="onB2BBuyerChange(this)">
+            <option value="">—</option>
+            ${B2B_BUYERS.map(b => `<option value="${b.business_name}"${S.d['s-b2b-name']===b.business_name?' selected':''}>${b.business_name}${b.contact_name?` (${b.contact_name})`:''}</option>`).join('')}
+            <option value="__other__"${S.d['s-b2b-name'] && !B2B_BUYERS.some(b=>b.business_name===S.d['s-b2b-name'])?' selected':''}>অন্য কেউ…</option>
+          </select>
         </div>
         ${sc('s-b2b-qty','পরিমাণ','kg',0.1)}
         ${sc('s-b2b-value','মূল্য','৳',100)}
+      </div>
+      <div class="card" id="b2b-other-wrap" style="display:${S.d['s-b2b-name'] && !B2B_BUYERS.some(b=>b.business_name===S.d['s-b2b-name'])?'':'none'};max-width:460px;width:100%;margin-top:10px">
+        <div class="card-lbl">নাম লিখুন</div>
+        <input class="ci-txt" type="text" id="f-s-b2b-name-other" value="${S.d['s-b2b-name-other']||''}" placeholder="ব্যবসার নাম" oninput="S.d['s-b2b-name-other']=this.value; S.d['s-b2b-name']=this.value;"/>
       </div>
     </div>
     <div class="tog-row">
@@ -557,7 +557,7 @@ function formStock() {
 function formExpenses() {
   const ef = [
     ['ex-spawn','Spawn কেনা'],['ex-substrate','Substrate'],
-    ['ex-packaging','Packaging'],['ex-labor','শ্রমিকের মজুরি'],
+    ['ex-packaging','Packaging'],['ex-labor','শ্রমিকের মজুরি (মাঝে মাঝে প্রয়োজন হলে)'],
     ['ex-electricity','বিদ্যুৎ বিল'],['ex-transport','পরিবহন'],
     ['ex-water','পানি'],['ex-other','অন্যান্য']
   ];
@@ -589,37 +589,8 @@ function formExpenses() {
   </div>`;
 }
 
-function formOps() {
-  return `<div class="cards">
-    <div class="cg4">
-      ${sc('op-rooms',   'Active রুম','টি',1)}
-      ${sc('op-bags-total','মোট ব্যাগ','টি',1)}
-      ${sc('op-workers', 'কর্মী','জন',1)}
-      ${sc('op-shifts',  'Shift','টি',1)}
-    </div>
-    <div class="cg4">
-      ${sc('op-new-batches', 'নতুন Batch','টি',1)}
-      ${sc('op-done-batches','শেষ Batch','টি',1)}
-      ${sc('op-bags-removed','বাদ দেওয়া ব্যাগ','টি',1)}
-      ${sc('op-energy-kwh',  'বিদ্যুৎ','kWh',0.1)}
-    </div>
-    <div class="tog-row">
-      <span class="tog-lbl">কোনো Machine-এ সমস্যা ছিল?</span>
-      <label class="tog"><input type="checkbox" id="tog-issue" ${S.tog.opIssue?'checked':''} onchange="togC('opIssue',this)"/><span class="tog-track"></span></label>
-    </div>
-    <div class="cond${S.tog.opIssue?' show':''}" id="cond-issue">
-      <textarea class="txt" id="f-op-issue-desc" rows="3" placeholder="কোন machine, কী সমস্যা হয়েছে, ঠিক হয়েছে কিনা…" oninput="S.d['op-issue-desc']=this.value">${S.d['op-issue-desc']||''}</textarea>
-    </div>
-  </div>`;
-}
-
 function formNotes() {
-  const strs  = [1,2,3,4,5].map(i=>`<span class="star${S.rating>=i?' on':''}" data-v="${i}" onclick="setStar(${i})">⭐</span>`).join('');
-  const sLbl  = ['','খুব খারাপ','খারাপ','মোটামুটি','ভালো','অনেক ভালো'];
   return `<div class="cards">
-    <div class="sec-lbl">আজকের দিনটা কেমন ছিল?</div>
-    <div class="stars">${strs}</div>
-    <div class="star-lbl" id="star-lbl">${S.rating ? sLbl[S.rating] : 'একটা তারা বেছে নিন'}</div>
     <div class="sec-lbl">আজকের মন্তব্য / নোট</div>
     <textarea class="txt" id="f-n-observations" rows="3" placeholder="মাশরুমের অবস্থা, রঙ, গন্ধ, কোনো অস্বাভাবিক কিছু থাকলে লিখুন…" oninput="S.d['n-observations']=this.value">${S.d['n-observations']||''}</textarea>
     <div class="sec-lbl">কালকে কী করতে হবে?</div>
@@ -632,7 +603,7 @@ function formNotes() {
 const FORMS = {
   harvest:formHarvest, qc:formQC, spawn:formSpawn,
   processing:formProcessing, sales:formSales, stock:formStock,
-  expenses:formExpenses, ops:formOps, notes:formNotes
+  expenses:formExpenses, notes:formNotes
 };
 
 /* ── Build full slide HTML ── */
@@ -665,6 +636,7 @@ function buildSlide(step) {
     const exp    = ['ex-spawn','ex-substrate','ex-packaging','ex-labor','ex-electricity','ex-transport','ex-water','ex-other'].reduce((s,id)=>s+dn(id),0);
     const net    = rev - exp;
     const qcT    = dn('qc-pass')+dn('qc-fail');
+    const stockT = dn('st-fresh')+dn('st-dried')+dn('st-powder');
     const rows   = [
       ['তারিখ',       S.d['log-date']||'—',                              ''],
       ['হার্ভেস্ট রুম', S.rooms.length ? S.rooms.join(', ') : '—',         ''],
@@ -672,8 +644,7 @@ function buildSlide(step) {
       ['QC পাশ হার',  qcT>0 ? ((dn('qc-pass')/qcT)*100).toFixed(0)+'%':'—','gold'],
       ['মোট বিক্রয়', rev>0 ? fmt(rev) : '—',                             'g'],
       ['মোট খরচ',    exp>0 ? fmt(exp) : '—',                             'r'],
-      ['কর্মী',      dn('op-workers') || '—',                             ''],
-      ['রেটিং',      S.rating ? '⭐'.repeat(S.rating) : '—',              '']
+      ['ক্লোজিং স্টক', stockT>0 ? stockT.toFixed(2)+' kg' : '—',           '']
     ].map(([k,v,c])=>`<div class="sum-row"><span class="sum-k">${k}</span><span class="sum-v${c?' '+c:''}">${v}</span></div>`).join('');
     return `
       <div class="step-icon">${step.icon}</div>
@@ -807,14 +778,11 @@ function collect() {
   if (disp) S.d['log-date'] = disp.textContent;
 
   /* Toggles */
-  const tMap = { contam:'tog-contam', spawnBought:'tog-spawn', b2b:'tog-b2b', samples:'tog-samples', opIssue:'tog-issue' };
+  const tMap = { contam:'tog-contam', spawnBought:'tog-spawn', b2b:'tog-b2b', samples:'tog-samples' };
   Object.entries(tMap).forEach(([k,id]) => {
     const el = document.getElementById(id);
     if (el) S.tog[k] = el.checked;
   });
-
-  /* Rating */
-  if (S.rating) S.d['n-overall-rating'] = String(S.rating);
 }
 
 /* ── Interactive helpers ── */
@@ -827,10 +795,21 @@ window.togRoom = function(r) {
 
 window.togC = function(key, el) {
   S.tog[key] = el.checked;
-  const map = { contam:'cond-contam', spawnBought:'cond-spawn', b2b:'cond-b2b', samples:'cond-samples', opIssue:'cond-issue' };
+  const map = { contam:'cond-contam', spawnBought:'cond-spawn', b2b:'cond-b2b', samples:'cond-samples' };
   const c = document.getElementById(map[key]);
   if (c) c.classList.toggle('show', el.checked);
   if (key === 'spawnBought') calcSpn();
+};
+
+window.onB2BBuyerChange = function(sel) {
+  const otherWrap = document.getElementById('b2b-other-wrap');
+  if (sel.value === '__other__') {
+    otherWrap.style.display = '';
+    S.d['s-b2b-name'] = S.d['s-b2b-name-other'] || '';
+  } else {
+    otherWrap.style.display = 'none';
+    S.d['s-b2b-name'] = sel.value;
+  }
 };
 
 window.editDate = function() {
@@ -846,14 +825,6 @@ window.dateChanged = function() {
   document.getElementById('date-disp').textContent = n.value;
   n.style.display  = 'none';
   document.getElementById('date-chip').style.display = '';
-};
-
-window.setStar = function(v) {
-  S.rating = v;
-  document.querySelectorAll('.star').forEach(s => s.classList.toggle('on', +s.dataset.v <= v));
-  const lbl = ['','খুব খারাপ','খারাপ','স্বাভাবিক','ভালো','চমৎকার'];
-  const el = document.getElementById('star-lbl');
-  if (el) el.textContent = lbl[v];
 };
 
 /* ── Toast ── */
@@ -881,6 +852,7 @@ async function submit() {
     harvest_healthy_kg:dn2('h-healthy-kg'), harvest_recovered_kg:dn2('h-recovered-kg'),
     harvest_rooms: S.rooms.length ? S.rooms : null,
     harvest_primary_batch:ds('h-primary-batch'), harvest_flush_num:dn2('h-flush-num'),
+    harvest_bags_removed:dn2('h-bags-removed'),
     qc_pass:dn2('qc-pass'), qc_fail:dn2('qc-fail'), qc_fail_reason:ds('qc-fail-reason'),
     contam_event:S.tog.contam, contam_room:ds('qc-contam-room'), contam_type:ds('qc-contam-type'), contam_bags:dn2('qc-contam-bags'), contam_action:ds('qc-contam-action'),
     spawn_bought_kg:dn2('sp-bought-kg'), spawn_price_per_kg:dn2('sp-price-per-kg'), spawn_supplier:ds('sp-supplier'),
@@ -901,11 +873,6 @@ async function submit() {
     ex_water:dn2('ex-water'), ex_other:dn2('ex-other'), ex_notes:ds('ex-notes'),
     online_packaging_cost:dn2('ex-online-packaging'), online_delivery_cost:dn2('ex-online-delivery'),
     offline_packaging_cost:dn2('ex-offline-packaging'), offline_delivery_cost:dn2('ex-offline-delivery'),
-    op_rooms:dn2('op-rooms'), op_bags_total:dn2('op-bags-total'), op_workers:dn2('op-workers'),
-    op_shifts:dn2('op-shifts'), op_new_batches:dn2('op-new-batches'), op_done_batches:dn2('op-done-batches'),
-    op_bags_removed:dn2('op-bags-removed'), op_energy_kwh:dn2('op-energy-kwh'),
-    op_issue:S.tog.opIssue, op_issue_desc:ds('op-issue-desc'),
-    n_overall_rating:dn2('n-overall-rating'),
     n_observations:ds('n-observations'), n_tomorrow:ds('n-tomorrow'), n_unusual:ds('n-unusual'),
   };
 
@@ -969,6 +936,16 @@ async function prefill() {
   } catch(_) { /* silent — defaults already set */ }
 }
 
+/* Known B2B buyers, for the Sales step's dropdown — replaces a free-text
+   field that let the same buyer's name drift across spellings. */
+let B2B_BUYERS = [];
+async function loadB2BBuyers() {
+  try {
+    const { data } = await sb.from('b2b_pipeline').select('business_name,contact_name').eq('status','won');
+    B2B_BUYERS = data || [];
+  } catch(_) { /* silent — dropdown falls back to Other/free-text only */ }
+}
+
 /* ── Swipe gesture (horizontal swipe = next/back) ── */
 let _tx = 0, _ty = 0;
 document.getElementById('wrap').addEventListener('touchstart', e => {
@@ -1002,7 +979,7 @@ document.getElementById('hdr-back').style.visibility = 'hidden';
   S.d['s-fresh-price']    = '350';
   S.d['s-dried-price']    = '2800';
   S.d['s-powder-price']   = '3500';
-  await prefill();
+  await Promise.all([prefill(), loadB2BBuyers()]);
 
   // Clear loading skeleton, then render first step
   document.getElementById('wrap').innerHTML = '';
