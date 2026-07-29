@@ -5,16 +5,15 @@
 // Summarizes the prior Saturday–Thursday (the standard Bangladesh business
 // week) from v_kpi_daily: fresh harvest kg, farm sales, online sales, total
 // sales, and total cost — then emails all admins (always) and best-effort
-// WhatsApps both founders (only once a WhatsApp Business template is
-// approved and WA_ACCESS_TOKEN/WA_PHONE_NUMBER_ID secrets are set — until
-// then this silently no-ops so it never blocks the email).
+// WhatsApps both founders via CallMeBot (only once each founder's personal
+// CALLMEBOT_KEY_* secret is set — until then this silently no-ops so it
+// never blocks the email).
 
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 
 const RESEND_API = 'https://api.resend.com/emails';
 const FROM_NAME  = 'SaFa Naturals';
 const FROM_EMAIL = 'onboarding@resend.dev';
-const WA_API_URL = 'https://graph.facebook.com/v20.0';
 
 // Same drift-risk caveat as the other hand-maintained admin-email copies
 // (src/admin-auth.js, public.is_admin()) — update all of them together.
@@ -24,10 +23,6 @@ const ADMIN_EMAILS = [
   'abrarfahim.nsu@gmail.com',
   'sunnymarjuk@gmail.com',
 ];
-
-// Founders' personal WhatsApp numbers — Cloud API can only send 1:1, never
-// into a group, so both get their own message.
-const WA_RECIPIENTS = ['8801970099378', '8801681884371'];
 
 function fmt(n: number) {
   return '৳' + Math.round(n || 0).toLocaleString('en');
@@ -123,53 +118,55 @@ async function sendEmail(startDate: string, endDate: string, t: Totals): Promise
   return { ok: res.ok, detail: result };
 }
 
-// Best-effort — swallows failures (e.g. missing secrets, unapproved
-// template) so a WhatsApp problem never blocks the email, which is the
-// channel that actually works today.
+function buildWaMessage(startDate: string, endDate: string, t: Totals): string {
+  return [
+    `📊 SaFa Naturals — Weekly Report`,
+    `${displayDate(startDate)} – ${displayDate(endDate)}`,
+    '─────────────────────',
+    `🌱 Fresh Harvest: ${t.harvestKg.toFixed(1)} kg`,
+    `💰 Farm Sales: ${fmt(t.farmRevenue)}`,
+    `🛒 Online Sales: ${fmt(t.webRevenue)}`,
+    `📈 Total Sales: ${fmt(t.totalSales)}`,
+    `💸 Total Cost: ${fmt(t.totalCost)}`,
+    `✅ Net: ${fmt(t.net)}`,
+  ].join('\n');
+}
+
+// Best-effort — swallows failures (e.g. a recipient hasn't activated their
+// CallMeBot key yet) so a WhatsApp problem never blocks the email, which is
+// the channel that actually works today.
+//
+// Uses CallMeBot (api.callmebot.com) instead of Meta's WhatsApp Business
+// Cloud API — same free relay service checkout.html already wires up for
+// seller order alerts (currently dormant there too, blank key). No Meta
+// Business verification, no message-template approval, plain free-form
+// text — just a personal API key per recipient, each obtained by that
+// person messaging CallMeBot's own WhatsApp number once. Each key only
+// works to message the phone number that generated it, so each founder
+// needs their own secret.
+const CALLMEBOT_RECIPIENTS = [
+  { phone: '8801970099378', keyEnv: 'CALLMEBOT_KEY_FAHIM' },
+  { phone: '8801681884371', keyEnv: 'CALLMEBOT_KEY_SUNNY' },
+];
+
 async function sendWhatsApp(startDate: string, endDate: string, t: Totals): Promise<{ ok: boolean; detail: unknown }[]> {
-  const WA_ACCESS_TOKEN    = Deno.env.get('WA_ACCESS_TOKEN');
-  const WA_PHONE_NUMBER_ID = Deno.env.get('WA_PHONE_NUMBER_ID');
-  if (!WA_ACCESS_TOKEN || !WA_PHONE_NUMBER_ID) {
-    console.log('WhatsApp skipped: WA_ACCESS_TOKEN / WA_PHONE_NUMBER_ID not configured yet');
-    return [{ ok: false, detail: 'not configured' }];
-  }
-
-  const payloadFor = (to: string) => ({
-    messaging_product: 'whatsapp',
-    to,
-    type: 'template',
-    template: {
-      name: 'weekly_farm_report',
-      language: { code: 'en' },
-      components: [{
-        type: 'body',
-        parameters: [
-          { type: 'text', text: displayDate(startDate) },
-          { type: 'text', text: displayDate(endDate) },
-          { type: 'text', text: t.harvestKg.toFixed(1) + ' kg' },
-          { type: 'text', text: fmt(t.farmRevenue) },
-          { type: 'text', text: fmt(t.webRevenue) },
-          { type: 'text', text: fmt(t.totalSales) },
-          { type: 'text', text: fmt(t.totalCost) },
-          { type: 'text', text: fmt(t.net) },
-        ],
-      }],
-    },
-  });
-
+  const msg = buildWaMessage(startDate, endDate, t);
   const results = [];
-  for (const to of WA_RECIPIENTS) {
+
+  for (const { phone, keyEnv } of CALLMEBOT_RECIPIENTS) {
+    const apiKey = Deno.env.get(keyEnv);
+    if (!apiKey) {
+      console.log(`WhatsApp skipped for ${phone}: ${keyEnv} not configured yet`);
+      results.push({ ok: false, detail: `${keyEnv} not configured` });
+      continue;
+    }
     try {
-      const res = await fetch(`${WA_API_URL}/${WA_PHONE_NUMBER_ID}/messages`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${WA_ACCESS_TOKEN}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify(payloadFor(to)),
-      });
-      const result = await res.json();
-      if (!res.ok) console.error(`WhatsApp API error for ${to}:`, JSON.stringify(result));
-      results.push({ ok: res.ok, detail: result });
+      const res = await fetch(`https://api.callmebot.com/whatsapp.php?phone=${phone}&text=${encodeURIComponent(msg)}&apikey=${apiKey}`);
+      const detail = await res.text();
+      if (!res.ok) console.error(`CallMeBot error for ${phone}:`, detail);
+      results.push({ ok: res.ok, detail });
     } catch (err) {
-      console.error(`WhatsApp send threw for ${to}:`, err);
+      console.error(`CallMeBot send threw for ${phone}:`, err);
       results.push({ ok: false, detail: String(err) });
     }
   }
