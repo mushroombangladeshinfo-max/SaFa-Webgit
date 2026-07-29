@@ -108,6 +108,15 @@ input[type="date"].date-nat::-webkit-calendar-picker-indicator{filter:invert(.7)
 .txt:focus{border-color:rgba(196,154,60,.4)}
 .txt::placeholder{color:rgba(245,239,230,.2)}
 
+/* Repeatable harvest entries (one per batch harvested that day) */
+.he-block{width:100%;max-width:460px;display:flex;flex-direction:column;gap:8px}
+.he-head{display:flex;justify-content:space-between;align-items:center;width:100%}
+.he-title{font-size:10px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--al)}
+.he-remove{background:none;border:none;color:var(--red);font-size:11px;cursor:pointer;padding:2px 4px}
+.he-sep{height:1px;background:rgba(255,255,255,.07);width:100%;max-width:460px;margin:2px 0}
+.he-add{background:rgba(217,178,84,.08);border:1px dashed rgba(217,178,84,.35);color:var(--al);border-radius:var(--r2);padding:10px;font-size:12px;font-weight:700;width:100%;max-width:460px;cursor:pointer;transition:all .15s}
+.he-add:active{transform:scale(.98)}
+
 /* Total rows */
 .tot{background:rgba(95,207,128,.07);border:1px solid rgba(95,207,128,.18);border-radius:8px;padding:10px 14px;display:flex;justify-content:space-between;align-items:baseline;width:100%;max-width:460px}
 .tot-lbl{font-size:11px;color:rgba(245,239,230,.45)}
@@ -203,7 +212,13 @@ const S = window.S = {
   rooms:     [],      // ['A','B','C']
   phase:     {},      // stepId → 'form'  (user answered YES)
   tog:       { spawnBought:false, newBatch:false, b2b:false, samples:false, fnf:false },
-  userEmail: ''
+  userEmail: '',
+  // One harvest can span multiple batches/rooms in a day — each id here is
+  // a stable suffix for that entry's fields (h-fresh-a-0, h-batch-1, etc.),
+  // never reused after removal, so a removed entry's fields never collide
+  // with a later one.
+  harvestEntryIds:     [0],
+  harvestEntryNextId:  1
 };
 
 /* ── Step definitions ── */
@@ -269,7 +284,7 @@ window.lc = function(calc) {
 };
 
 function calcH() {
-  const t = dn('h-fresh-a') + dn('h-fresh-rej');
+  const t = S.harvestEntryIds.reduce((s,idx) => s + dn('h-fresh-a-'+idx) + dn('h-fresh-rej-'+idx), 0);
   const el = document.getElementById('ht-tot');
   if (el) el.textContent = t.toFixed(2) + ' kg';
 }
@@ -308,41 +323,70 @@ function calcSpn() {
 }
 
 /* ── Section form builders ── */
-function formHarvest() {
-  return `<div class="cards">
-    <div class="sec-lbl">তাজা মাশরুম (kg)</div>
-    <div class="cg3">
-      ${sc('h-fresh-a',  'Grade A',  'kg', 0.1, 'h')}
-      ${sc('h-fresh-rej','বাতিল',    'kg', 0.1, 'h')}
+// One entry per batch actually harvested that day — most days are one
+// entry, but a day spanning two rooms just adds a second block instead of
+// blending both rooms' kg into one number or losing one batch's credit
+// entirely (see migration 20_harvest_entries.sql).
+function harvestEntryBlock(idx) {
+  const bId = 'h-batch-'+idx, fId = 'h-flush-'+idx;
+  return `<div class="he-block">
+    <div class="he-head">
+      <span class="he-title">হার্ভেস্ট এন্ট্রি ${idx+1}</span>
+      ${S.harvestEntryIds.length > 1 ? `<button type="button" class="he-remove" onclick="removeHarvestEntry(${idx})">✕ সরান</button>` : ''}
     </div>
-    <div class="tot"><span class="tot-lbl">মোট তাজা</span><span class="tot-val" id="ht-tot">0.00 kg</span></div>
-    <div class="divider"></div>
-    <div class="sec-lbl">হার্ভেস্ট উৎস</div>
-    <div class="cg2">
-      ${sc('h-healthy-kg','সুস্থ ব্যাগ থেকে','kg',0.01)}
-      ${sc('h-recovered-kg','মোল্ড থেকে উদ্ধারকৃত','kg',0.01)}
-    </div>
-    <div class="divider"></div>
-    <div class="sec-lbl">Batch তথ্য</div>
     <div class="cg3">
       <div class="card">
         <div class="card-lbl">Batch</div>
-        <select class="sel-inline" id="f-h-primary-batch" onchange="onHarvestBatchChange(this)">
+        <select class="sel-inline" id="f-${bId}" onchange="S.d['${bId}']=this.value; recomputeRooms();">
           <option value="">—</option>
-          ${ACTIVE_BATCHES.map(b=>`<option value="${b.batch_number}"${S.d['h-primary-batch']===b.batch_number?' selected':''}>${b.batch_number} (Room ${b.room})</option>`).join('')}
+          ${ACTIVE_BATCHES.map(b=>`<option value="${b.batch_number}"${S.d[bId]===b.batch_number?' selected':''}>${b.batch_number} (Room ${b.room})</option>`).join('')}
         </select>
       </div>
       <div class="card">
         <div class="card-lbl">Flush নম্বর</div>
-        <select class="sel-inline" id="f-h-flush-num" onchange="S.d['h-flush-num']=this.value">
+        <select class="sel-inline" id="f-${fId}" onchange="S.d['${fId}']=this.value">
           <option value="">—</option>
-          ${[1,2,3,4,5].map(i=>`<option value="${i}"${S.d['h-flush-num']==i?' selected':''}>${i}ম Flush</option>`).join('')}
+          ${[1,2,3,4,5].map(i=>`<option value="${i}"${S.d[fId]==i?' selected':''}>${i}ম Flush</option>`).join('')}
         </select>
       </div>
-      ${sc('h-bags-removed','চক্রের শেষে সরানো ব্যাগ','টি',1)}
+      ${sc('h-bags-removed-'+idx,'সরানো ব্যাগ','টি',1)}
+    </div>
+    <div class="cg2">
+      ${sc('h-fresh-a-'+idx,  'Grade A',  'kg', 0.1, 'h')}
+      ${sc('h-fresh-rej-'+idx,'বাতিল',    'kg', 0.1, 'h')}
+    </div>
+    <div class="cg2">
+      ${sc('h-healthy-kg-'+idx,'সুস্থ ব্যাগ থেকে','kg',0.01)}
+      ${sc('h-recovered-kg-'+idx,'মোল্ড থেকে উদ্ধারকৃত','kg',0.01)}
     </div>
   </div>`;
 }
+
+function renderHarvestEntries() {
+  return S.harvestEntryIds.map(idx => harvestEntryBlock(idx)).join('<div class="he-sep"></div>');
+}
+
+function formHarvest() {
+  return `<div class="cards">
+    <div id="harvest-entries">${renderHarvestEntries()}</div>
+    <button type="button" class="he-add" onclick="addHarvestEntry()">+ আরেকটি Batch-এর Harvest যোগ করুন</button>
+    <div class="tot"><span class="tot-lbl">মোট তাজা (সব Batch)</span><span class="tot-val" id="ht-tot">0.00 kg</span></div>
+  </div>`;
+}
+
+window.addHarvestEntry = function() {
+  collect();
+  S.harvestEntryIds.push(S.harvestEntryNextId++);
+  document.getElementById('harvest-entries').innerHTML = renderHarvestEntries();
+  calcH();
+};
+window.removeHarvestEntry = function(idx) {
+  collect();
+  S.harvestEntryIds = S.harvestEntryIds.filter(i => i !== idx);
+  document.getElementById('harvest-entries').innerHTML = renderHarvestEntries();
+  calcH();
+  recomputeRooms();
+};
 
 function formQC() {
   return `<div class="cards">
@@ -626,7 +670,7 @@ function buildSlide(step) {
 
   /* Summary step */
   if (step.type === 'summary') {
-    const freshT = dn('h-fresh-a')+dn('h-fresh-rej');
+    const freshT = S.harvestEntryIds.reduce((s,idx) => s + dn('h-fresh-a-'+idx) + dn('h-fresh-rej-'+idx), 0);
     const rev    = dn('s-fresh-kg')*dn('s-fresh-price') + dn('s-dried-kg')*dn('s-dried-price') + dn('s-powder-kg')*dn('s-powder-price');
     const exp    = ['ex-spawn','ex-substrate','ex-packaging','ex-labor','ex-electricity','ex-transport','ex-water','ex-other'].reduce((s,id)=>s+dn(id),0);
     const net    = rev - exp;
@@ -785,8 +829,10 @@ function collect() {
 // entries from an earlier selection the user has since changed.
 window.recomputeRooms = function() {
   const set = new Set();
-  const batch = ACTIVE_BATCHES.find(b => b.batch_number === S.d['h-primary-batch']);
-  if (batch) set.add(batch.room);
+  S.harvestEntryIds.forEach(idx => {
+    const batch = ACTIVE_BATCHES.find(b => b.batch_number === S.d['h-batch-'+idx]);
+    if (batch) set.add(batch.room);
+  });
   if (S.d['nb-room']) set.add(S.d['nb-room']);
   const cr = S.d['qc-contam-room'];
   if (cr && cr !== 'multiple') set.add(cr);
@@ -822,14 +868,6 @@ window.onNewBatchRoomChange = async function(sel) {
   preview.textContent = batchNumber;
   S.d['nb-room'] = room;
   S.d['nb-batch-number'] = batchNumber;
-  recomputeRooms();
-};
-
-/* Picking a batch already tells you the room (it's in the batch number
-   itself) — harvest_rooms derives from it automatically via
-   recomputeRooms() instead of being separately re-selected. */
-window.onHarvestBatchChange = function(sel) {
-  S.d['h-primary-batch'] = sel.value;
   recomputeRooms();
 };
 
@@ -871,19 +909,43 @@ function toast(msg, type='info') {
 }
 
 /* ── Submit to Supabase ── */
+function sumEntries(prefix) {
+  return S.harvestEntryIds.reduce((s,idx) => s + dn(prefix+'-'+idx), 0);
+}
+
 async function submit() {
   collect();
   const btn = document.getElementById('btn-next');
   btn.disabled = true; btn.textContent = 'Submit হচ্ছে…';
 
+  const logDate = S.d['log-date'] || localDateStr();
+
+  // One row per batch actually harvested — the entry-level detail behind
+  // the daily sums below (migration 20_harvest_entries.sql). Only entries
+  // with a batch or any non-zero number are kept, so an extra blank "add"
+  // row someone backs out of doesn't insert an empty entry.
+  const harvestEntryRows = S.harvestEntryIds.map(idx => {
+    const batchNumber = ds('h-batch-'+idx);
+    const batch = ACTIVE_BATCHES.find(b => b.batch_number === batchNumber);
+    return {
+      log_date:     logDate,
+      batch_number: batchNumber || null,
+      room:         batch ? batch.room : null,
+      flush_num:    dn2('h-flush-'+idx),
+      fresh_a_kg:   dn2('h-fresh-a-'+idx),
+      fresh_rej_kg: dn2('h-fresh-rej-'+idx),
+      healthy_kg:   dn2('h-healthy-kg-'+idx),
+      recovered_kg: dn2('h-recovered-kg-'+idx),
+      bags_removed: dn2('h-bags-removed-'+idx),
+    };
+  }).filter(e => e.batch_number || e.fresh_a_kg || e.fresh_rej_kg || e.healthy_kg || e.recovered_kg || e.bags_removed);
+
   const payload = {
-    log_date: S.d['log-date'] || localDateStr(),
+    log_date: logDate,
     submitted_by: S.userEmail || null,
-    harvest_fresh_a:dn2('h-fresh-a'), harvest_fresh_rej:dn2('h-fresh-rej'),
-    harvest_healthy_kg:dn2('h-healthy-kg'), harvest_recovered_kg:dn2('h-recovered-kg'),
+    harvest_fresh_a:sumEntries('h-fresh-a'), harvest_fresh_rej:sumEntries('h-fresh-rej'),
+    harvest_healthy_kg:sumEntries('h-healthy-kg'), harvest_recovered_kg:sumEntries('h-recovered-kg'),
     harvest_rooms: S.rooms.length ? S.rooms : null,
-    harvest_primary_batch:ds('h-primary-batch'), harvest_flush_num:dn2('h-flush-num'),
-    harvest_bags_removed:dn2('h-bags-removed'),
     contam_event:S.phase['qc']==='form', contam_room:ds('qc-contam-room'), contam_type:ds('qc-contam-type'), contam_bags:dn2('qc-contam-bags'), contam_action:ds('qc-contam-action'),
     spawn_bought_kg:dn2('sp-bought-kg'), spawn_price_per_kg:dn2('sp-price-per-kg'), spawn_supplier:ds('sp-supplier'),
     spawn_used_kg:dn2('sp-used-kg'), substrate_kg:dn2('sp-substrate-kg'), substrate_type:ds('sp-substrate-type'),
@@ -920,6 +982,17 @@ async function submit() {
 
     const { error } = await sb.from('farm_daily_logs').upsert(payload, { onConflict:'log_date' });
     if (error) throw error;
+
+    // Replace this day's harvest_entries wholesale — matches the same
+    // fully-re-editable-per-day model the farm_daily_logs upsert already
+    // uses, so resubmitting a day (e.g. fixing a number) doesn't duplicate
+    // or leave orphaned rows from an earlier submit.
+    const { error: delErr } = await sb.from('harvest_entries').delete().eq('log_date', logDate);
+    if (delErr) throw delErr;
+    if (harvestEntryRows.length) {
+      const { error: heErr } = await sb.from('harvest_entries').insert(harvestEntryRows);
+      if (heErr) throw heErr;
+    }
 
     /* Success screen */
     document.getElementById('ftr').style.display = 'none';
