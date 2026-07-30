@@ -384,6 +384,12 @@
         <div class="chart-wrap tall"><canvas id="chart-channel-rev"></canvas></div>
       </div>
 
+      <div class="chart-card mb-16">
+        <div class="chart-card-title">Supply &amp; Demand</div>
+        <div class="chart-card-sub">Daily fresh harvest (kg) against online revenue and ad spend (৳) — is online capped by supply, and does ad spend track what's actually available?</div>
+        <div class="chart-wrap tall"><canvas id="chart-supply-demand"></canvas></div>
+      </div>
+
       <div class="table-card mb-lg">
         <div class="table-toolbar"><span class="table-title">Channel P&amp;L Detail</span></div>
         <div class="scroll-x">
@@ -414,6 +420,12 @@
           </div>
           <div class="chart-wrap short"><canvas id="chart-samples"></canvas></div>
         </div>
+      </div>
+
+      <div class="chart-card mb-16">
+        <div class="chart-card-title">Harvest by Room</div>
+        <div class="chart-card-sub">Weekly fresh kg per room — Room B is currently the mold-recovery room, Room A the clean room, per current policy</div>
+        <div class="chart-wrap"><canvas id="chart-room-yield"></canvas></div>
       </div>
 
       <div class="table-card">
@@ -1208,11 +1220,14 @@ Use the actual numbers. Keep it under 350 words. No preamble.`;
        samples, and supplier health. */
     async function loadOperations() {
       const [{ data: chPnl, error: e1 }, { data: harvest, error: e2 },
-             { data: samples, error: e3 }, { data: suppliers, error: e4 }] = await Promise.all([
+             { data: samples, error: e3 }, { data: suppliers, error: e4 },
+             { data: supplyDemand, error: e5 }, { data: roomYield, error: e6 }] = await Promise.all([
         sb.from('v_channel_pnl_monthly').select('*').order('month').limit(24),
         sb.from('v_harvest_source_monthly').select('*').order('month').limit(24),
         sb.from('v_marketing_samples_monthly').select('*').order('month').limit(24),
         sb.from('v_supplier_scorecard').select('*').order('total_spent', { ascending: false }),
+        sb.from('v_supply_demand_daily').select('*').order('day').limit(90),
+        sb.from('v_room_yield_weekly').select('*').order('week').limit(52),
       ]);
       if (checkSetupError(e1) || checkSetupError(e2) || checkSetupError(e3) || checkSetupError(e4)) return;
 
@@ -1253,6 +1268,33 @@ Use the actual numbers. Keep it under 350 words. No preamble.`;
                     y: { grid: GRID, ticks: { callback: (v) => '৳' + (v >= 1000 ? (v/1000) + 'k' : v) } } } },
       });
 
+      /* Supply & Demand — harvest kg (bar, left axis) against online
+         revenue + ad spend (lines, right axis, both ৳ so they share one
+         axis cleanly). Answers "is online capped by supply" and "does ad
+         spend track actual harvest" in one view. */
+      const sdRows = supplyDemand || [];
+      makeChart('chart-supply-demand', {
+        type: 'bar',
+        data: { labels: sdRows.map(r => r.day.slice(5)), datasets: [
+          { type: 'bar', label: 'Harvest (kg)', data: sdRows.map(r => Number(r.harvest_kg)||0),
+            backgroundColor: 'rgba(25,158,112,.55)', borderRadius: 3, maxBarThickness: 10, yAxisID: 'ykg' },
+          { type: 'line', label: 'Online Revenue', data: sdRows.map(r => Number(r.online_revenue)||0),
+            borderColor: '#3987e5', backgroundColor: '#3987e5', tension: .3, pointRadius: 0, borderWidth: 2, yAxisID: 'ybdt' },
+          { type: 'line', label: 'Ad Spend', data: sdRows.map(r => Number(r.ad_spend)||0),
+            borderColor: '#c98500', backgroundColor: '#c98500', borderDash: [4,3], tension: .3, pointRadius: 0, borderWidth: 2, yAxisID: 'ybdt' },
+        ]},
+        options: { responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { labels: { boxWidth: 10, boxHeight: 10, usePointStyle: true } },
+                     tooltip: { callbacks: { label: (c) => c.dataset.yAxisID === 'ykg'
+                       ? ` ${c.dataset.label}: ${(c.parsed.y||0).toFixed(2)} kg`
+                       : ` ${c.dataset.label}: ${fmt(c.parsed.y)}` } } },
+          scales: {
+            x: { grid: { display: false } },
+            ykg:  { position: 'left',  grid: GRID, ticks: { callback: (v) => v + ' kg' } },
+            ybdt: { position: 'right', grid: { display: false }, ticks: { callback: (v) => '৳' + (v >= 1000 ? (v/1000) + 'k' : v) } },
+          } },
+      });
+
       /* Channel P&L detail table */
       document.getElementById('ops-pnl-tbody').innerHTML = pnlRows.length
         ? pnlRows.slice().reverse().map(r => {
@@ -1284,6 +1326,29 @@ Use the actual numbers. Keep it under 350 words. No preamble.`;
         options: { responsive: true, maintainAspectRatio: false,
           plugins: { legend: { labels: { boxWidth: 10, boxHeight: 10, usePointStyle: true } },
                      tooltip: { callbacks: { label: (c) => ` ${c.dataset.label}: ${(c.parsed.y||0).toFixed(1)} kg` } } },
+          scales: { x: { stacked: true, grid: { display: false } },
+                    y: { stacked: true, grid: GRID, ticks: { callback: (v) => v + ' kg' } } } },
+      });
+
+      /* Harvest by room — weekly stacked bar, one series per room seen in
+         the data (usually A/B, C joins automatically once it's in use) */
+      const ryRows = roomYield || [];
+      const weeks = [...new Set(ryRows.map(r => r.week))].sort();
+      const rooms = [...new Set(ryRows.map(r => r.room))].sort();
+      const roomColor = { A: '#199e70', B: '#c98500', C: '#3987e5' };
+      makeChart('chart-room-yield', {
+        type: 'bar',
+        data: { labels: weeks.map(w => w.slice(5)), datasets: rooms.map(room => ({
+          label: `Room ${room}`,
+          data: weeks.map(w => {
+            const row = ryRows.find(r => r.week === w && r.room === room);
+            return row ? Number(row.total_kg)||0 : 0;
+          }),
+          backgroundColor: roomColor[room] || '#9085e9', borderRadius: 3, maxBarThickness: 20, stack: 's',
+        })) },
+        options: { responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { labels: { boxWidth: 10, boxHeight: 10, usePointStyle: true } },
+                     tooltip: { callbacks: { label: (c) => ` ${c.dataset.label}: ${(c.parsed.y||0).toFixed(2)} kg` } } },
           scales: { x: { stacked: true, grid: { display: false } },
                     y: { stacked: true, grid: GRID, ticks: { callback: (v) => v + ' kg' } } } },
       });
@@ -1335,7 +1400,7 @@ Use the actual numbers. Keep it under 350 words. No preamble.`;
 
     injectRealtimeStyles();
     subscribeRealtime(sb, 'insights-live',
-      ['orders', 'farm_daily_logs', 'one_off_expenses', 'marketing_metrics', 'spawn_purchases', 'b2b_pipeline'],
+      ['orders', 'farm_daily_logs', 'one_off_expenses', 'marketing_metrics', 'spawn_purchases', 'b2b_pipeline', 'batches', 'harvest_entries'],
       refreshAll,
       { indicatorId: 'rt-indicator' });
   </script>

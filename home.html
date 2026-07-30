@@ -608,6 +608,22 @@
       });
     }
 
+    /* ── Active batches, for the AI assistant's snapshot — so a question
+       like "how's Batch 1 doing" has real data to answer from, instead of
+       just the farm-wide 30-day totals above. */
+    async function loadBatches() {
+      const { data, error } = await sb.from('v_batch_yield')
+        .select('batch_number,room,be_pct,total_fresh_kg,flush_count,status')
+        .eq('status', 'active').order('be_pct', { ascending: false, nullsFirst: false });
+      if (error || !data) { dash.batches = []; return; }
+      dash.batches = data.map(b => ({
+        batch: b.batch_number, room: b.room,
+        be_pct: b.be_pct != null ? Number(b.be_pct) : null,
+        total_fresh_kg: Number(b.total_fresh_kg) || 0,
+        flush_count: b.flush_count,
+      }));
+    }
+
     /* ── Today's weather chip — glanceable only; full trend lives on
        farm-analytics.html, which is what the chip links to. ── */
     async function loadWeather() {
@@ -905,7 +921,7 @@
     /* ── Load everything ── */
     async function reloadAll() {
       attentionItems.length = 0;
-      await Promise.all([loadB2B(), loadSuppliers(), loadStock(), loadFarm(), loadMarketing(), loadHarvestVsSold(), loadB2C(), loadWeather(), loadWeatherChart()]);
+      await Promise.all([loadB2B(), loadSuppliers(), loadStock(), loadFarm(), loadBatches(), loadMarketing(), loadHarvestVsSold(), loadB2C(), loadWeather(), loadWeatherChart()]);
       renderAttention();
     }
     await reloadAll();
@@ -915,7 +931,7 @@
        requiring a manual reload — this is the main "at a glance" page. ── */
     injectRealtimeStyles();
     subscribeRealtime(sb, 'home-live',
-      ['orders', 'products', 'farm_daily_logs', 'one_off_expenses', 'b2b_pipeline', 'spawn_purchases'],
+      ['orders', 'products', 'farm_daily_logs', 'one_off_expenses', 'b2b_pipeline', 'spawn_purchases', 'batches', 'harvest_entries'],
       reloadAll,
       { indicatorId: 'rt-indicator' });
 

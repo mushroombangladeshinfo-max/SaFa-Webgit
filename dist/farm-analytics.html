@@ -83,7 +83,7 @@ body{font-family:'DM Sans','Hind Siliguri',sans-serif;background:var(--g900);col
 @media(max-width:1000px){.metrics-grid{grid-template-columns:repeat(2,1fr)}.charts-grid{grid-template-columns:1fr}}
 @media(max-width:600px){.metrics-grid{grid-template-columns:1fr 1fr}.topbar{padding:0 16px;gap:10px}.top-title{font-size:12px}.content{padding:18px 16px 40px}}
 </style>
-  <script type="module" crossorigin src="/assets/farmAnalytics-ayZ0jjWn.js"></script>
+  <script type="module" crossorigin src="/assets/farmAnalytics-Dg9-lUke.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
   <link rel="modulepreload" crossorigin href="/assets/index-B-jIxwbw.js">
   <link rel="modulepreload" crossorigin href="/assets/admin-auth-4ZiUUGs_.js">
@@ -164,6 +164,18 @@ body{font-family:'DM Sans','Hind Siliguri',sans-serif;background:var(--g900);col
       <div class="chart-sub">Day (6am–6pm) vs night temperature &amp; humidity, farm location</div>
       <div class="chart-wrap"><canvas id="chart-weather"></canvas></div>
     </div>
+    <!-- Harvest allocation — offline destinations only, see chart-sub -->
+    <div class="chart-card">
+      <div class="chart-title">Harvest Allocation</div>
+      <div class="chart-sub">Weekly kg by offline destination — retail, B2B, FnF, samples, waste. Online sales are tracked separately in ৳ (Insights → Operations).</div>
+      <div class="chart-wrap"><canvas id="chart-allocation"></canvas></div>
+    </div>
+    <!-- Contamination vs outside temperature -->
+    <div class="chart-card">
+      <div class="chart-title">Contamination vs Temperature</div>
+      <div class="chart-sub">Weekly bags affected vs average day temperature (°C)</div>
+      <div class="chart-wrap"><canvas id="chart-contam-temp"></canvas></div>
+    </div>
   </div>
 
   <!-- Batch Performance — independent of the date-range picker above,
@@ -172,6 +184,7 @@ body{font-family:'DM Sans','Hind Siliguri',sans-serif;background:var(--g900);col
   <div class="chart-card" style="margin-top:16px">
     <div class="chart-title">Batch Performance</div>
     <div class="chart-sub">Biological Efficiency (BE%) — total fresh yield ÷ dry substrate weight, per batch, all-time</div>
+    <div class="chart-wrap" style="margin-bottom:16px"><canvas id="chart-be"></canvas></div>
     <div style="overflow-x:auto">
       <table class="batch-table">
         <thead>

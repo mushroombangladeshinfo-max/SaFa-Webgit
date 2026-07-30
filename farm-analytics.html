@@ -157,6 +157,18 @@ body{font-family:'DM Sans','Hind Siliguri',sans-serif;background:var(--g900);col
       <div class="chart-sub">Day (6am–6pm) vs night temperature &amp; humidity, farm location</div>
       <div class="chart-wrap"><canvas id="chart-weather"></canvas></div>
     </div>
+    <!-- Harvest allocation — offline destinations only, see chart-sub -->
+    <div class="chart-card">
+      <div class="chart-title">Harvest Allocation</div>
+      <div class="chart-sub">Weekly kg by offline destination — retail, B2B, FnF, samples, waste. Online sales are tracked separately in ৳ (Insights → Operations).</div>
+      <div class="chart-wrap"><canvas id="chart-allocation"></canvas></div>
+    </div>
+    <!-- Contamination vs outside temperature -->
+    <div class="chart-card">
+      <div class="chart-title">Contamination vs Temperature</div>
+      <div class="chart-sub">Weekly bags affected vs average day temperature (°C)</div>
+      <div class="chart-wrap"><canvas id="chart-contam-temp"></canvas></div>
+    </div>
   </div>
 
   <!-- Batch Performance — independent of the date-range picker above,
@@ -165,6 +177,7 @@ body{font-family:'DM Sans','Hind Siliguri',sans-serif;background:var(--g900);col
   <div class="chart-card" style="margin-top:16px">
     <div class="chart-title">Batch Performance</div>
     <div class="chart-sub">Biological Efficiency (BE%) — total fresh yield ÷ dry substrate weight, per batch, all-time</div>
+    <div class="chart-wrap" style="margin-bottom:16px"><canvas id="chart-be"></canvas></div>
     <div style="overflow-x:auto">
       <table class="batch-table">
         <thead>
@@ -203,6 +216,8 @@ const sb = createClient(
   subscribeRealtime(sb, 'farm-analytics-live', ['farm_daily_logs', 'one_off_expenses'], load,
     { indicatorId: 'rt-indicator' });
   subscribeRealtime(sb, 'farm-analytics-batches-live', ['batches', 'harvest_entries'], loadBatchYield,
+    { indicatorId: 'rt-indicator' });
+  subscribeRealtime(sb, 'farm-analytics-weekly-live', ['farm_daily_logs', 'weather_daily'], loadWeeklyIntegration,
     { indicatorId: 'rt-indicator' });
 })();
 
@@ -602,6 +617,21 @@ async function loadBatchYield() {
     .order('be_pct', { ascending: false, nullsFirst: false });
   if (error) { console.error('v_batch_yield load failed:', error); return; }
   renderBatchTable(data || []);
+  renderBeChart(data || []);
+}
+
+function renderBeChart(rows) {
+  destroyChart('chart-be');
+  const withBe = rows.filter(b => b.be_pct != null).sort((a,b) => (a.spawn_date||'') < (b.spawn_date||'') ? -1 : 1);
+  charts['chart-be'] = new Chart(document.getElementById('chart-be'), {
+    type: 'bar',
+    data: {
+      labels: withBe.map(b => b.batch_number),
+      datasets: [{ label: 'BE%', data: withBe.map(b => +b.be_pct),
+        backgroundColor: 'rgba(217,178,84,.6)', borderColor: '#d9b254', borderWidth: 1.5, borderRadius: 4, maxBarThickness: 34 }],
+    },
+    options: chartOpts({ yLabel: '%', prefix: '' }),
+  });
 }
 
 function renderBatchTable(rows) {
@@ -624,8 +654,59 @@ function renderBatchTable(rows) {
     </tr>`).join('');
 }
 
+/* ── Harvest Allocation + Contamination vs Temperature ──
+   Both weekly-aggregated views, independent of the days-range picker —
+   same reasoning as Batch Performance above. */
+async function loadWeeklyIntegration() {
+  const [{ data: alloc, error: e1 }, { data: contam, error: e2 }] = await Promise.all([
+    sb.from('v_channel_kg_weekly').select('*').order('week').limit(52),
+    sb.from('v_contamination_weather_weekly').select('*').order('week').limit(52),
+  ]);
+  if (e1) console.error('v_channel_kg_weekly load failed:', e1);
+  if (e2) console.error('v_contamination_weather_weekly load failed:', e2);
+
+  const aRows = alloc || [];
+  destroyChart('chart-allocation');
+  charts['chart-allocation'] = new Chart(document.getElementById('chart-allocation'), {
+    type: 'bar',
+    data: { labels: aRows.map(r => r.week.slice(5)), datasets: [
+      { label: 'Retail',  data: aRows.map(r => +r.retail_kg||0), backgroundColor: '#5fcf80', stack: 's' },
+      { label: 'B2B',     data: aRows.map(r => +r.b2b_kg||0),    backgroundColor: '#d9b254', stack: 's' },
+      { label: 'FnF',     data: aRows.map(r => +r.fnf_kg||0),    backgroundColor: '#7ba3ff', stack: 's' },
+      { label: 'Samples', data: aRows.map(r => +r.sample_kg||0), backgroundColor: '#9085e9', stack: 's' },
+      { label: 'Waste',   data: aRows.map(r => +r.waste_kg||0),  backgroundColor: 'rgba(224,82,82,.6)', stack: 's' },
+    ].map(d => ({ ...d, borderRadius: 3, maxBarThickness: 20 })) },
+    options: { ...chartOpts({ yLabel: 'kg', prefix: '' }),
+      scales: { x: { stacked: true, ticks: { maxRotation: 45, color: 'rgba(245,239,230,.3)', font: { size: 9 } }, grid: { color: 'rgba(255,255,255,.04)' } },
+                y: { stacked: true, ticks: { color: 'rgba(245,239,230,.3)', font: { size: 9 }, callback: v => v + ' kg' }, grid: { color: 'rgba(255,255,255,.05)' } } } },
+  });
+
+  const cRows = contam || [];
+  destroyChart('chart-contam-temp');
+  charts['chart-contam-temp'] = new Chart(document.getElementById('chart-contam-temp'), {
+    data: { labels: cRows.map(r => r.week.slice(5)), datasets: [
+      { type: 'bar', label: 'Bags Affected', data: cRows.map(r => +r.bags_affected||0),
+        backgroundColor: 'rgba(224,82,82,.55)', borderRadius: 3, maxBarThickness: 20, yAxisID: 'ybags' },
+      { type: 'line', label: 'Avg Day Temp', data: cRows.map(r => r.avg_day_temp_c != null ? +r.avg_day_temp_c : null),
+        borderColor: '#d9b254', backgroundColor: '#d9b254', tension: .3, pointRadius: 2, borderWidth: 2, yAxisID: 'ytemp', spanGaps: true },
+    ] },
+    options: { responsive: true, maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { labels: { color: 'rgba(245,239,230,.45)', boxWidth: 10, padding: 14, font: { size: 10 } } },
+                 tooltip: { backgroundColor: 'rgba(14,26,19,.95)', borderColor: 'rgba(255,255,255,.1)', borderWidth: 1, padding: 10,
+                   callbacks: { label: c => c.dataset.yAxisID === 'ytemp'
+                     ? ` ${c.dataset.label}: ${c.parsed.y}°C`
+                     : ` ${c.dataset.label}: ${c.parsed.y}` } } },
+      scales: {
+        x: { ticks: { maxRotation: 45, color: 'rgba(245,239,230,.3)', font: { size: 9 } }, grid: { color: 'rgba(255,255,255,.04)' } },
+        ybags: { position: 'left', ticks: { color: 'rgba(245,239,230,.3)', font: { size: 9 } }, grid: { color: 'rgba(255,255,255,.05)' } },
+        ytemp: { position: 'right', ticks: { color: 'rgba(245,239,230,.3)', font: { size: 9 }, callback: v => v + '°C' }, grid: { display: false } },
+      } },
+  });
+}
+
 /* ── Init ── */
-function init() { load(); loadBatchYield(); }
+function init() { load(); loadBatchYield(); loadWeeklyIntegration(); }
 </script>
 </body>
 </html>
