@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Harvest Log — SaFa Naturals</title>
+<link rel="icon" type="image/png" href="/favicon.png"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&family=Cormorant+Garamond:wght@300;600&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --g900:#060e09;--g800:#0e1a13;--g700:#121f16;
+  --c:#f5efe6;--al:#d9b254;--a:#c49a3c;
+  --border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.13);
+  --green:#5fcf80;--red:#e05252;--red-dim:rgba(224,82,82,.1);
+  --gold-dim:rgba(217,178,84,.1);--r:10px;--r2:6px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:14px}
+body{font-family:'DM Sans','Hind Siliguri',sans-serif;background:var(--g900);color:var(--c);min-height:100vh}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:2px}
+@keyframes shimmer{0%{background-position:-600px 0}100%{background-position:600px 0}}
+@keyframes toastIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── Topbar (matches farm-analytics.html) ── */
+.topbar{height:58px;background:var(--g800);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 28px;gap:16px;position:sticky;top:0;z-index:100}
+.back-link{font-size:11px;color:rgba(245,239,230,.38);text-decoration:none;display:flex;align-items:center;gap:5px;transition:color .2s;flex-shrink:0}
+.back-link:hover{color:rgba(245,239,230,.75)}
+.back-link svg{width:13px;height:13px}
+.top-sep{width:1px;height:20px;background:var(--border);flex-shrink:0}
+.top-title{font-family:'Syne','Hind Siliguri',sans-serif;font-size:14px;font-weight:700;flex:1}
+.export-btn{font-family:'Syne','Hind Siliguri',sans-serif;font-size:9px;font-weight:700;letter-spacing:.1em;padding:7px 14px;border-radius:var(--r2);border:1px solid var(--border);background:rgba(255,255,255,.03);color:rgba(245,239,230,.45);cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:5px;white-space:nowrap}
+.export-btn:hover{border-color:var(--border2);color:var(--c);background:rgba(255,255,255,.06)}
+.export-btn:disabled{opacity:.5;cursor:not-allowed}
+
+/* ── Content ── */
+.content{max-width:1300px;margin:0 auto;padding:28px 28px 60px}
+
+/* ── Summary metric cards ── */
+.metrics-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+.metric-card{background:var(--g800);border:1px solid var(--border);border-radius:var(--r);padding:18px 20px}
+.metric-lbl{font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:rgba(245,239,230,.35);margin-bottom:8px}
+.metric-val{font-family:'Cormorant Garamond','Hind Siliguri',serif;font-size:28px;font-weight:300;color:var(--c);line-height:1.15;margin-bottom:4px}
+.metric-val.green{color:var(--green)}
+.metric-val.gold{color:var(--al)}
+.metric-sub{font-size:11px;color:rgba(245,239,230,.3)}
+
+/* ── Filter bar (from orders.html) ── */
+.filter-bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.filter-bar-2{margin-top:-2px;margin-bottom:18px}
+.f-search{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:10px 14px;color:var(--c);font-family:'DM Sans','Hind Siliguri',sans-serif;font-size:13px;outline:none;transition:border-color .2s,background .2s}
+.f-search::placeholder{color:rgba(245,239,230,.3)}
+.f-search:focus{border-color:rgba(196,154,60,.45);background:rgba(255,255,255,.06)}
+.f-search.wide{width:220px}
+.f-search.f-date{width:140px}
+input[type="date"].f-search::-webkit-calendar-picker-indicator{filter:invert(1);opacity:.5;cursor:pointer}
+.f-select{background:var(--g800);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:10px 14px;color:var(--c);font-family:'DM Sans','Hind Siliguri',sans-serif;font-size:13px;cursor:pointer;outline:none;transition:border-color .2s;-webkit-appearance:none;appearance:none;padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(245,239,230,0.4)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center}
+.f-select:focus{border-color:rgba(196,154,60,.45)}
+.f-select option{background:#0e1a13}
+.filter-sep{width:1px;height:32px;background:rgba(255,255,255,.08);flex-shrink:0}
+.filter-date-sep{color:rgba(245,239,230,.35);font-size:12px}
+.f-clear-btn{font-family:'Syne','Hind Siliguri',sans-serif;font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(245,239,230,.38);background:none;border:none;cursor:pointer;padding:6px 4px;transition:color .2s}
+.f-clear-btn:hover{color:var(--red)}
+.f-label{font-size:11px;color:rgba(245,239,230,.38);white-space:nowrap;letter-spacing:.04em}
+.f-preset-btn{font-family:'DM Sans','Hind Siliguri',sans-serif;font-size:11px;font-weight:600;padding:7px 11px;border-radius:5px;cursor:pointer;border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.03);color:rgba(245,239,230,.55);transition:all .15s;white-space:nowrap}
+.f-preset-btn:hover{border-color:rgba(196,154,60,.35);color:var(--al);background:rgba(196,154,60,.06)}
+.f-preset-btn.active{border-color:rgba(196,154,60,.5);color:var(--al);background:rgba(196,154,60,.11)}
+.f-narrow{width:90px}
+.ml-auto{margin-left:auto}
+
+/* ── Harvest table ── */
+.harvest-table-wrap{background:var(--g800);border:1px solid rgba(255,255,255,.07);border-radius:12px;overflow:hidden;margin-bottom:18px;overflow-x:auto}
+.harvest-table{width:100%;border-collapse:collapse}
+.harvest-table th{padding:12px 16px;text-align:left;font-family:'Syne','Hind Siliguri',sans-serif;font-size:9.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(245,239,230,.4);background:rgba(255,255,255,.02);border-bottom:1px solid rgba(255,255,255,.06);white-space:nowrap}
+.harvest-table td{padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.04);font-size:13px;color:var(--c);white-space:nowrap}
+.harvest-table tbody tr:last-child td{border-bottom:none}
+.harvest-table tbody tr.clickable{cursor:pointer;transition:background .15s}
+.harvest-table tbody tr.clickable:hover{background:rgba(255,255,255,.025)}
+.cell-sub{font-size:11px;color:rgba(245,239,230,.42);margin-top:2px}
+.cell-total{font-family:'Cormorant Garamond','Hind Siliguri',serif;font-size:17px;font-weight:600;color:var(--al)}
+.batch-status-pill{font-size:9px;padding:3px 9px;border-radius:99px;text-transform:uppercase;letter-spacing:.3px;font-weight:700}
+.batch-status-pill.active{background:rgba(95,207,128,.1);color:var(--green)}
+.batch-status-pill.retired{background:rgba(255,255,255,.05);color:rgba(245,239,230,.35)}
+
+/* Skeleton / empty state */
+.skel-row-wrap{padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.04);display:flex;gap:16px;align-items:center}
+.skel{background:linear-gradient(90deg,rgba(255,255,255,.05) 0%,rgba(255,255,255,.1) 50%,rgba(255,255,255,.05) 100%);background-size:600px 100%;border-radius:4px;animation:shimmer 1.4s ease-in-out infinite}
+.table-empty{padding:56px 24px;text-align:center}
+.table-empty-icon{font-size:36px;margin-bottom:16px;opacity:.6}
+.table-empty-text{font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:rgba(245,239,230,.35)}
+
+/* Pagination */
+.pagination-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0}
+.pagination-info{color:rgba(245,239,230,.45);font-family:'Syne','Hind Siliguri',sans-serif;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.pagination-btns{display:flex;gap:8px}
+.pg-btn{font-family:'Syne','Hind Siliguri',sans-serif;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:8px 16px;border-radius:5px;cursor:pointer;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.03);color:rgba(245,239,230,.6);transition:all .2s}
+.pg-btn:hover:not(:disabled){border-color:rgba(255,255,255,.25);color:var(--c)}
+.pg-btn:disabled{opacity:.35;cursor:not-allowed}
+
+/* Toast */
+.toast-stack{position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:10px;pointer-events:none}
+.toast{display:flex;align-items:center;gap:10px;padding:13px 18px;border-radius:8px;font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;pointer-events:auto;animation:toastIn .3s cubic-bezier(0.22,1,0.36,1) both;box-shadow:0 8px 24px rgba(0,0,0,.4);min-width:200px}
+.toast.success{background:#5fcf80;color:#060d09}
+.toast.error{background:var(--red);color:#fff}
+
+/* Responsive */
+@media(max-width:1000px){.metrics-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.metrics-grid{grid-template-columns:1fr 1fr}.topbar{padding:0 16px;gap:10px}.top-title{font-size:12px}.content{padding:18px 16px 40px}}
+</style>
+  <script type="module" crossorigin src="/assets/harvestLog-B_WaXL7t.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="/assets/index-B-jIxwbw.js">
+  <link rel="modulepreload" crossorigin href="/assets/admin-auth-4ZiUUGs_.js">
+  <link rel="modulepreload" crossorigin href="/assets/date-utils-D3sh9T8I.js">
+  <link rel="modulepreload" crossorigin href="/assets/filter-state-Desfb7C6.js">
+  <link rel="modulepreload" crossorigin href="/assets/realtime-D7K--cdb.js">
+</head>
+<body>
+
+<header class="topbar">
+  <a href="home.html" class="back-link">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+    Home
+  </a>
+  <div class="top-sep"></div>
+  <div class="top-title">🍄 Harvest Log</div>
+  <span class="rt-indicator" id="rt-indicator"><span class="rt-dot"></span>Live</span>
+  <button type="button" class="export-btn" id="export-btn">
+    <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
+    Export CSV
+  </button>
+</header>
+
+<div class="content">
+
+  <!-- Summary strip — reflects the currently active filters, over the
+       full matching set (not just the current page) -->
+  <div class="metrics-grid">
+    <div class="metric-card">
+      <div class="metric-lbl">Entries</div>
+      <div class="metric-val" id="m-count">—</div>
+      <div class="metric-sub">matching current filters</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-lbl">Total Harvest</div>
+      <div class="metric-val green" id="m-total-kg">—</div>
+      <div class="metric-sub">kg, current filters</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-lbl">Date Range</div>
+      <div class="metric-val gold" id="m-range" style="font-size:16px">—</div>
+      <div class="metric-sub">earliest → latest entry</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-lbl">Rooms</div>
+      <div class="metric-val" id="m-rooms" style="font-size:18px">—</div>
+      <div class="metric-sub">covered by current filters</div>
+    </div>
+  </div>
+
+  <!-- Filter row 1 -->
+  <div class="filter-bar">
+    <input type="text" id="search-input" class="f-search wide" placeholder="Search batch number...">
+    <input type="date" id="filter-date-from" class="f-search f-date" title="From Date">
+    <span class="filter-date-sep">to</span>
+    <input type="date" id="filter-date-to" class="f-search f-date" title="To Date">
+    <select id="filter-room" class="f-select"><option value="">All Rooms</option></select>
+    <button type="button" class="f-clear-btn" id="clear-filters-btn">✕ Clear</button>
+  </div>
+
+  <!-- Filter row 2: presets + batch/flush + sort + kg range + group-by -->
+  <div class="filter-bar filter-bar-2">
+    <span class="f-label">Quick:</span>
+    <button type="button" class="f-preset-btn" id="preset-today"     onclick="setPreset('today')">Today</button>
+    <button type="button" class="f-preset-btn" id="preset-yesterday" onclick="setPreset('yesterday')">Yesterday</button>
+    <button type="button" class="f-preset-btn" id="preset-this_week" onclick="setPreset('this_week')">This Week</button>
+    <button type="button" class="f-preset-btn" id="preset-this_month" onclick="setPreset('this_month')">This Month</button>
+    <div class="filter-sep"></div>
+    <select id="filter-batch" class="f-select"><option value="">All Batches</option></select>
+    <select id="filter-flush" class="f-select">
+      <option value="">All Flushes</option>
+      <option value="1">1st Flush</option><option value="2">2nd Flush</option>
+      <option value="3">3rd Flush</option><option value="4">4th Flush</option>
+      <option value="5">5th Flush</option><option value="6">6th Flush</option>
+    </select>
+    <select id="filter-sort" class="f-select">
+      <option value="log_date|0">Newest First</option>
+      <option value="log_date|1">Oldest First</option>
+      <option value="total_kg|0">Highest kg</option>
+      <option value="total_kg|1">Lowest kg</option>
+    </select>
+    <input type="number" id="filter-min" class="f-search f-narrow" placeholder="Min kg" min="0" step="0.1">
+    <span class="filter-date-sep">–</span>
+    <input type="number" id="filter-max" class="f-search f-narrow" placeholder="Max kg" min="0" step="0.1">
+    <div class="filter-sep"></div>
+    <span class="f-label">Group by:</span>
+    <select id="filter-group" class="f-select ml-auto">
+      <option value="none">None (Detail)</option>
+      <option value="room">Room</option>
+      <option value="batch">Batch</option>
+      <option value="week">Week</option>
+      <option value="month">Month</option>
+    </select>
+  </div>
+
+  <!-- Table -->
+  <div class="harvest-table-wrap">
+    <table class="harvest-table">
+      <thead id="harvest-thead"></thead>
+      <tbody id="harvest-tbody"><tr><td colspan="11" style="text-align:center;color:rgba(245,239,230,.3);padding:24px">Loading…</td></tr></tbody>
+    </table>
+  </div>
+
+  <!-- Pagination (Detail mode only) -->
+  <div class="pagination-bar" id="pagination-bar">
+    <span class="pagination-info" id="page-info">Page 1 of 1</span>
+    <div class="pagination-btns">
+      <button type="button" class="pg-btn" id="btn-prev" disabled>← Prev</button>
+      <button type="button" class="pg-btn" id="btn-next" disabled>Next →</button>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast-stack" id="toast-stack"></div>
+
+</body>
+</html>

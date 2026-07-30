@@ -22,3 +22,10 @@ export function daysAgoStr(n) {
   d.setDate(d.getDate() - n);
   return localDateStr(d);
 }
+
+/** Local 'YYYY-MM-DD' for N days after a given 'YYYY-MM-DD' string. */
+export function addDaysStr(dateStr, n) {
+  const d = new Date(dateStr + 'T00:00:00');
+  d.setDate(d.getDate() + n);
+  return localDateStr(d);
+}

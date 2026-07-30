@@ -65,6 +65,8 @@
     .chart-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:18px 20px;}
     .chart-card-title{font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--cl);margin-bottom:4px;}
     .chart-card-sub{font-size:11px;color:var(--cl);margin-bottom:12px;}
+    .view-log-link{display:inline-block;margin-top:8px;font-size:11px;color:rgba(217,178,84,.75);text-decoration:none;}
+    .view-log-link:hover{color:var(--al);text-decoration:underline;}
     .chart-wrap{position:relative;height:240px;}
     .chart-wrap.tall{height:280px;}
     .chart-wrap.short{height:160px;}
@@ -386,8 +388,9 @@
 
       <div class="chart-card mb-16">
         <div class="chart-card-title">Supply &amp; Demand</div>
-        <div class="chart-card-sub">Daily fresh harvest (kg) against online revenue and ad spend (৳) — is online capped by supply, and does ad spend track what's actually available?</div>
+        <div class="chart-card-sub">Daily fresh harvest (kg) against online revenue and ad spend (৳) — is online capped by supply, and does ad spend track what's actually available? Click a harvest bar to see that day's entries.</div>
         <div class="chart-wrap tall"><canvas id="chart-supply-demand"></canvas></div>
+        <a href="harvest-log.html" class="view-log-link">View full harvest log →</a>
       </div>
 
       <div class="table-card mb-lg">
@@ -408,8 +411,9 @@
       <div class="charts-row">
         <div class="chart-card">
           <div class="chart-card-title">Harvest Source</div>
-          <div class="chart-card-sub">Healthy bags vs recovered from mold/problem bags, kg/month</div>
+          <div class="chart-card-sub">Healthy bags vs recovered from mold/problem bags, kg/month. Click a bar to see that month's entries.</div>
           <div class="chart-wrap"><canvas id="chart-harvest-source"></canvas></div>
+          <a href="harvest-log.html" class="view-log-link">View full harvest log →</a>
         </div>
         <div class="chart-card">
           <div class="chart-card-title">Marketing Samples</div>
@@ -424,8 +428,9 @@
 
       <div class="chart-card mb-16">
         <div class="chart-card-title">Harvest by Room</div>
-        <div class="chart-card-sub">Weekly fresh kg per room — Room B is currently the mold-recovery room, Room A the clean room, per current policy</div>
+        <div class="chart-card-sub">Weekly fresh kg per room — Room B is currently the mold-recovery room, Room A the clean room, per current policy. Click a bar to see that room's entries for that week.</div>
         <div class="chart-wrap"><canvas id="chart-room-yield"></canvas></div>
+        <a href="harvest-log.html" class="view-log-link">View full harvest log →</a>
       </div>
 
       <div class="table-card">
@@ -551,7 +556,7 @@
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
     import { requireAdmin }  from '/src/admin-auth.js';
     import { mountAdminNav } from '/src/admin-nav.js';
-    import { localDateStr }  from '/src/date-utils.js';
+    import { localDateStr, addDaysStr }  from '/src/date-utils.js';
     import { readFiltersFromURL, writeFiltersToURL } from '/src/filter-state.js';
     import { subscribeRealtime, injectRealtimeStyles } from '/src/realtime.js';
     import { AI_DEFAULTS, loadAiCfg, saveAiCfg, chatComplete, formatAiError, renderAiText } from '/src/ai-client.js';
@@ -949,9 +954,10 @@
 
     /* ════════════════════════ P&L ════════════════════════ */
     async function loadPnl() {
-      const { data, error } = await sb.from('v_pnl_monthly')
-        .select('*').order('month').limit(24);
+      const { data: dataDesc, error } = await sb.from('v_pnl_monthly')
+        .select('*').order('month', { ascending: false }).limit(24);
       if (checkSetupError(error)) return;
+      const data = (dataDesc || []).slice().reverse();
 
       /* Recompute ad spend per month from the toggle-filtered cache so
          excluded channels drop out of costs and net profit too. */
@@ -1219,17 +1225,25 @@ Use the actual numbers. Keep it under 350 words. No preamble.`;
        (revenue-share cost allocation), harvest source split, marketing
        samples, and supplier health. */
     async function loadOperations() {
-      const [{ data: chPnl, error: e1 }, { data: harvest, error: e2 },
-             { data: samples, error: e3 }, { data: suppliers, error: e4 },
-             { data: supplyDemand, error: e5 }, { data: roomYield, error: e6 }] = await Promise.all([
-        sb.from('v_channel_pnl_monthly').select('*').order('month').limit(24),
-        sb.from('v_harvest_source_monthly').select('*').order('month').limit(24),
-        sb.from('v_marketing_samples_monthly').select('*').order('month').limit(24),
+      const [{ data: chPnlDesc, error: e1 }, { data: harvestDesc, error: e2 },
+             { data: samplesDesc, error: e3 }, { data: suppliers, error: e4 },
+             { data: supplyDemandDesc, error: e5 }, { data: roomYieldDesc, error: e6 }] = await Promise.all([
+        sb.from('v_channel_pnl_monthly').select('*').order('month', { ascending: false }).limit(24),
+        sb.from('v_harvest_source_monthly').select('*').order('month', { ascending: false }).limit(24),
+        sb.from('v_marketing_samples_monthly').select('*').order('month', { ascending: false }).limit(24),
         sb.from('v_supplier_scorecard').select('*').order('total_spent', { ascending: false }),
-        sb.from('v_supply_demand_daily').select('*').order('day').limit(90),
-        sb.from('v_room_yield_weekly').select('*').order('week').limit(52),
+        sb.from('v_supply_demand_daily').select('*').order('day', { ascending: false }).limit(90),
+        sb.from('v_room_yield_weekly').select('*').order('week', { ascending: false }).limit(52),
       ]);
       if (checkSetupError(e1) || checkSetupError(e2) || checkSetupError(e3) || checkSetupError(e4)) return;
+
+      // Fetched most-recent-first so the limit keeps the latest period, not
+      // the earliest — then restored to chronological order for charting.
+      const chPnl       = (chPnlDesc || []).slice().reverse();
+      const harvest      = (harvestDesc || []).slice().reverse();
+      const samples      = (samplesDesc || []).slice().reverse();
+      const supplyDemand = (supplyDemandDesc || []).slice().reverse();
+      const roomYield    = (roomYieldDesc || []).slice().reverse();
 
       const pnlRows = chPnl || [];
       aiSnapshot.operations = {
@@ -1292,7 +1306,20 @@ Use the actual numbers. Keep it under 350 words. No preamble.`;
             x: { grid: { display: false } },
             ykg:  { position: 'left',  grid: GRID, ticks: { callback: (v) => v + ' kg' } },
             ybdt: { position: 'right', grid: { display: false }, ticks: { callback: (v) => '৳' + (v >= 1000 ? (v/1000) + 'k' : v) } },
-          } },
+          },
+          onHover: (e, els) => { e.native.target.style.cursor = els.length ? 'pointer' : 'default'; },
+          /* Drill into Harvest Log, pre-filtered to the clicked day — only
+             the "Harvest (kg)" bar is a harvest fact, the other two
+             datasets are revenue/ad-spend lines. */
+          onClick: (e, els, chart) => {
+            if (!els.length) return;
+            const el = els[0];
+            if (chart.data.datasets[el.datasetIndex].label !== 'Harvest (kg)') return;
+            const row = sdRows[el.index];
+            if (!row) return;
+            window.location.href = `harvest-log.html?from=${row.day}&to=${row.day}`;
+          },
+        },
       });
 
       /* Channel P&L detail table */
@@ -1327,7 +1354,17 @@ Use the actual numbers. Keep it under 350 words. No preamble.`;
           plugins: { legend: { labels: { boxWidth: 10, boxHeight: 10, usePointStyle: true } },
                      tooltip: { callbacks: { label: (c) => ` ${c.dataset.label}: ${(c.parsed.y||0).toFixed(1)} kg` } } },
           scales: { x: { stacked: true, grid: { display: false } },
-                    y: { stacked: true, grid: GRID, ticks: { callback: (v) => v + ' kg' } } } },
+                    y: { stacked: true, grid: GRID, ticks: { callback: (v) => v + ' kg' } } },
+          onHover: (e, els) => { e.native.target.style.cursor = els.length ? 'pointer' : 'default'; },
+          onClick: (e, els) => {
+            if (!els.length) return;
+            const row = hRows[els[0].index];
+            if (!row) return;
+            const d = new Date(row.month + 'T00:00:00');
+            const monthEnd = localDateStr(new Date(d.getFullYear(), d.getMonth() + 1, 0));
+            window.location.href = `harvest-log.html?from=${row.month}&to=${monthEnd}`;
+          },
+        },
       });
 
       /* Harvest by room — weekly stacked bar, one series per room seen in
@@ -1350,7 +1387,16 @@ Use the actual numbers. Keep it under 350 words. No preamble.`;
           plugins: { legend: { labels: { boxWidth: 10, boxHeight: 10, usePointStyle: true } },
                      tooltip: { callbacks: { label: (c) => ` ${c.dataset.label}: ${(c.parsed.y||0).toFixed(2)} kg` } } },
           scales: { x: { stacked: true, grid: { display: false } },
-                    y: { stacked: true, grid: GRID, ticks: { callback: (v) => v + ' kg' } } } },
+                    y: { stacked: true, grid: GRID, ticks: { callback: (v) => v + ' kg' } } },
+          onHover: (e, els) => { e.native.target.style.cursor = els.length ? 'pointer' : 'default'; },
+          onClick: (e, els) => {
+            if (!els.length) return;
+            const el = els[0];
+            const room = rooms[el.datasetIndex], weekStart = weeks[el.index];
+            if (!weekStart) return;
+            window.location.href = `harvest-log.html?from=${weekStart}&to=${addDaysStr(weekStart,6)}&room=${encodeURIComponent(room)}`;
+          },
+        },
       });
 
       /* Marketing samples — totals over the fetched range */

@@ -22,6 +22,7 @@ const NAV_LINKS = [
 
 const FARM_LINKS = [
   { href: 'quick-log.html',      label: '⚡ Quick Log'      },
+  { href: 'harvest-log.html',    label: '🍄 Harvest Log'    },
   { href: 'farm-analytics.html', label: '📈 Farm Analytics' },
   { href: 'dashboard.html',      label: '📡 IoT Dashboard'  },
 ];
@@ -37,6 +38,7 @@ const SEARCH_INDEX = [
   { href: 'pipeline.html',       label: 'B2B',            icon: '🤝', hint: 'Wholesale pipeline',       keywords: 'b2b pipeline wholesale deals leads' },
   { href: 'insights.html',       label: 'Insights',       icon: '📊', hint: 'AI analyst & trends',      keywords: 'insights analytics ai reports trends' },
   { href: 'quick-log.html',      label: 'Quick Log',      icon: '⚡', hint: 'Mobile daily farm log',    keywords: 'quick log daily farm mobile harvest' },
+  { href: 'harvest-log.html',    label: 'Harvest Log',    icon: '🍄', hint: 'Every harvest entry, filterable', keywords: 'harvest log entries batches rooms pivot table' },
   { href: 'farm-analytics.html', label: 'Farm Analytics',  icon: '📈', hint: 'Growth & yield charts',    keywords: 'farm analytics yield growth charts' },
   { href: 'dashboard.html',      label: 'IoT Dashboard',  icon: '📡', hint: 'Simulated sensor preview', keywords: 'iot dashboard sensors demo' },
 ];

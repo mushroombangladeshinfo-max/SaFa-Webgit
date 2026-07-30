@@ -21,6 +21,7 @@ export default defineConfig({
         customers:     './customers.html',
         products:      './products.html',
         insights:      './insights.html',
+        harvestLog:    './harvest-log.html',
       }
     }
   }

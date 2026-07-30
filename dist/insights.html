@@ -65,6 +65,8 @@
     .chart-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:18px 20px;}
     .chart-card-title{font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--cl);margin-bottom:4px;}
     .chart-card-sub{font-size:11px;color:var(--cl);margin-bottom:12px;}
+    .view-log-link{display:inline-block;margin-top:8px;font-size:11px;color:rgba(217,178,84,.75);text-decoration:none;}
+    .view-log-link:hover{color:var(--al);text-decoration:underline;}
     .chart-wrap{position:relative;height:240px;}
     .chart-wrap.tall{height:280px;}
     .chart-wrap.short{height:160px;}
@@ -175,12 +177,12 @@
       .chart-wrap{height:210px;}
     }
   </style>
-  <script type="module" crossorigin src="/assets/insights-rE7XVNfb.js"></script>
+  <script type="module" crossorigin src="/assets/insights-CE-9v1FO.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
   <link rel="modulepreload" crossorigin href="/assets/admin-auth-4ZiUUGs_.js">
-  <link rel="modulepreload" crossorigin href="/assets/admin-nav-CYswHG_J.js">
-  <link rel="modulepreload" crossorigin href="/assets/date-utils-BQiP-iFW.js">
-  <link rel="modulepreload" crossorigin href="/assets/filter-state-BDSbD5N3.js">
+  <link rel="modulepreload" crossorigin href="/assets/admin-nav-CaDfYKd-.js">
+  <link rel="modulepreload" crossorigin href="/assets/date-utils-D3sh9T8I.js">
+  <link rel="modulepreload" crossorigin href="/assets/filter-state-Desfb7C6.js">
   <link rel="modulepreload" crossorigin href="/assets/realtime-D7K--cdb.js">
   <link rel="modulepreload" crossorigin href="/assets/ai-client-DMf9DRrl.js">
 </head>
@@ -394,8 +396,9 @@
 
       <div class="chart-card mb-16">
         <div class="chart-card-title">Supply &amp; Demand</div>
-        <div class="chart-card-sub">Daily fresh harvest (kg) against online revenue and ad spend (৳) — is online capped by supply, and does ad spend track what's actually available?</div>
+        <div class="chart-card-sub">Daily fresh harvest (kg) against online revenue and ad spend (৳) — is online capped by supply, and does ad spend track what's actually available? Click a harvest bar to see that day's entries.</div>
         <div class="chart-wrap tall"><canvas id="chart-supply-demand"></canvas></div>
+        <a href="harvest-log.html" class="view-log-link">View full harvest log →</a>
       </div>
 
       <div class="table-card mb-lg">
@@ -416,8 +419,9 @@
       <div class="charts-row">
         <div class="chart-card">
           <div class="chart-card-title">Harvest Source</div>
-          <div class="chart-card-sub">Healthy bags vs recovered from mold/problem bags, kg/month</div>
+          <div class="chart-card-sub">Healthy bags vs recovered from mold/problem bags, kg/month. Click a bar to see that month's entries.</div>
           <div class="chart-wrap"><canvas id="chart-harvest-source"></canvas></div>
+          <a href="harvest-log.html" class="view-log-link">View full harvest log →</a>
         </div>
         <div class="chart-card">
           <div class="chart-card-title">Marketing Samples</div>
@@ -432,8 +436,9 @@
 
       <div class="chart-card mb-16">
         <div class="chart-card-title">Harvest by Room</div>
-        <div class="chart-card-sub">Weekly fresh kg per room — Room B is currently the mold-recovery room, Room A the clean room, per current policy</div>
+        <div class="chart-card-sub">Weekly fresh kg per room — Room B is currently the mold-recovery room, Room A the clean room, per current policy. Click a bar to see that room's entries for that week.</div>
         <div class="chart-wrap"><canvas id="chart-room-yield"></canvas></div>
+        <a href="harvest-log.html" class="view-log-link">View full harvest log →</a>
       </div>
 
       <div class="table-card">

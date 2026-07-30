@@ -1,0 +1,1 @@
+function n(t=new Date){return`${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,"0")}-${String(t.getDate()).padStart(2,"0")}`}function r(t){const e=new Date;return e.setDate(e.getDate()-t),n(e)}function D(t,e){const a=new Date(t+"T00:00:00");return a.setDate(a.getDate()+e),n(a)}export{D as a,r as d,n as l};

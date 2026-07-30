@@ -55,6 +55,8 @@ body{font-family:'DM Sans','Hind Siliguri',sans-serif;background:var(--g900);col
 .chart-card{background:var(--g800);border:1px solid var(--border);border-radius:var(--r);padding:20px 22px}
 .chart-title{font-family:'Syne','Hind Siliguri',sans-serif;font-size:12px;font-weight:700;color:var(--c);margin-bottom:4px}
 .chart-sub{font-size:10px;color:rgba(245,239,230,.3);margin-bottom:16px}
+.view-log-link{display:inline-block;font-size:10px;color:rgba(217,178,84,.75);text-decoration:none;margin-bottom:4px}
+.view-log-link:hover{color:var(--al);text-decoration:underline}
 .chart-wrap{position:relative;height:220px}
 .chart-wrap.tall{height:280px}
 
@@ -134,8 +136,9 @@ body{font-family:'DM Sans','Hind Siliguri',sans-serif;background:var(--g900);col
     <!-- Harvest trend -->
     <div class="chart-card">
       <div class="chart-title">Harvest Trend</div>
-      <div class="chart-sub">Daily fresh mushroom output (kg)</div>
+      <div class="chart-sub">Daily fresh mushroom output (kg). Click a point to see that day's entries.</div>
       <div class="chart-wrap"><canvas id="chart-harvest"></canvas></div>
+      <a href="harvest-log.html" class="view-log-link">View full harvest log →</a>
     </div>
     <!-- Revenue vs Expenses -->
     <div class="chart-card">
@@ -160,8 +163,9 @@ body{font-family:'DM Sans','Hind Siliguri',sans-serif;background:var(--g900);col
     <!-- Harvest allocation — offline destinations only, see chart-sub -->
     <div class="chart-card">
       <div class="chart-title">Harvest Allocation</div>
-      <div class="chart-sub">Weekly kg by offline destination — retail, B2B, FnF, samples, waste. Online sales are tracked separately in ৳ (Insights → Operations).</div>
+      <div class="chart-sub">Weekly kg by offline destination — retail, B2B, FnF, samples, waste. Online sales are tracked separately in ৳ (Insights → Operations). Click a bar to see that week's entries.</div>
       <div class="chart-wrap"><canvas id="chart-allocation"></canvas></div>
+      <a href="harvest-log.html" class="view-log-link">View full harvest log →</a>
     </div>
     <!-- Contamination vs outside temperature -->
     <div class="chart-card">
@@ -176,8 +180,9 @@ body{font-family:'DM Sans','Hind Siliguri',sans-serif;background:var(--g900);col
        show a batch mid-cycle as if it underperformed. -->
   <div class="chart-card" style="margin-top:16px">
     <div class="chart-title">Batch Performance</div>
-    <div class="chart-sub">Biological Efficiency (BE%) — total fresh yield ÷ dry substrate weight, per batch, all-time</div>
-    <div class="chart-wrap" style="margin-bottom:16px"><canvas id="chart-be"></canvas></div>
+    <div class="chart-sub">Biological Efficiency (BE%) — total fresh yield ÷ dry substrate weight, per batch, all-time. Click a row to see that batch's entries.</div>
+    <a href="harvest-log.html" class="view-log-link">View full harvest log →</a>
+    <div class="chart-wrap" style="margin-bottom:16px;margin-top:8px"><canvas id="chart-be"></canvas></div>
     <div style="overflow-x:auto">
       <table class="batch-table">
         <thead>
@@ -198,7 +203,7 @@ body{font-family:'DM Sans','Hind Siliguri',sans-serif;background:var(--g900);col
 <script type="module">
 import { createClient } from '@supabase/supabase-js';
 import { requireAdmin } from '/src/admin-auth.js';
-import { localDateStr } from '/src/date-utils.js';
+import { localDateStr, addDaysStr } from '/src/date-utils.js';
 import { readFiltersFromURL, writeFiltersToURL } from '/src/filter-state.js';
 import { subscribeRealtime, injectRealtimeStyles } from '/src/realtime.js';
 
@@ -475,7 +480,16 @@ function renderCharts() {
         { label:'Recovered (mold)', data:recovered, borderColor:'rgba(224,82,82,.6)', backgroundColor:'transparent', tension:.35, pointRadius:2, borderWidth:1.5, borderDash:[2,2] },
       ]
     },
-    options: chartOpts({ yLabel:'kg', prefix:'' })
+    options: {
+      ...chartOpts({ yLabel:'kg', prefix:'' }),
+      onHover: (e, els) => { e.native.target.style.cursor = els.length ? 'pointer' : 'default'; },
+      onClick: (e, els) => {
+        if (!els.length) return;
+        const day = labels[els[0].index];
+        if (!day) return;
+        window.location.href = `harvest-log.html?from=${day}&to=${day}`;
+      },
+    },
   });
 
   // ── Revenue by product (donut) ──
@@ -641,7 +655,7 @@ function renderBatchTable(rows) {
     return;
   }
   tbody.innerHTML = rows.map(b => `
-    <tr>
+    <tr style="cursor:pointer" onclick="window.location.href='harvest-log.html?batch=${encodeURIComponent(b.batch_number)}'">
       <td>${b.batch_number}</td>
       <td>${b.room || '—'}</td>
       <td>${b.substrate_type || '—'}</td>
@@ -658,12 +672,17 @@ function renderBatchTable(rows) {
    Both weekly-aggregated views, independent of the days-range picker —
    same reasoning as Batch Performance above. */
 async function loadWeeklyIntegration() {
-  const [{ data: alloc, error: e1 }, { data: contam, error: e2 }] = await Promise.all([
-    sb.from('v_channel_kg_weekly').select('*').order('week').limit(52),
-    sb.from('v_contamination_weather_weekly').select('*').order('week').limit(52),
+  const [{ data: allocDesc, error: e1 }, { data: contamDesc, error: e2 }] = await Promise.all([
+    sb.from('v_channel_kg_weekly').select('*').order('week', { ascending: false }).limit(52),
+    sb.from('v_contamination_weather_weekly').select('*').order('week', { ascending: false }).limit(52),
   ]);
   if (e1) console.error('v_channel_kg_weekly load failed:', e1);
   if (e2) console.error('v_contamination_weather_weekly load failed:', e2);
+
+  // Fetched most-recent-first so the limit keeps the latest weeks, not the
+  // earliest, then restored to chronological order for charting.
+  const alloc = (allocDesc || []).slice().reverse();
+  const contam = (contamDesc || []).slice().reverse();
 
   const aRows = alloc || [];
   destroyChart('chart-allocation');
@@ -678,7 +697,15 @@ async function loadWeeklyIntegration() {
     ].map(d => ({ ...d, borderRadius: 3, maxBarThickness: 20 })) },
     options: { ...chartOpts({ yLabel: 'kg', prefix: '' }),
       scales: { x: { stacked: true, ticks: { maxRotation: 45, color: 'rgba(245,239,230,.3)', font: { size: 9 } }, grid: { color: 'rgba(255,255,255,.04)' } },
-                y: { stacked: true, ticks: { color: 'rgba(245,239,230,.3)', font: { size: 9 }, callback: v => v + ' kg' }, grid: { color: 'rgba(255,255,255,.05)' } } } },
+                y: { stacked: true, ticks: { color: 'rgba(245,239,230,.3)', font: { size: 9 }, callback: v => v + ' kg' }, grid: { color: 'rgba(255,255,255,.05)' } } },
+      onHover: (e, els) => { e.native.target.style.cursor = els.length ? 'pointer' : 'default'; },
+      onClick: (e, els) => {
+        if (!els.length) return;
+        const row = aRows[els[0].index];
+        if (!row) return;
+        window.location.href = `harvest-log.html?from=${row.week}&to=${addDaysStr(row.week,6)}`;
+      },
+    },
   });
 
   const cRows = contam || [];
