@@ -105,6 +105,7 @@
     .count-label{font-size:12px;color:var(--cl);}
     .scroll-x{overflow-x:auto;}
     .th-r{text-align:right;}
+    .mb-20{margin-bottom:20px;}
   </style>
 </head>
 <body>
@@ -158,6 +159,27 @@
       <input type="date" class="search-input date-narrow" id="date-to" title="Last contact to">
       <button type="button" class="f-clear-btn" id="clear-filters-btn">✕ Clear</button>
       <button class="btn" id="export-btn">↓ CSV</button>
+    </div>
+
+    <!-- Receivables -->
+    <div class="table-card mb-20">
+      <div class="table-toolbar">
+        <span class="table-title">B2B Receivables</span>
+        <button type="button" class="btn primary sm" id="record-payment-btn">+ Record Payment</button>
+      </div>
+      <div class="scroll-x">
+        <table>
+          <thead>
+            <tr>
+              <th>Business</th><th class="th-r">Total Sold</th><th class="th-r">Total Paid</th>
+              <th class="th-r">Balance Due</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="receivables-tbody">
+            <tr><td colspan="5"><div class="empty-state"><div class="empty-icon">⏳</div>Loading...</div></td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
     <!-- Table -->
@@ -265,6 +287,42 @@
     </div>
   </div>
 
+  <!-- Record Payment Modal -->
+  <div class="modal-overlay" id="payment-modal">
+    <div class="modal">
+      <div class="modal-title">Record B2B Payment</div>
+      <div class="form-grid">
+        <div class="form-group span2">
+          <label>Business Name *</label>
+          <input type="text" id="pay-biz" placeholder="e.g. Hallal" list="pay-biz-list">
+          <datalist id="pay-biz-list"></datalist>
+        </div>
+        <div class="form-group">
+          <label>Amount (৳) *</label>
+          <input type="number" id="pay-amount" min="0" step="0.01" placeholder="0">
+        </div>
+        <div class="form-group">
+          <label>Payment Date</label>
+          <input type="date" id="pay-date">
+        </div>
+        <div class="form-group span2">
+          <label>Batch (optional)</label>
+          <select id="pay-batch">
+            <option value="">—</option>
+          </select>
+        </div>
+        <div class="form-group span2">
+          <label>Notes</label>
+          <textarea id="pay-notes" rows="2" placeholder="e.g. bKash, cash, partial payment..."></textarea>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn" id="payment-modal-cancel">Cancel</button>
+        <button type="button" class="btn primary" id="payment-modal-save">Save Payment</button>
+      </div>
+    </div>
+  </div>
+
   <div class="toast-wrap" id="toast-wrap"></div>
 
   <script type="module">
@@ -335,6 +393,71 @@
       renderKPIs();
       renderTable();
     }
+
+    /* ── Receivables ── */
+    let _batchOptions = [];
+    async function loadReceivables() {
+      const { data, error } = await sb.from('v_b2b_receivables').select('*').order('balance_due', { ascending: false });
+      if (error) { toast(error.message, 'err'); return; }
+      renderReceivables(data || []);
+      const list = document.getElementById('pay-biz-list');
+      list.innerHTML = (data || []).map(r => `<option value="${r.business_name}">`).join('');
+    }
+    async function loadBatchOptions() {
+      const { data } = await sb.from('batches').select('batch_number,room').order('batch_number');
+      _batchOptions = data || [];
+      document.getElementById('pay-batch').innerHTML = '<option value="">—</option>' +
+        _batchOptions.map(b => `<option value="${b.batch_number}">${b.batch_number} (Room ${b.room})</option>`).join('');
+    }
+    function renderReceivables(rows) {
+      const tbody = document.getElementById('receivables-tbody');
+      if (!rows.length) {
+        tbody.innerHTML = '<tr><td colspan="5"><div class="empty-state"><div class="empty-icon">🧾</div>No B2B sales recorded yet</div></td></tr>';
+        return;
+      }
+      tbody.innerHTML = rows.map(r => `
+        <tr>
+          <td style="font-weight:500;">${r.business_name}</td>
+          <td class="th-r" style="font-family:'DM Mono',monospace;">${fmt(+r.total_sold)}</td>
+          <td class="th-r" style="font-family:'DM Mono',monospace;">${fmt(+r.total_paid)}</td>
+          <td class="th-r" style="font-family:'DM Mono',monospace;color:${+r.balance_due>0?'var(--red)':'var(--green)'}">${fmt(+r.balance_due)}</td>
+          <td><button type="button" class="btn sm" onclick="window.openPaymentModal('${r.business_name.replace(/'/g,"\\'")}')">Record Payment</button></td>
+        </tr>`).join('');
+    }
+
+    window.openPaymentModal = function(businessName='') {
+      document.getElementById('pay-biz').value    = businessName;
+      document.getElementById('pay-amount').value = '';
+      document.getElementById('pay-date').value   = today();
+      document.getElementById('pay-batch').value  = '';
+      document.getElementById('pay-notes').value  = '';
+      document.getElementById('payment-modal').classList.add('open');
+    };
+    function closePaymentModal() { document.getElementById('payment-modal').classList.remove('open'); }
+
+    document.getElementById('record-payment-btn').addEventListener('click', () => window.openPaymentModal());
+    document.getElementById('payment-modal-cancel').addEventListener('click', closePaymentModal);
+    document.getElementById('payment-modal').addEventListener('click', e => { if (e.target === e.currentTarget) closePaymentModal(); });
+
+    document.getElementById('payment-modal-save').addEventListener('click', async () => {
+      const biz    = document.getElementById('pay-biz').value.trim();
+      const amount = parseFloat(document.getElementById('pay-amount').value);
+      if (!biz)             { toast('Business name is required', 'err'); return; }
+      if (!amount || amount <= 0) { toast('Enter a valid amount', 'err'); return; }
+
+      const payload = {
+        business_name: biz,
+        amount,
+        payment_date:  document.getElementById('pay-date').value || today(),
+        batch_number:  document.getElementById('pay-batch').value || null,
+        notes:         document.getElementById('pay-notes').value.trim() || null,
+      };
+      const { error } = await sb.from('b2b_payments').insert([payload]);
+      if (error) { toast(error.message, 'err'); return; }
+      toast('Payment recorded');
+      closePaymentModal();
+      loadReceivables();
+    });
 
     function renderKPIs() {
       const won      = _all.filter(r=>r.status==='won');
@@ -506,9 +629,12 @@
 
     applyFiltersFromURL();
     load();
+    loadReceivables();
+    loadBatchOptions();
 
     injectRealtimeStyles();
     subscribeRealtime(sb, 'pipeline-live', ['b2b_pipeline'], load, { indicatorId: 'rt-indicator' });
+    subscribeRealtime(sb, 'pipeline-receivables-live', ['b2b_payments', 'farm_daily_logs'], loadReceivables, { indicatorId: 'rt-indicator' });
   </script>
 </body>
 </html>

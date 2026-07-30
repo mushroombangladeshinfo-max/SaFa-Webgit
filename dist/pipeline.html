@@ -105,8 +105,9 @@
     .count-label{font-size:12px;color:var(--cl);}
     .scroll-x{overflow-x:auto;}
     .th-r{text-align:right;}
+    .mb-20{margin-bottom:20px;}
   </style>
-  <script type="module" crossorigin src="/assets/pipeline-BgdFR30d.js"></script>
+  <script type="module" crossorigin src="/assets/pipeline-CuLjw_sL.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
   <link rel="modulepreload" crossorigin href="/assets/admin-auth-4ZiUUGs_.js">
   <link rel="modulepreload" crossorigin href="/assets/admin-nav-CaDfYKd-.js">
@@ -165,6 +166,27 @@
       <input type="date" class="search-input date-narrow" id="date-to" title="Last contact to">
       <button type="button" class="f-clear-btn" id="clear-filters-btn">✕ Clear</button>
       <button class="btn" id="export-btn">↓ CSV</button>
+    </div>
+
+    <!-- Receivables -->
+    <div class="table-card mb-20">
+      <div class="table-toolbar">
+        <span class="table-title">B2B Receivables</span>
+        <button type="button" class="btn primary sm" id="record-payment-btn">+ Record Payment</button>
+      </div>
+      <div class="scroll-x">
+        <table>
+          <thead>
+            <tr>
+              <th>Business</th><th class="th-r">Total Sold</th><th class="th-r">Total Paid</th>
+              <th class="th-r">Balance Due</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="receivables-tbody">
+            <tr><td colspan="5"><div class="empty-state"><div class="empty-icon">⏳</div>Loading...</div></td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
     <!-- Table -->
@@ -268,6 +290,42 @@
       <div class="modal-actions">
         <button class="btn" id="modal-cancel">Cancel</button>
         <button class="btn primary" id="modal-save">Save Lead</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Record Payment Modal -->
+  <div class="modal-overlay" id="payment-modal">
+    <div class="modal">
+      <div class="modal-title">Record B2B Payment</div>
+      <div class="form-grid">
+        <div class="form-group span2">
+          <label>Business Name *</label>
+          <input type="text" id="pay-biz" placeholder="e.g. Hallal" list="pay-biz-list">
+          <datalist id="pay-biz-list"></datalist>
+        </div>
+        <div class="form-group">
+          <label>Amount (৳) *</label>
+          <input type="number" id="pay-amount" min="0" step="0.01" placeholder="0">
+        </div>
+        <div class="form-group">
+          <label>Payment Date</label>
+          <input type="date" id="pay-date">
+        </div>
+        <div class="form-group span2">
+          <label>Batch (optional)</label>
+          <select id="pay-batch">
+            <option value="">—</option>
+          </select>
+        </div>
+        <div class="form-group span2">
+          <label>Notes</label>
+          <textarea id="pay-notes" rows="2" placeholder="e.g. bKash, cash, partial payment..."></textarea>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn" id="payment-modal-cancel">Cancel</button>
+        <button type="button" class="btn primary" id="payment-modal-save">Save Payment</button>
       </div>
     </div>
   </div>
