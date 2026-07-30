@@ -78,6 +78,13 @@ input[type="date"].f-search::-webkit-calendar-picker-indicator{filter:invert(1);
 .harvest-table tbody tr.clickable:hover{background:rgba(255,255,255,.025)}
 .cell-sub{font-size:11px;color:rgba(245,239,230,.42);margin-top:2px}
 .cell-total{font-family:'Cormorant Garamond','Hind Siliguri',serif;font-size:17px;font-weight:600;color:var(--al)}
+.batch-link{cursor:pointer;text-decoration:underline;text-decoration-style:dotted}
+.row-edit-input{background:rgba(255,255,255,.06);border:1px solid rgba(196,154,60,.35);border-radius:5px;padding:5px 7px;color:var(--c);font-family:'DM Mono',monospace;font-size:12px;width:64px;outline:none}
+.row-edit-select{background:var(--g900);border:1px solid rgba(196,154,60,.35);border-radius:5px;padding:5px 6px;color:var(--c);font-family:'DM Sans',sans-serif;font-size:12px;outline:none;max-width:110px}
+.row-action-btn{font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:6px 10px;border-radius:5px;cursor:pointer;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.03);color:rgba(245,239,230,.6);transition:all .2s;margin-right:4px}
+.row-action-btn:hover{border-color:rgba(255,255,255,.25);color:var(--c)}
+.row-action-btn.save{color:var(--green);border-color:rgba(95,207,128,.35)}
+.row-action-btn:disabled{opacity:.5;cursor:not-allowed}
 .batch-status-pill{font-size:9px;padding:3px 9px;border-radius:99px;text-transform:uppercase;letter-spacing:.3px;font-weight:700}
 .batch-status-pill.active{background:rgba(95,207,128,.1);color:var(--green)}
 .batch-status-pill.retired{background:rgba(255,255,255,.05);color:rgba(245,239,230,.35)}
@@ -107,7 +114,7 @@ input[type="date"].f-search::-webkit-calendar-picker-indicator{filter:invert(1);
 @media(max-width:1000px){.metrics-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:600px){.metrics-grid{grid-template-columns:1fr 1fr}.topbar{padding:0 16px;gap:10px}.top-title{font-size:12px}.content{padding:18px 16px 40px}}
 </style>
-  <script type="module" crossorigin src="/assets/harvestLog-B_WaXL7t.js"></script>
+  <script type="module" crossorigin src="/assets/harvestLog-lsidAo1w.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
   <link rel="modulepreload" crossorigin href="/assets/index-B-jIxwbw.js">
   <link rel="modulepreload" crossorigin href="/assets/admin-auth-4ZiUUGs_.js">
@@ -207,7 +214,7 @@ input[type="date"].f-search::-webkit-calendar-picker-indicator{filter:invert(1);
   <div class="harvest-table-wrap">
     <table class="harvest-table">
       <thead id="harvest-thead"></thead>
-      <tbody id="harvest-tbody"><tr><td colspan="11" style="text-align:center;color:rgba(245,239,230,.3);padding:24px">Loading…</td></tr></tbody>
+      <tbody id="harvest-tbody"><tr><td colspan="12" style="text-align:center;color:rgba(245,239,230,.3);padding:24px">Loading…</td></tr></tbody>
     </table>
   </div>
 

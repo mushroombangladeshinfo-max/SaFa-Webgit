@@ -78,6 +78,13 @@ input[type="date"].f-search::-webkit-calendar-picker-indicator{filter:invert(1);
 .harvest-table tbody tr.clickable:hover{background:rgba(255,255,255,.025)}
 .cell-sub{font-size:11px;color:rgba(245,239,230,.42);margin-top:2px}
 .cell-total{font-family:'Cormorant Garamond','Hind Siliguri',serif;font-size:17px;font-weight:600;color:var(--al)}
+.batch-link{cursor:pointer;text-decoration:underline;text-decoration-style:dotted}
+.row-edit-input{background:rgba(255,255,255,.06);border:1px solid rgba(196,154,60,.35);border-radius:5px;padding:5px 7px;color:var(--c);font-family:'DM Mono',monospace;font-size:12px;width:64px;outline:none}
+.row-edit-select{background:var(--g900);border:1px solid rgba(196,154,60,.35);border-radius:5px;padding:5px 6px;color:var(--c);font-family:'DM Sans',sans-serif;font-size:12px;outline:none;max-width:110px}
+.row-action-btn{font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:6px 10px;border-radius:5px;cursor:pointer;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.03);color:rgba(245,239,230,.6);transition:all .2s;margin-right:4px}
+.row-action-btn:hover{border-color:rgba(255,255,255,.25);color:var(--c)}
+.row-action-btn.save{color:var(--green);border-color:rgba(95,207,128,.35)}
+.row-action-btn:disabled{opacity:.5;cursor:not-allowed}
 .batch-status-pill{font-size:9px;padding:3px 9px;border-radius:99px;text-transform:uppercase;letter-spacing:.3px;font-weight:700}
 .batch-status-pill.active{background:rgba(95,207,128,.1);color:var(--green)}
 .batch-status-pill.retired{background:rgba(255,255,255,.05);color:rgba(245,239,230,.35)}
@@ -200,7 +207,7 @@ input[type="date"].f-search::-webkit-calendar-picker-indicator{filter:invert(1);
   <div class="harvest-table-wrap">
     <table class="harvest-table">
       <thead id="harvest-thead"></thead>
-      <tbody id="harvest-tbody"><tr><td colspan="11" style="text-align:center;color:rgba(245,239,230,.3);padding:24px">Loading…</td></tr></tbody>
+      <tbody id="harvest-tbody"><tr><td colspan="12" style="text-align:center;color:rgba(245,239,230,.3);padding:24px">Loading…</td></tr></tbody>
     </table>
   </div>
 
@@ -235,7 +242,7 @@ const PAGE_SIZE = 20;
 const S = {
   page: 1, search: '', dateFrom: '', dateTo: '', room: '', batch: '', flush: '',
   minKg: '', maxKg: '', sortField: 'log_date', sortAsc: false, groupBy: 'none',
-  totalCount: 0, rows: [], batchOptions: [], roomOptions: [],
+  totalCount: 0, rows: [], batchOptions: [], roomOptions: [], editingId: null,
 };
 
 /* ── URL-persisted filters — same shareable/bookmarkable pattern as
@@ -394,7 +401,7 @@ async function fetchHarvest() {
 async function fetchDetail() {
   renderDetailHead();
   const tbody = document.getElementById('harvest-tbody');
-  tbody.innerHTML = skeletonRows(11);
+  tbody.innerHTML = skeletonRows(12);
 
   const from = (S.page - 1) * PAGE_SIZE, to = from + PAGE_SIZE - 1;
   let q = sb.from('harvest_entries')
@@ -406,7 +413,7 @@ async function fetchDetail() {
 
   if (error) {
     console.error('[Harvest Log] fetchDetail error:', error);
-    tbody.innerHTML = errorRow(error, 11);
+    tbody.innerHTML = errorRow(error, 12);
     return;
   }
   S.totalCount = count || 0;
@@ -487,33 +494,93 @@ function renderDetailHead() {
   document.getElementById('harvest-thead').innerHTML = `<tr>
     <th>Date</th><th>Batch</th><th>Flush</th><th>Fresh A</th><th>Fresh Rej</th>
     <th>Healthy</th><th>Recovered</th><th>Bags Removed</th><th>Total</th>
-    <th>Substrate</th><th>Status</th>
+    <th>Substrate</th><th>Status</th><th>Actions</th>
   </tr>`;
 }
 function renderDetailTable() {
   const tbody = document.getElementById('harvest-tbody');
-  if (!S.rows.length) { tbody.innerHTML = emptyRow(11); return; }
-  tbody.innerHTML = S.rows.map(r => {
-    const b = r.batches;
-    const statusPill = b?.status ? `<span class="batch-status-pill ${b.status}">${b.status}</span>` : '—';
-    return `<tr class="clickable" onclick="goToBatch('${(r.batch_number||'').replace(/'/g,"\\'")}')">
-      <td>${fmtDay(r.log_date)}</td>
-      <td>${r.batch_number || '—'}${r.room ? `<div class="cell-sub">Room ${r.room}</div>` : ''}</td>
-      <td>${r.flush_num ?? '—'}</td>
-      <td>${r.fresh_a_kg != null ? fmtKg(r.fresh_a_kg) : '—'}</td>
-      <td>${r.fresh_rej_kg != null ? fmtKg(r.fresh_rej_kg) : '—'}</td>
-      <td>${r.healthy_kg != null ? fmtKg(r.healthy_kg) : '—'}</td>
-      <td>${r.recovered_kg != null ? fmtKg(r.recovered_kg) : '—'}</td>
-      <td>${r.bags_removed ?? '—'}</td>
-      <td class="cell-total">${fmtKg(r.total_kg)}</td>
-      <td>${b?.substrate_type ?? '—'}</td>
-      <td>${statusPill}</td>
-    </tr>`;
-  }).join('');
+  if (!S.rows.length) { tbody.innerHTML = emptyRow(12); return; }
+  tbody.innerHTML = S.rows.map(r => r.id === S.editingId ? editRowHtml(r) : displayRowHtml(r)).join('');
+}
+function displayRowHtml(r) {
+  const b = r.batches;
+  const statusPill = b?.status ? `<span class="batch-status-pill ${b.status}">${b.status}</span>` : '—';
+  return `<tr>
+    <td>${fmtDay(r.log_date)}</td>
+    <td><span class="batch-link" onclick="goToBatch('${(r.batch_number||'').replace(/'/g,"\\'")}')">${r.batch_number || '—'}</span>${r.room ? `<div class="cell-sub">Room ${r.room}</div>` : ''}</td>
+    <td>${r.flush_num ?? '—'}</td>
+    <td>${r.fresh_a_kg != null ? fmtKg(r.fresh_a_kg) : '—'}</td>
+    <td>${r.fresh_rej_kg != null ? fmtKg(r.fresh_rej_kg) : '—'}</td>
+    <td>${r.healthy_kg != null ? fmtKg(r.healthy_kg) : '—'}</td>
+    <td>${r.recovered_kg != null ? fmtKg(r.recovered_kg) : '—'}</td>
+    <td>${r.bags_removed ?? '—'}</td>
+    <td class="cell-total">${fmtKg(r.total_kg)}</td>
+    <td>${b?.substrate_type ?? '—'}</td>
+    <td>${statusPill}</td>
+    <td><button type="button" class="row-action-btn" onclick="startEdit('${r.id}')">Edit</button></td>
+  </tr>`;
+}
+function editRowHtml(r) {
+  const batchOpts = '<option value="">—</option>' + S.batchOptions.map(b =>
+    `<option value="${b.batch_number}"${b.batch_number===r.batch_number?' selected':''}>${b.batch_number} (Room ${b.room})</option>`).join('');
+  const flushOpts = '<option value="">—</option>' + [1,2,3,4,5,6].map(n =>
+    `<option value="${n}"${Number(r.flush_num)===n?' selected':''}>${n}</option>`).join('');
+  const numInput = (id, val) => `<input type="number" class="row-edit-input" id="${id}-${r.id}" value="${val ?? ''}" step="0.01" min="0">`;
+  return `<tr>
+    <td>${fmtDay(r.log_date)}</td>
+    <td><select class="row-edit-select" id="edit-batch-${r.id}">${batchOpts}</select></td>
+    <td><select class="row-edit-select" id="edit-flush-${r.id}" style="max-width:60px">${flushOpts}</select></td>
+    <td>${numInput('edit-fresh-a', r.fresh_a_kg)}</td>
+    <td>${numInput('edit-fresh-rej', r.fresh_rej_kg)}</td>
+    <td>${numInput('edit-healthy', r.healthy_kg)}</td>
+    <td>${numInput('edit-recovered', r.recovered_kg)}</td>
+    <td><input type="number" class="row-edit-input" id="edit-bags-${r.id}" value="${r.bags_removed ?? ''}" step="1" min="0"></td>
+    <td class="cell-total">${fmtKg(r.total_kg)}</td>
+    <td>${r.batches?.substrate_type ?? '—'}</td>
+    <td>—</td>
+    <td>
+      <button type="button" class="row-action-btn save" id="save-btn-${r.id}" onclick="saveEdit('${r.id}')">Save</button>
+      <button type="button" class="row-action-btn" onclick="cancelEdit()">Cancel</button>
+    </td>
+  </tr>`;
 }
 window.goToBatch = function(batchNumber) {
   if (!batchNumber) return;
   window.location.href = `harvest-log.html?batch=${encodeURIComponent(batchNumber)}`;
+};
+window.startEdit = function(id) {
+  S.editingId = id;
+  renderDetailTable();
+};
+window.cancelEdit = function() {
+  S.editingId = null;
+  renderDetailTable();
+};
+const numOrNull = v => (v === '' || v == null ? null : Number(v));
+window.saveEdit = async function(id) {
+  const val = fieldId => document.getElementById(`${fieldId}-${id}`)?.value;
+  const btn = document.getElementById(`save-btn-${id}`);
+  if (btn) { btn.disabled = true; btn.textContent = 'Saving...'; }
+
+  const { error } = await sb.rpc('update_harvest_entry', {
+    p_id: id,
+    p_batch_number: val('edit-batch') || null,
+    p_flush_num:    numOrNull(val('edit-flush')),
+    p_fresh_a_kg:   numOrNull(val('edit-fresh-a')),
+    p_fresh_rej_kg: numOrNull(val('edit-fresh-rej')),
+    p_healthy_kg:   numOrNull(val('edit-healthy')),
+    p_recovered_kg: numOrNull(val('edit-recovered')),
+    p_bags_removed: numOrNull(val('edit-bags')),
+  });
+
+  if (error) {
+    toast('Save failed: ' + error.message, 'error');
+    if (btn) { btn.disabled = false; btn.textContent = 'Save'; }
+    return;
+  }
+  toast('Entry updated');
+  S.editingId = null;
+  await fetchHarvest();
 };
 
 /* ── Render: Pivot mode ── */
