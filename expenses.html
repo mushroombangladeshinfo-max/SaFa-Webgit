@@ -348,7 +348,11 @@
             <input type="number" id="sp-price" placeholder="0" min="0" step="0.01">
           </div>
           <div class="form-group">
-            <label>Total Cost</label>
+            <label>Delivery Cost (৳) <span class="label-optional">(optional)</span></label>
+            <input type="number" id="sp-delivery" placeholder="0" min="0" step="0.01">
+          </div>
+          <div class="form-group">
+            <label>Total Cost <span class="label-optional">(incl. delivery)</span></label>
             <div class="readonly-preview" id="sp-total-preview">৳ 0</div>
           </div>
         </div>
@@ -828,12 +832,14 @@
 
     /* Live total-cost preview */
     function updateSPTotalPreview() {
-      const kg    = parseFloat(document.getElementById('sp-kg').value) || 0;
-      const price = parseFloat(document.getElementById('sp-price').value) || 0;
-      document.getElementById('sp-total-preview').textContent = fmt(kg * price);
+      const kg       = parseFloat(document.getElementById('sp-kg').value) || 0;
+      const price    = parseFloat(document.getElementById('sp-price').value) || 0;
+      const delivery = parseFloat(document.getElementById('sp-delivery').value) || 0;
+      document.getElementById('sp-total-preview').textContent = fmt(kg * price + delivery);
     }
     document.getElementById('sp-kg').addEventListener('input', updateSPTotalPreview);
     document.getElementById('sp-price').addEventListener('input', updateSPTotalPreview);
+    document.getElementById('sp-delivery').addEventListener('input', updateSPTotalPreview);
 
     document.getElementById('add-sp-btn').addEventListener('click', () => {
       const f = document.getElementById('add-sp-form');
@@ -855,11 +861,13 @@
       if (wasted > kg)  { toast('Wasted kg cannot exceed purchased kg', 'err'); return; }
       if (refKg > wasted) { toast('Refunded kg cannot exceed wasted kg', 'err'); return; }
 
+      const delivery = parseFloat(document.getElementById('sp-delivery').value) || 0;
       const { error } = await sb.from('spawn_purchases').insert([{
         purchase_date: date,
         supplier_name: document.getElementById('sp-supplier-name').value.trim() || null,
         kg_purchased:  kg,
         price_per_kg:  price,
+        delivery_cost: delivery,
         kg_wasted:     wasted,
         problem_type:  document.getElementById('sp-problem-type').value || null,
         problem_notes: document.getElementById('sp-problem-notes').value.trim() || null,
@@ -870,7 +878,7 @@
       if (error) { toast(error.message, 'err'); return; }
       toast('Purchase saved');
       document.getElementById('add-sp-form').classList.remove('open');
-      ['sp-supplier-name','sp-kg','sp-price','sp-wasted','sp-problem-type','sp-problem-notes',
+      ['sp-supplier-name','sp-kg','sp-price','sp-delivery','sp-wasted','sp-problem-type','sp-problem-notes',
        'sp-refund-kg','sp-refund-amount','sp-refund-notes'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
       document.getElementById('sp-total-preview').textContent = '৳ 0';
       loadSuppliers();

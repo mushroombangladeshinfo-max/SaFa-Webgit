@@ -128,7 +128,7 @@
     .label-optional{opacity:.5;font-weight:400;text-transform:none;letter-spacing:0;}
     .readonly-preview{padding:9px 11px;border-radius:6px;border:1px solid var(--border);background:var(--bg3);color:var(--al);font-family:'DM Mono','Hind Siliguri',monospace;font-size:13px;}
   </style>
-  <script type="module" crossorigin src="/assets/expenses-CfGrUVpH.js"></script>
+  <script type="module" crossorigin src="/assets/expenses-0c_N5F-p.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
   <link rel="modulepreload" crossorigin href="/assets/admin-auth-4ZiUUGs_.js">
   <link rel="modulepreload" crossorigin href="/assets/admin-nav-CYswHG_J.js">
@@ -355,7 +355,11 @@
             <input type="number" id="sp-price" placeholder="0" min="0" step="0.01">
           </div>
           <div class="form-group">
-            <label>Total Cost</label>
+            <label>Delivery Cost (৳) <span class="label-optional">(optional)</span></label>
+            <input type="number" id="sp-delivery" placeholder="0" min="0" step="0.01">
+          </div>
+          <div class="form-group">
+            <label>Total Cost <span class="label-optional">(incl. delivery)</span></label>
             <div class="readonly-preview" id="sp-total-preview">৳ 0</div>
           </div>
         </div>
