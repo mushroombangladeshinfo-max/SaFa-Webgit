@@ -218,7 +218,12 @@ const S = window.S = {
   // never reused after removal, so a removed entry's fields never collide
   // with a later one.
   harvestEntryIds:     [0],
-  harvestEntryNextId:  1
+  harvestEntryNextId:  1,
+  // Same reasoning as harvestEntryIds — contamination can hit more than
+  // one room in a day, each with its own type/bag-count/action, so it's a
+  // repeatable block instead of one flat set of fields.
+  qcEntryIds:    [0],
+  qcEntryNextId: 1
 };
 
 /* ── Step definitions ── */
@@ -388,35 +393,68 @@ window.removeHarvestEntry = function(idx) {
   recomputeRooms();
 };
 
-function formQC() {
-  return `<div class="cards">
-      <div class="cg3" style="width:100%;max-width:460px">
-        <div class="card">
-          <div class="card-lbl">কোন রুম?</div>
-          <select class="sel-inline" id="f-qc-contam-room" onchange="S.d['qc-contam-room']=this.value; recomputeRooms();">
-            <option value="">—</option>
-            <option>A</option><option>B</option><option>C</option>
-            <option value="multiple">একাধিক</option>
-          </select>
-        </div>
-        <div class="card">
-          <div class="card-lbl">ধরন</div>
-          <select class="sel-inline" id="f-qc-contam-type" onchange="S.d['qc-contam-type']=this.value">
-            <option value="">—</option>
-            <option value="bacterial">Bacterial</option>
-            <option value="mould">Mould</option>
-            <option value="trichoderma">Trichoderma</option>
-            <option value="unknown">অজানা</option>
-          </select>
-        </div>
-        ${sc('qc-contam-bags','ক্ষতিগ্রস্ত ব্যাগ','টি',1)}
+// One entry per room actually affected that day — a day with contamination
+// in room A and room C is just two blocks (each with its own type/bag
+// count/action) instead of a "multiple" flag that can't say which rooms or
+// keep their bag counts separate (see migration 33_qc_entries.sql).
+function qcEntryBlock(idx) {
+  const rId = 'qc-room-'+idx, tId = 'qc-type-'+idx;
+  return `<div class="he-block">
+    <div class="he-head">
+      <span class="he-title">কন্টামিনেশন এন্ট্রি ${idx+1}</span>
+      ${S.qcEntryIds.length > 1 ? `<button type="button" class="he-remove" onclick="removeQcEntry(${idx})">✕ সরান</button>` : ''}
+    </div>
+    <div class="cg3">
+      <div class="card">
+        <div class="card-lbl">কোন রুম?</div>
+        <select class="sel-inline" id="f-${rId}" onchange="S.d['${rId}']=this.value; recomputeRooms();">
+          <option value="">—</option>
+          <option${S.d[rId]==='A'?' selected':''}>A</option>
+          <option${S.d[rId]==='B'?' selected':''}>B</option>
+          <option${S.d[rId]==='C'?' selected':''}>C</option>
+        </select>
       </div>
-      <div class="card" style="max-width:460px;width:100%">
-        <div class="card-lbl">ব্যবস্থা নেওয়া হয়েছে</div>
-        <input class="ci-txt" type="text" id="f-qc-contam-action" value="${S.d['qc-contam-action']||''}" placeholder="যেমন: ব্যাগ সরানো হয়েছে, রুম জীবাণুমুক্ত করা হয়েছে..." oninput="S.d['qc-contam-action']=this.value"/>
+      <div class="card">
+        <div class="card-lbl">ধরন</div>
+        <select class="sel-inline" id="f-${tId}" onchange="S.d['${tId}']=this.value">
+          <option value="">—</option>
+          <option value="bacterial"${S.d[tId]==='bacterial'?' selected':''}>Bacterial</option>
+          <option value="mould"${S.d[tId]==='mould'?' selected':''}>Mould</option>
+          <option value="trichoderma"${S.d[tId]==='trichoderma'?' selected':''}>Trichoderma</option>
+          <option value="unknown"${S.d[tId]==='unknown'?' selected':''}>অজানা</option>
+        </select>
       </div>
+      ${sc('qc-bags-'+idx,'ক্ষতিগ্রস্ত ব্যাগ','টি',1)}
+    </div>
+    <div class="card" style="max-width:460px;width:100%">
+      <div class="card-lbl">ব্যবস্থা নেওয়া হয়েছে</div>
+      <input class="ci-txt" type="text" id="f-qc-action-${idx}" value="${S.d['qc-action-'+idx]||''}" placeholder="যেমন: ব্যাগ সরানো হয়েছে, রুম জীবাণুমুক্ত করা হয়েছে..." oninput="S.d['qc-action-${idx}']=this.value"/>
+    </div>
   </div>`;
 }
+
+function renderQcEntries() {
+  return S.qcEntryIds.map(idx => qcEntryBlock(idx)).join('<div class="he-sep"></div>');
+}
+
+function formQC() {
+  return `<div class="cards">
+    <div id="qc-entries">${renderQcEntries()}</div>
+    <button type="button" class="he-add" onclick="addQcEntry()">+ আরেকটি রুমের Contamination যোগ করুন</button>
+  </div>`;
+}
+
+window.addQcEntry = function() {
+  collect();
+  S.qcEntryIds.push(S.qcEntryNextId++);
+  document.getElementById('qc-entries').innerHTML = renderQcEntries();
+};
+window.removeQcEntry = function(idx) {
+  collect();
+  S.qcEntryIds = S.qcEntryIds.filter(i => i !== idx);
+  document.getElementById('qc-entries').innerHTML = renderQcEntries();
+  recomputeRooms();
+};
 
 function formSpawn() {
   return `<div class="cards">
@@ -839,8 +877,10 @@ window.recomputeRooms = function() {
     if (batch) set.add(batch.room);
   });
   if (S.d['nb-room']) set.add(S.d['nb-room']);
-  const cr = S.d['qc-contam-room'];
-  if (cr && cr !== 'multiple') set.add(cr);
+  S.qcEntryIds.forEach(idx => {
+    const r = S.d['qc-room-'+idx];
+    if (r) set.add(r);
+  });
   S.rooms = Array.from(set);
 };
 
@@ -945,13 +985,26 @@ async function submit() {
     };
   }).filter(e => e.batch_number || e.fresh_a_kg || e.fresh_rej_kg || e.healthy_kg || e.recovered_kg || e.bags_removed);
 
+  // One row per room actually affected — the entry-level detail behind
+  // contam_event/contam_bags below (migration 33_qc_entries.sql). Only
+  // entries with a room, type, bags, or action are kept, so an extra
+  // blank "add" block someone backs out of doesn't insert an empty entry.
+  const qcEntryRows = S.qcEntryIds.map(idx => ({
+    log_date:    logDate,
+    room:        ds('qc-room-'+idx),
+    contam_type: ds('qc-type-'+idx),
+    bags:        dn2('qc-bags-'+idx),
+    action:      ds('qc-action-'+idx),
+  })).filter(e => e.room || e.contam_type || e.bags || e.action);
+
   const payload = {
     log_date: logDate,
     submitted_by: S.userEmail || null,
     harvest_fresh_a:sumEntries('h-fresh-a'), harvest_fresh_rej:sumEntries('h-fresh-rej'),
     harvest_healthy_kg:sumEntries('h-healthy-kg'), harvest_recovered_kg:sumEntries('h-recovered-kg'),
     harvest_rooms: S.rooms.length ? S.rooms : null,
-    contam_event:S.phase['qc']==='form', contam_room:ds('qc-contam-room'), contam_type:ds('qc-contam-type'), contam_bags:dn2('qc-contam-bags'), contam_action:ds('qc-contam-action'),
+    contam_event: qcEntryRows.length > 0,
+    contam_bags:  S.qcEntryIds.reduce((s,idx) => s + dn('qc-bags-'+idx), 0),
     spawn_bought_kg:dn2('sp-bought-kg'), spawn_price_per_kg:dn2('sp-price-per-kg'), spawn_supplier:ds('sp-supplier'),
     spawn_used_kg:dn2('sp-used-kg'), substrate_kg:dn2('sp-substrate-kg'), substrate_type:ds('sp-substrate-type'),
     bags_inoculated:dn2('sp-bags-inoculated'), bags_discarded:dn2('sp-bags-discarded'),
@@ -999,6 +1052,14 @@ async function submit() {
     if (harvestEntryRows.length) {
       const { error: heErr } = await sb.from('harvest_entries').insert(harvestEntryRows);
       if (heErr) throw heErr;
+    }
+
+    // Same replace-wholesale model as harvest_entries above.
+    const { error: delQcErr } = await sb.from('qc_entries').delete().eq('log_date', logDate);
+    if (delQcErr) throw delQcErr;
+    if (qcEntryRows.length) {
+      const { error: qcErr } = await sb.from('qc_entries').insert(qcEntryRows);
+      if (qcErr) throw qcErr;
     }
 
     /* Success screen */
