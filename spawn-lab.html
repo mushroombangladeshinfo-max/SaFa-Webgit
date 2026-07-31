@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Spawn Lab — SaFa Naturals</title>
+<link rel="icon" type="image/png" href="/favicon.png"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&family=Cormorant+Garamond:wght@300;600&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --g900:#060e09;--g800:#0e1a13;--g700:#121f16;
+  --c:#f5efe6;--al:#d9b254;--a:#c49a3c;
+  --border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.13);
+  --green:#5fcf80;--red:#e05252;--red-dim:rgba(224,82,82,.1);
+  --gold-dim:rgba(217,178,84,.1);--r:10px;--r2:6px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:14px}
+body{font-family:'DM Sans','Hind Siliguri',sans-serif;background:var(--g900);color:var(--c);min-height:100vh}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:2px}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── Topbar (matches farm-analytics.html/harvest-log.html) ── */
+.topbar{height:58px;background:var(--g800);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 28px;gap:16px;position:sticky;top:0;z-index:100}
+.back-link{font-size:11px;color:rgba(245,239,230,.38);text-decoration:none;display:flex;align-items:center;gap:5px;transition:color .2s;flex-shrink:0}
+.back-link:hover{color:rgba(245,239,230,.75)}
+.back-link svg{width:13px;height:13px}
+.top-sep{width:1px;height:20px;background:var(--border);flex-shrink:0}
+.top-title{font-family:'Syne','Hind Siliguri',sans-serif;font-size:14px;font-weight:700;flex:1}
+
+.content{max-width:1300px;margin:0 auto;padding:28px 28px 60px}
+
+/* ── KPIs ── */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+@media(max-width:900px){.kpi-grid{grid-template-columns:repeat(2,1fr)}}
+.kpi{background:var(--g800);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+.kpi-label{font-family:'Syne','Hind Siliguri',sans-serif;font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(245,239,230,.35);margin-bottom:6px}
+.kpi-val{font-family:'DM Mono',monospace;font-size:20px;font-weight:500;color:var(--c)}
+.kpi-val.gold{color:var(--al)}
+.kpi-val.red{color:var(--red)}
+
+.btn{font-family:'Syne','Hind Siliguri',sans-serif;font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:9px 16px;border-radius:6px;border:1px solid var(--border);background:rgba(255,255,255,.04);color:rgba(245,239,230,.6);cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:6px}
+.btn:hover{color:var(--c);background:rgba(255,255,255,.08)}
+.btn.primary{background:rgba(196,154,60,.12);border-color:rgba(196,154,60,.3);color:var(--al)}
+.btn.primary:hover{background:rgba(196,154,60,.2)}
+.btn.sm{padding:6px 10px;font-size:8px}
+
+/* ── Table ── */
+.table-card{background:var(--g800);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:24px}
+.table-toolbar{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border)}
+.table-title{font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(245,239,230,.35)}
+.scroll-x{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th{font-family:'Syne','Hind Siliguri',sans-serif;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(245,239,230,.35);padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:12px 14px;font-size:13px;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:middle;white-space:nowrap}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,.02)}
+.empty-state{text-align:center;padding:40px 20px;color:rgba(245,239,230,.3)}
+.empty-icon{font-size:30px;margin-bottom:10px}
+.td-actions{display:flex;gap:6px;align-items:center}
+
+/* ── Status ── */
+.status-pill{display:inline-flex;padding:3px 9px;border-radius:20px;font-family:'Syne','Hind Siliguri',sans-serif;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+.s-incubating{background:rgba(80,200,255,.1);color:#50c8ff}
+.s-ready{background:rgba(95,207,128,.12);color:var(--green)}
+.s-contaminated{background:rgba(224,82,82,.12);color:var(--red)}
+.s-used{background:rgba(255,255,255,.06);color:rgba(245,239,230,.45)}
+.s-expired{background:rgba(255,255,255,.06);color:rgba(245,239,230,.3)}
+.status-select{background:var(--g900);border:1px solid var(--border2);border-radius:5px;color:var(--c);font-family:'DM Sans',sans-serif;font-size:11px;padding:5px 8px;cursor:pointer;outline:none}
+.status-select option{background:var(--g900)}
+
+/* ── Modal ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:500;padding:20px}
+.modal-overlay.open{display:flex;animation:fadeUp .2s ease}
+.modal{background:var(--g800);border:1px solid var(--border);border-radius:12px;padding:28px;width:100%;max-width:620px;max-height:90vh;overflow-y:auto}
+.modal-title{font-family:'Syne','Hind Siliguri',sans-serif;font-size:14px;font-weight:700;color:var(--c);margin-bottom:20px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:520px){.form-grid{grid-template-columns:1fr}}
+.form-group{display:flex;flex-direction:column;gap:6px}
+.form-group.span2{grid-column:span 2}
+label{font-family:'Syne','Hind Siliguri',sans-serif;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(245,239,230,.35)}
+input,select,textarea{background:var(--g900);border:1px solid var(--border);border-radius:6px;color:var(--c);font-family:'DM Sans','Hind Siliguri',sans-serif;font-size:13px;padding:9px 12px;outline:none;width:100%}
+input:focus,select:focus,textarea:focus{border-color:rgba(196,154,60,.5)}
+.modal-actions{display:flex;gap:10px;margin-top:20px;justify-content:flex-end}
+
+.toast-wrap{position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;gap:8px}
+.toast{padding:12px 18px;border-radius:8px;font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;animation:fadeUp .3s ease}
+.toast.ok{background:#1a3322;border:1px solid rgba(95,207,128,.3);color:var(--green)}
+.toast.err{background:#2a1510;border:1px solid rgba(224,90,43,.3);color:var(--red)}
+
+@media(max-width:600px){.topbar{padding:0 16px;gap:10px}.top-title{font-size:12px}.content{padding:18px 16px 40px}}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <a href="home.html" class="back-link">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+    Home
+  </a>
+  <div class="top-sep"></div>
+  <div class="top-title">🧫 Spawn Lab</div>
+  <span class="rt-indicator" id="rt-indicator"><span class="rt-dot"></span>Live</span>
+</header>
+
+<div class="content">
+
+  <div class="kpi-grid">
+    <div class="kpi"><div class="kpi-label">Active Cultures</div><div class="kpi-val" id="kpi-cultures-active">—</div></div>
+    <div class="kpi"><div class="kpi-label">Active Grain Spawn</div><div class="kpi-val" id="kpi-grain-active">—</div></div>
+    <div class="kpi"><div class="kpi-label">Ready to Use</div><div class="kpi-val gold" id="kpi-ready">—</div></div>
+    <div class="kpi"><div class="kpi-label">Contaminated (all-time)</div><div class="kpi-val red" id="kpi-contaminated">—</div></div>
+  </div>
+
+  <!-- Cultures -->
+  <div class="table-card">
+    <div class="table-toolbar">
+      <span class="table-title">Cultures (Agar / Liquid Culture)</span>
+      <button type="button" class="btn primary sm" id="add-culture-btn">+ Add Culture</button>
+    </div>
+    <div class="scroll-x">
+      <table>
+        <thead><tr>
+          <th>ID</th><th>Stage</th><th>Strain</th><th>Source</th><th>Parent</th>
+          <th class="th-r">Qty</th><th>Start Date</th><th>Location</th><th>Status</th><th>Actions</th>
+        </tr></thead>
+        <tbody id="cultures-tbody"><tr><td colspan="10"><div class="empty-state"><div class="empty-icon">⏳</div>Loading...</div></td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Grain Spawn -->
+  <div class="table-card">
+    <div class="table-toolbar">
+      <span class="table-title">Grain Spawn Runs</span>
+      <button type="button" class="btn primary sm" id="add-grain-btn">+ Add Grain Spawn</button>
+    </div>
+    <div class="scroll-x">
+      <table>
+        <thead><tr>
+          <th>ID</th><th>Source</th><th>Grain Type</th><th class="th-r">Grain (kg)</th>
+          <th class="th-r">Jars/Bags</th><th>Start Date</th><th>Location</th><th>Status</th><th>Actions</th>
+        </tr></thead>
+        <tbody id="grain-tbody"><tr><td colspan="9"><div class="empty-state"><div class="empty-icon">⏳</div>Loading...</div></td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- Add/Edit Culture Modal -->
+<div class="modal-overlay" id="culture-modal">
+  <div class="modal">
+    <div class="modal-title" id="culture-modal-title">Add Culture</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Stage *</label>
+        <select id="cu-stage">
+          <option value="agar">Agar / Petri</option>
+          <option value="liquid_culture">Liquid Culture</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Strain</label>
+        <input type="text" id="cu-strain" placeholder="e.g. Oyster - P. ostreatus">
+      </div>
+      <div class="form-group span2">
+        <label>Source</label>
+        <input type="text" id="cu-source" placeholder="e.g. spore print, tissue culture, purchased slant">
+      </div>
+      <div class="form-group span2">
+        <label>Parent Culture (optional)</label>
+        <select id="cu-parent">
+          <option value="">—</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Quantity (plates/jars)</label>
+        <input type="number" id="cu-quantity" min="0">
+      </div>
+      <div class="form-group">
+        <label>Start Date</label>
+        <input type="date" id="cu-start-date">
+      </div>
+      <div class="form-group">
+        <label>Location</label>
+        <input type="text" id="cu-location" placeholder="e.g. incubator shelf 2">
+      </div>
+      <div class="form-group">
+        <label>Contaminated Count</label>
+        <input type="number" id="cu-contaminated" min="0" value="0">
+      </div>
+      <div class="form-group">
+        <label>Status</label>
+        <select id="cu-status">
+          <option value="incubating">Incubating</option>
+          <option value="ready">Ready</option>
+          <option value="contaminated">Contaminated</option>
+          <option value="used">Used</option>
+          <option value="expired">Expired</option>
+        </select>
+      </div>
+      <div class="form-group span2">
+        <label>Notes</label>
+        <textarea id="cu-notes" rows="2"></textarea>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn" id="culture-modal-cancel">Cancel</button>
+      <button type="button" class="btn primary" id="culture-modal-save">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit Grain Spawn Modal -->
+<div class="modal-overlay" id="grain-modal">
+  <div class="modal">
+    <div class="modal-title" id="grain-modal-title">Add Grain Spawn Run</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Source Culture (optional)</label>
+        <select id="gr-source-culture"><option value="">—</option></select>
+      </div>
+      <div class="form-group">
+        <label>Or: Parent Grain Spawn (multiplication)</label>
+        <select id="gr-parent-grain"><option value="">—</option></select>
+      </div>
+      <div class="form-group">
+        <label>Grain Type</label>
+        <input type="text" id="gr-grain-type" placeholder="e.g. wheat, sorghum, rye">
+      </div>
+      <div class="form-group">
+        <label>Grain (kg)</label>
+        <input type="number" id="gr-grain-kg" min="0" step="0.1">
+      </div>
+      <div class="form-group">
+        <label>Jars / Bags Count</label>
+        <input type="number" id="gr-jars" min="0">
+      </div>
+      <div class="form-group">
+        <label>Start Date</label>
+        <input type="date" id="gr-start-date">
+      </div>
+      <div class="form-group">
+        <label>Location</label>
+        <input type="text" id="gr-location" placeholder="e.g. incubator shelf 2">
+      </div>
+      <div class="form-group">
+        <label>Contaminated Count</label>
+        <input type="number" id="gr-contaminated" min="0" value="0">
+      </div>
+      <div class="form-group span2">
+        <label>Status</label>
+        <select id="gr-status">
+          <option value="incubating">Incubating</option>
+          <option value="ready">Ready</option>
+          <option value="contaminated">Contaminated</option>
+          <option value="used">Used</option>
+          <option value="expired">Expired</option>
+        </select>
+      </div>
+      <div class="form-group span2">
+        <label>Notes</label>
+        <textarea id="gr-notes" rows="2"></textarea>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn" id="grain-modal-cancel">Cancel</button>
+      <button type="button" class="btn primary" id="grain-modal-save">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toast-wrap"></div>
+
+<script type="module">
+import { createClient } from '@supabase/supabase-js';
+import { requireAdmin } from '/src/admin-auth.js';
+import { localDateStr } from '/src/date-utils.js';
+import { subscribeRealtime, injectRealtimeStyles } from '/src/realtime.js';
+
+const sb = createClient(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_ANON_KEY
+);
+
+function toast(msg, type='ok') {
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.textContent = msg;
+  document.getElementById('toast-wrap').appendChild(el);
+  setTimeout(() => el.remove(), 3500);
+}
+
+let _cultures = [], _grain = [], _editCultureId = null, _editGrainId = null;
+
+async function loadAll() {
+  const [{ data: cultures, error: e1 }, { data: grain, error: e2 }] = await Promise.all([
+    sb.from('spawn_cultures').select('*').order('start_date', { ascending: false }),
+    sb.from('grain_spawn_batches').select('*').order('start_date', { ascending: false }),
+  ]);
+  if (e1) { toast(e1.message, 'err'); return; }
+  if (e2) { toast(e2.message, 'err'); return; }
+  _cultures = cultures || [];
+  _grain    = grain || [];
+  renderKPIs();
+  renderCultures();
+  renderGrain();
+  fillDropdowns();
+}
+
+function renderKPIs() {
+  const activeStatuses = ['incubating', 'ready'];
+  const cultureActive = _cultures.filter(c => activeStatuses.includes(c.status));
+  const grainActive   = _grain.filter(g => activeStatuses.includes(g.status));
+  const ready         = _cultures.filter(c => c.status === 'ready').length + _grain.filter(g => g.status === 'ready').length;
+  const contaminated  = _cultures.reduce((s,c) => s + (+c.contaminated_count||0), 0) + _grain.reduce((s,g) => s + (+g.contaminated_count||0), 0);
+  document.getElementById('kpi-cultures-active').textContent = cultureActive.length;
+  document.getElementById('kpi-grain-active').textContent    = grainActive.length;
+  document.getElementById('kpi-ready').textContent           = ready;
+  document.getElementById('kpi-contaminated').textContent    = contaminated;
+}
+
+function statusPill(status) {
+  return `<span class="status-pill s-${status}">${status}</span>`;
+}
+function statusSelect(id, table, status) {
+  const opts = ['incubating','ready','contaminated','used','expired']
+    .map(s => `<option value="${s}"${s===status?' selected':''}>${s}</option>`).join('');
+  return `<select class="status-select" onchange="window.quickStatusChange('${table}',${id},this.value)">${opts}</select>`;
+}
+
+function renderCultures() {
+  const tbody = document.getElementById('cultures-tbody');
+  if (!_cultures.length) {
+    tbody.innerHTML = '<tr><td colspan="10"><div class="empty-state"><div class="empty-icon">🧫</div>No cultures recorded yet</div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = _cultures.map(c => {
+    const parent = _cultures.find(p => p.id === c.parent_culture_id);
+    return `<tr>
+      <td>#${c.id}</td>
+      <td>${c.stage === 'agar' ? 'Agar/Petri' : 'Liquid Culture'}</td>
+      <td>${c.strain || '—'}</td>
+      <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis">${c.source || '—'}</td>
+      <td>${parent ? '#'+parent.id : '—'}</td>
+      <td class="th-r">${c.quantity ?? '—'}</td>
+      <td>${c.start_date || '—'}</td>
+      <td>${c.location || '—'}</td>
+      <td>${statusSelect(c.id, 'spawn_cultures', c.status)}</td>
+      <td><div class="td-actions">
+        <button type="button" class="btn sm" onclick="window.editCulture(${c.id})">Edit</button>
+        <button type="button" class="btn sm" onclick="window.deleteCulture(${c.id})">Del</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+function renderGrain() {
+  const tbody = document.getElementById('grain-tbody');
+  if (!_grain.length) {
+    tbody.innerHTML = '<tr><td colspan="9"><div class="empty-state"><div class="empty-icon">🌾</div>No grain spawn runs recorded yet</div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = _grain.map(g => {
+    const cultureSrc = _cultures.find(c => c.id === g.source_culture_id);
+    const parentGrain = _grain.find(p => p.id === g.parent_grain_spawn_id);
+    const src = parentGrain ? `Grain #${parentGrain.id}` : (cultureSrc ? `Culture #${cultureSrc.id}` : '—');
+    return `<tr>
+      <td>#${g.id}</td>
+      <td>${src}</td>
+      <td>${g.grain_type || '—'}</td>
+      <td class="th-r">${g.grain_kg ?? '—'}</td>
+      <td class="th-r">${g.jars_or_bags_count ?? '—'}</td>
+      <td>${g.start_date || '—'}</td>
+      <td>${g.location || '—'}</td>
+      <td>${statusSelect(g.id, 'grain_spawn_batches', g.status)}</td>
+      <td><div class="td-actions">
+        <button type="button" class="btn sm" onclick="window.editGrain(${g.id})">Edit</button>
+        <button type="button" class="btn sm" onclick="window.deleteGrain(${g.id})">Del</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+function fillDropdowns() {
+  const cultureOpts = _cultures.map(c => `<option value="${c.id}">#${c.id} ${c.strain||c.stage}</option>`).join('');
+  const grainOpts   = _grain.map(g => `<option value="${g.id}">#${g.id} ${g.grain_type||''} (${g.start_date})</option>`).join('');
+  document.getElementById('cu-parent').innerHTML         = '<option value="">—</option>' + cultureOpts;
+  document.getElementById('gr-source-culture').innerHTML = '<option value="">—</option>' + cultureOpts;
+  document.getElementById('gr-parent-grain').innerHTML   = '<option value="">—</option>' + grainOpts;
+}
+
+window.quickStatusChange = async function(table, id, status) {
+  const patch = { status };
+  if (status === 'ready') patch.ready_date = localDateStr();
+  const { error } = await sb.from(table).update(patch).eq('id', id);
+  if (error) { toast(error.message, 'err'); return; }
+  toast('Status updated');
+  loadAll();
+};
+
+/* ── Culture modal ── */
+function openCultureModal(c=null) {
+  _editCultureId = c?.id || null;
+  document.getElementById('culture-modal-title').textContent = c ? 'Edit Culture' : 'Add Culture';
+  document.getElementById('cu-stage').value        = c?.stage || 'agar';
+  document.getElementById('cu-strain').value       = c?.strain || '';
+  document.getElementById('cu-source').value       = c?.source || '';
+  document.getElementById('cu-parent').value       = c?.parent_culture_id || '';
+  document.getElementById('cu-quantity').value     = c?.quantity ?? '';
+  document.getElementById('cu-start-date').value   = c?.start_date || localDateStr();
+  document.getElementById('cu-location').value     = c?.location || '';
+  document.getElementById('cu-contaminated').value = c?.contaminated_count ?? 0;
+  document.getElementById('cu-status').value       = c?.status || 'incubating';
+  document.getElementById('cu-notes').value        = c?.notes || '';
+  document.getElementById('culture-modal').classList.add('open');
+}
+function closeCultureModal() { document.getElementById('culture-modal').classList.remove('open'); _editCultureId = null; }
+
+document.getElementById('add-culture-btn').addEventListener('click', () => openCultureModal());
+document.getElementById('culture-modal-cancel').addEventListener('click', closeCultureModal);
+document.getElementById('culture-modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeCultureModal(); });
+
+document.getElementById('culture-modal-save').addEventListener('click', async () => {
+  const payload = {
+    stage:              document.getElementById('cu-stage').value,
+    strain:              document.getElementById('cu-strain').value.trim() || null,
+    source:              document.getElementById('cu-source').value.trim() || null,
+    parent_culture_id:   document.getElementById('cu-parent').value || null,
+    quantity:            parseInt(document.getElementById('cu-quantity').value) || null,
+    start_date:          document.getElementById('cu-start-date').value || localDateStr(),
+    location:            document.getElementById('cu-location').value.trim() || null,
+    contaminated_count:  parseInt(document.getElementById('cu-contaminated').value) || 0,
+    status:              document.getElementById('cu-status').value,
+    notes:               document.getElementById('cu-notes').value.trim() || null,
+  };
+  let error;
+  if (_editCultureId) ({ error } = await sb.from('spawn_cultures').update(payload).eq('id', _editCultureId));
+  else ({ error } = await sb.from('spawn_cultures').insert([payload]));
+  if (error) { toast(error.message, 'err'); return; }
+  toast(_editCultureId ? 'Culture updated' : 'Culture added');
+  closeCultureModal();
+  loadAll();
+});
+
+window.editCulture = (id) => openCultureModal(_cultures.find(c => c.id === id));
+window.deleteCulture = async (id) => {
+  if (!confirm('Delete this culture?')) return;
+  const { error } = await sb.from('spawn_cultures').delete().eq('id', id);
+  if (error) { toast(error.message, 'err'); return; }
+  toast('Deleted');
+  loadAll();
+};
+
+/* ── Grain spawn modal ── */
+function openGrainModal(g=null) {
+  _editGrainId = g?.id || null;
+  document.getElementById('grain-modal-title').textContent = g ? 'Edit Grain Spawn Run' : 'Add Grain Spawn Run';
+  document.getElementById('gr-source-culture').value = g?.source_culture_id || '';
+  document.getElementById('gr-parent-grain').value   = g?.parent_grain_spawn_id || '';
+  document.getElementById('gr-grain-type').value     = g?.grain_type || '';
+  document.getElementById('gr-grain-kg').value       = g?.grain_kg ?? '';
+  document.getElementById('gr-jars').value           = g?.jars_or_bags_count ?? '';
+  document.getElementById('gr-start-date').value     = g?.start_date || localDateStr();
+  document.getElementById('gr-location').value       = g?.location || '';
+  document.getElementById('gr-contaminated').value   = g?.contaminated_count ?? 0;
+  document.getElementById('gr-status').value         = g?.status || 'incubating';
+  document.getElementById('gr-notes').value          = g?.notes || '';
+  document.getElementById('grain-modal').classList.add('open');
+}
+function closeGrainModal() { document.getElementById('grain-modal').classList.remove('open'); _editGrainId = null; }
+
+document.getElementById('add-grain-btn').addEventListener('click', () => openGrainModal());
+document.getElementById('grain-modal-cancel').addEventListener('click', closeGrainModal);
+document.getElementById('grain-modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeGrainModal(); });
+
+document.getElementById('grain-modal-save').addEventListener('click', async () => {
+  const payload = {
+    source_culture_id:     document.getElementById('gr-source-culture').value || null,
+    parent_grain_spawn_id: document.getElementById('gr-parent-grain').value || null,
+    grain_type:            document.getElementById('gr-grain-type').value.trim() || null,
+    grain_kg:              parseFloat(document.getElementById('gr-grain-kg').value) || null,
+    jars_or_bags_count:    parseInt(document.getElementById('gr-jars').value) || null,
+    start_date:            document.getElementById('gr-start-date').value || localDateStr(),
+    location:              document.getElementById('gr-location').value.trim() || null,
+    contaminated_count:    parseInt(document.getElementById('gr-contaminated').value) || 0,
+    status:                document.getElementById('gr-status').value,
+    notes:                 document.getElementById('gr-notes').value.trim() || null,
+  };
+  let error;
+  if (_editGrainId) ({ error } = await sb.from('grain_spawn_batches').update(payload).eq('id', _editGrainId));
+  else ({ error } = await sb.from('grain_spawn_batches').insert([payload]));
+  if (error) { toast(error.message, 'err'); return; }
+  toast(_editGrainId ? 'Grain spawn run updated' : 'Grain spawn run added');
+  closeGrainModal();
+  loadAll();
+});
+
+window.editGrain = (id) => openGrainModal(_grain.find(g => g.id === id));
+window.deleteGrain = async (id) => {
+  if (!confirm('Delete this grain spawn run?')) return;
+  const { error } = await sb.from('grain_spawn_batches').delete().eq('id', id);
+  if (error) { toast(error.message, 'err'); return; }
+  toast('Deleted');
+  loadAll();
+};
+
+/* ── Auth + init ── */
+(async () => {
+  const session = await requireAdmin(sb);
+  if (!session) { window.location.href = 'orders.html'; return; }
+  await loadAll();
+  injectRealtimeStyles();
+  subscribeRealtime(sb, 'spawn-lab-live', ['spawn_cultures', 'grain_spawn_batches'], loadAll, { indicatorId: 'rt-indicator' });
+})();
+</script>
+</body>
+</html>

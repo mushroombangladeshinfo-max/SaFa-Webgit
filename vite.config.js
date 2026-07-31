@@ -22,6 +22,7 @@ export default defineConfig({
         products:      './products.html',
         insights:      './insights.html',
         harvestLog:    './harvest-log.html',
+        spawnLab:      './spawn-lab.html',
       }
     }
   }

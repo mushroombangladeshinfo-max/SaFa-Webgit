@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Spawn Lab — SaFa Naturals</title>
+<link rel="icon" type="image/png" href="/favicon.png"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&family=Cormorant+Garamond:wght@300;600&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --g900:#060e09;--g800:#0e1a13;--g700:#121f16;
+  --c:#f5efe6;--al:#d9b254;--a:#c49a3c;
+  --border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.13);
+  --green:#5fcf80;--red:#e05252;--red-dim:rgba(224,82,82,.1);
+  --gold-dim:rgba(217,178,84,.1);--r:10px;--r2:6px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:14px}
+body{font-family:'DM Sans','Hind Siliguri',sans-serif;background:var(--g900);color:var(--c);min-height:100vh}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:2px}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── Topbar (matches farm-analytics.html/harvest-log.html) ── */
+.topbar{height:58px;background:var(--g800);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 28px;gap:16px;position:sticky;top:0;z-index:100}
+.back-link{font-size:11px;color:rgba(245,239,230,.38);text-decoration:none;display:flex;align-items:center;gap:5px;transition:color .2s;flex-shrink:0}
+.back-link:hover{color:rgba(245,239,230,.75)}
+.back-link svg{width:13px;height:13px}
+.top-sep{width:1px;height:20px;background:var(--border);flex-shrink:0}
+.top-title{font-family:'Syne','Hind Siliguri',sans-serif;font-size:14px;font-weight:700;flex:1}
+
+.content{max-width:1300px;margin:0 auto;padding:28px 28px 60px}
+
+/* ── KPIs ── */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+@media(max-width:900px){.kpi-grid{grid-template-columns:repeat(2,1fr)}}
+.kpi{background:var(--g800);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+.kpi-label{font-family:'Syne','Hind Siliguri',sans-serif;font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(245,239,230,.35);margin-bottom:6px}
+.kpi-val{font-family:'DM Mono',monospace;font-size:20px;font-weight:500;color:var(--c)}
+.kpi-val.gold{color:var(--al)}
+.kpi-val.red{color:var(--red)}
+
+.btn{font-family:'Syne','Hind Siliguri',sans-serif;font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:9px 16px;border-radius:6px;border:1px solid var(--border);background:rgba(255,255,255,.04);color:rgba(245,239,230,.6);cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:6px}
+.btn:hover{color:var(--c);background:rgba(255,255,255,.08)}
+.btn.primary{background:rgba(196,154,60,.12);border-color:rgba(196,154,60,.3);color:var(--al)}
+.btn.primary:hover{background:rgba(196,154,60,.2)}
+.btn.sm{padding:6px 10px;font-size:8px}
+
+/* ── Table ── */
+.table-card{background:var(--g800);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:24px}
+.table-toolbar{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border)}
+.table-title{font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(245,239,230,.35)}
+.scroll-x{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th{font-family:'Syne','Hind Siliguri',sans-serif;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(245,239,230,.35);padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:12px 14px;font-size:13px;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:middle;white-space:nowrap}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,.02)}
+.empty-state{text-align:center;padding:40px 20px;color:rgba(245,239,230,.3)}
+.empty-icon{font-size:30px;margin-bottom:10px}
+.td-actions{display:flex;gap:6px;align-items:center}
+
+/* ── Status ── */
+.status-pill{display:inline-flex;padding:3px 9px;border-radius:20px;font-family:'Syne','Hind Siliguri',sans-serif;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+.s-incubating{background:rgba(80,200,255,.1);color:#50c8ff}
+.s-ready{background:rgba(95,207,128,.12);color:var(--green)}
+.s-contaminated{background:rgba(224,82,82,.12);color:var(--red)}
+.s-used{background:rgba(255,255,255,.06);color:rgba(245,239,230,.45)}
+.s-expired{background:rgba(255,255,255,.06);color:rgba(245,239,230,.3)}
+.status-select{background:var(--g900);border:1px solid var(--border2);border-radius:5px;color:var(--c);font-family:'DM Sans',sans-serif;font-size:11px;padding:5px 8px;cursor:pointer;outline:none}
+.status-select option{background:var(--g900)}
+
+/* ── Modal ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:500;padding:20px}
+.modal-overlay.open{display:flex;animation:fadeUp .2s ease}
+.modal{background:var(--g800);border:1px solid var(--border);border-radius:12px;padding:28px;width:100%;max-width:620px;max-height:90vh;overflow-y:auto}
+.modal-title{font-family:'Syne','Hind Siliguri',sans-serif;font-size:14px;font-weight:700;color:var(--c);margin-bottom:20px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:520px){.form-grid{grid-template-columns:1fr}}
+.form-group{display:flex;flex-direction:column;gap:6px}
+.form-group.span2{grid-column:span 2}
+label{font-family:'Syne','Hind Siliguri',sans-serif;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(245,239,230,.35)}
+input,select,textarea{background:var(--g900);border:1px solid var(--border);border-radius:6px;color:var(--c);font-family:'DM Sans','Hind Siliguri',sans-serif;font-size:13px;padding:9px 12px;outline:none;width:100%}
+input:focus,select:focus,textarea:focus{border-color:rgba(196,154,60,.5)}
+.modal-actions{display:flex;gap:10px;margin-top:20px;justify-content:flex-end}
+
+.toast-wrap{position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;gap:8px}
+.toast{padding:12px 18px;border-radius:8px;font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;animation:fadeUp .3s ease}
+.toast.ok{background:#1a3322;border:1px solid rgba(95,207,128,.3);color:var(--green)}
+.toast.err{background:#2a1510;border:1px solid rgba(224,90,43,.3);color:var(--red)}
+
+@media(max-width:600px){.topbar{padding:0 16px;gap:10px}.top-title{font-size:12px}.content{padding:18px 16px 40px}}
+</style>
+  <script type="module" crossorigin src="/assets/spawnLab-DdjiT6nA.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="/assets/index-B-jIxwbw.js">
+  <link rel="modulepreload" crossorigin href="/assets/admin-auth-4ZiUUGs_.js">
+  <link rel="modulepreload" crossorigin href="/assets/date-utils-D3sh9T8I.js">
+  <link rel="modulepreload" crossorigin href="/assets/realtime-D7K--cdb.js">
+</head>
+<body>
+
+<header class="topbar">
+  <a href="home.html" class="back-link">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+    Home
+  </a>
+  <div class="top-sep"></div>
+  <div class="top-title">🧫 Spawn Lab</div>
+  <span class="rt-indicator" id="rt-indicator"><span class="rt-dot"></span>Live</span>
+</header>
+
+<div class="content">
+
+  <div class="kpi-grid">
+    <div class="kpi"><div class="kpi-label">Active Cultures</div><div class="kpi-val" id="kpi-cultures-active">—</div></div>
+    <div class="kpi"><div class="kpi-label">Active Grain Spawn</div><div class="kpi-val" id="kpi-grain-active">—</div></div>
+    <div class="kpi"><div class="kpi-label">Ready to Use</div><div class="kpi-val gold" id="kpi-ready">—</div></div>
+    <div class="kpi"><div class="kpi-label">Contaminated (all-time)</div><div class="kpi-val red" id="kpi-contaminated">—</div></div>
+  </div>
+
+  <!-- Cultures -->
+  <div class="table-card">
+    <div class="table-toolbar">
+      <span class="table-title">Cultures (Agar / Liquid Culture)</span>
+      <button type="button" class="btn primary sm" id="add-culture-btn">+ Add Culture</button>
+    </div>
+    <div class="scroll-x">
+      <table>
+        <thead><tr>
+          <th>ID</th><th>Stage</th><th>Strain</th><th>Source</th><th>Parent</th>
+          <th class="th-r">Qty</th><th>Start Date</th><th>Location</th><th>Status</th><th>Actions</th>
+        </tr></thead>
+        <tbody id="cultures-tbody"><tr><td colspan="10"><div class="empty-state"><div class="empty-icon">⏳</div>Loading...</div></td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Grain Spawn -->
+  <div class="table-card">
+    <div class="table-toolbar">
+      <span class="table-title">Grain Spawn Runs</span>
+      <button type="button" class="btn primary sm" id="add-grain-btn">+ Add Grain Spawn</button>
+    </div>
+    <div class="scroll-x">
+      <table>
+        <thead><tr>
+          <th>ID</th><th>Source</th><th>Grain Type</th><th class="th-r">Grain (kg)</th>
+          <th class="th-r">Jars/Bags</th><th>Start Date</th><th>Location</th><th>Status</th><th>Actions</th>
+        </tr></thead>
+        <tbody id="grain-tbody"><tr><td colspan="9"><div class="empty-state"><div class="empty-icon">⏳</div>Loading...</div></td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- Add/Edit Culture Modal -->
+<div class="modal-overlay" id="culture-modal">
+  <div class="modal">
+    <div class="modal-title" id="culture-modal-title">Add Culture</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Stage *</label>
+        <select id="cu-stage">
+          <option value="agar">Agar / Petri</option>
+          <option value="liquid_culture">Liquid Culture</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Strain</label>
+        <input type="text" id="cu-strain" placeholder="e.g. Oyster - P. ostreatus">
+      </div>
+      <div class="form-group span2">
+        <label>Source</label>
+        <input type="text" id="cu-source" placeholder="e.g. spore print, tissue culture, purchased slant">
+      </div>
+      <div class="form-group span2">
+        <label>Parent Culture (optional)</label>
+        <select id="cu-parent">
+          <option value="">—</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Quantity (plates/jars)</label>
+        <input type="number" id="cu-quantity" min="0">
+      </div>
+      <div class="form-group">
+        <label>Start Date</label>
+        <input type="date" id="cu-start-date">
+      </div>
+      <div class="form-group">
+        <label>Location</label>
+        <input type="text" id="cu-location" placeholder="e.g. incubator shelf 2">
+      </div>
+      <div class="form-group">
+        <label>Contaminated Count</label>
+        <input type="number" id="cu-contaminated" min="0" value="0">
+      </div>
+      <div class="form-group">
+        <label>Status</label>
+        <select id="cu-status">
+          <option value="incubating">Incubating</option>
+          <option value="ready">Ready</option>
+          <option value="contaminated">Contaminated</option>
+          <option value="used">Used</option>
+          <option value="expired">Expired</option>
+        </select>
+      </div>
+      <div class="form-group span2">
+        <label>Notes</label>
+        <textarea id="cu-notes" rows="2"></textarea>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn" id="culture-modal-cancel">Cancel</button>
+      <button type="button" class="btn primary" id="culture-modal-save">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit Grain Spawn Modal -->
+<div class="modal-overlay" id="grain-modal">
+  <div class="modal">
+    <div class="modal-title" id="grain-modal-title">Add Grain Spawn Run</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Source Culture (optional)</label>
+        <select id="gr-source-culture"><option value="">—</option></select>
+      </div>
+      <div class="form-group">
+        <label>Or: Parent Grain Spawn (multiplication)</label>
+        <select id="gr-parent-grain"><option value="">—</option></select>
+      </div>
+      <div class="form-group">
+        <label>Grain Type</label>
+        <input type="text" id="gr-grain-type" placeholder="e.g. wheat, sorghum, rye">
+      </div>
+      <div class="form-group">
+        <label>Grain (kg)</label>
+        <input type="number" id="gr-grain-kg" min="0" step="0.1">
+      </div>
+      <div class="form-group">
+        <label>Jars / Bags Count</label>
+        <input type="number" id="gr-jars" min="0">
+      </div>
+      <div class="form-group">
+        <label>Start Date</label>
+        <input type="date" id="gr-start-date">
+      </div>
+      <div class="form-group">
+        <label>Location</label>
+        <input type="text" id="gr-location" placeholder="e.g. incubator shelf 2">
+      </div>
+      <div class="form-group">
+        <label>Contaminated Count</label>
+        <input type="number" id="gr-contaminated" min="0" value="0">
+      </div>
+      <div class="form-group span2">
+        <label>Status</label>
+        <select id="gr-status">
+          <option value="incubating">Incubating</option>
+          <option value="ready">Ready</option>
+          <option value="contaminated">Contaminated</option>
+          <option value="used">Used</option>
+          <option value="expired">Expired</option>
+        </select>
+      </div>
+      <div class="form-group span2">
+        <label>Notes</label>
+        <textarea id="gr-notes" rows="2"></textarea>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn" id="grain-modal-cancel">Cancel</button>
+      <button type="button" class="btn primary" id="grain-modal-save">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toast-wrap"></div>
+
+</body>
+</html>
