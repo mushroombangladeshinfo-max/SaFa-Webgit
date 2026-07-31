@@ -300,10 +300,11 @@ window.adj = function(id, delta, dec) {
 
 /* ── Live calc dispatcher ── */
 window.lc = function(calc) {
-  if (calc === 'h')    calcH();
-  if (calc === 'sale') calcSale();
-  if (calc === 'exp')  calcExp();
-  if (calc === 'proc') calcProc();
+  if (calc === 'h')     calcH();
+  if (calc === 'sale')  calcSale();
+  if (calc === 'exp')   calcExp();
+  if (calc === 'proc')  calcProc();
+  if (calc === 'stock') calcStock();
 };
 
 function calcH() {
@@ -324,7 +325,14 @@ function calcSale() {
   if (el) el.textContent = fmt(tot);
 }
 function calcExp() {
-  const ids = ['ex-spawn','ex-substrate','ex-packaging','ex-labor','ex-electricity','ex-transport','ex-water','ex-other'];
+  // ex_spawn/ex_transport/ex_electricity/ex_water removed — ex_spawn was
+  // legacy-redundant with spawn_purchases (Expenses → Suppliers already
+  // handles it, with richer waste/refund tracking); the other three are
+  // periodic bills/trips, not daily production costs, and overlapped with
+  // one_off_expenses' own Transport/Utilities categories with no
+  // reconciliation between the two entry points. One canonical place each
+  // now: spawn_purchases, and one_off_expenses for transport/utilities.
+  const ids = ['ex-substrate','ex-packaging','ex-labor','ex-other'];
   const tot = ids.reduce((s,id) => s + dn(id), 0);
   const el  = document.getElementById('exp-tot');
   if (el) el.textContent = fmt(tot);
@@ -744,19 +752,21 @@ function formStock() {
   return `<div class="cards">
     <div class="sec-lbl">দিন শেষের Stock (kg)</div>
     <div class="cg3">
-      ${sc('st-fresh','তাজা','kg',0.1)}
-      ${sc('st-dried','শুকনো','kg',0.1)}
-      ${sc('st-powder','পাউডার','kg',0.1)}
+      ${sc('st-fresh','তাজা','kg',0.1,'stock')}
+      ${sc('st-dried','শুকনো','kg',0.1,'stock')}
+      ${sc('st-powder','পাউডার','kg',0.1,'stock')}
     </div>
+    <div style="font-size:11px;color:rgba(245,239,230,.3);width:100%;max-width:460px">"Expected" গতকালের Stock + আজকের Harvest/Processing/বিক্রয়-খরচ হিসাব করে বসানো হয়। বড় পার্থক্য থাকলে আবার গুনে দেখুন — অলিখিত loss বা ভুলে যাওয়া বিক্রয় ধরা পড়তে পারে।</div>
   </div>`;
 }
 
 function formExpenses() {
+  // Spawn purchase, transport, and utilities intentionally live elsewhere
+  // now (Expenses → Suppliers for spawn; one_off_expenses' Transport/
+  // Utilities categories for those two) — see calcExp()'s comment.
   const ef = [
-    ['ex-spawn','Spawn কেনা'],['ex-substrate','Substrate'],
-    ['ex-packaging','Packaging'],['ex-labor','শ্রমিকের মজুরি (মাঝে মাঝে প্রয়োজন হলে)'],
-    ['ex-electricity','বিদ্যুৎ বিল'],['ex-transport','পরিবহন'],
-    ['ex-water','পানি'],['ex-other','অন্যান্য']
+    ['ex-substrate','Substrate'],['ex-packaging','Packaging'],
+    ['ex-labor','শ্রমিকের মজুরি (মাঝে মাঝে প্রয়োজন হলে)'],['ex-other','অন্যান্য']
   ];
   const rows = [];
   for (let i = 0; i < ef.length; i += 2) {
@@ -912,6 +922,7 @@ function render(dir='next') {
   if (step.id === 'sales'   && inForm) calcSale();
   if (step.id === 'expenses'&& inForm) calcExp();
   if (step.id === 'processing'&&inForm) calcProc();
+  if (step.id === 'stock' && inForm) calcStock();
 
   /* Focus first input after animation */
   setTimeout(() => {
@@ -1187,9 +1198,8 @@ async function submit() {
     sample_dried_kg:  sampleEntryRows.reduce((s,e) => s + (+e.dried_kg||0), 0),
     sample_powder_kg: sampleEntryRows.reduce((s,e) => s + (+e.powder_kg||0), 0),
     st_fresh:dn2('st-fresh'), st_dried:dn2('st-dried'), st_powder:dn2('st-powder'),
-    ex_spawn:dn2('ex-spawn'), ex_substrate:dn2('ex-substrate'), ex_packaging:dn2('ex-packaging'),
-    ex_labor:dn2('ex-labor'), ex_electricity:dn2('ex-electricity'), ex_transport:dn2('ex-transport'),
-    ex_water:dn2('ex-water'), ex_other:dn2('ex-other'), ex_notes:ds('ex-notes'),
+    ex_substrate:dn2('ex-substrate'), ex_packaging:dn2('ex-packaging'),
+    ex_labor:dn2('ex-labor'), ex_other:dn2('ex-other'), ex_notes:ds('ex-notes'),
     online_packaging_cost:dn2('ex-online-packaging'), online_delivery_cost:dn2('ex-online-delivery'),
     offline_packaging_cost:dn2('ex-offline-packaging'), offline_delivery_cost:dn2('ex-offline-delivery'),
     n_observations:ds('n-observations'), n_tomorrow:ds('n-tomorrow'), n_unusual:ds('n-unusual'),
@@ -1336,6 +1346,49 @@ async function loadReadyGrainSpawn() {
     const { data } = await sb.from('grain_spawn_batches').select('id,grain_type,start_date').in('status', ['ready','incubating']).order('start_date', { ascending: false });
     READY_GRAIN_SPAWN = data || [];
   } catch(_) { /* silent — dropdown just shows none yet */ }
+}
+
+/* ── Stock reconciliation — "expected" is yesterday's actual count plus
+   everything else already entered this session (harvest, processing,
+   sales across every channel, waste, returns, samples), matching
+   supabase/migrations/37_stock_reconciliation.sql's v_stock_reconciliation
+   formula exactly. Cached per log-date so re-rendering the Stock step
+   (e.g. adjusting a number) doesn't refetch yesterday's row every time. */
+let _yesterdayStock = null;
+async function loadYesterdayStockFor(logDate) {
+  if (_yesterdayStock && _yesterdayStock.forDate === logDate) return _yesterdayStock;
+  const d = new Date(logDate+'T00:00:00');
+  d.setDate(d.getDate() - 1);
+  const { data } = await sb.from('farm_daily_logs').select('st_fresh,st_dried,st_powder').eq('log_date', localDateStr(d)).maybeSingle();
+  _yesterdayStock = { forDate: logDate, fresh: data?.st_fresh ?? null, dried: data?.st_dried ?? null, powder: data?.st_powder ?? null };
+  return _yesterdayStock;
+}
+
+async function calcStock() {
+  const logDate = S.d['log-date'] || localDateStr();
+  const y = await loadYesterdayStockFor(logDate);
+
+  const harvestFresh = sumEntries('h-fresh-a') + sumEntries('h-fresh-rej') + sumEntries('h-healthy-kg') + sumEntries('h-recovered-kg');
+  const b2bFnfQty  = S.b2bEntryIds.reduce((s,idx) => s + dn('b2b-qty-'+idx), 0) + S.fnfEntryIds.reduce((s,idx) => s + dn('fnf-qty-'+idx), 0);
+  const sampleFresh  = S.sampleEntryIds.reduce((s,idx) => s + dn('sample-fresh-'+idx), 0);
+  const sampleDried  = S.sampleEntryIds.reduce((s,idx) => s + dn('sample-dried-'+idx), 0);
+  const samplePowder = S.sampleEntryIds.reduce((s,idx) => s + dn('sample-powder-'+idx), 0);
+
+  const expFresh  = (y.fresh  ?? 0) + harvestFresh - dn('pr-fresh-in') - dn('s-fresh-kg') - b2bFnfQty - sampleFresh - dn('s-waste-kg') + dn('s-returned-kg');
+  const expDried  = (y.dried  ?? 0) + dn('pr-dried-out') - dn('pr-dried-in') - dn('s-dried-kg') - sampleDried;
+  const expPowder = (y.powder ?? 0) + dn('pr-powder-out') - dn('s-powder-kg') - samplePowder;
+
+  showStockTag('st-fresh',  expFresh,  y.fresh);
+  showStockTag('st-dried',  expDried,  y.dried);
+  showStockTag('st-powder', expPowder, y.powder);
+}
+function showStockTag(id, expected, prevVal) {
+  const el = document.getElementById('tag-'+id);
+  if (!el) return;
+  if (prevVal == null) { el.textContent = 'গতকালের Stock নেই — তুলনা করা যাচ্ছে না'; return; }
+  const delta = dn(id) - expected;
+  const big   = Math.abs(delta) > 0.5;
+  el.innerHTML = `Expected: ${expected.toFixed(2)} kg · পার্থক্য: <span style="color:${big?'var(--red)':'var(--green)'}">${delta>0?'+':''}${delta.toFixed(2)} kg</span>`;
 }
 
 /* ── Swipe gesture (horizontal swipe = next/back) ── */

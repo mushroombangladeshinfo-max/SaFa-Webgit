@@ -595,20 +595,56 @@
       // from both instead of only from loadMarketing().
       renderNet();
 
-      /* Contamination events in the raw log, unresolved (no contam_action noted).
+      /* Contamination events, unresolved (no action noted) — reads
+         qc_entries (migration 33_qc_entries.sql), not farm_daily_logs'
+         contam_room/contam_type/contam_action columns, which quick-log.html
+         stopped writing once contamination became a repeatable per-room
+         entry; this check was still reading them and had gone silently
+         blind for everything logged since. contam_event/contam_bags on
+         farm_daily_logs remain correct (still the daily aggregate), only
+         the per-room identity/action fields moved.
          Note: this only tells you WHICH ROOM had a problem, not which spawn
          supplier's batch caused it — that link doesn't exist yet in the
          schema. Worth adding once real supplier purchase data exists. */
-      const { data: contam } = await sb.from('farm_daily_logs')
-        .select('log_date,contam_room,contam_type,contam_bags,contam_action')
-        .eq('contam_event', true).gte('log_date', daysAgo(14)).order('log_date', { ascending:false });
-      (contam || []).filter(c => !c.contam_action).forEach(c => {
+      const { data: contam } = await sb.from('qc_entries')
+        .select('log_date,room,contam_type,bags,action')
+        .is('action', null).gte('log_date', daysAgo(14)).order('log_date', { ascending:false });
+      (contam || []).forEach(c => {
         attentionItems.push({
           sev: 'warn',
-          text: `Contamination in Room ${c.contam_room || '?'} not yet resolved`,
-          meta: `${c.contam_type || 'Unknown type'} · ${c.contam_bags || '?'} bags · ${c.log_date}`,
+          text: `Contamination in Room ${c.room || '?'} not yet resolved`,
+          meta: `${c.contam_type || 'Unknown type'} · ${c.bags || '?'} bags · ${c.log_date}`,
           href: 'quick-log.html',
         });
+      });
+    }
+
+    /* Stock reconciliation — flags the most recent counted day if the
+       physical count didn't match what harvest/processing/sales/waste
+       should have left behind (migration 37_stock_reconciliation.sql).
+       Skips a form with no real prior baseline (first-ever count) since
+       there's nothing meaningful to compare against yet. */
+    async function loadStockReconciliation() {
+      const { data } = await sb.from('v_stock_reconciliation')
+        .select('log_date,st_fresh,st_dried,st_powder,prev_st_fresh,prev_st_dried,prev_st_powder,expected_fresh,expected_dried,expected_powder')
+        .order('log_date', { ascending:false }).limit(1);
+      const row = (data||[])[0];
+      if (!row) return;
+      [
+        ['fresh',  row.prev_st_fresh,  row.st_fresh,  row.expected_fresh,  0.5],
+        ['dried',  row.prev_st_dried,  row.st_dried,  row.expected_dried,  1],
+        ['powder', row.prev_st_powder, row.st_powder, row.expected_powder, 1],
+      ].forEach(([label, prev, actual, expected, threshold]) => {
+        if (prev == null || actual == null) return;
+        const delta = Number(actual) - Number(expected);
+        if (Math.abs(delta) > threshold) {
+          attentionItems.push({
+            sev: Math.abs(delta) > threshold * 3 ? 'crit' : 'warn',
+            text: `Stock mismatch — ${label}`,
+            meta: `Expected ${Number(expected).toFixed(2)}kg, counted ${Number(actual).toFixed(2)}kg (${delta>0?'+':''}${delta.toFixed(2)}kg) on ${row.log_date}`,
+            href: 'quick-log.html',
+          });
+        }
       });
     }
 
@@ -925,7 +961,7 @@
     /* ── Load everything ── */
     async function reloadAll() {
       attentionItems.length = 0;
-      await Promise.all([loadB2B(), loadSuppliers(), loadStock(), loadFarm(), loadBatches(), loadMarketing(), loadHarvestVsSold(), loadB2C(), loadWeather(), loadWeatherChart()]);
+      await Promise.all([loadB2B(), loadSuppliers(), loadStock(), loadFarm(), loadStockReconciliation(), loadBatches(), loadMarketing(), loadHarvestVsSold(), loadB2C(), loadWeather(), loadWeatherChart()]);
       renderAttention();
     }
     await reloadAll();
@@ -935,7 +971,7 @@
        requiring a manual reload — this is the main "at a glance" page. ── */
     injectRealtimeStyles();
     subscribeRealtime(sb, 'home-live',
-      ['orders', 'products', 'farm_daily_logs', 'one_off_expenses', 'b2b_pipeline', 'spawn_purchases', 'batches', 'harvest_entries', 'b2b_sale_entries'],
+      ['orders', 'products', 'farm_daily_logs', 'one_off_expenses', 'b2b_pipeline', 'spawn_purchases', 'batches', 'harvest_entries', 'b2b_sale_entries', 'qc_entries'],
       reloadAll,
       { indicatorId: 'rt-indicator' });
 
