@@ -469,12 +469,14 @@
     // instead of running its own separate queries (see aiCurrentSnapshot()).
     const dash = {};
 
-    /* ── B2B: buyer identity (b2b_pipeline) + real transaction history (farm_daily_logs) ── */
+    /* ── B2B: buyer identity (b2b_pipeline) + real transaction history
+       (b2b_sale_entries — one row per buyer per day, so more than one
+       B2B sale on the same day is no longer silently lost). ── */
     async function loadB2B() {
       const [pipelineRes, salesRes] = await Promise.all([
         sb.from('b2b_pipeline').select('business_name,contact_name').eq('status', 'won'),
-        sb.from('farm_daily_logs').select('log_date,s_b2b_name,s_b2b_qty,s_b2b_value')
-          .not('s_b2b_name', 'is', null).order('log_date', { ascending:false }),
+        sb.from('b2b_sale_entries').select('log_date,business_name,qty,value')
+          .order('log_date', { ascending:false }),
       ]);
 
       const buyers = pipelineRes.data || [];
@@ -483,7 +485,7 @@
       const lastDaysAgo = last ? daysSince(last.log_date) : null;
       const monthCutoff = daysAgo(30);
       const rev30 = sales.filter(s => s.log_date >= monthCutoff)
-        .reduce((s,r) => s + (Number(r.s_b2b_value)||0), 0);
+        .reduce((s,r) => s + (Number(r.value)||0), 0);
 
       countUp(document.getElementById('k-b2b-revenue'), rev30, fmt);
       if (lastDaysAgo !== null) countUp(document.getElementById('k-b2b-days'), lastDaysAgo, n => Math.round(n));
@@ -933,7 +935,7 @@
        requiring a manual reload — this is the main "at a glance" page. ── */
     injectRealtimeStyles();
     subscribeRealtime(sb, 'home-live',
-      ['orders', 'products', 'farm_daily_logs', 'one_off_expenses', 'b2b_pipeline', 'spawn_purchases', 'batches', 'harvest_entries'],
+      ['orders', 'products', 'farm_daily_logs', 'one_off_expenses', 'b2b_pipeline', 'spawn_purchases', 'batches', 'harvest_entries', 'b2b_sale_entries'],
       reloadAll,
       { indicatorId: 'rt-indicator' });
 

@@ -163,7 +163,7 @@ body{font-family:'DM Sans','Hind Siliguri',sans-serif;background:var(--g900);col
     <!-- Harvest allocation — offline destinations only, see chart-sub -->
     <div class="chart-card">
       <div class="chart-title">Harvest Allocation</div>
-      <div class="chart-sub">Weekly kg by offline destination — retail, B2B, FnF, samples, waste. Online sales are tracked separately in ৳ (Insights → Operations). Click a bar to see that week's entries.</div>
+      <div class="chart-sub">Weekly kg by offline destination — retail, B2B, FnF, samples, waste (spoilage), returned (customer returns, separate from spoilage). Online sales are tracked separately in ৳ (Insights → Operations). Click a bar to see that week's entries.</div>
       <div class="chart-wrap"><canvas id="chart-allocation"></canvas></div>
       <a href="harvest-log.html" class="view-log-link">View full harvest log →</a>
     </div>
@@ -694,6 +694,7 @@ async function loadWeeklyIntegration() {
       { label: 'FnF',     data: aRows.map(r => +r.fnf_kg||0),    backgroundColor: '#7ba3ff', stack: 's' },
       { label: 'Samples', data: aRows.map(r => +r.sample_kg||0), backgroundColor: '#9085e9', stack: 's' },
       { label: 'Waste',   data: aRows.map(r => +r.waste_kg||0),  backgroundColor: 'rgba(224,82,82,.6)', stack: 's' },
+      { label: 'Returned', data: aRows.map(r => +r.returned_kg||0), backgroundColor: 'rgba(224,82,82,.32)', stack: 's' },
     ].map(d => ({ ...d, borderRadius: 3, maxBarThickness: 20 })) },
     options: { ...chartOpts({ yLabel: 'kg', prefix: '' }),
       scales: { x: { stacked: true, ticks: { maxRotation: 45, color: 'rgba(245,239,230,.3)', font: { size: 9 } }, grid: { color: 'rgba(255,255,255,.04)' } },

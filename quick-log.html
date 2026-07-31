@@ -211,7 +211,7 @@ const S = window.S = {
   d:         {},      // fieldId → value string
   rooms:     [],      // ['A','B','C']
   phase:     {},      // stepId → 'form'  (user answered YES)
-  tog:       { b2b:false, samples:false, fnf:false },
+  tog:       { b2b:false, fnf:false },
   userEmail: '',
   // One harvest can span multiple batches/rooms in a day — each id here is
   // a stable suffix for that entry's fields (h-fresh-a-0, h-batch-1, etc.),
@@ -229,7 +229,19 @@ const S = window.S = {
   // instead of a separate page-level toggle (a new-batch day IS an
   // inoculation day, so they're the same block, not two).
   inocEntryIds:    [0],
-  inocEntryNextId: 1
+  inocEntryNextId: 1,
+  // Same reasoning again — more than one B2B buyer or FnF sale can happen
+  // in one day; a single flat field silently loses every one after the
+  // first (and directly undercuts the B2B receivables tracking).
+  b2bEntryIds:    [0],
+  b2bEntryNextId: 1,
+  fnfEntryIds:    [0],
+  fnfEntryNextId: 1,
+  // Samples are their own top-level step now (not nested inside "did a
+  // sale happen today?" — a no-sale day with a free sample given away was
+  // silently losing that data), so no toggle needed, just entries.
+  sampleEntryIds:    [0],
+  sampleEntryNextId: 1
 };
 
 /* ── Step definitions ── */
@@ -240,6 +252,7 @@ const STEPS = [
   { id:'spawn',      icon:'🌱', title:'Spawn ও Substrate',   type:'yn', q:'আজকে কি Spawn বা Substrate কাজ হয়েছে?' },
   { id:'processing', icon:'⚙️', title:'Processing',          type:'yn', q:'আজকে কি Processing হয়েছে?'           },
   { id:'sales',      icon:'📦', title:'বিক্রি',              type:'yn', q:'আজকে কি বিক্রি হয়েছে?'              },
+  { id:'samples',    icon:'🎁', title:'নমুনা',                type:'yn', q:'আজকে কি বিনামূল্যে নমুনা দেওয়া হয়েছে?' },
   { id:'stock',      icon:'📊', title:'Closing Stock',       type:'yn', q:'আজকের Closing Stock দিবেন?'           },
   { id:'expenses',   icon:'💰', title:'খরচের হিসাব',         type:'yn', q:'আজকে কোনো খরচ হয়েছে?'              },
   { id:'notes',      icon:'📝', title:'নোট',                 type:'yn', q:'আজকের মন্তব্য দিবেন?'               },
@@ -604,64 +617,126 @@ function formSales() {
       </div>
     </div>`).join('');
   return `<div class="cards">
+    <div class="sec-lbl">খুচরা বিক্রি (B2B, বন্ধু-পরিবার ও নমুনা বাদে)</div>
     ${rows}
     <div class="tot"><span class="tot-lbl">মোট বিক্রয়</span><span class="tot-val" id="sale-tot">৳ 0</span></div>
     <div class="divider"></div>
-    <div class="cg2">
-      ${sc('s-waste','নষ্ট/ফেরত','kg',0.1)}
+    <div class="cg3">
+      ${sc('s-waste-kg','নষ্ট (Spoilage)','kg',0.1)}
+      ${sc('s-returned-kg','ফেরত পরিমাণ','kg',0.1)}
+      ${sc('s-returned-value','ফেরত মূল্য','৳',50)}
     </div>
+    <div class="divider"></div>
     <div class="tog-row">
       <span class="tog-lbl">আজকে কি B2B Order ছিল?</span>
       <label class="tog"><input type="checkbox" id="tog-b2b" ${S.tog.b2b?'checked':''} onchange="togC('b2b',this)"/><span class="tog-track"></span></label>
     </div>
     <div class="cond${S.tog.b2b?' show':''}" id="cond-b2b">
-      <div class="cg3" style="width:100%;max-width:460px">
-        <div class="card">
-          <div class="card-lbl">B2B Client</div>
-          <select class="sel-inline" id="f-s-b2b-buyer-select" onchange="onB2BBuyerChange(this)">
-            <option value="">—</option>
-            ${B2B_BUYERS.map(b => `<option value="${b.business_name}"${S.d['s-b2b-name']===b.business_name?' selected':''}>${b.business_name}${b.contact_name?` (${b.contact_name})`:''}</option>`).join('')}
-            <option value="__other__"${S.d['s-b2b-name'] && !B2B_BUYERS.some(b=>b.business_name===S.d['s-b2b-name'])?' selected':''}>অন্য কেউ…</option>
-          </select>
-        </div>
-        ${sc('s-b2b-qty','পরিমাণ','kg',0.1)}
-        ${sc('s-b2b-value','মূল্য','৳',100)}
-      </div>
-      <div class="card" id="b2b-other-wrap" style="display:${S.d['s-b2b-name'] && !B2B_BUYERS.some(b=>b.business_name===S.d['s-b2b-name'])?'':'none'};max-width:460px;width:100%;margin-top:10px">
-        <div class="card-lbl">নাম লিখুন</div>
-        <input class="ci-txt" type="text" id="f-s-b2b-name-other" value="${S.d['s-b2b-name-other']||''}" placeholder="ব্যবসার নাম" oninput="S.d['s-b2b-name-other']=this.value; S.d['s-b2b-name']=this.value;"/>
-      </div>
+      <div id="b2b-entries">${renderB2bEntries()}</div>
+      <button type="button" class="he-add" onclick="addB2bEntry()">+ আরেকটি B2B এন্ট্রি যোগ করুন</button>
     </div>
     <div class="tog-row">
       <span class="tog-lbl">আজ বন্ধু/পরিবারকে বিক্রি হয়েছে?</span>
       <label class="tog"><input type="checkbox" id="tog-fnf" ${S.tog.fnf?'checked':''} onchange="togC('fnf',this)"/><span class="tog-track"></span></label>
     </div>
     <div class="cond${S.tog.fnf?' show':''}" id="cond-fnf">
-      <div class="cg3" style="width:100%;max-width:460px">
-        <div class="card">
-          <div class="card-lbl">কার কাছে</div>
-          <input class="ci-txt" type="text" id="f-fnf-name" value="${S.d['fnf-name']||''}" placeholder="নাম" oninput="S.d['fnf-name']=this.value"/>
-        </div>
-        ${sc('fnf-qty','পরিমাণ','kg',0.1)}
-        ${sc('fnf-value','মূল্য','৳',50)}
-      </div>
+      <div id="fnf-entries">${renderFnfEntries()}</div>
+      <button type="button" class="he-add" onclick="addFnfEntry()">+ আরেকটি এন্ট্রি যোগ করুন</button>
     </div>
-    <div class="tog-row">
-      <span class="tog-lbl">আজ বিনামূল্যে নমুনা দেওয়া হয়েছে?</span>
-      <label class="tog"><input type="checkbox" id="tog-samples" ${S.tog.samples?'checked':''} onchange="togC('samples',this)"/><span class="tog-track"></span></label>
+  </div>`;
+}
+
+// One entry per B2B buyer sold to that day — a second buyer on the same
+// day used to silently have nowhere to go (single flat s-b2b-name/qty/
+// value fields), which also undercut v_b2b_receivables' assumption that
+// it sees every B2B sale.
+function b2bEntryBlock(idx) {
+  const nameKey = 'b2b-name-'+idx, otherKey = 'b2b-name-other-'+idx;
+  const isOther = S.d[nameKey] && !B2B_BUYERS.some(b=>b.business_name===S.d[nameKey]);
+  return `<div class="he-block">
+    <div class="he-head">
+      <span class="he-title">B2B এন্ট্রি ${idx+1}</span>
+      ${S.b2bEntryIds.length > 1 ? `<button type="button" class="he-remove" onclick="removeB2bEntry(${idx})">✕ সরান</button>` : ''}
     </div>
-    <div class="cond${S.tog.samples?' show':''}" id="cond-samples">
-      <div style="font-size:11px;color:rgba(245,239,230,.38);max-width:460px;margin-bottom:8px">বন্ধু-পরিবার, রেস্টুরেন্ট ট্রায়াল ইত্যাদি — খরচ হিসেবে যোগ হয় না, শুধু মার্কেটিং ভ্যালু হিসেবে ট্র্যাক করা হয়।</div>
-      <div class="cg3" style="width:100%;max-width:460px">
-        ${sc('sample-fresh-kg','তাজা','kg',0.01)}
-        ${sc('sample-dried-kg','শুকনো','kg',0.01)}
-        ${sc('sample-powder-kg','পাউডার','kg',0.01)}
+    <div class="cg3">
+      <div class="card">
+        <div class="card-lbl">B2B Client</div>
+        <select class="sel-inline" id="f-b2b-select-${idx}" onchange="onB2BBuyerChange(this,${idx})">
+          <option value="">—</option>
+          ${B2B_BUYERS.map(b => `<option value="${b.business_name}"${S.d[nameKey]===b.business_name?' selected':''}>${b.business_name}${b.contact_name?` (${b.contact_name})`:''}</option>`).join('')}
+          <option value="__other__"${isOther?' selected':''}>অন্য কেউ…</option>
+        </select>
       </div>
-      <div class="card" style="max-width:460px;width:100%">
-        <div class="card-lbl">কাকে/কেন দেওয়া হয়েছে</div>
-        <input class="ci-txt" type="text" id="f-sample-notes" value="${S.d['sample-notes']||''}" placeholder="যেমন: রেস্টুরেন্ট ট্রায়াল, বন্ধু-পরিবার" oninput="S.d['sample-notes']=this.value"/>
-      </div>
+      ${sc('b2b-qty-'+idx,'পরিমাণ','kg',0.1)}
+      ${sc('b2b-value-'+idx,'মূল্য','৳',100)}
     </div>
+    ${isOther ? `<div class="card" style="max-width:460px;width:100%;margin-top:8px">
+      <div class="card-lbl">নাম লিখুন</div>
+      <input class="ci-txt" type="text" id="f-${otherKey}" value="${S.d[otherKey]||''}" placeholder="ব্যবসার নাম" oninput="S.d['${otherKey}']=this.value; S.d['${nameKey}']=this.value;"/>
+    </div>` : ''}
+  </div>`;
+}
+function renderB2bEntries() { return S.b2bEntryIds.map(idx => b2bEntryBlock(idx)).join('<div class="he-sep"></div>'); }
+function renderB2bEntries_() { collect(); document.getElementById('b2b-entries').innerHTML = renderB2bEntries(); }
+window.addB2bEntry = function() { collect(); S.b2bEntryIds.push(S.b2bEntryNextId++); document.getElementById('b2b-entries').innerHTML = renderB2bEntries(); };
+window.removeB2bEntry = function(idx) { collect(); S.b2bEntryIds = S.b2bEntryIds.filter(i => i !== idx); document.getElementById('b2b-entries').innerHTML = renderB2bEntries(); };
+window.onB2BBuyerChange = function(sel, idx) {
+  const nameKey = 'b2b-name-'+idx;
+  S.d[nameKey] = sel.value === '__other__' ? (S.d['b2b-name-other-'+idx] || '') : sel.value;
+  renderB2bEntries_();
+};
+
+// Same reasoning — one friends-and-family sale per day used to be the limit.
+function fnfEntryBlock(idx) {
+  return `<div class="he-block">
+    <div class="he-head">
+      <span class="he-title">এন্ট্রি ${idx+1}</span>
+      ${S.fnfEntryIds.length > 1 ? `<button type="button" class="he-remove" onclick="removeFnfEntry(${idx})">✕ সরান</button>` : ''}
+    </div>
+    <div class="cg3">
+      <div class="card">
+        <div class="card-lbl">কার কাছে</div>
+        <input class="ci-txt" type="text" id="f-fnf-name-${idx}" value="${S.d['fnf-name-'+idx]||''}" placeholder="নাম" oninput="S.d['fnf-name-${idx}']=this.value"/>
+      </div>
+      ${sc('fnf-qty-'+idx,'পরিমাণ','kg',0.1)}
+      ${sc('fnf-value-'+idx,'মূল্য','৳',50)}
+    </div>
+  </div>`;
+}
+function renderFnfEntries() { return S.fnfEntryIds.map(idx => fnfEntryBlock(idx)).join('<div class="he-sep"></div>'); }
+window.addFnfEntry = function() { collect(); S.fnfEntryIds.push(S.fnfEntryNextId++); document.getElementById('fnf-entries').innerHTML = renderFnfEntries(); };
+window.removeFnfEntry = function(idx) { collect(); S.fnfEntryIds = S.fnfEntryIds.filter(i => i !== idx); document.getElementById('fnf-entries').innerHTML = renderFnfEntries(); };
+
+// Samples are now their own top-level step (see STEPS), not nested inside
+// "did a sale happen today?" — a no-sale day with a free sample given away
+// was silently losing that data. Repeatable for the same multi-recipient
+// reason as B2B/FnF above.
+function sampleEntryBlock(idx) {
+  return `<div class="he-block">
+    <div class="he-head">
+      <span class="he-title">নমুনা এন্ট্রি ${idx+1}</span>
+      ${S.sampleEntryIds.length > 1 ? `<button type="button" class="he-remove" onclick="removeSampleEntry(${idx})">✕ সরান</button>` : ''}
+    </div>
+    <div class="card" style="max-width:460px;width:100%">
+      <div class="card-lbl">কাকে/কেন দেওয়া হয়েছে</div>
+      <input class="ci-txt" type="text" id="f-sample-recipient-${idx}" value="${S.d['sample-recipient-'+idx]||''}" placeholder="যেমন: রেস্টুরেন্ট ট্রায়াল, বন্ধু-পরিবার" oninput="S.d['sample-recipient-${idx}']=this.value"/>
+    </div>
+    <div class="cg3">
+      ${sc('sample-fresh-'+idx,'তাজা','kg',0.01)}
+      ${sc('sample-dried-'+idx,'শুকনো','kg',0.01)}
+      ${sc('sample-powder-'+idx,'পাউডার','kg',0.01)}
+    </div>
+  </div>`;
+}
+function renderSampleEntries() { return S.sampleEntryIds.map(idx => sampleEntryBlock(idx)).join('<div class="he-sep"></div>'); }
+window.addSampleEntry = function() { collect(); S.sampleEntryIds.push(S.sampleEntryNextId++); document.getElementById('sample-entries').innerHTML = renderSampleEntries(); };
+window.removeSampleEntry = function(idx) { collect(); S.sampleEntryIds = S.sampleEntryIds.filter(i => i !== idx); document.getElementById('sample-entries').innerHTML = renderSampleEntries(); };
+
+function formSamples() {
+  return `<div class="cards">
+    <div style="font-size:11px;color:rgba(245,239,230,.38);max-width:460px;margin-bottom:8px">বন্ধু-পরিবার, রেস্টুরেন্ট ট্রায়াল ইত্যাদি — খরচ হিসেবে যোগ হয় না, শুধু মার্কেটিং ভ্যালু হিসেবে ট্র্যাক করা হয়।</div>
+    <div id="sample-entries">${renderSampleEntries()}</div>
+    <button type="button" class="he-add" onclick="addSampleEntry()">+ আরেকটি নমুনা এন্ট্রি যোগ করুন</button>
   </div>`;
 }
 
@@ -724,7 +799,7 @@ function formNotes() {
 
 const FORMS = {
   harvest:formHarvest, qc:formQC, spawn:formSpawn,
-  processing:formProcessing, sales:formSales, stock:formStock,
+  processing:formProcessing, sales:formSales, samples:formSamples, stock:formStock,
   expenses:formExpenses, notes:formNotes
 };
 
@@ -890,7 +965,7 @@ function collect() {
   if (disp) S.d['log-date'] = disp.textContent;
 
   /* Toggles */
-  const tMap = { b2b:'tog-b2b', samples:'tog-samples', fnf:'tog-fnf' };
+  const tMap = { b2b:'tog-b2b', fnf:'tog-fnf' };
   Object.entries(tMap).forEach(([k,id]) => {
     const el = document.getElementById(id);
     if (el) S.tog[k] = el.checked;
@@ -922,7 +997,7 @@ window.recomputeRooms = function() {
 
 window.togC = function(key, el) {
   S.tog[key] = el.checked;
-  const map = { b2b:'cond-b2b', samples:'cond-samples', fnf:'cond-fnf' };
+  const map = { b2b:'cond-b2b', fnf:'cond-fnf' };
   const c = document.getElementById(map[key]);
   if (c) c.classList.toggle('show', el.checked);
 };
@@ -958,17 +1033,6 @@ window.onInocNewBatchRoomChange = async function(sel, idx) {
   S.d['inoc-newroom-'+idx] = room;
   S.d['inoc-newbatch-number-'+idx] = batchNumber;
   recomputeRooms();
-};
-
-window.onB2BBuyerChange = function(sel) {
-  const otherWrap = document.getElementById('b2b-other-wrap');
-  if (sel.value === '__other__') {
-    otherWrap.style.display = '';
-    S.d['s-b2b-name'] = S.d['s-b2b-name-other'] || '';
-  } else {
-    otherWrap.style.display = 'none';
-    S.d['s-b2b-name'] = sel.value;
-  }
 };
 
 window.editDate = function() {
@@ -1076,6 +1140,31 @@ async function submit() {
     };
   }).filter(e => e.batch_number || e.substrate_kg || e.bags_count || e.spawn_kg_used);
 
+  // One row per B2B buyer / FnF sale / sample recipient that day (migration
+  // 36_sales_entries.sql) — the entry-level detail behind the daily sums
+  // below, same reasoning as harvest/qc/inoculation entries above.
+  const b2bEntryRows = S.b2bEntryIds.map(idx => ({
+    log_date:      logDate,
+    business_name: ds('b2b-name-'+idx),
+    qty:           dn2('b2b-qty-'+idx),
+    value:         dn2('b2b-value-'+idx),
+  })).filter(e => e.business_name || e.qty || e.value);
+
+  const fnfEntryRows = S.fnfEntryIds.map(idx => ({
+    log_date:    logDate,
+    person_name: ds('fnf-name-'+idx),
+    qty:         dn2('fnf-qty-'+idx),
+    value:       dn2('fnf-value-'+idx),
+  })).filter(e => e.person_name || e.qty || e.value);
+
+  const sampleEntryRows = S.sampleEntryIds.map(idx => ({
+    log_date:  logDate,
+    recipient: ds('sample-recipient-'+idx),
+    fresh_kg:  dn2('sample-fresh-'+idx),
+    dried_kg:  dn2('sample-dried-'+idx),
+    powder_kg: dn2('sample-powder-'+idx),
+  })).filter(e => e.recipient || e.fresh_kg || e.dried_kg || e.powder_kg);
+
   const payload = {
     log_date: logDate,
     submitted_by: S.userEmail || null,
@@ -1089,11 +1178,14 @@ async function submit() {
     s_fresh_kg:dn2('s-fresh-kg'), s_fresh_price:dn2('s-fresh-price'),
     s_dried_kg:dn2('s-dried-kg'), s_dried_price:dn2('s-dried-price'),
     s_powder_kg:dn2('s-powder-kg'), s_powder_price:dn2('s-powder-price'),
-    s_waste:dn2('s-waste'),
-    s_b2b_name:ds('s-b2b-name'), s_b2b_qty:dn2('s-b2b-qty'), s_b2b_value:dn2('s-b2b-value'),
-    fnf_name:ds('fnf-name'), fnf_qty:dn2('fnf-qty'), fnf_value:dn2('fnf-value'),
-    sample_fresh_kg:dn2('sample-fresh-kg'), sample_dried_kg:dn2('sample-dried-kg'),
-    sample_powder_kg:dn2('sample-powder-kg'), sample_notes:ds('sample-notes'),
+    s_waste_kg:dn2('s-waste-kg'), s_returned_kg:dn2('s-returned-kg'), s_returned_value:dn2('s-returned-value'),
+    s_b2b_qty:  b2bEntryRows.reduce((s,e) => s + (+e.qty||0), 0),
+    s_b2b_value:b2bEntryRows.reduce((s,e) => s + (+e.value||0), 0),
+    fnf_qty:    fnfEntryRows.reduce((s,e) => s + (+e.qty||0), 0),
+    fnf_value:  fnfEntryRows.reduce((s,e) => s + (+e.value||0), 0),
+    sample_fresh_kg:  sampleEntryRows.reduce((s,e) => s + (+e.fresh_kg||0), 0),
+    sample_dried_kg:  sampleEntryRows.reduce((s,e) => s + (+e.dried_kg||0), 0),
+    sample_powder_kg: sampleEntryRows.reduce((s,e) => s + (+e.powder_kg||0), 0),
     st_fresh:dn2('st-fresh'), st_dried:dn2('st-dried'), st_powder:dn2('st-powder'),
     ex_spawn:dn2('ex-spawn'), ex_substrate:dn2('ex-substrate'), ex_packaging:dn2('ex-packaging'),
     ex_labor:dn2('ex-labor'), ex_electricity:dn2('ex-electricity'), ex_transport:dn2('ex-transport'),
@@ -1137,6 +1229,28 @@ async function submit() {
     if (inocEntryRows.length) {
       const { error: inocErr } = await sb.from('inoculation_entries').insert(inocEntryRows);
       if (inocErr) throw inocErr;
+    }
+
+    // Same replace-wholesale model as harvest_entries above.
+    const { error: delB2bErr } = await sb.from('b2b_sale_entries').delete().eq('log_date', logDate);
+    if (delB2bErr) throw delB2bErr;
+    if (b2bEntryRows.length) {
+      const { error: b2bErr } = await sb.from('b2b_sale_entries').insert(b2bEntryRows);
+      if (b2bErr) throw b2bErr;
+    }
+
+    const { error: delFnfErr } = await sb.from('fnf_sale_entries').delete().eq('log_date', logDate);
+    if (delFnfErr) throw delFnfErr;
+    if (fnfEntryRows.length) {
+      const { error: fnfErr } = await sb.from('fnf_sale_entries').insert(fnfEntryRows);
+      if (fnfErr) throw fnfErr;
+    }
+
+    const { error: delSampleErr } = await sb.from('sample_entries').delete().eq('log_date', logDate);
+    if (delSampleErr) throw delSampleErr;
+    if (sampleEntryRows.length) {
+      const { error: sampleErr } = await sb.from('sample_entries').insert(sampleEntryRows);
+      if (sampleErr) throw sampleErr;
     }
 
     /* Success screen */
