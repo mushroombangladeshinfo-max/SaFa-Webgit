@@ -600,53 +600,52 @@
          contam_room/contam_type/contam_action columns, which quick-log.html
          stopped writing once contamination became a repeatable per-room
          entry; this check was still reading them and had gone silently
-         blind for everything logged since. contam_event/contam_bags on
+         blind for everything logged since. contam_event/contam_kg on
          farm_daily_logs remain correct (still the daily aggregate), only
          the per-room identity/action fields moved.
-         Note: this only tells you WHICH ROOM had a problem, not which spawn
-         supplier's batch caused it — that link doesn't exist yet in the
-         schema. Worth adding once real supplier purchase data exists. */
+         batch_number/bags_kg added in migration 40_qc_batch_kg.sql — batch
+         is now the real identifier (bag count wasn't comparable across
+         entries since bags aren't a uniform size), so an unresolved
+         contamination can be traced straight to that batch's history. */
       const { data: contam } = await sb.from('qc_entries')
-        .select('log_date,room,contam_type,bags,action')
+        .select('log_date,room,batch_number,contam_type,bags_kg,action')
         .is('action', null).gte('log_date', daysAgo(14)).order('log_date', { ascending:false });
       (contam || []).forEach(c => {
         attentionItems.push({
           sev: 'warn',
-          text: `Contamination in Room ${c.room || '?'} not yet resolved`,
-          meta: `${c.contam_type || 'Unknown type'} · ${c.bags || '?'} bags · ${c.log_date}`,
+          text: `Contamination in Room ${c.room || '?'}${c.batch_number ? ` (Batch ${c.batch_number})` : ''} not yet resolved`,
+          meta: `${c.contam_type || 'Unknown type'} · ${c.bags_kg != null ? c.bags_kg+' kg' : '?'} · ${c.log_date}`,
           href: 'quick-log.html',
         });
       });
     }
 
-    /* Stock reconciliation — flags the most recent counted day if the
-       physical count didn't match what harvest/processing/sales/waste
-       should have left behind (migration 37_stock_reconciliation.sql).
-       Skips a form with no real prior baseline (first-ever count) since
-       there's nothing meaningful to compare against yet. */
-    async function loadStockReconciliation() {
-      const { data } = await sb.from('v_stock_reconciliation')
-        .select('log_date,st_fresh,st_dried,st_powder,prev_st_fresh,prev_st_dried,prev_st_powder,expected_fresh,expected_dried,expected_powder')
-        .order('log_date', { ascending:false }).limit(1);
-      const row = (data||[])[0];
-      if (!row) return;
-      [
-        ['fresh',  row.prev_st_fresh,  row.st_fresh,  row.expected_fresh,  0.5],
-        ['dried',  row.prev_st_dried,  row.st_dried,  row.expected_dried,  1],
-        ['powder', row.prev_st_powder, row.st_powder, row.expected_powder, 1],
-      ].forEach(([label, prev, actual, expected, threshold]) => {
-        if (prev == null || actual == null) return;
-        const delta = Number(actual) - Number(expected);
-        if (Math.abs(delta) > threshold) {
-          attentionItems.push({
-            sev: Math.abs(delta) > threshold * 3 ? 'crit' : 'warn',
-            text: `Stock mismatch — ${label}`,
-            meta: `Expected ${Number(expected).toFixed(2)}kg, counted ${Number(actual).toFixed(2)}kg (${delta>0?'+':''}${delta.toFixed(2)}kg) on ${row.log_date}`,
-            href: 'quick-log.html',
-          });
-        }
-      });
-    }
+    // DORMANT: Closing Stock — disabled 2026-08-01, see quick-log.html's STEPS
+    // array note (grep "DORMANT: Closing Stock" there) for why/how to revive.
+    // Also add loadStockReconciliation() back to the Promise.all(...) list below.
+    // async function loadStockReconciliation() {
+    //   const { data } = await sb.from('v_stock_reconciliation')
+    //     .select('log_date,st_fresh,st_dried,st_powder,prev_st_fresh,prev_st_dried,prev_st_powder,expected_fresh,expected_dried,expected_powder')
+    //     .order('log_date', { ascending:false }).limit(1);
+    //   const row = (data||[])[0];
+    //   if (!row) return;
+    //   [
+    //     ['fresh',  row.prev_st_fresh,  row.st_fresh,  row.expected_fresh,  0.5],
+    //     ['dried',  row.prev_st_dried,  row.st_dried,  row.expected_dried,  1],
+    //     ['powder', row.prev_st_powder, row.st_powder, row.expected_powder, 1],
+    //   ].forEach(([label, prev, actual, expected, threshold]) => {
+    //     if (prev == null || actual == null) return;
+    //     const delta = Number(actual) - Number(expected);
+    //     if (Math.abs(delta) > threshold) {
+    //       attentionItems.push({
+    //         sev: Math.abs(delta) > threshold * 3 ? 'crit' : 'warn',
+    //         text: `Stock mismatch — ${label}`,
+    //         meta: `Expected ${Number(expected).toFixed(2)}kg, counted ${Number(actual).toFixed(2)}kg (${delta>0?'+':''}${delta.toFixed(2)}kg) on ${row.log_date}`,
+    //         href: 'quick-log.html',
+    //       });
+    //     }
+    //   });
+    // }
 
     /* ── Active batches, for the AI assistant's snapshot — so a question
        like "how's Batch 1 doing" has real data to answer from, instead of
@@ -961,7 +960,8 @@
     /* ── Load everything ── */
     async function reloadAll() {
       attentionItems.length = 0;
-      await Promise.all([loadB2B(), loadSuppliers(), loadStock(), loadFarm(), loadStockReconciliation(), loadBatches(), loadMarketing(), loadHarvestVsSold(), loadB2C(), loadWeather(), loadWeatherChart()]);
+      // loadStockReconciliation() was in this list — DORMANT: Closing Stock, see note above.
+      await Promise.all([loadB2B(), loadSuppliers(), loadStock(), loadFarm(), loadBatches(), loadMarketing(), loadHarvestVsSold(), loadB2C(), loadWeather(), loadWeatherChart()]);
       renderAttention();
     }
     await reloadAll();

@@ -170,7 +170,7 @@ body{font-family:'DM Sans','Hind Siliguri',sans-serif;background:var(--g900);col
     <!-- Contamination vs outside temperature -->
     <div class="chart-card">
       <div class="chart-title">Contamination vs Temperature</div>
-      <div class="chart-sub">Weekly bags affected vs average day temperature (°C)</div>
+      <div class="chart-sub">Weekly kg affected vs average day temperature (°C)</div>
       <div class="chart-wrap"><canvas id="chart-contam-temp"></canvas></div>
     </div>
   </div>
@@ -277,7 +277,9 @@ async function load() {
         harvest_dried,harvest_powder,
         qc_pass,qc_fail,
         s_fresh_kg,s_fresh_price,s_dried_kg,s_dried_price,s_powder_kg,s_powder_price,
-        ex_spawn,ex_substrate,ex_packaging,ex_labor,ex_electricity,ex_transport,ex_water,ex_other`)
+        s_b2b_value,fnf_value,s_returned_value,
+        ex_spawn,ex_substrate,ex_packaging,ex_labor,ex_electricity,ex_transport,ex_water,ex_other,
+        online_packaging_cost,online_delivery_cost,offline_packaging_cost,offline_delivery_cost`)
       .gte('log_date', fromStr)
       .order('log_date', { ascending: true }),
     sb.from('one_off_expenses')
@@ -308,19 +310,31 @@ const dn = (r, k) => parseFloat(r?.[k]) || 0;
 const fmt = n => '৳ ' + Math.round(n).toLocaleString('en-BD');
 
 function rowFresh(r) {
-  // Two harvest models coexist: older Grade A/B/Rejected entries, and
-  // newer healthy-vs-mold-recovered entries (quick-log.html). A day's
-  // total fresh harvest is whichever fields that entry actually used.
+  // There's no grading system (no Grade A/B) — harvest_fresh_a/_rej is a
+  // normal-harvest/discarded pair, harvest_healthy_kg/_recovered_kg is the
+  // clean-bag/recovered-from-mold source pair, harvest_fresh_b is a fully
+  // dead legacy column (no writer anywhere). An entry only ever fills one
+  // pair, never both, so a straight sum across all fields is correct.
   return dn(r,'harvest_fresh_a') + dn(r,'harvest_fresh_b') + dn(r,'harvest_fresh_rej') +
          dn(r,'harvest_healthy_kg') + dn(r,'harvest_recovered_kg');
 }
 function rowRevenue(r) {
+  // Includes B2B/FnF and nets out returns — retail-only understated
+  // revenue on any day where most of it came from a B2B order or FnF sale
+  // (matches v_ops_daily.farm_revenue's formula).
   return dn(r,'s_fresh_kg')*dn(r,'s_fresh_price') +
          dn(r,'s_dried_kg')*dn(r,'s_dried_price') +
-         dn(r,'s_powder_kg')*dn(r,'s_powder_price');
+         dn(r,'s_powder_kg')*dn(r,'s_powder_price') +
+         dn(r,'s_b2b_value') + dn(r,'fnf_value') - dn(r,'s_returned_value');
 }
 function rowExpenses(r) {
-  return ['ex_spawn','ex_substrate','ex_packaging','ex_labor','ex_electricity','ex_transport','ex_water','ex_other']
+  // ex_spawn/ex_electricity/ex_transport/ex_water stay in the sum even
+  // though quick-log.html no longer writes them (historical rows may still
+  // hold real values); online/offline packaging+delivery added — these
+  // existed in the schema but were never read here, so real delivery fees
+  // never reduced this dashboard's expense/profit numbers.
+  return ['ex_spawn','ex_substrate','ex_packaging','ex_labor','ex_electricity','ex_transport','ex_water','ex_other',
+          'online_packaging_cost','online_delivery_cost','offline_packaging_cost','offline_delivery_cost']
     .reduce((s,k) => s + dn(r,k), 0);
 }
 const oneOffTotal = () => _oneOff.reduce((s,r) => s + (+r.amount||0), 0);
@@ -474,8 +488,8 @@ function renderCharts() {
       labels,
       datasets: [
         { label:'Total', data:freshTotals, borderColor:'#5fcf80', backgroundColor:'rgba(95,207,128,.08)', fill:true, tension:.35, pointRadius:3, borderWidth:2 },
-        { label:'Grade A', data:gradeA, borderColor:'#d9b254', backgroundColor:'transparent', tension:.35, pointRadius:2, borderWidth:1.5, borderDash:[4,3] },
-        { label:'Grade B', data:gradeB, borderColor:'rgba(245,239,230,.3)', backgroundColor:'transparent', tension:.35, pointRadius:2, borderWidth:1.5, borderDash:[4,3] },
+        { label:'Normal harvest', data:gradeA, borderColor:'#d9b254', backgroundColor:'transparent', tension:.35, pointRadius:2, borderWidth:1.5, borderDash:[4,3] },
+        { label:'Legacy (unused)', data:gradeB, borderColor:'rgba(245,239,230,.3)', backgroundColor:'transparent', tension:.35, pointRadius:2, borderWidth:1.5, borderDash:[4,3] },
         { label:'Healthy', data:healthy, borderColor:'#7ba3ff', backgroundColor:'transparent', tension:.35, pointRadius:2, borderWidth:1.5, borderDash:[2,2] },
         { label:'Recovered (mold)', data:recovered, borderColor:'rgba(224,82,82,.6)', backgroundColor:'transparent', tension:.35, pointRadius:2, borderWidth:1.5, borderDash:[2,2] },
       ]
@@ -713,7 +727,7 @@ async function loadWeeklyIntegration() {
   destroyChart('chart-contam-temp');
   charts['chart-contam-temp'] = new Chart(document.getElementById('chart-contam-temp'), {
     data: { labels: cRows.map(r => r.week.slice(5)), datasets: [
-      { type: 'bar', label: 'Bags Affected', data: cRows.map(r => +r.bags_affected||0),
+      { type: 'bar', label: 'Kg Affected', data: cRows.map(r => +r.kg_affected||0),
         backgroundColor: 'rgba(224,82,82,.55)', borderRadius: 3, maxBarThickness: 20, yAxisID: 'ybags' },
       { type: 'line', label: 'Avg Day Temp', data: cRows.map(r => r.avg_day_temp_c != null ? +r.avg_day_temp_c : null),
         borderColor: '#d9b254', backgroundColor: '#d9b254', tension: .3, pointRadius: 2, borderWidth: 2, yAxisID: 'ytemp', spanGaps: true },

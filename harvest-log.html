@@ -373,7 +373,7 @@ function aggregateRows(rows, groupBy) {
   for (const r of rows) {
     const key = keyFn(r);
     if (!groups.has(key)) groups.set(key, {
-      key, entries: 0, fresh_a_kg: 0, fresh_rej_kg: 0, healthy_kg: 0, recovered_kg: 0, bags_removed: 0,
+      key, entries: 0, fresh_a_kg: 0, fresh_rej_kg: 0, healthy_kg: 0, recovered_kg: 0, bags_removed_kg: 0,
     });
     const g = groups.get(key);
     g.entries++;
@@ -381,10 +381,10 @@ function aggregateRows(rows, groupBy) {
     g.fresh_rej_kg += +r.fresh_rej_kg || 0;
     g.healthy_kg   += +r.healthy_kg   || 0;
     g.recovered_kg += +r.recovered_kg || 0;
-    g.bags_removed += +r.bags_removed || 0;
+    g.bags_removed_kg += +r.bags_removed_kg || 0;
   }
   return [...groups.values()]
-    .map(g => ({ ...g, total_kg: Math.max(g.fresh_a_kg + g.fresh_rej_kg, g.healthy_kg + g.recovered_kg) }))
+    .map(g => ({ ...g, total_kg: g.fresh_a_kg + g.fresh_rej_kg + g.healthy_kg + g.recovered_kg }))
     .sort((a, b) => a.key < b.key ? -1 : (a.key > b.key ? 1 : 0));
 }
 
@@ -444,8 +444,11 @@ async function fetchPivot() {
 
 /* ── Summary strip — over the FULL filtered set (not just the current
    page), so it stays meaningful regardless of pagination/group-by mode.
-   Sums each pair across the whole set, then GREATESTs — same convention
-   as pivot aggregation, treating the filtered set as one group. ── */
+   A straight sum across all four fields: an entry only ever fills one
+   pair (grade OR healthy/recovered source), never both, so nothing is
+   double-counted by adding everything (confirmed with the user; see
+   migration 38_harvest_total_greatest_fix.sql for the same correction
+   applied to v_batch_yield/v_room_yield_weekly). ── */
 async function fetchSummary() {
   let q = sb.from('harvest_entries').select('log_date,fresh_a_kg,fresh_rej_kg,healthy_kg,recovered_kg,room').limit(5000);
   q = applyFilters(q);
@@ -463,7 +466,7 @@ async function fetchSummary() {
     if (r.room) rooms.add(r.room);
     dates.push(r.log_date);
   });
-  const totalKg = Math.max(sumFresh + sumRej, sumHealthy + sumRecovered);
+  const totalKg = sumFresh + sumRej + sumHealthy + sumRecovered;
   dates.sort();
 
   document.getElementById('m-count').textContent    = rows.length.toLocaleString('en');
@@ -493,7 +496,7 @@ function emptyRow(cols) {
 function renderDetailHead() {
   document.getElementById('harvest-thead').innerHTML = `<tr>
     <th>Date</th><th>Batch</th><th>Flush</th><th>Fresh A</th><th>Fresh Rej</th>
-    <th>Healthy</th><th>Recovered</th><th>Bags Removed</th><th>Total</th>
+    <th>Healthy</th><th>Recovered</th><th>Bags Removed (kg)</th><th>Total</th>
     <th>Substrate</th><th>Status</th><th>Actions</th>
   </tr>`;
 }
@@ -513,7 +516,7 @@ function displayRowHtml(r) {
     <td>${r.fresh_rej_kg != null ? fmtKg(r.fresh_rej_kg) : '—'}</td>
     <td>${r.healthy_kg != null ? fmtKg(r.healthy_kg) : '—'}</td>
     <td>${r.recovered_kg != null ? fmtKg(r.recovered_kg) : '—'}</td>
-    <td>${r.bags_removed ?? '—'}</td>
+    <td>${r.bags_removed_kg != null ? fmtKg(r.bags_removed_kg) : '—'}</td>
     <td class="cell-total">${fmtKg(r.total_kg)}</td>
     <td>${b?.substrate_type ?? '—'}</td>
     <td>${statusPill}</td>
@@ -534,7 +537,7 @@ function editRowHtml(r) {
     <td>${numInput('edit-fresh-rej', r.fresh_rej_kg)}</td>
     <td>${numInput('edit-healthy', r.healthy_kg)}</td>
     <td>${numInput('edit-recovered', r.recovered_kg)}</td>
-    <td><input type="number" class="row-edit-input" id="edit-bags-${r.id}" value="${r.bags_removed ?? ''}" step="1" min="0"></td>
+    <td><input type="number" class="row-edit-input" id="edit-bags-${r.id}" value="${r.bags_removed_kg ?? ''}" step="0.1" min="0"></td>
     <td class="cell-total">${fmtKg(r.total_kg)}</td>
     <td>${r.batches?.substrate_type ?? '—'}</td>
     <td>—</td>
@@ -570,7 +573,7 @@ window.saveEdit = async function(id) {
     p_fresh_rej_kg: numOrNull(val('edit-fresh-rej')),
     p_healthy_kg:   numOrNull(val('edit-healthy')),
     p_recovered_kg: numOrNull(val('edit-recovered')),
-    p_bags_removed: numOrNull(val('edit-bags')),
+    p_bags_removed_kg: numOrNull(val('edit-bags')),
   });
 
   if (error) {
@@ -587,7 +590,7 @@ window.saveEdit = async function(id) {
 function renderPivotHead() {
   document.getElementById('harvest-thead').innerHTML = `<tr>
     <th>${GROUP_LABELS[S.groupBy] || 'Group'}</th><th>Entries</th><th>Fresh A</th>
-    <th>Fresh Rej</th><th>Healthy</th><th>Recovered</th><th>Bags Removed</th><th>Total</th>
+    <th>Fresh Rej</th><th>Healthy</th><th>Recovered</th><th>Bags Removed (kg)</th><th>Total</th>
   </tr>`;
 }
 function renderPivotTable() {
@@ -601,7 +604,7 @@ function renderPivotTable() {
       <td>${fmtKg(g.fresh_rej_kg)}</td>
       <td>${fmtKg(g.healthy_kg)}</td>
       <td>${fmtKg(g.recovered_kg)}</td>
-      <td>${g.bags_removed}</td>
+      <td>${fmtKg(g.bags_removed_kg)}</td>
       <td class="cell-total">${fmtKg(g.total_kg)}</td>
     </tr>`).join('');
 }
@@ -672,11 +675,11 @@ document.getElementById('export-btn').addEventListener('click', async () => {
       if (error) throw error;
       rows = data || [];
       if (!rows.length) { toast('No entries to export.', 'error'); return; }
-      headers = ['Date','Batch','Room','Flush','Fresh A (kg)','Fresh Rej (kg)','Healthy (kg)','Recovered (kg)','Bags Removed','Total (kg)','Substrate','Status'];
+      headers = ['Date','Batch','Room','Flush','Fresh A (kg)','Fresh Rej (kg)','Healthy (kg)','Recovered (kg)','Bags Removed (kg)','Total (kg)','Substrate','Status'];
       lines = rows.map(r => [
         r.log_date, r.batch_number||'', r.room||'', r.flush_num??'',
         r.fresh_a_kg??'', r.fresh_rej_kg??'', r.healthy_kg??'', r.recovered_kg??'',
-        r.bags_removed??'', r.total_kg??'', r.batches?.substrate_type||'', r.batches?.status||'',
+        r.bags_removed_kg??'', r.total_kg??'', r.batches?.substrate_type||'', r.batches?.status||'',
       ].join(','));
     } else {
       let q = sb.from('harvest_entries').select('*').order('log_date', { ascending: true }).limit(5000);
@@ -685,8 +688,8 @@ document.getElementById('export-btn').addEventListener('click', async () => {
       if (error) throw error;
       rows = aggregateRows(data || [], S.groupBy);
       if (!rows.length) { toast('No entries to export.', 'error'); return; }
-      headers = [GROUP_LABELS[S.groupBy], 'Entries','Fresh A (kg)','Fresh Rej (kg)','Healthy (kg)','Recovered (kg)','Bags Removed','Total (kg)'];
-      lines = rows.map(g => [g.key, g.entries, g.fresh_a_kg, g.fresh_rej_kg, g.healthy_kg, g.recovered_kg, g.bags_removed, g.total_kg].join(','));
+      headers = [GROUP_LABELS[S.groupBy], 'Entries','Fresh A (kg)','Fresh Rej (kg)','Healthy (kg)','Recovered (kg)','Bags Removed (kg)','Total (kg)'];
+      lines = rows.map(g => [g.key, g.entries, g.fresh_a_kg, g.fresh_rej_kg, g.healthy_kg, g.recovered_kg, g.bags_removed_kg, g.total_kg].join(','));
     }
     const csv  = [headers.join(','), ...lines].join('\n');
     const blob = new Blob([csv], { type:'text/csv;charset=utf-8;' });
