@@ -49,12 +49,70 @@ interface Totals {
   net: number;
 }
 
-function buildEmailHtml(startDate: string, endDate: string, t: Totals): string {
+function computeTotals(rows: any[]): Totals {
+  const t: Totals = (rows || []).reduce((acc, row) => {
+    acc.harvestKg   += Number(row.harvest_kg)    || 0;
+    acc.farmRevenue += Number(row.farm_revenue)  || 0;
+    acc.webRevenue  += Number(row.web_revenue)   || 0;
+    acc.totalCost   += Number(row.farm_expenses) || 0;
+    return acc;
+  }, { harvestKg: 0, farmRevenue: 0, webRevenue: 0, totalSales: 0, totalCost: 0, net: 0 });
+  t.totalSales = t.farmRevenue + t.webRevenue;
+  t.net        = t.totalSales - t.totalCost;
+  return t;
+}
+
+// AI takeaway paragraph — reads the same shared ai_settings row the admin
+// tools use (src/ai-client.js), via this function's existing service-role
+// client so RLS/is_admin() never comes into it and the key never reaches
+// a browser. Compares this week against the prior week so the paragraph
+// adds real synthesis instead of just restating numbers already in the
+// table above it. Best-effort: any failure (no key configured, rate
+// limited, provider down) just omits the section — never blocks the
+// actual report, same resilience principle as the WhatsApp send below.
+async function fetchAiCfg(sb: any): Promise<{ url: string; model: string; key: string } | null> {
+  const { data } = await sb.from('ai_settings').select('url,model,api_key').eq('id', true).maybeSingle();
+  if (!data || !data.api_key) return null;
+  return { url: data.url, model: data.model, key: data.api_key };
+}
+
+async function generateWeeklyTakeaway(
+  cfg: { url: string; model: string; key: string },
+  startDate: string, endDate: string, t: Totals, prev: Totals | null,
+): Promise<string | null> {
+  const prevLine = prev
+    ? `Prior week for comparison — Fresh Harvest: ${prev.harvestKg.toFixed(1)} kg, Total Sales: ${fmt(prev.totalSales)}, Total Cost: ${fmt(prev.totalCost)}, Net: ${fmt(prev.net)}.`
+    : 'No prior-week data available for comparison.';
+  const messages = [
+    { role: 'system', content: 'You write a single short paragraph (2-3 sentences, no bullet points, no headers) summarizing a small organic mushroom farm\'s weekly business report for its two co-founders. Use ONLY the numbers given below — never invent figures, trends, or explanations not supported by the data. If nothing notable stands out, it\'s fine to say the week was steady. Be specific with the actual numbers, not vague. Currency is BDT (৳).' },
+    { role: 'user', content: `Week: ${displayDate(startDate)} – ${displayDate(endDate)}\nFresh Harvest: ${t.harvestKg.toFixed(1)} kg\nFarm Sales: ${fmt(t.farmRevenue)}\nOnline Sales: ${fmt(t.webRevenue)}\nTotal Sales: ${fmt(t.totalSales)}\nTotal Cost: ${fmt(t.totalCost)}\nNet: ${fmt(t.net)}\n\n${prevLine}` },
+  ];
+  const res = await fetch(`${cfg.url}/v1/chat/completions`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${cfg.key}` },
+    body: JSON.stringify({ model: cfg.model, messages }),
+  });
+  if (!res.ok) {
+    console.error('AI weekly takeaway failed:', res.status, await res.text());
+    return null;
+  }
+  const json = await res.json();
+  return json.choices?.[0]?.message?.content?.trim() || null;
+}
+
+function buildEmailHtml(startDate: string, endDate: string, t: Totals, aiTakeaway: string | null): string {
   const row = (label: string, value: string, color = '#0a1a0f', big = false) => `
     <tr>
       <td style="padding:12px 0;border-bottom:1px solid #f0ebe3;font-size:14px;color:#666;">${label}</td>
       <td style="padding:12px 0;border-bottom:1px solid #f0ebe3;font-size:${big ? 20 : 16}px;font-weight:700;color:${color};text-align:right;">${value}</td>
     </tr>`;
+  // Visually distinct from the numbers table (different background) so
+  // it reads clearly as AI commentary, not another measured figure.
+  const takeawayBlock = aiTakeaway ? `
+        <tr><td style="background:#f7f0dc;padding:20px 40px;">
+          <div style="font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:#a67f2e;font-weight:700;margin-bottom:8px;">✦ This Week's Take</div>
+          <div style="font-size:14px;line-height:1.6;color:#3a3226;">${aiTakeaway}</div>
+        </td></tr>` : '';
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -84,7 +142,7 @@ function buildEmailHtml(startDate: string, endDate: string, t: Totals): string {
             ${row('✅ Net', fmt(t.net), t.net >= 0 ? '#2d6a3e' : '#b23b3b', true)}
           </table>
         </td></tr>
-
+        ${takeawayBlock}
         <tr><td style="background:#f0ebe3;border-radius:0 0 12px 12px;padding:20px 40px;text-align:center;">
           <p style="font-size:12px;color:#999;margin:0;line-height:1.8;">
             SaFa Naturals Agrotech Farm · Alompur, Sirajganj, Bangladesh<br>
@@ -99,7 +157,7 @@ function buildEmailHtml(startDate: string, endDate: string, t: Totals): string {
 </html>`;
 }
 
-async function sendEmail(startDate: string, endDate: string, t: Totals): Promise<{ ok: boolean; detail: unknown }> {
+async function sendEmail(startDate: string, endDate: string, t: Totals, aiTakeaway: string | null): Promise<{ ok: boolean; detail: unknown }> {
   const RESEND_KEY = Deno.env.get('RESEND_API_KEY');
   if (!RESEND_KEY) return { ok: false, detail: 'Missing RESEND_API_KEY secret' };
 
@@ -110,7 +168,7 @@ async function sendEmail(startDate: string, endDate: string, t: Totals): Promise
       from:    `${FROM_NAME} <${FROM_EMAIL}>`,
       to:      ADMIN_EMAILS,
       subject: `Weekly Report: ${displayDate(startDate)} – ${displayDate(endDate)} · SaFa Naturals 🍄`,
-      html:    buildEmailHtml(startDate, endDate, t),
+      html:    buildEmailHtml(startDate, endDate, t, aiTakeaway),
     }),
   });
   const result = await res.json();
@@ -118,8 +176,8 @@ async function sendEmail(startDate: string, endDate: string, t: Totals): Promise
   return { ok: res.ok, detail: result };
 }
 
-function buildWaMessage(startDate: string, endDate: string, t: Totals): string {
-  return [
+function buildWaMessage(startDate: string, endDate: string, t: Totals, aiTakeaway: string | null): string {
+  const lines = [
     `📊 SaFa Naturals — Weekly Report`,
     `${displayDate(startDate)} – ${displayDate(endDate)}`,
     '─────────────────────',
@@ -129,7 +187,9 @@ function buildWaMessage(startDate: string, endDate: string, t: Totals): string {
     `📈 Total Sales: ${fmt(t.totalSales)}`,
     `💸 Total Cost: ${fmt(t.totalCost)}`,
     `✅ Net: ${fmt(t.net)}`,
-  ].join('\n');
+  ];
+  if (aiTakeaway) lines.push('─────────────────────', `✦ ${aiTakeaway}`);
+  return lines.join('\n');
 }
 
 // Best-effort — swallows failures (e.g. a recipient hasn't activated their
@@ -149,8 +209,8 @@ const CALLMEBOT_RECIPIENTS = [
   { phone: '8801681884371', keyEnv: 'CALLMEBOT_KEY_SUNNY' },
 ];
 
-async function sendWhatsApp(startDate: string, endDate: string, t: Totals): Promise<{ ok: boolean; detail: unknown }[]> {
-  const msg = buildWaMessage(startDate, endDate, t);
+async function sendWhatsApp(startDate: string, endDate: string, t: Totals, aiTakeaway: string | null): Promise<{ ok: boolean; detail: unknown }[]> {
+  const msg = buildWaMessage(startDate, endDate, t, aiTakeaway);
   const results = [];
 
   for (const { phone, keyEnv } of CALLMEBOT_RECIPIENTS) {
@@ -204,22 +264,34 @@ Deno.serve(async (req) => {
     return new Response(JSON.stringify({ error }), { status: 500, headers: { 'Content-Type': 'application/json' } });
   }
 
-  const t: Totals = (data || []).reduce((acc, row) => {
-    acc.harvestKg   += Number(row.harvest_kg)    || 0;
-    acc.farmRevenue += Number(row.farm_revenue)  || 0;
-    acc.webRevenue  += Number(row.web_revenue)   || 0;
-    acc.totalCost   += Number(row.farm_expenses) || 0;
-    return acc;
-  }, { harvestKg: 0, farmRevenue: 0, webRevenue: 0, totalSales: 0, totalCost: 0, net: 0 });
-  t.totalSales = t.farmRevenue + t.webRevenue;
-  t.net        = t.totalSales - t.totalCost;
+  const t: Totals = computeTotals(data || []);
 
-  const emailResult = await sendEmail(startDate, endDate, t);
-  const waResults    = await sendWhatsApp(startDate, endDate, t);
+  // Prior week (the 6 days immediately before startDate), for the AI
+  // takeaway's comparison — best-effort, a failed/empty fetch just means
+  // no comparison is offered, never blocks the report itself.
+  const prevEnd   = addDays(startDate, -1);
+  const prevStart = addDays(prevEnd, -6);
+  const { data: prevData } = await sb
+    .from('v_kpi_daily')
+    .select('harvest_kg,farm_revenue,web_revenue,farm_expenses')
+    .gte('day', prevStart)
+    .lte('day', prevEnd);
+  const prevT: Totals | null = prevData && prevData.length ? computeTotals(prevData) : null;
 
-  console.log(`Weekly report ${startDate}..${endDate}: harvest=${t.harvestKg}kg sales=${t.totalSales} cost=${t.totalCost} — email ${emailResult.ok ? 'sent' : 'FAILED'}, whatsapp ${waResults.filter(r => r.ok).length}/${waResults.length} sent`);
+  let aiTakeaway: string | null = null;
+  try {
+    const aiCfg = await fetchAiCfg(sb);
+    if (aiCfg) aiTakeaway = await generateWeeklyTakeaway(aiCfg, startDate, endDate, t, prevT);
+  } catch (e) {
+    console.error('AI weekly takeaway threw:', e);
+  }
 
-  return new Response(JSON.stringify({ startDate, endDate, totals: t, email: emailResult, whatsapp: waResults }), {
+  const emailResult = await sendEmail(startDate, endDate, t, aiTakeaway);
+  const waResults    = await sendWhatsApp(startDate, endDate, t, aiTakeaway);
+
+  console.log(`Weekly report ${startDate}..${endDate}: harvest=${t.harvestKg}kg sales=${t.totalSales} cost=${t.totalCost} — email ${emailResult.ok ? 'sent' : 'FAILED'}, whatsapp ${waResults.filter(r => r.ok).length}/${waResults.length} sent, ai_takeaway ${aiTakeaway ? 'included' : 'omitted'}`);
+
+  return new Response(JSON.stringify({ startDate, endDate, totals: t, aiTakeaway, email: emailResult, whatsapp: waResults }), {
     headers: { 'Content-Type': 'application/json' },
   });
 });
