@@ -62,6 +62,9 @@
     .btn.primary:hover{background:rgba(196,154,60,.2);border-color:rgba(196,154,60,.5);}
     .btn.danger{color:var(--red);border-color:rgba(224,90,43,.25);}
     .btn.danger:hover{background:rgba(224,90,43,.08);}
+    .repl-select{background:var(--bg3);border:1px solid var(--border);border-radius:5px;color:var(--c);font-family:'DM Sans','Hind Siliguri',sans-serif;font-size:11px;padding:5px 8px;cursor:pointer;outline:none;}
+    .repl-select.promised{color:var(--al);border-color:rgba(196,154,60,.35);}
+    .repl-select.received{color:var(--green);border-color:rgba(95,207,128,.3);}
 
     /* ── Charts ── */
     .charts-row{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;margin-bottom:24px;}
@@ -128,7 +131,7 @@
     .label-optional{opacity:.5;font-weight:400;text-transform:none;letter-spacing:0;}
     .readonly-preview{padding:9px 11px;border-radius:6px;border:1px solid var(--border);background:var(--bg3);color:var(--al);font-family:'DM Mono','Hind Siliguri',monospace;font-size:13px;}
   </style>
-  <script type="module" crossorigin src="/assets/expenses-DKQX4ZXV.js"></script>
+  <script type="module" crossorigin src="/assets/expenses-Bv14onI_.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
   <link rel="modulepreload" crossorigin href="/assets/admin-auth-4ZiUUGs_.js">
   <link rel="modulepreload" crossorigin href="/assets/admin-nav-DSW_-4Nj.js">
@@ -441,10 +444,10 @@
             <thead>
               <tr>
                 <th>Date</th><th>Supplier</th><th class="th-r">Kg</th><th class="th-r">৳/Kg</th>
-                <th class="th-r">Cost</th><th class="th-r">Wasted</th><th class="th-r">Refunded</th><th>Used By</th><th></th>
+                <th class="th-r">Cost</th><th class="th-r">Wasted</th><th class="th-r">Refunded</th><th>Replacement</th><th>Used By</th><th></th>
               </tr>
             </thead>
-            <tbody id="sp-tbody"><tr><td colspan="9"><div class="empty-state"><div class="empty-icon">🌱</div>No spawn purchases logged yet</div></td></tr></tbody>
+            <tbody id="sp-tbody"><tr><td colspan="10"><div class="empty-state"><div class="empty-icon">🌱</div>No spawn purchases logged yet</div></td></tr></tbody>
           </table>
         </div>
       </div>
