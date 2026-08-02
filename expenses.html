@@ -434,10 +434,10 @@
             <thead>
               <tr>
                 <th>Date</th><th>Supplier</th><th class="th-r">Kg</th><th class="th-r">৳/Kg</th>
-                <th class="th-r">Cost</th><th class="th-r">Wasted</th><th class="th-r">Refunded</th><th></th>
+                <th class="th-r">Cost</th><th class="th-r">Wasted</th><th class="th-r">Refunded</th><th>Used By</th><th></th>
               </tr>
             </thead>
-            <tbody id="sp-tbody"><tr><td colspan="8"><div class="empty-state"><div class="empty-icon">🌱</div>No spawn purchases logged yet</div></td></tr></tbody>
+            <tbody id="sp-tbody"><tr><td colspan="9"><div class="empty-state"><div class="empty-icon">🌱</div>No spawn purchases logged yet</div></td></tr></tbody>
           </table>
         </div>
       </div>
@@ -764,12 +764,17 @@
     let _spData = [];
 
     async function loadSuppliers() {
-      const [{ data: purchases, error: pErr }, { data: scorecard, error: sErr }] = await Promise.all([
+      const [{ data: purchases, error: pErr }, { data: scorecard, error: sErr }, { data: usage }] = await Promise.all([
         sb.from('spawn_purchases').select('*').order('purchase_date', { ascending: false }),
         sb.from('v_supplier_scorecard').select('*').order('total_spent', { ascending: false }),
+        sb.from('v_spawn_purchase_usage').select('*'),
       ]);
       if (pErr) { toast(pErr.message, 'err'); return; }
-      _spData = purchases || [];
+      // Which batch(es) this purchase's spawn went into (migration
+      // 43_spawn_traceability.sql) — merged in client-side since PostgREST
+      // can't join across two separate .from() calls.
+      const usageById = new Map((usage || []).map(u => [u.spawn_purchase_id, u.used_by_batches]));
+      _spData = (purchases || []).map(p => ({ ...p, used_by_batches: usageById.get(p.id) || null }));
       renderSPKPIs();
       renderScorecard(scorecard || [], sErr);
       renderSPTable();
@@ -814,7 +819,7 @@
     function renderSPTable() {
       const tbody = document.getElementById('sp-tbody');
       if (!_spData.length) {
-        tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">🌱</div>No spawn purchases logged yet</div></td></tr>';
+        tbody.innerHTML = '<tr><td colspan="9"><div class="empty-state"><div class="empty-icon">🌱</div>No spawn purchases logged yet</div></td></tr>';
         return;
       }
       tbody.innerHTML = _spData.map(r => `
@@ -826,6 +831,7 @@
           <td class="th-r amount-cell total">${fmt(r.total_cost)}</td>
           <td class="th-r" style="color:${r.kg_wasted>0?'var(--red)':'var(--cl)'}">${r.kg_wasted>0 ? (+r.kg_wasted).toFixed(2) : '—'}</td>
           <td class="th-r" style="color:${r.refund_amount>0?'var(--green)':'var(--cl)'}">${r.refund_amount>0 ? fmt(r.refund_amount) : '—'}</td>
+          <td style="font-size:12px;color:var(--cl);">${r.used_by_batches && r.used_by_batches.length ? r.used_by_batches.join(', ') : '—'}</td>
           <td><button class="btn danger" onclick="window.deleteSP(${r.id})">Delete</button></td>
         </tr>`).join('');
     }
@@ -1010,7 +1016,7 @@
       if (tab === 'summary')   loadPL();
     }
     injectRealtimeStyles();
-    subscribeRealtime(sb, 'expenses-live', ['farm_daily_logs', 'one_off_expenses', 'spawn_purchases'], reloadVisibleTab,
+    subscribeRealtime(sb, 'expenses-live', ['farm_daily_logs', 'one_off_expenses', 'spawn_purchases', 'inoculation_entries'], reloadVisibleTab,
       { indicatorId: 'rt-indicator' });
   </script>
 </body>

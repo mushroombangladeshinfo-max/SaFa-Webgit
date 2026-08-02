@@ -425,7 +425,7 @@ async function fetchDetail() {
 async function fetchPivot() {
   renderPivotHead();
   const tbody = document.getElementById('harvest-tbody');
-  tbody.innerHTML = skeletonRows(8);
+  tbody.innerHTML = skeletonRows(S.groupBy === 'batch' ? 15 : 8);
 
   let q = sb.from('harvest_entries').select('*').order('log_date', { ascending: true }).limit(5000);
   q = applyFilters(q);
@@ -433,10 +433,47 @@ async function fetchPivot() {
 
   if (error) {
     console.error('[Harvest Log] fetchPivot error:', error);
-    tbody.innerHTML = errorRow(error, 8);
+    tbody.innerHTML = errorRow(error, S.groupBy === 'batch' ? 15 : 8);
     return;
   }
   const grouped = aggregateRows(data || [], S.groupBy);
+
+  // "Where did this batch's harvest end up" — only meaningful when
+  // grouped by batch (traced sales are keyed by batch_number, not room/
+  // week/month). See migration 44_fresh_sale_traceability.sql: these are
+  // TRACED totals only, never a complete sales reconciliation, since the
+  // batch link on a sale is always optional.
+  if (S.groupBy === 'batch') {
+    const [{ data: traced, error: tErr }, { data: proc, error: pErr }] = await Promise.all([
+      sb.from('v_batch_sales_traced').select('*'),
+      sb.from('processing_entries').select('batch_number,dried_out_kg,dried_reject_kg').not('batch_number', 'is', null),
+    ]);
+    if (tErr) console.error('[Harvest Log] v_batch_sales_traced error:', tErr);
+    if (pErr) console.error('[Harvest Log] processing_entries error:', pErr);
+    const tracedById = new Map((traced || []).map(t => [t.batch_number, t]));
+    // Batch-traced drying output (migration 45_processing_entries.sql) —
+    // summed client-side the same way harvest_entries already is, since
+    // there's no dedicated view for it yet.
+    const driedById = new Map();
+    (proc || []).forEach(r => {
+      const cur = driedById.get(r.batch_number) || { dried_out_kg: 0, dried_reject_kg: 0 };
+      cur.dried_out_kg    += +r.dried_out_kg    || 0;
+      cur.dried_reject_kg += +r.dried_reject_kg || 0;
+      driedById.set(r.batch_number, cur);
+    });
+    grouped.forEach(g => {
+      const t = tracedById.get(g.key);
+      g.traced_retail_kg = t ? +t.traced_retail_kg : 0;
+      g.traced_b2b_kg    = t ? +t.traced_b2b_kg    : 0;
+      g.traced_fnf_kg    = t ? +t.traced_fnf_kg    : 0;
+      g.traced_sample_kg = t ? +t.traced_sample_kg : 0;
+      g.traced_total_kg  = t ? +t.traced_total_kg  : 0;
+      const d = driedById.get(g.key);
+      g.traced_dried_out_kg    = d ? d.dried_out_kg    : 0;
+      g.traced_dried_reject_kg = d ? d.dried_reject_kg : 0;
+    });
+  }
+
   S.rows = grouped;
   S.totalCount = grouped.length;
   renderPivotTable();
@@ -588,14 +625,18 @@ window.saveEdit = async function(id) {
 
 /* ── Render: Pivot mode ── */
 function renderPivotHead() {
+  const tracedCols = S.groupBy === 'batch'
+    ? '<th class="cell-total">Traced Dried</th><th>— Reject</th><th class="cell-total">Traced Sold</th><th>— Retail</th><th>— B2B</th><th>— FnF</th><th>— Samples</th>'
+    : '';
   document.getElementById('harvest-thead').innerHTML = `<tr>
     <th>${GROUP_LABELS[S.groupBy] || 'Group'}</th><th>Entries</th><th>Fresh A</th>
-    <th>Fresh Rej</th><th>Healthy</th><th>Recovered</th><th>Bags Removed (kg)</th><th>Total</th>
+    <th>Fresh Rej</th><th>Healthy</th><th>Recovered</th><th>Bags Removed (kg)</th><th>Total</th>${tracedCols}
   </tr>`;
 }
 function renderPivotTable() {
   const tbody = document.getElementById('harvest-tbody');
-  if (!S.rows.length) { tbody.innerHTML = emptyRow(8); return; }
+  const cols = S.groupBy === 'batch' ? 15 : 8;
+  if (!S.rows.length) { tbody.innerHTML = emptyRow(cols); return; }
   tbody.innerHTML = S.rows.map(g => `
     <tr>
       <td>${g.key}</td>
@@ -606,6 +647,14 @@ function renderPivotTable() {
       <td>${fmtKg(g.recovered_kg)}</td>
       <td>${fmtKg(g.bags_removed_kg)}</td>
       <td class="cell-total">${fmtKg(g.total_kg)}</td>
+      ${S.groupBy === 'batch' ? `
+      <td class="cell-total">${g.traced_dried_out_kg > 0 ? fmtKg(g.traced_dried_out_kg) : '—'}</td>
+      <td>${g.traced_dried_reject_kg > 0 ? fmtKg(g.traced_dried_reject_kg) : '—'}</td>
+      <td class="cell-total">${g.traced_total_kg > 0 ? fmtKg(g.traced_total_kg) : '—'}</td>
+      <td>${g.traced_retail_kg > 0 ? fmtKg(g.traced_retail_kg) : '—'}</td>
+      <td>${g.traced_b2b_kg > 0 ? fmtKg(g.traced_b2b_kg) : '—'}</td>
+      <td>${g.traced_fnf_kg > 0 ? fmtKg(g.traced_fnf_kg) : '—'}</td>
+      <td>${g.traced_sample_kg > 0 ? fmtKg(g.traced_sample_kg) : '—'}</td>` : ''}
     </tr>`).join('');
 }
 
@@ -688,8 +737,33 @@ document.getElementById('export-btn').addEventListener('click', async () => {
       if (error) throw error;
       rows = aggregateRows(data || [], S.groupBy);
       if (!rows.length) { toast('No entries to export.', 'error'); return; }
-      headers = [GROUP_LABELS[S.groupBy], 'Entries','Fresh A (kg)','Fresh Rej (kg)','Healthy (kg)','Recovered (kg)','Bags Removed (kg)','Total (kg)'];
-      lines = rows.map(g => [g.key, g.entries, g.fresh_a_kg, g.fresh_rej_kg, g.healthy_kg, g.recovered_kg, g.bags_removed_kg, g.total_kg].join(','));
+      if (S.groupBy === 'batch') {
+        const [{ data: traced }, { data: proc }] = await Promise.all([
+          sb.from('v_batch_sales_traced').select('*'),
+          sb.from('processing_entries').select('batch_number,dried_out_kg,dried_reject_kg').not('batch_number', 'is', null),
+        ]);
+        const tracedById = new Map((traced || []).map(t => [t.batch_number, t]));
+        const driedById = new Map();
+        (proc || []).forEach(r => {
+          const cur = driedById.get(r.batch_number) || { dried_out_kg: 0, dried_reject_kg: 0 };
+          cur.dried_out_kg    += +r.dried_out_kg    || 0;
+          cur.dried_reject_kg += +r.dried_reject_kg || 0;
+          driedById.set(r.batch_number, cur);
+        });
+        rows.forEach(g => { g._traced = tracedById.get(g.key) || null; g._dried = driedById.get(g.key) || null; });
+        headers = [GROUP_LABELS[S.groupBy], 'Entries','Fresh A (kg)','Fresh Rej (kg)','Healthy (kg)','Recovered (kg)','Bags Removed (kg)','Total (kg)',
+                   'Traced Dried (kg)','Traced Dried Reject (kg)',
+                   'Traced Sold (kg)','Traced Retail (kg)','Traced B2B (kg)','Traced FnF (kg)','Traced Samples (kg)'];
+        lines = rows.map(g => [
+          g.key, g.entries, g.fresh_a_kg, g.fresh_rej_kg, g.healthy_kg, g.recovered_kg, g.bags_removed_kg, g.total_kg,
+          g._dried?.dried_out_kg ?? 0, g._dried?.dried_reject_kg ?? 0,
+          g._traced?.traced_total_kg ?? 0, g._traced?.traced_retail_kg ?? 0, g._traced?.traced_b2b_kg ?? 0,
+          g._traced?.traced_fnf_kg ?? 0, g._traced?.traced_sample_kg ?? 0,
+        ].join(','));
+      } else {
+        headers = [GROUP_LABELS[S.groupBy], 'Entries','Fresh A (kg)','Fresh Rej (kg)','Healthy (kg)','Recovered (kg)','Bags Removed (kg)','Total (kg)'];
+        lines = rows.map(g => [g.key, g.entries, g.fresh_a_kg, g.fresh_rej_kg, g.healthy_kg, g.recovered_kg, g.bags_removed_kg, g.total_kg].join(','));
+      }
     }
     const csv  = [headers.join(','), ...lines].join('\n');
     const blob = new Blob([csv], { type:'text/csv;charset=utf-8;' });

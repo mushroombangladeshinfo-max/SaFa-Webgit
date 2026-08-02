@@ -230,6 +230,13 @@ const S = window.S = {
   // inoculation day, so they're the same block, not two).
   inocEntryIds:    [0],
   inocEntryNextId: 1,
+  // Same reasoning again — drying is kept batch-separate (each batch on
+  // its own labeled tray, even within one dryer run), so fresh→dried is
+  // repeatable per batch (migration 45_processing_entries.sql). Dried→
+  // powder stays a single flat pair below — that stage genuinely does
+  // combine batches.
+  procEntryIds:    [0],
+  procEntryNextId: 1,
   // Same reasoning again — more than one B2B buyer or FnF sale can happen
   // in one day; a single flat field silently loses every one after the
   // first (and directly undercuts the B2B receivables tracking).
@@ -348,7 +355,13 @@ function calcExp() {
   if (el) el.textContent = fmt(tot);
 }
 function calcProc() {
-  const fi = dn('pr-fresh-in'), dout = dn('pr-dried-out');
+  // Dry yield is now summed across every batch's fresh→dried entry that
+  // day (repeatable, migration 45) — pooled across batches for this one
+  // yield% figure since that's a process-efficiency number, not a
+  // per-batch traceability field (each entry's own kg values are what
+  // stay batch-traced, in submit()'s payload).
+  const fi = S.procEntryIds.reduce((s,idx) => s + dn('pr-fresh-in-'+idx), 0);
+  const dout = S.procEntryIds.reduce((s,idx) => s + dn('pr-dried-out-'+idx), 0);
   const di = dn('pr-dried-in'), pout = dn('pr-powder-out');
   const d1 = document.getElementById('dry-yld');
   const d2 = document.getElementById('pow-yld');
@@ -512,15 +525,19 @@ window.removeQcEntry = function(idx) {
 // batch IS an inoculation event (you don't create one with no substrate
 // going in), so "start a new batch" lives inline in the same block instead
 // of a separate toggle, and a day inoculating two rooms is just two blocks.
-// Spawn PURCHASE is intentionally not here — that's spawn_purchases,
-// tracked correctly in Expenses → Suppliers already; this step used to
-// duplicate it into farm_daily_logs columns no report ever read.
+// Recording a spawn PURCHASE itself is intentionally not here — that's
+// spawn_purchases, tracked in Expenses → Suppliers. What IS here (when
+// Spawn Source = কেনা) is picking WHICH purchase this inoculation's spawn
+// came from — spawn_purchase_id (migration 43) — so a purchase can be
+// traced forward to the batch(es) it fed, same as the existing in-house
+// grain-spawn link below.
 function inocEntryBlock(idx) {
   const bId = 'inoc-batch-'+idx;
   const isNew = S.d[bId] === '__new__';
   const source = S.d['inoc-source-'+idx] || '';
   const batchOpts = ACTIVE_BATCHES.map(b=>`<option value="${b.batch_number}"${S.d[bId]===b.batch_number?' selected':''}>${b.batch_number} (Room ${b.room})</option>`).join('');
   const grainOpts = READY_GRAIN_SPAWN.map(g=>`<option value="${g.id}"${S.d['inoc-grain-'+idx]==g.id?' selected':''}>#${g.id} ${g.grain_type||''} (${g.start_date})</option>`).join('');
+  const purchaseOpts = RECENT_SPAWN_PURCHASES.map(p=>`<option value="${p.id}"${S.d['inoc-purchase-'+idx]==p.id?' selected':''}>#${p.id} ${p.supplier_name||''} (${p.purchase_date}, ${(+p.kg_purchased||0).toFixed(1)}kg)</option>`).join('');
   return `<div class="he-block">
     <div class="he-head">
       <span class="he-title">Inoculation এন্ট্রি ${idx+1}</span>
@@ -584,6 +601,13 @@ function inocEntryBlock(idx) {
         ${grainOpts}
       </select>
     </div>` : ''}
+    ${source==='purchased' ? `<div class="card" style="max-width:460px;width:100%;margin-top:8px">
+      <div class="card-lbl">কোন Purchase থেকে এই Spawn? (ঐচ্ছিক)</div>
+      <select class="sel-inline" id="f-inoc-purchase-${idx}" onchange="S.d['inoc-purchase-${idx}']=this.value">
+        <option value="">—</option>
+        ${purchaseOpts}
+      </select>
+    </div>` : ''}
   </div>`;
 }
 
@@ -614,15 +638,54 @@ window.removeInocEntry = function(idx) {
   recomputeRooms();
 };
 
+// One entry per batch actually dried that day — each batch stays on its
+// own labeled tray within the dryer even when multiple batches run
+// together, so this is batch-traceable the same way harvest is (migration
+// 45_processing_entries.sql). Dried→powder is intentionally NOT here —
+// that stage genuinely combines dried product across batches/dates, so it
+// stays the flat pair below.
+function processingEntryBlock(idx) {
+  const bId = 'pr-batch-'+idx;
+  return `<div class="he-block">
+    <div class="he-head">
+      <span class="he-title">Dryer এন্ট্রি ${idx+1}</span>
+      ${S.procEntryIds.length > 1 ? `<button type="button" class="he-remove" onclick="removeProcessingEntry(${idx})">✕ সরান</button>` : ''}
+    </div>
+    <div class="card">
+      <div class="card-lbl">Batch</div>
+      <select class="sel-inline" id="f-${bId}" onchange="S.d['${bId}']=this.value">
+        <option value="">—</option>
+        ${ACTIVE_BATCHES.map(b=>`<option value="${b.batch_number}"${S.d[bId]===b.batch_number?' selected':''}>${b.batch_number} (Room ${b.room})</option>`).join('')}
+      </select>
+    </div>
+    <div class="cg2" style="margin-top:8px">
+      ${sc('pr-fresh-in-'+idx,'Dryer-এ দেওয়া','kg',0.1,'proc')}
+      ${sc('pr-dried-out-'+idx,'শুকনো পাওয়া','kg',0.1,'proc')}
+    </div>
+    ${sc('pr-dried-reject-'+idx,'নষ্ট (পোড়া/ছত্রাক)','kg',0.1)}
+  </div>`;
+}
+function renderProcessingEntries() {
+  return S.procEntryIds.map(idx => processingEntryBlock(idx)).join('<div class="he-sep"></div>');
+}
+window.addProcessingEntry = function() {
+  collect();
+  S.procEntryIds.push(S.procEntryNextId++);
+  document.getElementById('proc-entries').innerHTML = renderProcessingEntries();
+};
+window.removeProcessingEntry = function(idx) {
+  collect();
+  S.procEntryIds = S.procEntryIds.filter(i => i !== idx);
+  document.getElementById('proc-entries').innerHTML = renderProcessingEntries();
+  calcProc();
+};
+
 function formProcessing() {
   return `<div class="cards">
-    <div class="sec-lbl">তাজা → শুকনো</div>
-    <div class="cg2">
-      ${sc('pr-fresh-in','Dryer-এ দেওয়া','kg',0.1,'proc')}
-      ${sc('pr-dried-out','শুকনো পাওয়া','kg',0.1,'proc')}
-    </div>
+    <div class="sec-lbl">তাজা → শুকনো (Batch অনুযায়ী)</div>
+    <div id="proc-entries">${renderProcessingEntries()}</div>
+    <button type="button" class="he-add" onclick="addProcessingEntry()">+ আরেকটি Batch-এর Drying যোগ করুন</button>
     <div class="yield-tag" id="dry-yld"></div>
-    ${sc('pr-dried-reject-kg','নষ্ট (পোড়া/ছত্রাক)','kg',0.1)}
     <div class="divider"></div>
     <div class="sec-lbl">শুকনো → পাউডার</div>
     <div class="cg2">
@@ -659,7 +722,8 @@ function formSales() {
         <div class="card-unit">৳/kg</div>
         <div class="card-tag" id="tag-${q}"></div>
       </div>
-    </div>`).join('');
+    </div>
+    ${q==='s-fresh-kg' ? `<div class="cg2">${batchSelectHtml('s-fresh-batch', S.d['s-fresh-batch'])}<div></div></div>` : ''}`).join('');
   return `<div class="cards">
     <div class="sec-lbl">খুচরা বিক্রি (B2B, বন্ধু-পরিবার ও নমুনা বাদে)</div>
     ${rows}
@@ -699,6 +763,23 @@ function formSales() {
   </div>`;
 }
 
+// Optional "which batch" selector reused by every fresh-sale-adjacent
+// entry (retail/B2B/FnF/samples) — migration 44_fresh_sale_traceability.sql.
+// Always optional, never blocks submission: fresh from multiple batches is
+// stored together once it leaves the harvest step, so this is only
+// fillable when the seller actually knows (e.g. read it off a labeled
+// fridge bag) — an unlinked sale isn't an error, just untraced.
+function batchSelectHtml(fieldId, current) {
+  const opts = ACTIVE_BATCHES.map(b=>`<option value="${b.batch_number}"${current===b.batch_number?' selected':''}>${b.batch_number} (Room ${b.room})</option>`).join('');
+  return `<div class="card">
+    <div class="card-lbl">কোন Batch থেকে? (ঐচ্ছিক)</div>
+    <select class="sel-inline" id="f-${fieldId}" onchange="S.d['${fieldId}']=this.value">
+      <option value="">—</option>
+      ${opts}
+    </select>
+  </div>`;
+}
+
 // One entry per B2B buyer sold to that day — a second buyer on the same
 // day used to silently have nowhere to go (single flat s-b2b-name/qty/
 // value fields), which also undercut v_b2b_receivables' assumption that
@@ -727,6 +808,10 @@ function b2bEntryBlock(idx) {
       <div class="card-lbl">নাম লিখুন</div>
       <input class="ci-txt" type="text" id="f-${otherKey}" value="${S.d[otherKey]||''}" placeholder="ব্যবসার নাম" oninput="S.d['${otherKey}']=this.value; S.d['${nameKey}']=this.value;"/>
     </div>` : ''}
+    <div class="cg2" style="margin-top:8px">
+      ${batchSelectHtml('b2b-batch-'+idx, S.d['b2b-batch-'+idx])}
+      <div></div>
+    </div>
   </div>`;
 }
 function renderB2bEntries() { return S.b2bEntryIds.map(idx => b2bEntryBlock(idx)).join('<div class="he-sep"></div>'); }
@@ -754,6 +839,10 @@ function fnfEntryBlock(idx) {
       ${sc('fnf-qty-'+idx,'পরিমাণ','kg',0.1)}
       ${sc('fnf-value-'+idx,'মূল্য','৳',50)}
     </div>
+    <div class="cg2" style="margin-top:8px">
+      ${batchSelectHtml('fnf-batch-'+idx, S.d['fnf-batch-'+idx])}
+      <div></div>
+    </div>
   </div>`;
 }
 function renderFnfEntries() { return S.fnfEntryIds.map(idx => fnfEntryBlock(idx)).join('<div class="he-sep"></div>'); }
@@ -777,6 +866,10 @@ function sampleEntryBlock(idx) {
       ${sc('sample-fresh-'+idx,'তাজা','kg',0.01)}
       ${sc('sample-dried-'+idx,'শুকনো','kg',0.01)}
       ${sc('sample-powder-'+idx,'পাউডার','kg',0.01)}
+    </div>
+    <div class="cg2" style="margin-top:8px">
+      ${batchSelectHtml('sample-batch-'+idx, S.d['sample-batch-'+idx])}
+      <div></div>
     </div>
   </div>`;
 }
@@ -1158,6 +1251,23 @@ async function submit() {
     };
   }).filter(e => e.batch_number || e.fresh_a_kg || e.fresh_rej_kg || e.healthy_kg || e.recovered_kg || e.bags_removed_kg);
 
+  // One row per batch actually dried that day (migration
+  // 45_processing_entries.sql) — the entry-level detail behind
+  // pr_fresh_in/pr_dried_out/pr_dried_reject_kg below, same reasoning as
+  // harvest entries above.
+  const procEntryRows = S.procEntryIds.map(idx => {
+    const batchNumber = ds('pr-batch-'+idx);
+    const batch = ACTIVE_BATCHES.find(b => b.batch_number === batchNumber);
+    return {
+      log_date:        logDate,
+      batch_number:    batchNumber || null,
+      room:            batch ? batch.room : null,
+      fresh_in_kg:     dn2('pr-fresh-in-'+idx),
+      dried_out_kg:    dn2('pr-dried-out-'+idx),
+      dried_reject_kg: dn2('pr-dried-reject-'+idx),
+    };
+  }).filter(e => e.batch_number || e.fresh_in_kg || e.dried_out_kg || e.dried_reject_kg);
+
   // One row per batch/room actually affected — the entry-level detail
   // behind contam_event/contam_kg below (migration 33/40_qc_batch_kg.sql).
   // batch_number is the identifier (room is derived from it); bags_kg
@@ -1210,6 +1320,7 @@ async function submit() {
       spawn_kg_used:        dn2('inoc-spawn-kg-'+idx),
       spawn_source:         ds('inoc-source-'+idx),
       grain_spawn_batch_id: ds('inoc-source-'+idx) === 'inhouse' ? (ds('inoc-grain-'+idx) || null) : null,
+      spawn_purchase_id:    ds('inoc-source-'+idx) === 'purchased' ? (ds('inoc-purchase-'+idx) || null) : null,
     };
   }).filter(e => e.batch_number || e.substrate_kg || e.bags_count || e.spawn_kg_used);
 
@@ -1221,6 +1332,7 @@ async function submit() {
     business_name: ds('b2b-name-'+idx),
     qty:           dn2('b2b-qty-'+idx),
     value:         dn2('b2b-value-'+idx),
+    batch_number:  ds('b2b-batch-'+idx),
   })).filter(e => e.business_name || e.qty || e.value);
 
   const fnfEntryRows = S.fnfEntryIds.map(idx => ({
@@ -1228,6 +1340,7 @@ async function submit() {
     person_name: ds('fnf-name-'+idx),
     qty:         dn2('fnf-qty-'+idx),
     value:       dn2('fnf-value-'+idx),
+    batch_number: ds('fnf-batch-'+idx),
   })).filter(e => e.person_name || e.qty || e.value);
 
   const sampleEntryRows = S.sampleEntryIds.map(idx => ({
@@ -1236,6 +1349,7 @@ async function submit() {
     fresh_kg:  dn2('sample-fresh-'+idx),
     dried_kg:  dn2('sample-dried-'+idx),
     powder_kg: dn2('sample-powder-'+idx),
+    batch_number: ds('sample-batch-'+idx),
   })).filter(e => e.recipient || e.fresh_kg || e.dried_kg || e.powder_kg);
 
   const payload = {
@@ -1246,10 +1360,12 @@ async function submit() {
     harvest_rooms: S.rooms.length ? S.rooms : null,
     contam_event: qcEntryRows.length > 0,
     contam_kg:    S.qcEntryIds.reduce((s,idx) => s + dn('qc-bags-kg-'+idx), 0),
-    pr_fresh_in:dn2('pr-fresh-in'), pr_dried_out:dn2('pr-dried-out'),
+    pr_fresh_in:  procEntryRows.reduce((s,e) => s + (+e.fresh_in_kg||0), 0),
+    pr_dried_out: procEntryRows.reduce((s,e) => s + (+e.dried_out_kg||0), 0),
+    pr_dried_reject_kg: procEntryRows.reduce((s,e) => s + (+e.dried_reject_kg||0), 0),
     pr_dried_in:dn2('pr-dried-in'), pr_powder_out:dn2('pr-powder-out'), pr_notes:ds('pr-notes'),
-    pr_dried_reject_kg:dn2('pr-dried-reject-kg'), pr_powder_reject_kg:dn2('pr-powder-reject-kg'),
-    s_fresh_kg:dn2('s-fresh-kg'), s_fresh_price:dn2('s-fresh-price'),
+    pr_powder_reject_kg:dn2('pr-powder-reject-kg'),
+    s_fresh_kg:dn2('s-fresh-kg'), s_fresh_price:dn2('s-fresh-price'), s_fresh_batch_number:ds('s-fresh-batch'),
     s_dried_kg:dn2('s-dried-kg'), s_dried_price:dn2('s-dried-price'),
     s_powder_kg:dn2('s-powder-kg'), s_powder_price:dn2('s-powder-price'),
     s_waste_kg:dn2('s-waste-kg'), s_returned_kg:dn2('s-returned-kg'), s_returned_value:dn2('s-returned-value'),
@@ -1286,6 +1402,14 @@ async function submit() {
     if (harvestEntryRows.length) {
       const { error: heErr } = await sb.from('harvest_entries').insert(harvestEntryRows);
       if (heErr) throw heErr;
+    }
+
+    // Same replace-wholesale model as harvest_entries above.
+    const { error: delProcErr } = await sb.from('processing_entries').delete().eq('log_date', logDate);
+    if (delProcErr) throw delProcErr;
+    if (procEntryRows.length) {
+      const { error: procErr } = await sb.from('processing_entries').insert(procEntryRows);
+      if (procErr) throw procErr;
     }
 
     // Same replace-wholesale model as harvest_entries above.
@@ -1411,6 +1535,20 @@ async function loadReadyGrainSpawn() {
   } catch(_) { /* silent — dropdown just shows none yet */ }
 }
 
+/* Recent spawn purchases, for the "which purchase did this spawn come
+   from" dropdown (migration 43_spawn_traceability.sql) — last 90 days is
+   plenty for picking a recent delivery; older purchases are almost
+   certainly already fully used. */
+let RECENT_SPAWN_PURCHASES = [];
+async function loadRecentSpawnPurchases() {
+  try {
+    const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 90);
+    const { data } = await sb.from('spawn_purchases').select('id,supplier_name,purchase_date,kg_purchased')
+      .gte('purchase_date', localDateStr(cutoff)).order('purchase_date', { ascending: false });
+    RECENT_SPAWN_PURCHASES = data || [];
+  } catch(_) { /* silent — dropdown just shows none yet */ }
+}
+
 // DORMANT: Closing Stock — see the STEPS array note above for why/how to revive.
 // Note: this "expected = last count + this count day's own flows only" formula
 // is what needs the cumulative-sum fix before trusting it at non-daily cadence.
@@ -1484,7 +1622,7 @@ document.getElementById('hdr-back').style.visibility = 'hidden';
   S.d['s-fresh-price']    = '350';
   S.d['s-dried-price']    = '2800';
   S.d['s-powder-price']   = '3500';
-  await Promise.all([prefill(), loadB2BBuyers(), loadActiveBatches(), loadReadyGrainSpawn()]);
+  await Promise.all([prefill(), loadB2BBuyers(), loadActiveBatches(), loadReadyGrainSpawn(), loadRecentSpawnPurchases()]);
 
   // Clear loading skeleton, then render first step
   document.getElementById('wrap').innerHTML = '';
