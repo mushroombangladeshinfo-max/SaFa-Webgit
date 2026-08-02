@@ -64,6 +64,10 @@
     .tw-side-val{font-family:'DM Mono','Hind Siliguri',monospace;font-size:26px;font-weight:500;color:var(--c);}
     .tw-side-val.gold{color:var(--al);}
     .tw-side-sub{font-size:11px;color:var(--cl);margin-top:4px;}
+    .tw-cmp{font-size:11px;font-weight:600;margin-top:6px;min-height:14px;}
+    .tw-cmp.up{color:var(--green);}
+    .tw-cmp.down{color:var(--red);}
+    .tw-cmp.flat{color:var(--cl);font-weight:400;}
     .tw-div{width:1px;background:var(--border);flex-shrink:0;}
     @media(max-width:600px){.tw-div{width:100%;height:1px;}}
     .tw-sell-through{margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,.05);}
@@ -231,18 +235,20 @@
          much as "how much did we pick." -->
     <a href="farm-analytics.html" class="panel tw-panel" aria-label="Harvest vs sold this month — open Farm Analytics">
       <div class="panel-head"><div class="panel-title">🌾 <span id="tw-month-label">This Month</span></div><svg class="panel-chevron" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg></div>
-      <div class="panel-sub">Production vs. what actually sold this calendar month so far.</div>
+      <div class="panel-sub" id="tw-panel-sub">Production vs. what actually sold this calendar month so far.</div>
       <div class="tw-split">
         <div class="tw-side">
           <div class="tw-side-lbl">🌾 Harvest</div>
           <div class="tw-side-val" id="tw-harvest-kg">—</div>
           <div class="tw-side-sub">Fresh, kg</div>
+          <div class="tw-cmp" id="tw-harvest-cmp"></div>
         </div>
         <div class="tw-div"></div>
         <div class="tw-side">
           <div class="tw-side-lbl">💰 Sold</div>
           <div class="tw-side-val gold" id="tw-sold-kg">—</div>
           <div class="tw-side-sub" id="tw-sold-rev">Fresh + dried + powder + B2B, kg</div>
+          <div class="tw-cmp" id="tw-sold-cmp"></div>
         </div>
       </div>
       <div class="tw-sell-through hidden" id="tw-sell-through">
@@ -426,7 +432,11 @@
 
     /* ── Helpers ── */
     const fmt = n => '৳' + Math.round(n || 0).toLocaleString('en-BD');
-    const fmtKg = n => (n || 0).toFixed(2) + ' kg';
+    // Headline aggregate totals (30-day/monthly sums) don't need hundredths —
+    // ".00" on a 3-digit kg figure reads as noise, not precision. Small
+    // values (<10kg, e.g. an early-month total) keep 1 decimal so they don't
+    // round away to nothing.
+    const fmtKg = n => { const v = n || 0; return v.toFixed(Math.abs(v) < 10 ? 1 : 0) + ' kg'; };
     const fmtN = n => (n || 0).toLocaleString('en-BD');
     const cap = s => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
     const daysSince = dateStr => Math.floor((Date.now() - new Date(dateStr).getTime()) / 864e5);
@@ -802,17 +812,48 @@
       renderStatusChips(document.getElementById('humidity-status'), humResult.inRangeDay, humResult.inRangeNight, humResult.total);
     }
 
+    // ▲/▼ badge comparing this month-to-date against the SAME elapsed number
+    // of days last month (not last month's full total) — the standard MTD
+    // comparison pattern. Comparing a 2-day-old total against a full 30-day
+    // prior month would always show a misleading, alarming-looking drop, so
+    // the prior-period query below is deliberately day-aligned, not a whole
+    // month. Also doubles as the empty-state fix: "0.00 kg" on day 1 used to
+    // look broken; "0 kg — 12kg same time last month" reads as "just early."
+    function renderMonthCmp(id, current, prior) {
+      const el = document.getElementById(id);
+      if (prior <= 0) { el.textContent = ''; el.className = 'tw-cmp'; return; }
+      const pct = ((current - prior) / prior) * 100;
+      const dir = pct > 1 ? 'up' : pct < -1 ? 'down' : 'flat';
+      const arrow = dir === 'up' ? '▲' : dir === 'down' ? '▼' : '—';
+      el.textContent = `${arrow} ${Math.abs(Math.round(pct))}% vs same period last month`;
+      el.className = 'tw-cmp ' + dir;
+    }
+
     /* ── This calendar month: harvest vs. sold, side by side ── */
     async function loadHarvestVsSold() {
-      const monthName = new Date().toLocaleDateString('en-GB', { month:'long' });
-      document.getElementById('tw-month-label').textContent = `${monthName} ${new Date().getFullYear()}`;
+      const now = new Date();
+      const monthName = now.toLocaleDateString('en-GB', { month:'long' });
+      document.getElementById('tw-month-label').textContent = `${monthName} ${now.getFullYear()}`;
+      const dayOfMonth = now.getDate();
+      document.getElementById('tw-panel-sub').textContent =
+        `Production vs. what actually sold — day ${dayOfMonth} of ${monthName}.`;
 
       const monthStart = startOfMonth();
-      const [harvestRes, salesRes] = await Promise.all([
+      // Same elapsed days last month, clamped so e.g. day 31 doesn't roll
+      // into a month that doesn't have one.
+      const prevMonthLastDay = new Date(now.getFullYear(), now.getMonth(), 0).getDate();
+      const lastMonthStart = localDateStr(new Date(now.getFullYear(), now.getMonth()-1, 1));
+      const lastMonthMTDEnd = localDateStr(new Date(now.getFullYear(), now.getMonth()-1, Math.min(dayOfMonth, prevMonthLastDay)));
+
+      const [harvestRes, salesRes, lastHarvestRes, lastSalesRes] = await Promise.all([
         sb.from('v_ops_daily').select('harvest_fresh_kg').gte('day', monthStart),
         sb.from('farm_daily_logs')
           .select('s_fresh_kg,s_fresh_price,s_dried_kg,s_dried_price,s_powder_kg,s_powder_price,s_b2b_qty,s_b2b_value')
           .gte('log_date', monthStart),
+        sb.from('v_ops_daily').select('harvest_fresh_kg').gte('day', lastMonthStart).lte('day', lastMonthMTDEnd),
+        sb.from('farm_daily_logs')
+          .select('s_fresh_kg,s_dried_kg,s_powder_kg,s_b2b_qty')
+          .gte('log_date', lastMonthStart).lte('log_date', lastMonthMTDEnd),
       ]);
 
       const harvestKg = (harvestRes.data || []).reduce((s,r) => s + (Number(r.harvest_fresh_kg)||0), 0);
@@ -830,6 +871,13 @@
       countUp(document.getElementById('tw-sold-kg'), soldKg, fmtKg);
       document.getElementById('tw-sold-rev').textContent = soldKg > 0 ? `${fmt(soldRev)} · fresh + dried + powder + B2B` : 'Fresh + dried + powder + B2B, kg';
       dash.this_month = { harvest_kg: Number(harvestKg.toFixed(2)), sold_kg: Number(soldKg.toFixed(2)), sold_revenue_bdt: Math.round(soldRev) };
+
+      const lastHarvestKg = (lastHarvestRes.data || []).reduce((s,r) => s + (Number(r.harvest_fresh_kg)||0), 0);
+      const lastSales = lastSalesRes.data || [];
+      const lastSoldKg = lastSales.reduce((s,r) =>
+        s + (Number(r.s_fresh_kg)||0) + (Number(r.s_dried_kg)||0) + (Number(r.s_powder_kg)||0) + (Number(r.s_b2b_qty)||0), 0);
+      renderMonthCmp('tw-harvest-cmp', harvestKg, lastHarvestKg);
+      renderMonthCmp('tw-sold-cmp', soldKg, lastSoldKg);
 
       // Sell-through: for a perishable product, unsold harvest is spoilage
       // risk, not just a smaller number — worth a clearer signal than the
@@ -1002,10 +1050,17 @@
       aiUpdateConnBadge();
     }
     async function aiSaveCfgUI() {
-      await saveAiCfg(sb, {
+      const cfg = {
         provider: $ai('ai-provider').value, url: $ai('ai-url').value.trim(),
         model: $ai('ai-model').value.trim(), key: $ai('ai-key').value.trim(),
-      });
+      };
+      try {
+        await saveAiCfg(sb, cfg);
+      } catch (e) {
+        if (e.code !== 'EMPTY_KEY_WOULD_OVERWRITE') throw e;
+        if (!confirm('The key field is empty — saving now will remove the working API key shared by the whole team. Continue?')) return;
+        await saveAiCfg(sb, cfg, { force: true });
+      }
       aiUpdateConnBadge();
     }
     $ai('ai-save-cfg').addEventListener('click', aiSaveCfgUI);

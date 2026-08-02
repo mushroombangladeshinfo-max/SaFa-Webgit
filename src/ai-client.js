@@ -21,7 +21,19 @@ export async function loadAiCfg(supabase) {
   return { provider: 'openai', ...AI_DEFAULTS.openai, key: '' };
 }
 
-export async function saveAiCfg(supabase, cfg) {
+// Saving a blank key over a working one is exactly how this broke once
+// already (someone re-saved the settings panel with an empty key field,
+// silently wiping the shared key for the whole team). Refuses by default;
+// callers pass { force: true } after the user confirms they mean it.
+export async function saveAiCfg(supabase, cfg, { force = false } = {}) {
+  if (!force && !cfg.key) {
+    const { data } = await supabase.from('ai_settings').select('api_key').eq('id', true).maybeSingle();
+    if (data?.api_key) {
+      const err = new Error('Saving would clear the shared API key.');
+      err.code = 'EMPTY_KEY_WOULD_OVERWRITE';
+      throw err;
+    }
+  }
   await supabase.from('ai_settings')
     .update({ provider: cfg.provider, url: cfg.url, model: cfg.model, api_key: cfg.key })
     .eq('id', true);

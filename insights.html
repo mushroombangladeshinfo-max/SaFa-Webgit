@@ -1135,10 +1135,17 @@
       updateConnBadge();
     }
     async function saveAiCfgUI() {
-      await saveAiCfg(sb, {
+      const cfg = {
         provider: $ai('ai-provider').value, url: $ai('ai-url').value.trim(),
         model: $ai('ai-model').value.trim(), key: $ai('ai-key').value.trim(),
-      });
+      };
+      try {
+        await saveAiCfg(sb, cfg);
+      } catch (e) {
+        if (e.code !== 'EMPTY_KEY_WOULD_OVERWRITE') throw e;
+        if (!confirm('The key field is empty — saving now will remove the working API key shared by the whole team. Continue?')) return;
+        await saveAiCfg(sb, cfg, { force: true });
+      }
       updateConnBadge();
       toast('AI config saved');
     }
