@@ -323,10 +323,33 @@
     </div>
   </div>
 
+  <!-- Draft Reminder Modal — AI-drafted payment nudge, never auto-sent.
+       Only ever fed the real numbers already on screen (business name,
+       sold/paid/balance) — no invented dates, invoice numbers, or overdue
+       counts, since nothing tracks a due date today. A human reviews,
+       edits, and sends it themselves via WhatsApp/email. -->
+  <div class="modal-overlay" id="reminder-modal">
+    <div class="modal">
+      <div class="modal-title">✦ Draft Reminder — <span id="reminder-biz-name"></span></div>
+      <div class="form-grid">
+        <div class="form-group span2">
+          <label>Message (edit before sending)</label>
+          <textarea id="reminder-text" rows="7" placeholder="Drafting..."></textarea>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn" id="reminder-modal-close">Close</button>
+        <button type="button" class="btn" id="reminder-regenerate">↻ Regenerate</button>
+        <button type="button" class="btn primary" id="reminder-copy">Copy</button>
+      </div>
+    </div>
+  </div>
+
   <div class="toast-wrap" id="toast-wrap"></div>
 
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+    import { loadAiCfg, chatComplete, formatAiError } from '/src/ai-client.js';
     import { requireAdmin }  from '/src/admin-auth.js';
     import { mountAdminNav } from '/src/admin-nav.js';
     import { localDateStr }  from '/src/date-utils.js';
@@ -421,7 +444,10 @@
           <td class="th-r" style="font-family:'DM Mono',monospace;">${fmt(+r.total_sold)}</td>
           <td class="th-r" style="font-family:'DM Mono',monospace;">${fmt(+r.total_paid)}</td>
           <td class="th-r" style="font-family:'DM Mono',monospace;color:${+r.balance_due>0?'var(--red)':'var(--green)'}">${fmt(+r.balance_due)}</td>
-          <td><button type="button" class="btn sm" onclick="window.openPaymentModal('${r.business_name.replace(/'/g,"\\'")}')">Record Payment</button></td>
+          <td>
+            <button type="button" class="btn sm" onclick="window.openPaymentModal('${r.business_name.replace(/'/g,"\\'")}')">Record Payment</button>
+            ${+r.balance_due > 0 ? `<button type="button" class="btn sm" style="margin-left:6px" onclick="window.openReminderModal('${r.business_name.replace(/'/g,"\\'")}',${+r.total_sold||0},${+r.total_paid||0},${+r.balance_due||0})">✦ Draft Reminder</button>` : ''}
+          </td>
         </tr>`).join('');
     }
 
@@ -457,6 +483,47 @@
       toast('Payment recorded');
       closePaymentModal();
       loadReceivables();
+    });
+
+    /* ── Draft Reminder (AI) — drafts, never sends. Fed only the real
+       numbers already on screen; the prompt is explicit about not
+       inventing dates/details since nothing tracks a due date today. */
+    let _reminderCtx = null;
+    async function draftReminder() {
+      const ta = document.getElementById('reminder-text');
+      ta.value = '';
+      ta.placeholder = 'Drafting...';
+      const cfg = await loadAiCfg(sb);
+      if (cfg.provider === 'openai' && !cfg.key) {
+        ta.placeholder = 'API key needed — open the SaFa Assistant settings (⚙) on the Home page and save a Groq key.';
+        return;
+      }
+      const { businessName, totalSold, totalPaid, balanceDue } = _reminderCtx;
+      const messages = [
+        { role: 'system', content: `You draft short, polite B2B payment reminder messages in Bengali, to be sent via WhatsApp by SaFa Naturals, a small organic mushroom farm in Bangladesh, to one of its business buyers. This is an ongoing supplier relationship, not a debt collection — keep it warm, respectful, and brief (3-4 sentences). Use ONLY the numbers given below; never invent a due date, invoice number, days-overdue count, or any other detail not provided. End with a soft, low-pressure question about when payment might be possible. Output only the message text, nothing else.` },
+        { role: 'user', content: `Business: ${businessName}\nTotal sold to date: ${fmt(totalSold)}\nTotal paid to date: ${fmt(totalPaid)}\nBalance due: ${fmt(balanceDue)}` },
+      ];
+      try {
+        const reply = await chatComplete(cfg, messages);
+        ta.value = reply.trim();
+      } catch (e) {
+        ta.placeholder = formatAiError(cfg, e).replace(/\*\*/g, '');
+      }
+    }
+    window.openReminderModal = function(businessName, totalSold, totalPaid, balanceDue) {
+      _reminderCtx = { businessName, totalSold, totalPaid, balanceDue };
+      document.getElementById('reminder-biz-name').textContent = businessName;
+      document.getElementById('reminder-modal').classList.add('open');
+      draftReminder();
+    };
+    function closeReminderModal() { document.getElementById('reminder-modal').classList.remove('open'); }
+    document.getElementById('reminder-modal-close').addEventListener('click', closeReminderModal);
+    document.getElementById('reminder-modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeReminderModal(); });
+    document.getElementById('reminder-regenerate').addEventListener('click', draftReminder);
+    document.getElementById('reminder-copy').addEventListener('click', () => {
+      const text = document.getElementById('reminder-text').value;
+      if (!text) return;
+      navigator.clipboard.writeText(text).then(() => toast('Copied to clipboard'));
     });
 
     function renderKPIs() {
