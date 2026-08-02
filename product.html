@@ -802,6 +802,97 @@
   </div>
 </a>
 
+<!-- AI Assistant (Storefront Chat) — see index.html for the reference
+     implementation/comments; markup+script identical, this site has no
+     shared-partial system so floating UI is duplicated per page (same
+     as the WhatsApp button above). Styles live in style.css section 16. -->
+<button type="button" class="ai-widget-btn" id="aiWidgetBtn" aria-label="SaFa AI Assistant খুলুন">✦</button>
+<div class="ai-widget-panel" id="aiWidgetPanel" role="dialog" aria-label="SaFa AI Assistant">
+  <div class="ai-widget-head">
+    <div class="ai-widget-title">✦ SaFa Assistant</div>
+    <div class="ai-widget-sub">দ্রুত উত্তরের জন্য AI, জটিল বিষয়ে <a href="https://wa.me/+8801970099378" target="_blank" rel="noopener">WhatsApp</a>-এ মানুষ</div>
+    <button type="button" class="ai-widget-close" id="aiWidgetClose" aria-label="বন্ধ করুন">✕</button>
+  </div>
+  <div class="ai-widget-messages" id="aiWidgetMessages">
+    <div class="ai-widget-empty">নমস্কার! ডেলিভারি, দাম, পণ্য বা অর্ডার নিয়ে যেকোনো প্রশ্ন করুন।</div>
+  </div>
+  <div class="ai-widget-typing hidden" id="aiWidgetTyping">লিখছে...</div>
+  <form class="ai-widget-input-row" id="aiWidgetForm">
+    <input type="text" id="aiWidgetInput" placeholder="আপনার প্রশ্ন লিখুন..." autocomplete="off" maxlength="500">
+    <button type="submit" id="aiWidgetSend" aria-label="পাঠান">→</button>
+  </form>
+</div>
+<script>
+(function() {
+  var FN_URL = 'https://uiwmerejtrdrykqpumdu.supabase.co/functions/v1/storefront-chat';
+  var btn = document.getElementById('aiWidgetBtn');
+  var panel = document.getElementById('aiWidgetPanel');
+  var closeBtn = document.getElementById('aiWidgetClose');
+  var messagesEl = document.getElementById('aiWidgetMessages');
+  var typingEl = document.getElementById('aiWidgetTyping');
+  var form = document.getElementById('aiWidgetForm');
+  var input = document.getElementById('aiWidgetInput');
+  var sendBtn = document.getElementById('aiWidgetSend');
+  if (!btn || !panel || !form) return;
+
+  var history = [];
+
+  function escapeHtml(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+  function render() {
+    if (!history.length) {
+      messagesEl.innerHTML = '<div class="ai-widget-empty">নমস্কার! ডেলিভারি, দাম, পণ্য বা অর্ডার নিয়ে যেকোনো প্রশ্ন করুন।</div>';
+      return;
+    }
+    messagesEl.innerHTML = history.map(function(m) {
+      var cls = m.role === 'user' ? 'ai-widget-msg user' : (m.role === 'error' ? 'ai-widget-msg error' : 'ai-widget-msg bot');
+      return '<div class="' + cls + '">' + escapeHtml(m.content) + '</div>';
+    }).join('');
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+
+  btn.addEventListener('click', function() {
+    panel.classList.toggle('open');
+    if (panel.classList.contains('open')) input.focus();
+  });
+  closeBtn.addEventListener('click', function() { panel.classList.remove('open'); });
+
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    var text = input.value.trim();
+    if (!text) return;
+    history.push({ role: 'user', content: text });
+    input.value = '';
+    render();
+    typingEl.classList.remove('hidden');
+    sendBtn.disabled = true;
+
+    fetch(FN_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages: history.filter(function(m) { return m.role !== 'error'; }) }),
+    })
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        if (data.reply) {
+          history.push({ role: 'assistant', content: data.reply });
+        } else {
+          history.push({ role: 'error', content: data.error || 'কিছু ভুল হয়েছে, আবার চেষ্টা করুন।' });
+        }
+      })
+      .catch(function() {
+        history.push({ role: 'error', content: 'সংযোগ ব্যর্থ হয়েছে — আবার চেষ্টা করুন অথবা WhatsApp করুন।' });
+      })
+      .finally(function() {
+        typingEl.classList.add('hidden');
+        sendBtn.disabled = false;
+        render();
+      });
+  });
+})();
+</script>
+
 <script type="module" src="/src/main.js"></script>
 <script type="module" src="/src/auth-nav.js"></script>
 
