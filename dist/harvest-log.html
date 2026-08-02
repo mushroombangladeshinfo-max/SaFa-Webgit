@@ -171,7 +171,7 @@ input[type="date"].f-search::-webkit-calendar-picker-indicator{filter:invert(1);
     <input type="date" id="filter-date-from" class="f-search f-date" title="From Date">
     <span class="filter-date-sep">to</span>
     <input type="date" id="filter-date-to" class="f-search f-date" title="To Date">
-    <select id="filter-room" class="f-select"><option value="">All Rooms</option></select>
+    <select id="filter-room" class="f-select" aria-label="Filter by room"><option value="">All Rooms</option></select>
     <button type="button" class="f-clear-btn" id="clear-filters-btn">✕ Clear</button>
   </div>
 
@@ -183,14 +183,14 @@ input[type="date"].f-search::-webkit-calendar-picker-indicator{filter:invert(1);
     <button type="button" class="f-preset-btn" id="preset-this_week" onclick="setPreset('this_week')">This Week</button>
     <button type="button" class="f-preset-btn" id="preset-this_month" onclick="setPreset('this_month')">This Month</button>
     <div class="filter-sep"></div>
-    <select id="filter-batch" class="f-select"><option value="">All Batches</option></select>
-    <select id="filter-flush" class="f-select">
+    <select id="filter-batch" class="f-select" aria-label="Filter by batch"><option value="">All Batches</option></select>
+    <select id="filter-flush" class="f-select" aria-label="Filter by flush">
       <option value="">All Flushes</option>
       <option value="1">1st Flush</option><option value="2">2nd Flush</option>
       <option value="3">3rd Flush</option><option value="4">4th Flush</option>
       <option value="5">5th Flush</option><option value="6">6th Flush</option>
     </select>
-    <select id="filter-sort" class="f-select">
+    <select id="filter-sort" class="f-select" aria-label="Sort by">
       <option value="log_date|0">Newest First</option>
       <option value="log_date|1">Oldest First</option>
       <option value="total_kg|0">Highest kg</option>
@@ -201,7 +201,7 @@ input[type="date"].f-search::-webkit-calendar-picker-indicator{filter:invert(1);
     <input type="number" id="filter-max" class="f-search f-narrow" placeholder="Max kg" min="0" step="0.1">
     <div class="filter-sep"></div>
     <span class="f-label">Group by:</span>
-    <select id="filter-group" class="f-select ml-auto">
+    <select id="filter-group" class="f-select ml-auto" aria-label="Group by">
       <option value="none">None (Detail)</option>
       <option value="room">Room</option>
       <option value="batch">Batch</option>
