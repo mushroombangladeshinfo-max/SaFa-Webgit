@@ -62,6 +62,9 @@
     .btn.primary:hover{background:rgba(196,154,60,.2);border-color:rgba(196,154,60,.5);}
     .btn.danger{color:var(--red);border-color:rgba(224,90,43,.25);}
     .btn.danger:hover{background:rgba(224,90,43,.08);}
+    .repl-select{background:var(--bg3);border:1px solid var(--border);border-radius:5px;color:var(--c);font-family:'DM Sans','Hind Siliguri',sans-serif;font-size:11px;padding:5px 8px;cursor:pointer;outline:none;}
+    .repl-select.promised{color:var(--al);border-color:rgba(196,154,60,.35);}
+    .repl-select.received{color:var(--green);border-color:rgba(95,207,128,.3);}
 
     /* ── Charts ── */
     .charts-row{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;margin-bottom:24px;}
@@ -434,10 +437,10 @@
             <thead>
               <tr>
                 <th>Date</th><th>Supplier</th><th class="th-r">Kg</th><th class="th-r">৳/Kg</th>
-                <th class="th-r">Cost</th><th class="th-r">Wasted</th><th class="th-r">Refunded</th><th>Used By</th><th></th>
+                <th class="th-r">Cost</th><th class="th-r">Wasted</th><th class="th-r">Refunded</th><th>Replacement</th><th>Used By</th><th></th>
               </tr>
             </thead>
-            <tbody id="sp-tbody"><tr><td colspan="9"><div class="empty-state"><div class="empty-icon">🌱</div>No spawn purchases logged yet</div></td></tr></tbody>
+            <tbody id="sp-tbody"><tr><td colspan="10"><div class="empty-state"><div class="empty-icon">🌱</div>No spawn purchases logged yet</div></td></tr></tbody>
           </table>
         </div>
       </div>
@@ -816,10 +819,25 @@
         </tr>`).join('');
     }
 
+    // Only shown when a problem was actually logged (kg_wasted or
+    // problem_type set) — a clean delivery has no replacement to track.
+    // Cycling this to 'received' is the whole point: at-a-glance, which
+    // promised replacements are still outstanding (migration
+    // 46_spawn_replacement_status.sql).
+    function replacementSelect(r) {
+      if (!(r.kg_wasted > 0 || r.problem_type)) return '<span style="color:var(--cl)">—</span>';
+      const status = r.replacement_status || 'none';
+      const opts = [
+        ['none', 'কোনো প্রতিশ্রুতি নেই'],
+        ['promised', '⏳ প্রতিশ্রুতি দেওয়া হয়েছে'],
+        ['received', '✓ পাওয়া গেছে'],
+      ].map(([v,l]) => `<option value="${v}"${v===status?' selected':''}>${l}</option>`).join('');
+      return `<select class="repl-select ${status}" onchange="window.setReplacementStatus(${r.id},this.value)">${opts}</select>`;
+    }
     function renderSPTable() {
       const tbody = document.getElementById('sp-tbody');
       if (!_spData.length) {
-        tbody.innerHTML = '<tr><td colspan="9"><div class="empty-state"><div class="empty-icon">🌱</div>No spawn purchases logged yet</div></td></tr>';
+        tbody.innerHTML = '<tr><td colspan="10"><div class="empty-state"><div class="empty-icon">🌱</div>No spawn purchases logged yet</div></td></tr>';
         return;
       }
       tbody.innerHTML = _spData.map(r => `
@@ -831,6 +849,7 @@
           <td class="th-r amount-cell total">${fmt(r.total_cost)}</td>
           <td class="th-r" style="color:${r.kg_wasted>0?'var(--red)':'var(--cl)'}">${r.kg_wasted>0 ? (+r.kg_wasted).toFixed(2) : '—'}</td>
           <td class="th-r" style="color:${r.refund_amount>0?'var(--green)':'var(--cl)'}">${r.refund_amount>0 ? fmt(r.refund_amount) : '—'}</td>
+          <td>${replacementSelect(r)}</td>
           <td style="font-size:12px;color:var(--cl);">${r.used_by_batches && r.used_by_batches.length ? r.used_by_batches.join(', ') : '—'}</td>
           <td><button class="btn danger" onclick="window.deleteSP(${r.id})">Delete</button></td>
         </tr>`).join('');
@@ -895,6 +914,13 @@
       const { error } = await sb.from('spawn_purchases').delete().eq('id', id);
       if (error) { toast(error.message, 'err'); return; }
       toast('Deleted');
+      loadSuppliers();
+    };
+
+    window.setReplacementStatus = async (id, status) => {
+      const { error } = await sb.from('spawn_purchases').update({ replacement_status: status }).eq('id', id);
+      if (error) { toast(error.message, 'err'); return; }
+      toast(status === 'received' ? 'Marked as received' : status === 'promised' ? 'Marked as promised' : 'Cleared');
       loadSuppliers();
     };
 
