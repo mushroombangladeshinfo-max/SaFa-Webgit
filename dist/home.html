@@ -64,6 +64,10 @@
     .tw-side-val{font-family:'DM Mono','Hind Siliguri',monospace;font-size:26px;font-weight:500;color:var(--c);}
     .tw-side-val.gold{color:var(--al);}
     .tw-side-sub{font-size:11px;color:var(--cl);margin-top:4px;}
+    .tw-cmp{font-size:11px;font-weight:600;margin-top:6px;min-height:14px;}
+    .tw-cmp.up{color:var(--green);}
+    .tw-cmp.down{color:var(--red);}
+    .tw-cmp.flat{color:var(--cl);font-weight:400;}
     .tw-div{width:1px;background:var(--border);flex-shrink:0;}
     @media(max-width:600px){.tw-div{width:100%;height:1px;}}
     .tw-sell-through{margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,.05);}
@@ -198,13 +202,13 @@
     .ai-quick-row input:focus{outline:none;border-color:rgba(196,154,60,.4);}
     .ai-quick-row button{background:var(--al);color:var(--bg);border:none;padding:0 18px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;}
   </style>
-  <script type="module" crossorigin src="/assets/home-CC-LC6iM.js"></script>
+  <script type="module" crossorigin src="/assets/home-ChfpEWhx.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
   <link rel="modulepreload" crossorigin href="/assets/admin-auth-4ZiUUGs_.js">
   <link rel="modulepreload" crossorigin href="/assets/admin-nav-DSW_-4Nj.js">
   <link rel="modulepreload" crossorigin href="/assets/date-utils-D3sh9T8I.js">
   <link rel="modulepreload" crossorigin href="/assets/realtime-D7K--cdb.js">
-  <link rel="modulepreload" crossorigin href="/assets/ai-client-DMf9DRrl.js">
+  <link rel="modulepreload" crossorigin href="/assets/ai-client-m_keF5zz.js">
 </head>
 <body>
 
@@ -238,18 +242,20 @@
          much as "how much did we pick." -->
     <a href="farm-analytics.html" class="panel tw-panel" aria-label="Harvest vs sold this month — open Farm Analytics">
       <div class="panel-head"><div class="panel-title">🌾 <span id="tw-month-label">This Month</span></div><svg class="panel-chevron" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg></div>
-      <div class="panel-sub">Production vs. what actually sold this calendar month so far.</div>
+      <div class="panel-sub" id="tw-panel-sub">Production vs. what actually sold this calendar month so far.</div>
       <div class="tw-split">
         <div class="tw-side">
           <div class="tw-side-lbl">🌾 Harvest</div>
           <div class="tw-side-val" id="tw-harvest-kg">—</div>
           <div class="tw-side-sub">Fresh, kg</div>
+          <div class="tw-cmp" id="tw-harvest-cmp"></div>
         </div>
         <div class="tw-div"></div>
         <div class="tw-side">
           <div class="tw-side-lbl">💰 Sold</div>
           <div class="tw-side-val gold" id="tw-sold-kg">—</div>
           <div class="tw-side-sub" id="tw-sold-rev">Fresh + dried + powder + B2B, kg</div>
+          <div class="tw-cmp" id="tw-sold-cmp"></div>
         </div>
       </div>
       <div class="tw-sell-through hidden" id="tw-sell-through">
