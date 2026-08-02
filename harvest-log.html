@@ -85,9 +85,10 @@ input[type="date"].f-search::-webkit-calendar-picker-indicator{filter:invert(1);
 .row-action-btn:hover{border-color:rgba(255,255,255,.25);color:var(--c)}
 .row-action-btn.save{color:var(--green);border-color:rgba(95,207,128,.35)}
 .row-action-btn:disabled{opacity:.5;cursor:not-allowed}
-.batch-status-pill{font-size:9px;padding:3px 9px;border-radius:99px;text-transform:uppercase;letter-spacing:.3px;font-weight:700}
-.batch-status-pill.active{background:rgba(95,207,128,.1);color:var(--green)}
-.batch-status-pill.retired{background:rgba(255,255,255,.05);color:rgba(245,239,230,.35)}
+.batch-status-select{font-size:9px;padding:3px 20px 3px 9px;border-radius:99px;text-transform:uppercase;letter-spacing:.3px;font-weight:700;border:1px solid transparent;cursor:pointer;outline:none;font-family:inherit;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='rgba(245,239,230,0.5)' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 6px center}
+.batch-status-select.active{background-color:rgba(95,207,128,.1);color:var(--green)}
+.batch-status-select.done{background-color:rgba(255,255,255,.05);color:rgba(245,239,230,.35)}
+.batch-status-select option{background:var(--g900);color:var(--c)}
 
 /* Skeleton / empty state */
 .skel-row-wrap{padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.04);display:flex;gap:16px;align-items:center}
@@ -542,9 +543,23 @@ function renderDetailTable() {
   if (!S.rows.length) { tbody.innerHTML = emptyRow(12); return; }
   tbody.innerHTML = S.rows.map(r => r.id === S.editingId ? editRowHtml(r) : displayRowHtml(r)).join('');
 }
+// Editable status — was a read-only pill that only ever said "active"
+// (nothing anywhere ever wrote a different value, see migration
+// 47_batch_status_lifecycle.sql). Batch dropdowns elsewhere (quick-log's
+// Harvest/QC/Inoculation entries) filter on this, so marking a finished
+// batch "done" here is what actually keeps those dropdowns from
+// accumulating every batch ever created.
+function batchStatusHtml(r) {
+  const b = r.batches;
+  if (!r.batch_number || !b?.status) return '—';
+  const status = b.status;
+  return `<select class="batch-status-select ${status}" onchange="window.setBatchStatus('${r.batch_number.replace(/'/g,"\\'")}',this.value)">
+    <option value="active"${status==='active'?' selected':''}>active</option>
+    <option value="done"${status==='done'?' selected':''}>done</option>
+  </select>`;
+}
 function displayRowHtml(r) {
   const b = r.batches;
-  const statusPill = b?.status ? `<span class="batch-status-pill ${b.status}">${b.status}</span>` : '—';
   return `<tr>
     <td>${fmtDay(r.log_date)}</td>
     <td><span class="batch-link" onclick="goToBatch('${(r.batch_number||'').replace(/'/g,"\\'")}')">${r.batch_number || '—'}</span>${r.room ? `<div class="cell-sub">Room ${r.room}</div>` : ''}</td>
@@ -556,7 +571,7 @@ function displayRowHtml(r) {
     <td>${r.bags_removed_kg != null ? fmtKg(r.bags_removed_kg) : '—'}</td>
     <td class="cell-total">${fmtKg(r.total_kg)}</td>
     <td>${b?.substrate_type ?? '—'}</td>
-    <td>${statusPill}</td>
+    <td>${batchStatusHtml(r)}</td>
     <td><button type="button" class="row-action-btn" onclick="startEdit('${r.id}')">Edit</button></td>
   </tr>`;
 }
@@ -587,6 +602,12 @@ function editRowHtml(r) {
 window.goToBatch = function(batchNumber) {
   if (!batchNumber) return;
   window.location.href = `harvest-log.html?batch=${encodeURIComponent(batchNumber)}`;
+};
+window.setBatchStatus = async function(batchNumber, status) {
+  const { error } = await sb.from('batches').update({ status }).eq('batch_number', batchNumber);
+  if (error) { toast(error.message, 'error'); return; }
+  toast(status === 'done' ? `Batch ${batchNumber} marked done` : `Batch ${batchNumber} marked active`);
+  fetchHarvest();
 };
 window.startEdit = function(id) {
   S.editingId = id;
