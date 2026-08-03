@@ -21,7 +21,7 @@ import"./modulepreload-polyfill-B5Qt9EMX.js";import{c as B}from"./index-B-jIxwbw
       <td>${e.start_date||"—"}</td>
       <td>${e.location||"—"}</td>
       <td>${I(e.id,"grain_spawn_batches",e.status)}</td>
-      <td style="font-size:12px;color:rgba(245,239,230,.5)">${e.used_by_batches&&e.used_by_batches.length?e.used_by_batches.join(", "):"—"}</td>
+      <td style="font-size:13px;color:rgba(245,239,230,.5)">${e.used_by_batches&&e.used_by_batches.length?e.used_by_batches.join(", "):"—"}</td>
       <td><div class="td-actions">
         <button type="button" class="btn sm" onclick="window.editGrain(${e.id})">Edit</button>
         <button type="button" class="btn sm" onclick="window.deleteGrain(${e.id})">Del</button>

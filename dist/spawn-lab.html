@@ -15,7 +15,7 @@
   --gold-dim:rgba(217,178,84,.1);--r:10px;--r2:6px;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{font-size:14px}
+html{font-size:15px}
 body{font-family:'DM Sans','Hind Siliguri',sans-serif;background:var(--g900);color:var(--c);min-height:100vh}
 ::-webkit-scrollbar{width:4px;height:4px}
 ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:2px}
@@ -23,11 +23,11 @@ body{font-family:'DM Sans','Hind Siliguri',sans-serif;background:var(--g900);col
 
 /* ── Topbar (matches farm-analytics.html/harvest-log.html) ── */
 .topbar{height:58px;background:var(--g800);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 28px;gap:16px;position:sticky;top:0;z-index:100}
-.back-link{font-size:11px;color:rgba(245,239,230,.38);text-decoration:none;display:flex;align-items:center;gap:5px;transition:color .2s;flex-shrink:0}
+.back-link{font-size:12px;color:rgba(245,239,230,.38);text-decoration:none;display:flex;align-items:center;gap:5px;transition:color .2s;flex-shrink:0}
 .back-link:hover{color:rgba(245,239,230,.75)}
 .back-link svg{width:13px;height:13px}
 .top-sep{width:1px;height:20px;background:var(--border);flex-shrink:0}
-.top-title{font-family:'Syne','Hind Siliguri',sans-serif;font-size:14px;font-weight:700;flex:1}
+.top-title{font-family:'Syne','Hind Siliguri',sans-serif;font-size:15px;font-weight:700;flex:1}
 
 .content{max-width:1300px;margin:0 auto;padding:28px 28px 60px}
 
@@ -35,12 +35,12 @@ body{font-family:'DM Sans','Hind Siliguri',sans-serif;background:var(--g900);col
 .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
 @media(max-width:900px){.kpi-grid{grid-template-columns:repeat(2,1fr)}}
 .kpi{background:var(--g800);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
-.kpi-label{font-family:'Syne','Hind Siliguri',sans-serif;font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(245,239,230,.35);margin-bottom:6px}
+.kpi-label{font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(245,239,230,.35);margin-bottom:6px}
 .kpi-val{font-family:'DM Mono',monospace;font-size:20px;font-weight:500;color:var(--c)}
 .kpi-val.gold{color:var(--al)}
 .kpi-val.red{color:var(--red)}
 
-.btn{font-family:'Syne','Hind Siliguri',sans-serif;font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:9px 16px;border-radius:6px;border:1px solid var(--border);background:rgba(255,255,255,.04);color:rgba(245,239,230,.6);cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:6px}
+.btn{font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:9px 16px;border-radius:6px;border:1px solid var(--border);background:rgba(255,255,255,.04);color:rgba(245,239,230,.6);cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:6px}
 .btn:hover{color:var(--c);background:rgba(255,255,255,.08)}
 .btn.primary{background:rgba(196,154,60,.12);border-color:rgba(196,154,60,.3);color:var(--al)}
 .btn.primary:hover{background:rgba(196,154,60,.2)}
@@ -49,11 +49,11 @@ body{font-family:'DM Sans','Hind Siliguri',sans-serif;background:var(--g900);col
 /* ── Table ── */
 .table-card{background:var(--g800);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:24px}
 .table-toolbar{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border)}
-.table-title{font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(245,239,230,.35)}
+.table-title{font-family:'Syne','Hind Siliguri',sans-serif;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(245,239,230,.35)}
 .scroll-x{overflow-x:auto}
 table{width:100%;border-collapse:collapse}
-th{font-family:'Syne','Hind Siliguri',sans-serif;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(245,239,230,.35);padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap}
-td{padding:12px 14px;font-size:13px;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:middle;white-space:nowrap}
+th{font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(245,239,230,.35);padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:12px 14px;font-size:14px;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:middle;white-space:nowrap}
 tr:last-child td{border-bottom:none}
 tr:hover td{background:rgba(255,255,255,.02)}
 .empty-state{text-align:center;padding:40px 20px;color:rgba(245,239,230,.3)}
@@ -61,37 +61,37 @@ tr:hover td{background:rgba(255,255,255,.02)}
 .td-actions{display:flex;gap:6px;align-items:center}
 
 /* ── Status ── */
-.status-pill{display:inline-flex;padding:3px 9px;border-radius:20px;font-family:'Syne','Hind Siliguri',sans-serif;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+.status-pill{display:inline-flex;padding:3px 9px;border-radius:20px;font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
 .s-incubating{background:rgba(80,200,255,.1);color:#50c8ff}
 .s-ready{background:rgba(95,207,128,.12);color:var(--green)}
 .s-contaminated{background:rgba(224,82,82,.12);color:var(--red)}
 .s-used{background:rgba(255,255,255,.06);color:rgba(245,239,230,.45)}
 .s-expired{background:rgba(255,255,255,.06);color:rgba(245,239,230,.3)}
-.status-select{background:var(--g900);border:1px solid var(--border2);border-radius:5px;color:var(--c);font-family:'DM Sans',sans-serif;font-size:11px;padding:5px 8px;cursor:pointer;outline:none}
+.status-select{background:var(--g900);border:1px solid var(--border2);border-radius:5px;color:var(--c);font-family:'DM Sans',sans-serif;font-size:12px;padding:5px 8px;cursor:pointer;outline:none}
 .status-select option{background:var(--g900)}
 
 /* ── Modal ── */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:500;padding:20px}
 .modal-overlay.open{display:flex;animation:fadeUp .2s ease}
 .modal{background:var(--g800);border:1px solid var(--border);border-radius:12px;padding:28px;width:100%;max-width:620px;max-height:90vh;overflow-y:auto}
-.modal-title{font-family:'Syne','Hind Siliguri',sans-serif;font-size:14px;font-weight:700;color:var(--c);margin-bottom:20px}
+.modal-title{font-family:'Syne','Hind Siliguri',sans-serif;font-size:15px;font-weight:700;color:var(--c);margin-bottom:20px}
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 @media(max-width:520px){.form-grid{grid-template-columns:1fr}}
 .form-group{display:flex;flex-direction:column;gap:6px}
 .form-group.span2{grid-column:span 2}
-label{font-family:'Syne','Hind Siliguri',sans-serif;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(245,239,230,.35)}
-input,select,textarea{background:var(--g900);border:1px solid var(--border);border-radius:6px;color:var(--c);font-family:'DM Sans','Hind Siliguri',sans-serif;font-size:13px;padding:9px 12px;outline:none;width:100%}
+label{font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(245,239,230,.35)}
+input,select,textarea{background:var(--g900);border:1px solid var(--border);border-radius:6px;color:var(--c);font-family:'DM Sans','Hind Siliguri',sans-serif;font-size:14px;padding:9px 12px;outline:none;width:100%}
 input:focus,select:focus,textarea:focus{border-color:rgba(196,154,60,.5)}
 .modal-actions{display:flex;gap:10px;margin-top:20px;justify-content:flex-end}
 
 .toast-wrap{position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;gap:8px}
-.toast{padding:12px 18px;border-radius:8px;font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;animation:fadeUp .3s ease}
+.toast{padding:12px 18px;border-radius:8px;font-family:'Syne','Hind Siliguri',sans-serif;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;animation:fadeUp .3s ease}
 .toast.ok{background:#1a3322;border:1px solid rgba(95,207,128,.3);color:var(--green)}
 .toast.err{background:#2a1510;border:1px solid rgba(224,90,43,.3);color:var(--red)}
 
-@media(max-width:600px){.topbar{padding:0 16px;gap:10px}.top-title{font-size:12px}.content{padding:18px 16px 40px}}
+@media(max-width:600px){.topbar{padding:0 16px;gap:10px}.top-title{font-size:13px}.content{padding:18px 16px 40px}}
 </style>
-  <script type="module" crossorigin src="/assets/spawnLab-CJ81OX4q.js"></script>
+  <script type="module" crossorigin src="/assets/spawnLab-oOHv0bVw.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
   <link rel="modulepreload" crossorigin href="/assets/index-B-jIxwbw.js">
   <link rel="modulepreload" crossorigin href="/assets/admin-auth-4ZiUUGs_.js">
