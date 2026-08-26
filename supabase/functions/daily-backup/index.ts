@@ -27,6 +27,40 @@ function dhakaTodayISO(): string {
   return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Dhaka' }).format(new Date());
 }
 
+// Postgrest/Storage errors are plain objects with a `.message`, not real
+// Error instances -- String(err) on one of those produces the useless
+// "[object Object]" (confirmed live: two different tables each failed
+// with that exact string on separate runs). Pulls the real message out
+// wherever one exists, falls back to JSON so nothing is ever silently lost.
+function errMsg(err: unknown): string {
+  if (err instanceof Error) return err.message;
+  if (err && typeof err === 'object' && 'message' in err) {
+    const m = (err as { message: unknown }).message;
+    if (typeof m === 'string' && m) return m;
+  }
+  try { return JSON.stringify(err); } catch { return String(err); }
+}
+
+// All ~16 tables' fetch/upload/sheets-write calls fire concurrently
+// (Promise.all below) -- confirmed live that this occasionally trips up
+// whichever table happens to be unlucky under that load (a different
+// table failed on each of two consecutive runs, both transient: an
+// immediate retry succeeded both times). One retry after a short pause
+// absorbs that without slowing down the common case where everything
+// just works.
+async function withRetry<T>(fn: () => Promise<T>, attempts = 2, delayMs = 700): Promise<T> {
+  let lastErr: unknown;
+  for (let i = 0; i < attempts; i++) {
+    try {
+      return await fn();
+    } catch (err) {
+      lastErr = err;
+      if (i < attempts - 1) await new Promise(r => setTimeout(r, delayMs));
+    }
+  }
+  throw lastErr;
+}
+
 // Real business records only -- tables with an external source of truth
 // (weather_daily/Open-Meteo, site_section_engagement+site_scroll_depth/GA4)
 // are re-fetchable and skipped. sensor_readings is also skipped for now: no
@@ -235,27 +269,27 @@ async function writeTableToSheet(ctx: SheetsContext, table: string, rows: Record
 async function processTable(sb: any, today: string, table: string, sheets: SheetsContext | null): Promise<TableResult> {
   let rows: Record<string, unknown>[];
   try {
-    rows = await fetchAllRows(sb, table);
+    rows = await withRetry(() => fetchAllRows(sb, table));
   } catch (err) {
     console.error(`Backup failed for ${table}:`, err);
-    return { table, ok: false, error: String(err) };
+    return { table, ok: false, error: errMsg(err) };
   }
 
   try {
-    await uploadCsvToStorage(sb, today, table, rows);
+    await withRetry(() => uploadCsvToStorage(sb, today, table, rows));
   } catch (err) {
     console.error(`Backup failed for ${table}:`, err);
-    return { table, ok: false, rowCount: rows.length, error: String(err) };
+    return { table, ok: false, rowCount: rows.length, error: errMsg(err) };
   }
 
   const result: TableResult = { table, ok: true, rowCount: rows.length };
   if (sheets) {
     try {
-      await writeTableToSheet(sheets, table, rows);
+      await withRetry(() => writeTableToSheet(sheets, table, rows));
       result.sheets = { ok: true };
     } catch (err) {
       console.error(`Sheets mirror failed for ${table}:`, err);
-      result.sheets = { ok: false, error: String(err) };
+      result.sheets = { ok: false, error: errMsg(err) };
     }
   }
   return result;
@@ -298,7 +332,7 @@ async function pruneOldBackups(sb: any, today: string): Promise<{ foldersRemoved
     return { foldersRemoved, filesRemoved };
   } catch (err) {
     console.error('Retention sweep failed:', err);
-    return { foldersRemoved: 0, filesRemoved: 0, error: String(err) };
+    return { foldersRemoved: 0, filesRemoved: 0, error: errMsg(err) };
   }
 }
 
