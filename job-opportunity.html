@@ -108,7 +108,10 @@
 <body>
 
   <div class="page">
-    <a href="job-opportunities.html" class="back-link">← Opportunities</a>
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <a href="job-opportunities.html" class="back-link">← Opportunities</a>
+      <span class="rt-indicator" id="rt-indicator"><span class="rt-dot"></span>Live</span>
+    </div>
 
     <div class="op-header">
       <div class="op-company" id="op-company">—</div>
@@ -174,7 +177,7 @@
         <div class="card-title">Fit Dimensions</div>
         <table class="fit-table" id="fit-table"></table>
         <div class="form-grid" style="margin-top:14px;">
-          <div class="form-group"><label class="f">Interest</label>
+          <div class="form-group"><label class="f" for="f-interest">Interest</label>
             <select id="f-interest"><option value="">Not rated</option><option value="1">1 — Very Low</option><option value="2">2 — Low</option><option value="3">3 — Moderate</option><option value="4">4 — High</option><option value="5">5 — Dream Opportunity</option></select>
           </div>
         </div>
@@ -190,12 +193,12 @@
         <div class="card-title">Application Tracking</div>
         <div class="check-row"><input type="checkbox" id="f-applied"><label for="f-applied">Applied</label></div>
         <div class="form-grid">
-          <div class="form-group"><label class="f">Applied Date</label><input type="date" id="f-applied_date"></div>
-          <div class="form-group"><label class="f">Application Channel</label>
+          <div class="form-group"><label class="f" for="f-applied_date">Applied Date</label><input type="date" id="f-applied_date"></div>
+          <div class="form-group"><label class="f" for="f-application_channel">Application Channel</label>
             <select id="f-application_channel"><option value="">Select...</option></select>
           </div>
-          <div class="form-group"><label class="f">CV Version</label><input type="text" id="f-cv_version" placeholder="e.g. CV-Analytics-v2.1"></div>
-          <div class="form-group"><label class="f">Application Reference Number</label><input type="text" id="f-application_reference_number"></div>
+          <div class="form-group"><label class="f" for="f-cv_version">CV Version</label><input type="text" id="f-cv_version" placeholder="e.g. CV-Analytics-v2.1"></div>
+          <div class="form-group"><label class="f" for="f-application_reference_number">Application Reference Number</label><input type="text" id="f-application_reference_number"></div>
         </div>
         <div style="margin:14px 0;">
           <div class="check-row"><input type="checkbox" id="f-cover_letter_used"><label for="f-cover_letter_used">Cover letter used</label></div>
@@ -203,10 +206,10 @@
           <div class="check-row"><input type="checkbox" id="f-application_questions_completed"><label for="f-application_questions_completed">Application questions completed</label></div>
           <div class="check-row"><input type="checkbox" id="f-application_confirmation_received"><label for="f-application_confirmation_received">Confirmation received</label></div>
         </div>
-        <div class="form-group span2" style="margin-bottom:14px;"><label class="f">Application Notes</label><textarea id="f-application_notes" rows="2"></textarea></div>
+        <div class="form-group span2" style="margin-bottom:14px;"><label class="f" for="f-application_notes">Application Notes</label><textarea id="f-application_notes" rows="2"></textarea></div>
         <div class="form-grid">
-          <div class="form-group"><label class="f">Next Action</label><input type="text" id="f-next_action" placeholder="e.g. Follow up with recruiter"></div>
-          <div class="form-group"><label class="f">Next Action Date</label><input type="date" id="f-next_action_date"></div>
+          <div class="form-group"><label class="f" for="f-next_action">Next Action</label><input type="text" id="f-next_action" placeholder="e.g. Follow up with recruiter"></div>
+          <div class="form-group"><label class="f" for="f-next_action_date">Next Action Date</label><input type="date" id="f-next_action_date"></div>
         </div>
         <div style="margin-top:14px;"><button class="btn sm primary" id="save-application-btn">Save</button></div>
       </div>
@@ -245,24 +248,26 @@
     <div class="modal">
       <div class="modal-title">Edit Details</div>
       <div class="form-grid">
-        <div class="form-group span2"><label class="f">Company *</label><input type="text" id="ed-company"></div>
-        <div class="form-group"><label class="f">Job Title *</label><input type="text" id="ed-job_title"></div>
-        <div class="form-group"><label class="f">Career Track</label><select id="ed-career_track"><option value="">Select...</option></select></div>
-        <div class="form-group"><label class="f">Job URL</label><input type="url" id="ed-job_url"></div>
-        <div class="form-group"><label class="f">Location</label><input type="text" id="ed-location"></div>
-        <div class="form-group"><label class="f">Country</label><input type="text" id="ed-country"></div>
-        <div class="form-group"><label class="f">Work Mode</label><select id="ed-work_mode"><option value="">Select...</option><option value="remote">Remote</option><option value="hybrid">Hybrid</option><option value="onsite">On-site</option></select></div>
-        <div class="form-group"><label class="f">Role Family</label><input type="text" id="ed-role_family"></div>
-        <div class="form-group"><label class="f">Employment Type</label><select id="ed-employment_type"><option value="">Select...</option></select></div>
-        <div class="form-group"><label class="f">Source</label><select id="ed-source"><option value="">Select...</option></select></div>
-        <div class="form-group"><label class="f">Posting Date</label><input type="date" id="ed-posting_date"></div>
-        <div class="form-group"><label class="f">Application Deadline</label><input type="date" id="ed-application_deadline"></div>
-        <div class="form-group"><label class="f">German Requirement</label><select id="ed-german_requirement"><option value="">Select...</option></select></div>
-        <div class="form-group"><label class="f">English Requirement</label><input type="text" id="ed-english_requirement"></div>
-        <div class="form-group"><label class="f">Working Hours</label><input type="text" id="ed-working_hours"></div>
-        <div class="form-group"><label class="f">Int'l Candidate Friendly</label><select id="ed-international_candidate_friendly"><option value="">Select...</option></select></div>
-        <div class="form-group span2"><label class="f">Visa / Work Authorisation Notes</label><textarea id="ed-visa_notes" rows="2"></textarea></div>
-        <div class="form-group span2"><label class="f">Job Description</label><textarea id="ed-job_description" rows="4"></textarea></div>
+        <div class="form-group span2"><label class="f" for="ed-company">Company *</label><input type="text" id="ed-company"></div>
+        <div class="form-group"><label class="f" for="ed-job_title">Job Title *</label><input type="text" id="ed-job_title"></div>
+        <div class="form-group"><label class="f" for="ed-career_track">Career Track</label><select id="ed-career_track"><option value="">Select...</option></select></div>
+        <div class="form-group"><label class="f" for="ed-job_url">Job URL</label><input type="url" id="ed-job_url"></div>
+        <div class="form-group"><label class="f" for="ed-location">Location</label><input type="text" id="ed-location"></div>
+        <div class="form-group"><label class="f" for="ed-country">Country</label><input type="text" id="ed-country"></div>
+        <div class="form-group"><label class="f" for="ed-work_mode">Work Mode</label><select id="ed-work_mode"><option value="">Select...</option><option value="remote">Remote</option><option value="hybrid">Hybrid</option><option value="onsite">On-site</option></select></div>
+        <div class="form-group"><label class="f" for="ed-role_family">Role Family</label><input type="text" id="ed-role_family"></div>
+        <div class="form-group"><label class="f" for="ed-employment_type">Employment Type</label><select id="ed-employment_type"><option value="">Select...</option></select></div>
+        <div class="form-group"><label class="f" for="ed-source">Source</label><select id="ed-source"><option value="">Select...</option></select></div>
+        <div class="form-group"><label class="f" for="ed-posting_date">Posting Date</label><input type="date" id="ed-posting_date"></div>
+        <div class="form-group"><label class="f" for="ed-application_deadline">Application Deadline</label><input type="date" id="ed-application_deadline"></div>
+        <div class="form-group"><label class="f" for="ed-german_requirement">German Requirement</label><select id="ed-german_requirement"><option value="">Select...</option></select></div>
+        <div class="form-group"><label class="f" for="ed-english_requirement">English Requirement</label><input type="text" id="ed-english_requirement"></div>
+        <div class="form-group"><label class="f" for="ed-working_hours">Working Hours</label><input type="text" id="ed-working_hours"></div>
+        <div class="form-group"><label class="f" for="ed-international_candidate_friendly">Int'l Candidate Friendly</label><select id="ed-international_candidate_friendly"><option value="">Select...</option></select></div>
+        <div class="form-group"><label class="f" for="ed-student_status_required">Student Status Required</label><select id="ed-student_status_required"><option value="">Unknown</option><option value="true">Yes</option><option value="false">No</option></select></div>
+        <div class="form-group"><label class="f" for="ed-relocation_required">Relocation Required</label><select id="ed-relocation_required"><option value="">Unknown</option><option value="true">Yes</option><option value="false">No</option></select></div>
+        <div class="form-group span2"><label class="f" for="ed-visa_notes">Visa / Work Authorisation Notes</label><textarea id="ed-visa_notes" rows="2"></textarea></div>
+        <div class="form-group span2"><label class="f" for="ed-job_description">Job Description</label><textarea id="ed-job_description" rows="4"></textarea></div>
       </div>
       <div class="modal-actions">
         <button class="btn" id="edit-modal-cancel">Cancel</button>
@@ -275,12 +280,12 @@
   <div class="modal-overlay" id="contact-modal">
     <div class="modal">
       <div class="modal-title">Link Contact</div>
-      <div class="form-group" style="margin-bottom:12px;"><label class="f">Existing Contact</label>
+      <div class="form-group" style="margin-bottom:12px;"><label class="f" for="cm-existing">Existing Contact</label>
         <select id="cm-existing"><option value="">— None, create new below —</option></select>
       </div>
       <div class="form-grid">
-        <div class="form-group span2"><label class="f">Full Name (new contact)</label><input type="text" id="cm-full_name"></div>
-        <div class="form-group"><label class="f">Contact Type</label>
+        <div class="form-group span2"><label class="f" for="cm-full_name">Full Name (new contact)</label><input type="text" id="cm-full_name"></div>
+        <div class="form-group"><label class="f" for="cm-contact_type">Contact Type</label>
           <select id="cm-contact_type"><option value="">Select...</option></select>
         </div>
       </div>
@@ -296,12 +301,12 @@
     <div class="modal">
       <div class="modal-title">Add Interview</div>
       <div class="form-grid">
-        <div class="form-group"><label class="f">Round</label><input type="text" id="im-round" placeholder="e.g. 1st round"></div>
-        <div class="form-group"><label class="f">Type</label>
+        <div class="form-group"><label class="f" for="im-round">Round</label><input type="text" id="im-round" placeholder="e.g. 1st round"></div>
+        <div class="form-group"><label class="f" for="im-interview_type">Type</label>
           <select id="im-interview_type"><option value="">Select...</option></select>
         </div>
-        <div class="form-group"><label class="f">Date</label><input type="date" id="im-interview_date"></div>
-        <div class="form-group"><label class="f">Time</label><input type="text" id="im-interview_time" placeholder="e.g. 14:00"></div>
+        <div class="form-group"><label class="f" for="im-interview_date">Date</label><input type="date" id="im-interview_date"></div>
+        <div class="form-group"><label class="f" for="im-interview_time">Time</label><input type="text" id="im-interview_time" placeholder="e.g. 14:00"></div>
       </div>
       <div class="modal-actions">
         <button class="btn" id="interview-modal-cancel">Cancel</button>
@@ -315,13 +320,13 @@
     <div class="modal">
       <div class="modal-title">Add Activity</div>
       <div class="form-grid">
-        <div class="form-group"><label class="f">Type</label>
+        <div class="form-group"><label class="f" for="am-activity_type">Type</label>
           <select id="am-activity_type"><option value="">Select...</option></select>
         </div>
-        <div class="form-group"><label class="f">Date</label><input type="date" id="am-activity_date"></div>
-        <div class="form-group span2"><label class="f">Summary</label><textarea id="am-summary" rows="2"></textarea></div>
-        <div class="form-group"><label class="f">Next Step</label><input type="text" id="am-next_step"></div>
-        <div class="form-group"><label class="f">Next Step Date</label><input type="date" id="am-next_step_date"></div>
+        <div class="form-group"><label class="f" for="am-activity_date">Date</label><input type="date" id="am-activity_date"></div>
+        <div class="form-group span2"><label class="f" for="am-summary">Summary</label><textarea id="am-summary" rows="2"></textarea></div>
+        <div class="form-group"><label class="f" for="am-next_step">Next Step</label><input type="text" id="am-next_step"></div>
+        <div class="form-group"><label class="f" for="am-next_step_date">Next Step Date</label><input type="date" id="am-next_step_date"></div>
       </div>
       <div class="modal-actions">
         <button class="btn" id="activity-modal-cancel">Cancel</button>
@@ -335,14 +340,14 @@
     <div class="modal">
       <div class="modal-title">Mark Closed</div>
       <div class="form-grid">
-        <div class="form-group"><label class="f">Closed Date</label><input type="date" id="cl-closed_date"></div>
-        <div class="form-group"><label class="f">Closed Outcome</label>
+        <div class="form-group"><label class="f" for="cl-closed_date">Closed Date</label><input type="date" id="cl-closed_date"></div>
+        <div class="form-group"><label class="f" for="cl-closed_outcome">Closed Outcome</label>
           <select id="cl-closed_outcome"><option value="">Select...</option></select>
         </div>
-        <div class="form-group"><label class="f">Known Reason</label>
+        <div class="form-group"><label class="f" for="cl-known_reason">Known Reason</label>
           <select id="cl-known_reason"><option value="">Select...</option></select>
         </div>
-        <div class="form-group span2"><label class="f">Notes</label><textarea id="cl-closed_reason" rows="2"></textarea></div>
+        <div class="form-group span2"><label class="f" for="cl-closed_reason">Notes</label><textarea id="cl-closed_reason" rows="2"></textarea></div>
       </div>
       <div class="modal-actions">
         <button class="btn" id="close-modal-cancel">Cancel</button>
@@ -359,9 +364,10 @@
     import { mountAdminNav } from '/src/admin-nav.js';
     import { loadAiCfg, chatComplete, formatAiError } from '/src/ai-client.js';
     import { localDateStr } from '/src/date-utils.js';
-    import { FIT_DIMENSIONS, effectiveRating, computeFitScore, fitClassification, eligibilityStatus, recommendation, computePriority, ELIGIBILITY_FIELDS } from '/src/job-scoring.js';
+    import { FIT_DIMENSIONS, effectiveRating, computeFitScore, fitClassification, eligibilityStatus, recommendation, computePriority, computeDerivedFields, ELIGIBILITY_FIELDS } from '/src/job-scoring.js';
     import { escapeHtml } from '/src/html-utils.js';
     import { STAGES, STAGE_LABEL, STAGE_ORDER, CAREER_TRACKS, EMPLOYMENT_TYPES, SOURCES, GERMAN_REQUIREMENTS, YES_NO_UNCLEAR, CONTACT_TYPES, INTERVIEW_TYPES, KNOWN_REASONS, ACTIVITY_TYPES, CLOSE_OUTCOMES, optionsHtml, valueLabelOptionsHtml } from '/src/job-constants.js';
+    import { subscribeRealtime, injectRealtimeStyles } from '/src/realtime.js';
 
     document.documentElement.classList.add('auth-checking');
     const sb = createClient(
@@ -463,6 +469,7 @@
       document.getElementById('reopen-btn').style.display = opp.closed ? '' : 'none';
     }
 
+    function fmtBool(v) { return v === true ? 'Yes' : v === false ? 'No' : null; }
     function kv(label, val) {
       return `<div class="kv"><label>${label}</label><div class="kv-val">${val===null||val===undefined||val===''?'—':escapeHtml(val)}</div></div>`;
     }
@@ -484,6 +491,8 @@
         kv('English Requirement', opp.english_requirement),
         kv('Working Hours', opp.working_hours),
         kv('Int\'l Candidate Friendly', opp.international_candidate_friendly),
+        kv('Student Status Required', fmtBool(opp.student_status_required)),
+        kv('Relocation Required', fmtBool(opp.relocation_required)),
         kv('Visa / Work Auth Notes', opp.visa_notes),
       ].join('');
       document.getElementById('f-notes').value = opp.notes || '';
@@ -505,7 +514,7 @@
     };
     function renderFit() {
       document.getElementById('elig-grid').innerHTML = ELIGIBILITY_FIELDS.map(f => `
-        <div class="form-group"><label class="f">${ELIG_LABELS[f]}</label>
+        <div class="form-group"><label class="f" for="elig-${f}">${ELIG_LABELS[f]}</label>
           <select id="elig-${f}"><option value="">Unclear</option><option value="yes" ${opp[f]==='yes'?'selected':''}>Yes</option><option value="no" ${opp[f]==='no'?'selected':''}>No</option><option value="unclear" ${opp[f]==='unclear'?'selected':''}>Unclear</option></select>
         </div>`).join('');
 
@@ -571,6 +580,7 @@
       const fit_manual = currentManualFromForm();
       const elig = readEligFromForm();
       const payload = { fit_manual, interest: document.getElementById('f-interest').value ? +document.getElementById('f-interest').value : null, ...elig };
+      Object.assign(payload, computeDerivedFields({ ...opp, ...payload }));
       const { error } = await sb.from('job_opportunities').update(payload).eq('id', oppId);
       if (error) { toast(error.message, 'err'); return; }
       toast('Fit & eligibility saved');
@@ -601,7 +611,9 @@
         ];
         const reply = await chatComplete(cfg, messages, { json: true });
         const parsed = JSON.parse(reply);
-        const { error } = await sb.from('job_opportunities').update({ fit_ai: parsed }).eq('id', oppId);
+        const payload = { fit_ai: parsed };
+        Object.assign(payload, computeDerivedFields({ ...opp, ...payload }));
+        const { error } = await sb.from('job_opportunities').update(payload).eq('id', oppId);
         if (error) { toast(error.message, 'err'); return; }
         toast('AI analysis complete');
         load();
@@ -648,6 +660,9 @@
         payload.stage = 'applied';
         payload.stage_entered_at = new Date().toISOString();
       }
+      // applied/applied_date affect priority's deadline-urgency component
+      // (a deadline stops mattering once you've actually applied).
+      Object.assign(payload, computeDerivedFields({ ...opp, ...payload }));
       const { error } = await sb.from('job_opportunities').update(payload).eq('id', oppId);
       if (error) { toast(error.message, 'err'); return; }
       if (justApplied) {
@@ -663,6 +678,9 @@
       'working_hours','international_candidate_friendly','visa_notes','job_description'];
     document.getElementById('edit-details-btn').addEventListener('click', () => {
       EDIT_FIELDS.forEach(f => { document.getElementById('ed-'+f).value = opp[f] || ''; });
+      ['student_status_required','relocation_required'].forEach(f => {
+        document.getElementById('ed-'+f).value = opp[f] === true ? 'true' : opp[f] === false ? 'false' : '';
+      });
       document.getElementById('edit-modal').classList.add('open');
     });
     document.getElementById('edit-modal-cancel').addEventListener('click', () => document.getElementById('edit-modal').classList.remove('open'));
@@ -673,6 +691,13 @@
       if (!company || !title) { toast('Company and Job Title are required', 'err'); return; }
       const payload = {};
       EDIT_FIELDS.forEach(f => { payload[f] = document.getElementById('ed-'+f).value.trim() || null; });
+      ['student_status_required','relocation_required'].forEach(f => {
+        const v = document.getElementById('ed-'+f).value;
+        payload[f] = v === 'true' ? true : v === 'false' ? false : null;
+      });
+      // application_deadline is one of EDIT_FIELDS and feeds priority's
+      // deadline-urgency component, so a deadline edit needs a recompute too.
+      Object.assign(payload, computeDerivedFields({ ...opp, ...payload }));
       const { error } = await sb.from('job_opportunities').update(payload).eq('id', oppId);
       if (error) { toast(error.message, 'err'); return; }
       toast('Details saved');
@@ -768,11 +793,20 @@
       document.getElementById('activities-empty').style.display = rows.length ? 'none' : '';
       document.getElementById('activities-list').innerHTML = rows.map(a => `
         <div class="timeline-item">
-          <div class="timeline-date">${a.activity_date} · ${escapeHtml(a.activity_type)||'Other'}</div>
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">
+            <div class="timeline-date">${a.activity_date} · ${escapeHtml(a.activity_type)||'Other'}</div>
+            <button class="btn sm" onclick="window.deleteActivityRow('${a.id}')">Del</button>
+          </div>
           <div class="timeline-summary">${escapeHtml(a.summary)}</div>
           ${a.next_step ? `<div style="font-size:12px;color:var(--cl);margin-top:2px;">Next: ${escapeHtml(a.next_step)}${a.next_step_date?' ('+a.next_step_date+')':''}</div>` : ''}
         </div>`).join('');
     }
+    window.deleteActivityRow = async (id) => {
+      if (!confirm('Delete this activity?')) return;
+      const { error } = await sb.from('job_activities').delete().eq('id', id);
+      if (error) { toast(error.message, 'err'); return; }
+      loadActivities();
+    };
     document.getElementById('add-activity-btn').addEventListener('click', () => {
       document.getElementById('am-activity_type').value = '';
       document.getElementById('am-activity_date').value = localDateStr();
@@ -844,6 +878,8 @@
     }));
 
     load();
+    injectRealtimeStyles();
+    subscribeRealtime(sb, 'job-opportunity-live', ['job_opportunities','job_activities','job_interviews','job_interview_questions'], load, { indicatorId: 'rt-indicator' });
   </script>
 </body>
 </html>

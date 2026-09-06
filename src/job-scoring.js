@@ -137,3 +137,28 @@ export function jobRef(seq) {
   return 'JOB-' + String(seq).padStart(4, '0');
 }
 
+/** Bundles the five derived read-model columns on job_opportunities
+ *  (fit_score, fit_classification, priority_score, priority_label,
+ *  eligibility_status) into one payload, ready to spread into any update
+ *  or insert. These are never the source of truth — every page still
+ *  computes them fresh from fit_manual, fit_ai, interest, the elig_
+ *  fields, application_deadline, and applied via the functions above —
+ *  but persisting them means a future direct-SQL report or another tool
+ *  doesn't need to reimplement this module's logic just to filter or sort
+ *  by fit, priority, or eligibility.
+ *  Call this with the FULL merged opportunity state (existing row plus
+ *  the fields about to change), not just the changed fields, since
+ *  priority depends on several of those inputs at once. */
+export function computeDerivedFields(opp) {
+  const fitScore = computeFitScore(opp.fit_manual, opp.fit_ai);
+  const eligStatus = eligibilityStatus(opp);
+  const priority = computePriority(opp);
+  return {
+    fit_score: fitScore,
+    fit_classification: fitClassification(fitScore),
+    eligibility_status: eligStatus,
+    priority_score: priority.score,
+    priority_label: priority.label,
+  };
+}
+

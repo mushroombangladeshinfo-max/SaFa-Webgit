@@ -208,11 +208,11 @@
       <div class="ai-box" id="ai-box">
         <div class="ai-box-title">✦ Analyse with AI — paste a job description</div>
         <div class="form-group" style="margin-bottom:10px;">
-          <label>Job URL (optional)</label>
+          <label for="ai-url">Job URL (optional)</label>
           <input type="url" id="ai-url" placeholder="https://...">
         </div>
         <div class="form-group">
-          <label>Job Description</label>
+          <label for="ai-paste">Job Description</label>
           <textarea id="ai-paste" rows="6" placeholder="Paste the full vacancy text here..."></textarea>
         </div>
         <div class="modal-actions" style="margin-top:10px;justify-content:flex-start;">
@@ -227,37 +227,39 @@
       <details id="details-wrap">
         <summary id="details-summary">Opportunity Details</summary>
         <div class="form-grid" style="margin-top:14px;">
-          <div class="form-group span2"><label>Company *</label><input type="text" id="f-company"></div>
-          <div class="form-group"><label>Job Title *</label><input type="text" id="f-job_title"></div>
-          <div class="form-group"><label>Career Track</label>
+          <div class="form-group span2"><label for="f-company">Company *</label><input type="text" id="f-company"></div>
+          <div class="form-group"><label for="f-job_title">Job Title *</label><input type="text" id="f-job_title"></div>
+          <div class="form-group"><label for="f-career_track">Career Track</label>
             <select id="f-career_track"><option value="">Select...</option></select>
           </div>
-          <div class="form-group"><label>Job URL</label><input type="url" id="f-job_url"></div>
-          <div class="form-group"><label>Location</label><input type="text" id="f-location"></div>
-          <div class="form-group"><label>Employment Type</label>
+          <div class="form-group"><label for="f-job_url">Job URL</label><input type="url" id="f-job_url"></div>
+          <div class="form-group"><label for="f-location">Location</label><input type="text" id="f-location"></div>
+          <div class="form-group"><label for="f-employment_type">Employment Type</label>
             <select id="f-employment_type"><option value="">Select...</option></select>
           </div>
-          <div class="form-group"><label>Source</label>
+          <div class="form-group"><label for="f-source">Source</label>
             <select id="f-source"><option value="">Select...</option></select>
           </div>
-          <div class="form-group"><label>Application Deadline</label><input type="date" id="f-application_deadline"></div>
-          <div class="form-group"><label>Next Action</label><input type="text" id="f-next_action" placeholder="e.g. Tailor CV and find an employee contact"></div>
-          <div class="form-group span2"><label>Job Description</label><textarea id="f-job_description" rows="4"></textarea></div>
+          <div class="form-group"><label for="f-application_deadline">Application Deadline</label><input type="date" id="f-application_deadline"></div>
+          <div class="form-group"><label for="f-next_action">Next Action</label><input type="text" id="f-next_action" placeholder="e.g. Tailor CV and find an employee contact"></div>
+          <div class="form-group span2"><label for="f-job_description">Job Description</label><textarea id="f-job_description" rows="4"></textarea></div>
         </div>
 
         <span class="more-toggle" id="more-toggle">+ More Details</span>
         <div class="form-grid more-fields" id="more-fields">
-          <div class="form-group"><label>Role Family</label><input type="text" id="f-role_family"></div>
-          <div class="form-group"><label>Country</label><input type="text" id="f-country"></div>
-          <div class="form-group"><label>Work Mode</label><select id="f-work_mode"><option value="">Select...</option><option value="remote">Remote</option><option value="hybrid">Hybrid</option><option value="onsite">On-site</option></select></div>
-          <div class="form-group"><label>Posting Date</label><input type="date" id="f-posting_date"></div>
-          <div class="form-group"><label>German Requirement</label>
+          <div class="form-group"><label for="f-role_family">Role Family</label><input type="text" id="f-role_family"></div>
+          <div class="form-group"><label for="f-country">Country</label><input type="text" id="f-country"></div>
+          <div class="form-group"><label for="f-work_mode">Work Mode</label><select id="f-work_mode"><option value="">Select...</option><option value="remote">Remote</option><option value="hybrid">Hybrid</option><option value="onsite">On-site</option></select></div>
+          <div class="form-group"><label for="f-posting_date">Posting Date</label><input type="date" id="f-posting_date"></div>
+          <div class="form-group"><label for="f-german_requirement">German Requirement</label>
             <select id="f-german_requirement"><option value="">Select...</option></select>
           </div>
-          <div class="form-group"><label>English Requirement</label><input type="text" id="f-english_requirement"></div>
-          <div class="form-group"><label>Working Hours</label><input type="text" id="f-working_hours"></div>
-          <div class="form-group"><label>International Candidate Friendly</label><select id="f-international_candidate_friendly"><option value="">Select...</option></select></div>
-          <div class="form-group span2"><label>Visa / Work Authorisation Notes</label><textarea id="f-visa_notes" rows="2"></textarea></div>
+          <div class="form-group"><label for="f-english_requirement">English Requirement</label><input type="text" id="f-english_requirement"></div>
+          <div class="form-group"><label for="f-working_hours">Working Hours</label><input type="text" id="f-working_hours"></div>
+          <div class="form-group"><label for="f-international_candidate_friendly">International Candidate Friendly</label><select id="f-international_candidate_friendly"><option value="">Select...</option></select></div>
+          <div class="form-group"><label for="f-student_status_required">Student Status Required</label><select id="f-student_status_required"><option value="">Unknown</option><option value="true">Yes</option><option value="false">No</option></select></div>
+          <div class="form-group"><label for="f-relocation_required">Relocation Required</label><select id="f-relocation_required"><option value="">Unknown</option><option value="true">Yes</option><option value="false">No</option></select></div>
+          <div class="form-group span2"><label for="f-visa_notes">Visa / Work Authorisation Notes</label><textarea id="f-visa_notes" rows="2"></textarea></div>
         </div>
       </details>
 
@@ -278,7 +280,7 @@
     import { localDateStr } from '/src/date-utils.js';
     import { readFiltersFromURL, writeFiltersToURL } from '/src/filter-state.js';
     import { subscribeRealtime, injectRealtimeStyles } from '/src/realtime.js';
-    import { computeFitScore, computePriority, eligibilityStatus, followUpStatus, jobRef, fitClassification, recommendation, ELIGIBILITY_FIELDS } from '/src/job-scoring.js';
+    import { computeFitScore, computePriority, eligibilityStatus, followUpStatus, jobRef, fitClassification, recommendation, computeDerivedFields, ELIGIBILITY_FIELDS } from '/src/job-scoring.js';
     import { escapeHtml } from '/src/html-utils.js';
     import { STAGES, STAGE_LABEL, CAREER_TRACKS, EMPLOYMENT_TYPES, SOURCES, GERMAN_REQUIREMENTS, YES_NO_UNCLEAR, valueLabelOptionsHtml, optionsHtml } from '/src/job-constants.js';
 
@@ -522,6 +524,12 @@
       _lastFitAi = null;
       _lastElig = null;
       MODAL_FIELDS.forEach(f => { document.getElementById('f-'+f).value = opp?.[f] || ''; });
+      // Booleans need explicit handling: `opp?.[f] || ''` collapses a real
+      // `false` value to '' (Unknown) since false is falsy, silently
+      // losing a "No" answer every time the modal re-opens on an edit.
+      ['student_status_required','relocation_required'].forEach(f => {
+        document.getElementById('f-'+f).value = opp?.[f] === true ? 'true' : opp?.[f] === false ? 'false' : '';
+      });
       document.getElementById('modal').classList.add('open');
     }
     function closeModal() { document.getElementById('modal').classList.remove('open'); _editId = null; }
@@ -546,6 +554,10 @@
       });
       payload.company = company;
       payload.job_title = title;
+      ['student_status_required','relocation_required'].forEach(f => {
+        const v = document.getElementById('f-'+f).value;
+        payload[f] = v === 'true' ? true : v === 'false' ? false : null;
+      });
 
       let error;
       if (_editId) {
@@ -554,6 +566,7 @@
         if (_lastAiExtracted) payload.ai_extracted = _lastAiExtracted;
         if (_lastFitAi) payload.fit_ai = _lastFitAi;
         if (_lastElig) Object.assign(payload, _lastElig);
+        Object.assign(payload, computeDerivedFields(payload));
         const { data, error: insErr } = await sb.from('job_opportunities').insert([payload]).select().single();
         error = insErr;
         if (!error) {
@@ -640,7 +653,7 @@
         const profileText = ['education','work_experience','projects','skills','languages','certifications','career_preferences','work_authorization','target_locations','target_roles','salary_preferences','availability','career_narrative']
           .map(k => profile?.[k] ? `${k}: ${profile[k]}` : null).filter(Boolean).join('\n') || '(No career profile saved yet — fit judgement will be limited. Fill one in on the Career Profile page for better results.)';
 
-        const shape = `{"company":string,"job_title":string,"career_track":"A"|"B"|"C"|"X"|null,"role_family":string|null,"employment_type":"Werkstudent"|"Internship"|"Part-Time"|"Full-Time"|"Graduate Programme"|"Temporary"|"Freelance"|"Other"|null,"location":string|null,"country":string|null,"work_mode":"remote"|"hybrid"|"onsite"|null,"application_deadline":"YYYY-MM-DD"|null,"german_requirement":"None"|"Preferred"|"A1"|"A2"|"B1"|"B2"|"C1"|"Fluent"|"Native"|null,"english_requirement":string|null,"working_hours":string|null,"international_candidate_friendly":"Yes"|"No"|"Unclear"|null,"eligibility":{"elig_student_status":"yes"|"no"|"unclear","elig_working_hours":"yes"|"no"|"unclear","elig_location":"yes"|"no"|"unclear","elig_language":"yes"|"no"|"unclear","elig_work_auth":"yes"|"no"|"unclear","elig_experience":"yes"|"no"|"unclear","elig_mandatory_tech":"yes"|"no"|"unclear"},"analysis":{"reasons":[string],"ratings":{"exp":1,"skills":1,"role":1,"edu":1,"lang":1,"career_value":1,"location":1,"company_attract":1,"networking":1},"strong_matches":[string],"gaps":[string],"hard_blockers":[string],"recoverable_gaps":[string],"application_strategy":string,"networking_recommendation":string,"best_cv":string,"best_next_action":string,"confidence_note":string}}`;
+        const shape = `{"company":string,"job_title":string,"career_track":"A"|"B"|"C"|"X"|null,"role_family":string|null,"employment_type":"Werkstudent"|"Internship"|"Part-Time"|"Full-Time"|"Graduate Programme"|"Temporary"|"Freelance"|"Other"|null,"location":string|null,"country":string|null,"work_mode":"remote"|"hybrid"|"onsite"|null,"application_deadline":"YYYY-MM-DD"|null,"german_requirement":"None"|"Preferred"|"A1"|"A2"|"B1"|"B2"|"C1"|"Fluent"|"Native"|null,"english_requirement":string|null,"working_hours":string|null,"international_candidate_friendly":"Yes"|"No"|"Unclear"|null,"student_status_required":true|false|null,"relocation_required":true|false|null,"eligibility":{"elig_student_status":"yes"|"no"|"unclear","elig_working_hours":"yes"|"no"|"unclear","elig_location":"yes"|"no"|"unclear","elig_language":"yes"|"no"|"unclear","elig_work_auth":"yes"|"no"|"unclear","elig_experience":"yes"|"no"|"unclear","elig_mandatory_tech":"yes"|"no"|"unclear"},"analysis":{"reasons":[string],"ratings":{"exp":1,"skills":1,"role":1,"edu":1,"lang":1,"career_value":1,"location":1,"company_attract":1,"networking":1},"strong_matches":[string],"gaps":[string],"hard_blockers":[string],"recoverable_gaps":[string],"application_strategy":string,"networking_recommendation":string,"best_cv":string,"best_next_action":string,"confidence_note":string}}`;
         const messages = [
           { role: 'system', content: `You extract structured fields from a pasted job vacancy AND assess candidate fit against a stored career profile, for a personal job-search tracker. Return ONLY a single JSON object matching exactly this shape (no markdown, no commentary): ${shape}.
 
@@ -655,7 +668,13 @@ Fit-analysis rules: base every rating and claim ONLY on what's explicitly in the
 
         Object.keys(parsed).forEach(k => {
           const el = document.getElementById('f-'+k);
-          if (el && parsed[k]) el.value = parsed[k];
+          if (!el) return;
+          const v = parsed[k];
+          // A plain truthy check silently drops a real `false` (e.g.
+          // relocation_required: false is a genuine, useful answer, not
+          // "nothing extracted") — only null/undefined/'' mean "skip".
+          if (v === null || v === undefined || v === '') return;
+          el.value = typeof v === 'boolean' ? String(v) : v;
         });
         document.getElementById('f-job_description').value = jd;
         const url = document.getElementById('ai-url').value.trim();

@@ -125,17 +125,17 @@
       <div class="card">
         <div class="card-title">Logistics</div>
         <div class="form-grid">
-          <div class="form-group"><label class="f">Round</label><input type="text" id="f-round"></div>
-          <div class="form-group"><label class="f">Type</label>
+          <div class="form-group"><label class="f" for="f-round">Round</label><input type="text" id="f-round"></div>
+          <div class="form-group"><label class="f" for="f-interview_type">Type</label>
             <select id="f-interview_type"><option value="">Select...</option></select>
           </div>
-          <div class="form-group"><label class="f">Date</label><input type="date" id="f-interview_date"></div>
-          <div class="form-group"><label class="f">Time</label><input type="text" id="f-interview_time"></div>
-          <div class="form-group"><label class="f">Duration (min)</label><input type="number" id="f-duration_minutes" min="0"></div>
-          <div class="form-group"><label class="f">Interviewers</label><input type="text" id="f-interviewers"></div>
-          <div class="form-group"><label class="f">Status</label><select id="f-status"><option value="scheduled">Scheduled</option><option value="completed">Completed</option><option value="cancelled">Cancelled</option></select></div>
-          <div class="form-group"><label class="f">Location / Link</label><input type="text" id="f-location_or_link"></div>
-          <div class="form-group span2"><label class="f">Logistics Notes</label><textarea id="f-logistics_notes" rows="2"></textarea></div>
+          <div class="form-group"><label class="f" for="f-interview_date">Date</label><input type="date" id="f-interview_date"></div>
+          <div class="form-group"><label class="f" for="f-interview_time">Time</label><input type="text" id="f-interview_time"></div>
+          <div class="form-group"><label class="f" for="f-duration_minutes">Duration (min)</label><input type="number" id="f-duration_minutes" min="0"></div>
+          <div class="form-group"><label class="f" for="f-interviewers">Interviewers</label><input type="text" id="f-interviewers"></div>
+          <div class="form-group"><label class="f" for="f-status">Status</label><select id="f-status"><option value="scheduled">Scheduled</option><option value="completed">Completed</option><option value="cancelled">Cancelled</option></select></div>
+          <div class="form-group"><label class="f" for="f-location_or_link">Location / Link</label><input type="text" id="f-location_or_link"></div>
+          <div class="form-group span2"><label class="f" for="f-logistics_notes">Logistics Notes</label><textarea id="f-logistics_notes" rows="2"></textarea></div>
         </div>
         <div style="margin-top:12px;"><button class="btn sm primary" id="save-logistics-btn">Save Logistics</button></div>
       </div>
@@ -143,13 +143,13 @@
       <div class="card">
         <div class="card-title">Prep Workspace</div>
         <div class="form-grid">
-          <div class="form-group span2"><label class="f">Company Research</label><textarea id="f-company_research" rows="3"></textarea></div>
-          <div class="form-group span2"><label class="f">Role Research</label><textarea id="f-role_research" rows="3"></textarea></div>
-          <div class="form-group span2"><label class="f">Expected Questions</label><textarea id="f-expected_questions" rows="4"></textarea></div>
-          <div class="form-group span2"><label class="f">STAR Stories</label><textarea id="f-star_stories" rows="4"></textarea></div>
-          <div class="form-group span2"><label class="f">Technical / Case Preparation</label><textarea id="f-tech_prep" rows="3"></textarea></div>
-          <div class="form-group span2"><label class="f">Questions to Ask Employer</label><textarea id="f-questions_to_ask" rows="3"></textarea></div>
-          <div class="form-group span2"><label class="f">General Notes</label><textarea id="f-general_notes" rows="3"></textarea></div>
+          <div class="form-group span2"><label class="f" for="f-company_research">Company Research</label><textarea id="f-company_research" rows="3"></textarea></div>
+          <div class="form-group span2"><label class="f" for="f-role_research">Role Research</label><textarea id="f-role_research" rows="3"></textarea></div>
+          <div class="form-group span2"><label class="f" for="f-expected_questions">Expected Questions</label><textarea id="f-expected_questions" rows="4"></textarea></div>
+          <div class="form-group span2"><label class="f" for="f-star_stories">STAR Stories</label><textarea id="f-star_stories" rows="4"></textarea></div>
+          <div class="form-group span2"><label class="f" for="f-tech_prep">Technical / Case Preparation</label><textarea id="f-tech_prep" rows="3"></textarea></div>
+          <div class="form-group span2"><label class="f" for="f-questions_to_ask">Questions to Ask Employer</label><textarea id="f-questions_to_ask" rows="3"></textarea></div>
+          <div class="form-group span2"><label class="f" for="f-general_notes">General Notes</label><textarea id="f-general_notes" rows="3"></textarea></div>
         </div>
         <div style="margin-top:12px;"><button class="btn sm primary" id="save-prep-btn">Save Prep</button></div>
         <div class="ai-output" id="ai-output" style="display:none;"></div>
@@ -159,8 +159,8 @@
         <div class="card-title">Question Log</div>
         <div id="q-list"></div>
         <div class="form-grid" style="margin-top:10px;">
-          <div class="form-group span2"><label class="f">Question Asked</label><input type="text" id="q-question"></div>
-          <div class="form-group"><label class="f">Tag</label>
+          <div class="form-group span2"><label class="f" for="q-question">Question Asked</label><input type="text" id="q-question"></div>
+          <div class="form-group"><label class="f" for="q-tag">Tag</label>
             <select id="q-tag"><option value="">Select...</option></select>
           </div>
         </div>
@@ -170,8 +170,8 @@
       <div class="card">
         <div class="card-title">Post-Interview Reflection &amp; Self-Assessment</div>
         <div class="self-grid" id="self-assessment-grid"></div>
-        <div class="form-group span2" style="margin-top:14px;"><label class="f">Reflection — what went well, what could improve, unexpected questions, what you'd answer differently</label><textarea id="f-post_interview_reflection" rows="4"></textarea></div>
-        <div class="form-group span2" style="margin-top:10px;"><label class="f">Outcome</label><input type="text" id="f-outcome" placeholder="e.g. Awaiting next round"></div>
+        <div class="form-group span2" style="margin-top:14px;"><label class="f" for="f-post_interview_reflection">Reflection — what went well, what could improve, unexpected questions, what you'd answer differently</label><textarea id="f-post_interview_reflection" rows="4"></textarea></div>
+        <div class="form-group span2" style="margin-top:10px;"><label class="f" for="f-outcome">Outcome</label><input type="text" id="f-outcome" placeholder="e.g. Awaiting next round"></div>
         <div style="margin-top:12px;"><button class="btn sm primary" id="save-reflection-btn">Save Reflection</button></div>
       </div>
     </div>
@@ -182,13 +182,13 @@
     <div class="modal">
       <div class="modal-title">Schedule Interview</div>
       <div class="form-grid">
-        <div class="form-group span2"><label class="f">Opportunity *</label><select id="m-opportunity_id"></select></div>
-        <div class="form-group"><label class="f">Round</label><input type="text" id="m-round"></div>
-        <div class="form-group"><label class="f">Type</label>
+        <div class="form-group span2"><label class="f" for="m-opportunity_id">Opportunity *</label><select id="m-opportunity_id"></select></div>
+        <div class="form-group"><label class="f" for="m-round">Round</label><input type="text" id="m-round"></div>
+        <div class="form-group"><label class="f" for="m-interview_type">Type</label>
           <select id="m-interview_type"><option value="">Select...</option></select>
         </div>
-        <div class="form-group"><label class="f">Date</label><input type="date" id="m-interview_date"></div>
-        <div class="form-group"><label class="f">Time</label><input type="text" id="m-interview_time"></div>
+        <div class="form-group"><label class="f" for="m-interview_date">Date</label><input type="date" id="m-interview_date"></div>
+        <div class="form-group"><label class="f" for="m-interview_time">Time</label><input type="text" id="m-interview_time"></div>
       </div>
       <div class="modal-actions">
         <button class="btn" id="modal-cancel">Cancel</button>
@@ -405,7 +405,7 @@
     /* ── Question log ── */
     async function loadQuestions() {
       const { data } = await sb.from('job_interview_questions').select('*').eq('interview_id', ivId).order('created_at', { ascending: false });
-      document.getElementById('q-list').innerHTML = (data||[]).map(q => `<div class="q-item"><span>${escapeHtml(q.question)}</span><span class="q-tag">${escapeHtml(q.tag)}</span></div>`).join('') || '<div style="color:var(--cl);font-size:13px;">No questions logged yet.</div>';
+      document.getElementById('q-list').innerHTML = (data||[]).map(q => `<div class="q-item"><span>${escapeHtml(q.question)}</span><span style="display:flex;align-items:center;gap:8px;"><span class="q-tag">${escapeHtml(q.tag)}</span><button class="btn sm" onclick="window.deleteQuestion('${q.id}')">Del</button></span></div>`).join('') || '<div style="color:var(--cl);font-size:13px;">No questions logged yet.</div>';
     }
     document.getElementById('add-question-btn').addEventListener('click', async () => {
       const question = document.getElementById('q-question').value.trim();
@@ -416,6 +416,12 @@
       document.getElementById('q-tag').value = '';
       loadQuestions();
     });
+    window.deleteQuestion = async (id) => {
+      if (!confirm('Delete this logged question?')) return;
+      const { error } = await sb.from('job_interview_questions').delete().eq('id', id);
+      if (error) { toast(error.message, 'err'); return; }
+      loadQuestions();
+    };
 
     /* ── Self-assessment ── */
     function renderSelfAssessment() {

@@ -105,7 +105,7 @@
     <div class="modal">
       <div class="modal-title">Log an Update</div>
       <div class="form-group">
-        <label>What happened?</label>
+        <label for="update-input">What happened?</label>
         <textarea id="update-input" rows="4" placeholder="e.g. I applied to Bosch today using CV Analytics v2.1"></textarea>
       </div>
       <div id="update-status" style="font-size:12px;color:var(--cl);min-height:16px;"></div>
@@ -126,7 +126,7 @@
     import { mountAdminNav } from '/src/admin-nav.js';
     import { loadAiCfg, chatComplete, formatAiError, renderAiText } from '/src/ai-client.js';
     import { localDateStr } from '/src/date-utils.js';
-    import { computeFitScore, computePriority, followUpStatus } from '/src/job-scoring.js';
+    import { computeFitScore, computePriority, followUpStatus, computeDerivedFields } from '/src/job-scoring.js';
     import { escapeHtml } from '/src/html-utils.js';
     import { STAGE_LABEL, STAGE_ORDER, ACTIVITY_TYPES, QUESTION_TAGS } from '/src/job-constants.js';
 
@@ -361,6 +361,11 @@ Rules: matched_opportunity_id and matched_interview_id must be one of the exact 
           const payload = {};
           Object.entries(p.opportunity_updates).forEach(([k,v]) => { if (v !== null && v !== undefined) payload[k] = v; });
           if (Object.keys(payload).length) {
+            // applied/applied_date affect priority's deadline-urgency
+            // component, so recompute the derived fields against the full
+            // current row + this diff — not just the diff in isolation.
+            const { data: currentOpp } = await sb.from('job_opportunities').select('*').eq('id', p.matched_opportunity_id).maybeSingle();
+            if (currentOpp) Object.assign(payload, computeDerivedFields({ ...currentOpp, ...payload }));
             const { error } = await sb.from('job_opportunities').update(payload).eq('id', p.matched_opportunity_id);
             if (error) throw error;
           }

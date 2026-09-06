@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Activities — SaFa Naturals</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>html.auth-checking *:not(style){visibility:hidden!important;}</style>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;}
+    html{font-size:15px;}
+    :root{--bg:#060d09;--bg2:#0d1f12;--bg3:#122018;--border:rgba(255,255,255,.07);--c:#f5efe6;--cm:rgba(245,239,230,.6);--cl:rgba(245,239,230,.35);--al:#c49a3c;--green:#5fcf80;--red:#e05a2b;}
+    body{font-family:'DM Sans','Hind Siliguri',sans-serif;background:var(--bg);color:var(--c);min-height:100vh;margin:0;-webkit-font-smoothing:antialiased;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+    .page{max-width:1240px;margin:0 auto;padding:28px 24px 64px;}
+    .page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;}
+    .page-title{font-family:'Syne','Hind Siliguri',sans-serif;font-size:22px;font-weight:700;color:var(--c);margin:0 0 4px;}
+    .page-sub{font-size:13px;color:var(--cl);}
+    .btn{font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:9px 16px;border-radius:6px;border:1px solid var(--border);background:rgba(255,255,255,.04);color:var(--cl);cursor:pointer;}
+    .btn:hover{color:var(--c);background:rgba(255,255,255,.08);}
+    .btn.primary{background:rgba(196,154,60,.12);border-color:rgba(196,154,60,.3);color:var(--al);}
+    .btn.primary:hover{background:rgba(196,154,60,.2);}
+    .btn.sm{padding:6px 10px;font-size:8px;}
+    .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px;}
+    @media(max-width:700px){.kpi-grid{grid-template-columns:repeat(2,1fr);}}
+    .kpi{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;}
+    .kpi-label{font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--cl);margin-bottom:6px;}
+    .kpi-val{font-family:'DM Mono','Hind Siliguri',monospace;font-size:20px;font-weight:500;color:var(--c);}
+    .toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:18px;}
+    .filter-select,.search-input{background:var(--bg2);border:1px solid var(--border);border-radius:6px;color:var(--c);font-family:'DM Sans','Hind Siliguri',sans-serif;font-size:14px;padding:8px 12px;outline:none;}
+    .search-input{min-width:200px;}
+    .table-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+    .table-toolbar{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);}
+    .table-title{font-family:'Syne','Hind Siliguri',sans-serif;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--cl);}
+    .scroll-x{overflow-x:auto;}
+    table{width:100%;border-collapse:collapse;}
+    th{font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--cl);padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap;}
+    td{padding:12px 14px;font-size:14px;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:middle;}
+    tr:last-child td{border-bottom:none;}
+    tr:hover td{background:rgba(255,255,255,.02);}
+    .empty-state{text-align:center;padding:48px 20px;color:var(--cl);}
+    .empty-icon{font-size:32px;margin-bottom:10px;}
+    .pill{display:inline-flex;padding:3px 9px;border-radius:20px;font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:rgba(255,255,255,.06);color:var(--cm);}
+    .related-link{color:var(--al);text-decoration:none;font-size:13px;}
+
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:500;padding:20px;}
+    .modal-overlay.open{display:flex;animation:fadeUp .2s ease;}
+    .modal{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:28px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;}
+    .modal-title{font-family:'Syne','Hind Siliguri',sans-serif;font-size:15px;font-weight:700;color:var(--c);margin-bottom:20px;}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+    @media(max-width:520px){.form-grid{grid-template-columns:1fr;}}
+    .form-group{display:flex;flex-direction:column;gap:6px;}
+    .form-group.span2{grid-column:span 2;}
+    label{font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--cl);}
+    input,select,textarea{background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--c);font-family:'DM Sans','Hind Siliguri',sans-serif;font-size:14px;padding:9px 12px;outline:none;width:100%;}
+    input:focus,select:focus,textarea:focus{border-color:rgba(196,154,60,.5);}
+    .modal-actions{display:flex;gap:10px;margin-top:20px;justify-content:flex-end;}
+    .toast-wrap{position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;gap:8px;}
+    .toast{padding:12px 18px;border-radius:8px;font-family:'Syne','Hind Siliguri',sans-serif;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;animation:fadeUp .3s ease;}
+    .toast.ok{background:#1a3322;border:1px solid rgba(95,207,128,.3);color:var(--green);}
+    .toast.err{background:#2a1510;border:1px solid rgba(224,90,43,.3);color:var(--red);}
+  </style>
+</head>
+<body>
+
+  <div class="page">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Job Search <span style="color:var(--al)">Activities</span></div>
+        <div class="page-sub">Every application, message, call, and follow-up in one chronological record.</div>
+      </div>
+      <span class="rt-indicator" id="rt-indicator"><span class="rt-dot"></span>Live</span>
+      <button class="btn primary" id="add-btn">+ Log Activity</button>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi"><div class="kpi-label">Total Activities</div><div class="kpi-val" id="kpi-total">—</div></div>
+      <div class="kpi"><div class="kpi-label">This Week</div><div class="kpi-val" id="kpi-week">—</div></div>
+      <div class="kpi"><div class="kpi-label">This Month</div><div class="kpi-val" id="kpi-month">—</div></div>
+      <div class="kpi"><div class="kpi-label">Networking Activity</div><div class="kpi-val" id="kpi-networking">—</div></div>
+    </div>
+
+    <div class="toolbar">
+      <input type="text" class="search-input" id="search-input" placeholder="Search summary...">
+      <select class="filter-select" id="filter-type" aria-label="Filter by activity type"><option value="">All Types</option></select>
+      <input type="date" class="search-input" id="filter-from" title="From date" aria-label="From date">
+      <input type="date" class="search-input" id="filter-to" title="To date" aria-label="To date">
+    </div>
+
+    <div class="table-card">
+      <div class="table-toolbar"><span class="table-title">Activities</span><span class="count-label" id="activity-count" style="font-size:13px;color:var(--cl);"></span></div>
+      <div class="scroll-x">
+        <table>
+          <thead><tr><th>Date</th><th>Type</th><th>Related</th><th>Summary</th><th>Next Step</th><th></th></tr></thead>
+          <tbody id="tbody"><tr><td colspan="6"><div class="empty-state"><div class="empty-icon">⏳</div>Loading...</div></td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add/Edit Activity modal -->
+  <div class="modal-overlay" id="modal">
+    <div class="modal">
+      <div class="modal-title" id="modal-title">Log Activity</div>
+      <div class="form-grid">
+        <div class="form-group"><label for="f-activity_type">Type</label><select id="f-activity_type"></select></div>
+        <div class="form-group"><label for="f-activity_date">Date</label><input type="date" id="f-activity_date"></div>
+        <div class="form-group"><label for="f-opportunity_id">Related Opportunity</label><select id="f-opportunity_id"><option value="">None</option></select></div>
+        <div class="form-group"><label for="f-contact_id">Related Contact</label><select id="f-contact_id"><option value="">None</option></select></div>
+        <div class="form-group"><label for="f-channel">Channel</label><input type="text" id="f-channel" placeholder="e.g. Email, Phone, LinkedIn"></div>
+        <div class="form-group"><label for="f-outcome">Outcome</label><input type="text" id="f-outcome"></div>
+        <div class="form-group span2"><label for="f-summary">Summary</label><textarea id="f-summary" rows="2"></textarea></div>
+        <div class="form-group"><label for="f-next_step">Next Step</label><input type="text" id="f-next_step"></div>
+        <div class="form-group"><label for="f-next_step_date">Next Step Date</label><input type="date" id="f-next_step_date"></div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn" id="modal-cancel">Cancel</button>
+        <button class="btn primary" id="modal-save">Save Activity</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-wrap" id="toast-wrap"></div>
+
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+    import { requireAdmin }  from '/src/admin-auth.js';
+    import { mountAdminNav } from '/src/admin-nav.js';
+    import { localDateStr, daysAgoStr } from '/src/date-utils.js';
+    import { subscribeRealtime, injectRealtimeStyles } from '/src/realtime.js';
+    import { escapeHtml } from '/src/html-utils.js';
+    import { ACTIVITY_TYPES, optionsHtml } from '/src/job-constants.js';
+
+    document.documentElement.classList.add('auth-checking');
+    const sb = createClient(
+      import.meta.env.VITE_SUPABASE_URL,
+      import.meta.env.VITE_SUPABASE_ANON_KEY
+    );
+    const session = await requireAdmin(sb);
+    if (!session) { window.location.href = 'orders.html'; }
+    document.documentElement.classList.remove('auth-checking');
+    mountAdminNav({ page: 'job-activities', supabase: sb, email: session.user.email });
+
+    document.getElementById('filter-type').innerHTML += optionsHtml(ACTIVITY_TYPES);
+    document.getElementById('f-activity_type').innerHTML = optionsHtml(ACTIVITY_TYPES);
+
+    function toast(msg, type='ok') {
+      const el = document.createElement('div');
+      el.className = `toast ${type}`;
+      el.textContent = msg;
+      document.getElementById('toast-wrap').appendChild(el);
+      setTimeout(()=>el.remove(), 3500);
+    }
+    const NETWORKING_TYPES = ['LinkedIn Message','Email','Phone Call','Recruiter Call','Networking Meeting'];
+
+    let _all = [];
+
+    async function load() {
+      const { data, error } = await sb.from('job_activities').select('*, job_opportunities(id,company,job_title), job_contacts(id,full_name)').order('activity_date', { ascending: false });
+      if (error) { toast(error.message, 'err'); return; }
+      _all = data || [];
+      renderKpis();
+      renderTable();
+    }
+
+    function renderKpis() {
+      document.getElementById('kpi-total').textContent = _all.length;
+      const weekAgo = daysAgoStr(7), monthAgo = daysAgoStr(30);
+      document.getElementById('kpi-week').textContent = _all.filter(a => a.activity_date >= weekAgo).length;
+      document.getElementById('kpi-month').textContent = _all.filter(a => a.activity_date >= monthAgo).length;
+      document.getElementById('kpi-networking').textContent = _all.filter(a => NETWORKING_TYPES.includes(a.activity_type) && a.activity_date >= monthAgo).length;
+    }
+
+    function filtered() {
+      const search = document.getElementById('search-input').value.toLowerCase();
+      const type = document.getElementById('filter-type').value;
+      const from = document.getElementById('filter-from').value;
+      const to = document.getElementById('filter-to').value;
+      return _all.filter(a =>
+        (!search || (a.summary||'').toLowerCase().includes(search)) &&
+        (!type || a.activity_type === type) &&
+        (!from || a.activity_date >= from) &&
+        (!to || a.activity_date <= to)
+      );
+    }
+
+    function renderTable() {
+      const rows = filtered();
+      document.getElementById('activity-count').textContent = `${rows.length} activit${rows.length!==1?'ies':'y'}`;
+      if (!rows.length) {
+        document.getElementById('tbody').innerHTML = '<tr><td colspan="6"><div class="empty-state"><div class="empty-icon">≡</div>No activities logged yet.</div></td></tr>';
+        return;
+      }
+      document.getElementById('tbody').innerHTML = rows.map(a => {
+        const related = a.job_opportunities
+          ? `<a class="related-link" href="job-opportunity.html?id=${a.job_opportunities.id}">${escapeHtml(a.job_opportunities.company)}</a>`
+          : a.job_contacts ? `<a class="related-link" href="job-contacts.html">${escapeHtml(a.job_contacts.full_name)}</a>` : '—';
+        return `<tr>
+          <td style="font-family:'DM Mono',monospace;font-size:13px;">${a.activity_date}</td>
+          <td><span class="pill">${escapeHtml(a.activity_type)||'Other'}</span></td>
+          <td>${related}</td>
+          <td style="max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(a.summary)||'—'}</td>
+          <td style="color:var(--cl);font-size:13px;">${escapeHtml(a.next_step)||'—'}</td>
+          <td>
+            <div style="display:flex;gap:6px;">
+              <button class="btn sm" onclick="window.editActivity('${a.id}')">Edit</button>
+              <button class="btn sm" onclick="window.deleteActivity('${a.id}')">Del</button>
+            </div>
+          </td>
+        </tr>`;
+      }).join('');
+    }
+
+    let searchTimer;
+    document.getElementById('search-input').addEventListener('input', () => { clearTimeout(searchTimer); searchTimer = setTimeout(renderTable, 250); });
+    ['filter-type','filter-from','filter-to'].forEach(id => document.getElementById(id).addEventListener('change', renderTable));
+
+    /* ── Modal ── */
+    const FIELDS = ['activity_type','activity_date','opportunity_id','contact_id','channel','outcome','summary','next_step','next_step_date'];
+    let _editId = null;
+    async function openModal(activity=null) {
+      _editId = activity?.id || null;
+      document.getElementById('modal-title').textContent = activity ? 'Edit Activity' : 'Log Activity';
+      const [{ data: opps }, { data: contacts }] = await Promise.all([
+        sb.from('job_opportunities').select('id,company,job_title').order('company'),
+        sb.from('job_contacts').select('id,full_name').order('full_name'),
+      ]);
+      document.getElementById('f-opportunity_id').innerHTML = '<option value="">None</option>' + (opps||[]).map(o => `<option value="${o.id}">${escapeHtml(o.company)} — ${escapeHtml(o.job_title)}</option>`).join('');
+      document.getElementById('f-contact_id').innerHTML = '<option value="">None</option>' + (contacts||[]).map(c => `<option value="${c.id}">${escapeHtml(c.full_name)}</option>`).join('');
+      FIELDS.forEach(f => { document.getElementById('f-'+f).value = activity?.[f] || (f==='activity_date' ? localDateStr() : ''); });
+      document.getElementById('modal').classList.add('open');
+    }
+    function closeModal() { document.getElementById('modal').classList.remove('open'); _editId = null; }
+    document.getElementById('add-btn').addEventListener('click', () => openModal());
+    document.getElementById('modal-cancel').addEventListener('click', closeModal);
+    document.getElementById('modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
+
+    document.getElementById('modal-save').addEventListener('click', async () => {
+      const payload = {};
+      FIELDS.forEach(f => { payload[f] = document.getElementById('f-'+f).value || null; });
+      if (!payload.activity_date) payload.activity_date = localDateStr();
+
+      let error;
+      if (_editId) ({ error } = await sb.from('job_activities').update(payload).eq('id', _editId));
+      else ({ error } = await sb.from('job_activities').insert([payload]));
+      if (error) { toast(error.message, 'err'); return; }
+      toast(_editId ? 'Activity updated' : 'Activity logged');
+      closeModal();
+      load();
+    });
+
+    window.editActivity = (id) => openModal(_all.find(a => a.id === id));
+    window.deleteActivity = async (id) => {
+      if (!confirm('Delete this activity?')) return;
+      const { error } = await sb.from('job_activities').delete().eq('id', id);
+      if (error) { toast(error.message, 'err'); return; }
+      toast('Deleted');
+      load();
+    };
+
+    load();
+    injectRealtimeStyles();
+    subscribeRealtime(sb, 'job-activities-live', ['job_activities'], load, { indicatorId: 'rt-indicator' });
+  </script>
+</body>
+</html>
