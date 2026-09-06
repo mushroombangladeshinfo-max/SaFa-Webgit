@@ -214,6 +214,19 @@
         <div style="margin-top:14px;"><button class="btn sm primary" id="save-application-btn">Save</button></div>
       </div>
       <div class="card">
+        <div class="card-title">Cover Letter</div>
+        <div style="margin-bottom:10px;"><button class="btn sm primary" id="draft-cover-letter-btn">✦ Draft with AI</button></div>
+        <div class="form-group"><textarea id="f-cover-letter" rows="10" placeholder="Draft with AI, or write your own — this is saved either way."></textarea></div>
+        <div id="cover-letter-notes"></div>
+        <div style="margin-top:10px;display:flex;gap:8px;"><button class="btn sm primary" id="save-cover-letter-btn">Save</button><button class="btn sm" id="copy-cover-letter-btn">Copy</button></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Application Questions</div>
+        <div class="card-hint" style="font-size:12px;color:var(--cl);margin-bottom:10px;">Paste each question the application form actually asks, then draft an evidence-based answer per question.</div>
+        <div id="answers-list"></div>
+        <div style="margin-top:10px;display:flex;gap:8px;"><button class="btn sm" id="add-question-btn">+ Add Question</button><button class="btn sm primary" id="save-answers-btn">Save All</button></div>
+      </div>
+      <div class="card">
         <div class="card-title">Offers</div>
         <table class="linked" id="offers-table"><thead><tr><th>Base Salary</th><th>Status</th><th>Start Date</th><th>Response Deadline</th></tr></thead><tbody></tbody></table>
         <div class="empty-mini" id="offers-empty" style="display:none;">No offers yet for this opportunity.</div>
@@ -375,6 +388,7 @@
     import { STAGES, STAGE_LABEL, STAGE_ORDER, CAREER_TRACKS, EMPLOYMENT_TYPES, SOURCES, GERMAN_REQUIREMENTS, YES_NO_UNCLEAR, CONTACT_TYPES, INTERVIEW_TYPES, KNOWN_REASONS, ACTIVITY_TYPES, CLOSE_OUTCOMES, optionsHtml, valueLabelOptionsHtml } from '/src/job-constants.js';
     import { subscribeRealtime, injectRealtimeStyles } from '/src/realtime.js';
     import { structuredProfileToText } from '/src/career-diagnostic.js';
+    import { buildCoverLetterMessages, buildAnswerMessages, normaliseCoverLetter, normaliseAnswer } from '/src/application-materials.js';
 
     document.documentElement.classList.add('auth-checking');
     const sb = createClient(
@@ -666,6 +680,127 @@
       document.getElementById('f-application_notes').value = opp.application_notes || '';
       document.getElementById('f-next_action').value = opp.next_action || '';
       document.getElementById('f-next_action_date').value = opp.next_action_date || '';
+
+      const cl = opp.cover_letter;
+      document.getElementById('f-cover-letter').value = cl?.content || '';
+      const clNotes = document.getElementById('cover-letter-notes');
+      const clNoteHtml = [
+        cl?.evidenceWarnings?.length ? `<div><b>Evidence warnings:</b> ${cl.evidenceWarnings.map(w=>escapeHtml(w)).join('; ')}</div>` : '',
+        cl?.excludedClaims?.length ? `<div><b>Excluded claims (not enough evidence):</b> ${cl.excludedClaims.map(w=>escapeHtml(w)).join('; ')}</div>` : '',
+      ].filter(Boolean).join('');
+      clNotes.innerHTML = clNoteHtml ? `<div style="font-size:12px;color:var(--cl);margin-top:8px;">${clNoteHtml}</div>` : '';
+
+      _answers = Array.isArray(opp.application_answers) ? opp.application_answers.map(a => ({...a})) : [];
+      renderAnswersList();
+    }
+
+    let _answers = [];
+    function renderAnswersList() {
+      const list = document.getElementById('answers-list');
+      list.innerHTML = _answers.length ? _answers.map((a, i) => `
+        <div class="card" style="background:var(--bg3);margin-bottom:10px;padding:14px;">
+          <div class="form-group"><label class="f">Question ${i+1}</label><textarea data-q-idx="${i}" class="answer-question" rows="2">${escapeHtml(a.question||'')}</textarea></div>
+          <div class="form-group"><label class="f">Answer</label><textarea data-a-idx="${i}" class="answer-text" rows="4">${escapeHtml(a.answer||'')}</textarea></div>
+          ${a.evidenceStatus ? `<div style="font-size:12px;color:var(--cl);">Evidence: ${escapeHtml(a.evidenceStatus)}${a.evidenceBasis ? ' — '+escapeHtml(a.evidenceBasis) : ''}${a.confidenceNote ? '<br>'+escapeHtml(a.confidenceNote) : ''}</div>` : ''}
+          <div style="margin-top:8px;display:flex;gap:8px;">
+            <button class="btn sm primary" data-draft-answer="${i}">✦ Draft Answer</button>
+            <button class="btn sm" data-remove-answer="${i}">Remove</button>
+          </div>
+        </div>
+      `).join('') : '<div class="empty-mini">No application questions added yet.</div>';
+
+      list.querySelectorAll('.answer-question').forEach(el => el.addEventListener('input', e => { _answers[+e.target.dataset.qIdx].question = e.target.value; }));
+      list.querySelectorAll('.answer-text').forEach(el => el.addEventListener('input', e => { _answers[+e.target.dataset.aIdx].answer = e.target.value; }));
+      list.querySelectorAll('[data-draft-answer]').forEach(b => b.addEventListener('click', () => draftAnswer(+b.dataset.draftAnswer)));
+      list.querySelectorAll('[data-remove-answer]').forEach(b => b.addEventListener('click', () => { _answers.splice(+b.dataset.removeAnswer, 1); renderAnswersList(); }));
+    }
+
+    document.getElementById('add-question-btn').addEventListener('click', () => {
+      _answers.push({ question: '', answer: '', evidenceBasis: '', evidenceStatus: '', confidenceNote: '' });
+      renderAnswersList();
+    });
+
+    document.getElementById('save-answers-btn').addEventListener('click', async () => {
+      const { error } = await sb.from('job_opportunities').update({ application_answers: _answers }).eq('id', oppId);
+      if (error) { toast(error.message, 'err'); return; }
+      toast('Application answers saved');
+      load();
+    });
+
+    async function requireConfirmedProfileForOpp() {
+      const { data: profile } = await sb.from('job_profiles').select('*').eq('id', opp.profile_id).maybeSingle();
+      if (profile?.status !== 'confirmed') {
+        toast('Complete and confirm your Career Profile diagnostic first', 'err');
+        return null;
+      }
+      return profile;
+    }
+
+    document.getElementById('draft-cover-letter-btn').addEventListener('click', async () => {
+      if (!opp.job_description) { toast('Add a job description first (Overview → Edit Details)', 'err'); return; }
+      const btn = document.getElementById('draft-cover-letter-btn');
+      btn.textContent = 'Drafting...'; btn.disabled = true;
+      try {
+        const cfg = await loadAiCfg(sb);
+        if (cfg.provider === 'openai' && !cfg.key) { toast('Configure a Groq key on the Home page first', 'err'); return; }
+        const profile = await requireConfirmedProfileForOpp();
+        if (!profile) return;
+        const messages = buildCoverLetterMessages({
+          structuredProfile: profile.structured_profile, strategyJson: profile.strategy_json,
+          company: opp.company, jobTitle: opp.job_title, jobDescription: opp.job_description,
+        });
+        const reply = await chatComplete(cfg, messages, { json: true });
+        const cl = normaliseCoverLetter(JSON.parse(reply));
+        document.getElementById('f-cover-letter').value = cl.content;
+        const { error } = await sb.from('job_opportunities').update({ cover_letter: cl }).eq('id', oppId);
+        if (error) { toast(error.message, 'err'); return; }
+        toast('Cover letter drafted');
+        load();
+      } catch (e) {
+        toast('Drafting failed: ' + e.message, 'err');
+      } finally {
+        btn.textContent = '✦ Draft with AI'; btn.disabled = false;
+      }
+    });
+
+    document.getElementById('save-cover-letter-btn').addEventListener('click', async () => {
+      const content = document.getElementById('f-cover-letter').value;
+      const existing = opp.cover_letter || {};
+      const { error } = await sb.from('job_opportunities').update({ cover_letter: { ...existing, content } }).eq('id', oppId);
+      if (error) { toast(error.message, 'err'); return; }
+      toast('Cover letter saved');
+      load();
+    });
+    document.getElementById('copy-cover-letter-btn').addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(document.getElementById('f-cover-letter').value);
+        toast('Copied');
+      } catch {
+        toast('Copy failed — your browser may be blocking clipboard access', 'err');
+      }
+    });
+
+    async function draftAnswer(idx) {
+      const q = _answers[idx].question.trim();
+      if (!q) { toast('Type the question first', 'err'); return; }
+      try {
+        const cfg = await loadAiCfg(sb);
+        if (cfg.provider === 'openai' && !cfg.key) { toast('Configure a Groq key on the Home page first', 'err'); return; }
+        const profile = await requireConfirmedProfileForOpp();
+        if (!profile) return;
+        const otherAnswers = _answers.filter((a,i) => i !== idx && a.answer).map(a => ({ question: a.question, answer: a.answer }));
+        const messages = buildAnswerMessages({
+          structuredProfile: profile.structured_profile, strategyJson: profile.strategy_json,
+          company: opp.company, jobTitle: opp.job_title, jobDescription: opp.job_description,
+          question: q, otherAnswers,
+        });
+        const reply = await chatComplete(cfg, messages, { json: true });
+        const result = normaliseAnswer(JSON.parse(reply));
+        Object.assign(_answers[idx], result);
+        renderAnswersList();
+      } catch (e) {
+        toast('Drafting failed: ' + e.message, 'err');
+      }
     }
     document.getElementById('save-application-btn').addEventListener('click', async () => {
       const applied = document.getElementById('f-applied').checked;
