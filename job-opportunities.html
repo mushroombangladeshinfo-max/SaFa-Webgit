@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Opportunities — SaFa Naturals</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>html.auth-checking *:not(style){visibility:hidden!important;}</style>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;}
+    html{font-size:15px;}
+    :root{--bg:#060d09;--bg2:#0d1f12;--bg3:#122018;--border:rgba(255,255,255,.07);--c:#f5efe6;--cm:rgba(245,239,230,.6);--cl:rgba(245,239,230,.35);--al:#c49a3c;--green:#5fcf80;--red:#e05a2b;--blue:#50c8ff;}
+    body{font-family:'DM Sans','Hind Siliguri',sans-serif;background:var(--bg);color:var(--c);min-height:100vh;margin:0;-webkit-font-smoothing:antialiased;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+    .page{max-width:1360px;margin:0 auto;padding:28px 24px 64px;}
+    .page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;}
+    .page-title{font-family:'Syne','Hind Siliguri',sans-serif;font-size:22px;font-weight:700;color:var(--c);margin:0 0 4px;}
+    .page-sub{font-size:13px;color:var(--cl);}
+    .btn{font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:9px 16px;border-radius:6px;border:1px solid var(--border);background:rgba(255,255,255,.04);color:var(--cl);cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:6px;}
+    .btn:hover{color:var(--c);background:rgba(255,255,255,.08);}
+    .btn.primary{background:rgba(196,154,60,.12);border-color:rgba(196,154,60,.3);color:var(--al);}
+    .btn.primary:hover{background:rgba(196,154,60,.2);}
+    .btn.danger{color:var(--red);border-color:rgba(224,90,43,.2);}
+    .btn.danger:hover{background:rgba(224,90,43,.08);}
+    .btn.sm{padding:6px 10px;font-size:8px;}
+
+    .tabs{display:flex;gap:4px;margin-bottom:16px;border-bottom:1px solid var(--border);}
+    .tab-btn{background:none;border:none;color:var(--cl);font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:10px 14px;cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;}
+    .tab-btn:hover{color:var(--c);}
+    .tab-btn.active{color:var(--al);border-bottom-color:var(--al);}
+    .view-toggle{display:flex;gap:2px;background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:2px;}
+    .view-toggle button{background:none;border:none;color:var(--cl);font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:6px 12px;border-radius:5px;cursor:pointer;}
+    .view-toggle button.active{background:rgba(196,154,60,.14);color:var(--al);}
+
+    .toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:18px;}
+    .filter-select,.search-input{background:var(--bg2);border:1px solid var(--border);border-radius:6px;color:var(--c);font-family:'DM Sans','Hind Siliguri',sans-serif;font-size:14px;padding:8px 12px;outline:none;}
+    .filter-select:focus,.search-input:focus{border-color:rgba(196,154,60,.4);}
+    .search-input{min-width:200px;}
+    .f-clear-btn{font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(245,239,230,.38);background:none;border:none;cursor:pointer;padding:6px 4px;}
+    .f-clear-btn:hover{color:var(--al);}
+
+    .table-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+    .table-toolbar{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);}
+    .table-title{font-family:'Syne','Hind Siliguri',sans-serif;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--cl);}
+    .count-label{font-size:13px;color:var(--cl);}
+    .scroll-x{overflow-x:auto;}
+    table{width:100%;border-collapse:collapse;}
+    th{font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--cl);padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap;}
+    td{padding:12px 14px;font-size:14px;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:middle;}
+    tr:last-child td{border-bottom:none;}
+    tr:hover td{background:rgba(255,255,255,.02);}
+    .empty-state{text-align:center;padding:48px 20px;color:var(--cl);}
+    .empty-icon{font-size:32px;margin-bottom:10px;}
+    .td-actions{display:flex;gap:6px;align-items:center;}
+    .row-link{color:inherit;text-decoration:none;}
+    .row-link:hover .company-name{color:var(--al);}
+
+    .pill{display:inline-flex;padding:3px 9px;border-radius:20px;font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;}
+    .pill-stage{background:rgba(255,255,255,.06);color:var(--cm);}
+    .pill-p1{background:rgba(224,90,43,.12);color:var(--red);}
+    .pill-p2{background:rgba(196,154,60,.12);color:var(--al);}
+    .pill-p3{background:rgba(80,200,255,.1);color:var(--blue);}
+    .pill-p4{background:rgba(255,255,255,.05);color:var(--cl);}
+    .pill-skip{background:rgba(255,255,255,.04);color:rgba(245,239,230,.25);}
+    .follow-up-badge{font-size:12px;padding:2px 7px;border-radius:4px;font-family:'DM Mono','Hind Siliguri',monospace;}
+    .follow-up-badge.overdue{background:rgba(224,90,43,.12);color:var(--red);}
+    .follow-up-badge.today{background:rgba(196,154,60,.12);color:var(--al);}
+    .follow-up-badge.soon{background:rgba(95,207,128,.08);color:var(--green);}
+    .fit-badge{font-family:'DM Mono','Hind Siliguri',monospace;font-size:13px;}
+
+    /* Kanban */
+    .kanban-board{display:flex;gap:12px;overflow-x:auto;padding-bottom:8px;}
+    .kanban-col{flex:0 0 220px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;display:flex;flex-direction:column;max-height:75vh;}
+    .kanban-col-head{padding:10px 12px;border-bottom:1px solid var(--border);font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--cl);display:flex;justify-content:space-between;align-items:center;}
+    .kanban-col-body{padding:8px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:8px;min-height:60px;}
+    .kanban-col-body.drag-over{background:rgba(196,154,60,.06);}
+    .kanban-card{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 12px;cursor:grab;transition:border-color .15s;}
+    .kanban-card:hover{border-color:rgba(196,154,60,.3);}
+    .kanban-card.dragging{opacity:.4;}
+    .kc-company{font-weight:600;font-size:13px;color:var(--c);}
+    .kc-title{font-size:12px;color:var(--cl);margin-top:2px;}
+    .kc-meta{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;}
+
+    /* Modal */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:500;padding:20px;}
+    .modal-overlay.open{display:flex;animation:fadeUp .2s ease;}
+    .modal{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:28px;width:100%;max-width:760px;max-height:90vh;overflow-y:auto;}
+    .modal-title{font-family:'Syne','Hind Siliguri',sans-serif;font-size:15px;font-weight:700;color:var(--c);margin-bottom:16px;}
+    .ai-box{background:rgba(196,154,60,.06);border:1px solid rgba(196,154,60,.2);border-radius:8px;padding:14px;margin-bottom:20px;}
+    .ai-box-title{font-family:'Syne','Hind Siliguri',sans-serif;font-size:11px;font-weight:700;color:var(--al);margin-bottom:8px;}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+    @media(max-width:560px){.form-grid{grid-template-columns:1fr;}}
+    .form-group{display:flex;flex-direction:column;gap:6px;}
+    .form-group.span2{grid-column:span 2;}
+    label{font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--cl);}
+    input,select,textarea{background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--c);font-family:'DM Sans','Hind Siliguri',sans-serif;font-size:14px;padding:9px 12px;outline:none;width:100%;}
+    input:focus,select:focus,textarea:focus{border-color:rgba(196,154,60,.5);}
+    .modal-actions{display:flex;gap:10px;margin-top:20px;justify-content:flex-end;}
+    .more-toggle{font-size:12px;color:var(--al);cursor:pointer;margin:16px 0 4px;display:inline-block;}
+    .more-fields{display:none;}
+    .more-fields.open{display:grid;}
+
+    .toast-wrap{position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;gap:8px;}
+    .toast{padding:12px 18px;border-radius:8px;font-family:'Syne','Hind Siliguri',sans-serif;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;animation:fadeUp .3s ease;}
+    .toast.ok{background:#1a3322;border:1px solid rgba(95,207,128,.3);color:var(--green);}
+    .toast.err{background:#2a1510;border:1px solid rgba(224,90,43,.3);color:var(--red);}
+  </style>
+</head>
+<body>
+
+  <div class="page">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Job <span style="color:var(--al)">Opportunities</span></div>
+        <div class="page-sub">Every job from discovery to offer — table or Kanban.</div>
+      </div>
+      <span class="rt-indicator" id="rt-indicator"><span class="rt-dot"></span>Live</span>
+      <button class="btn primary" id="add-btn">+ Add Opportunity</button>
+    </div>
+
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="active">Active</button>
+      <button class="tab-btn" data-tab="closed">Closed</button>
+      <button class="tab-btn" data-tab="all">All</button>
+    </div>
+
+    <div class="toolbar">
+      <input type="text" class="search-input" id="search-input" placeholder="Search company or title...">
+      <select class="filter-select" id="filter-track" aria-label="Filter by career track">
+        <option value="">All Tracks</option>
+        <option value="A">A — BD/Commercial</option>
+        <option value="B">B — Analytics</option>
+        <option value="C">C — Operations/SC</option>
+        <option value="X">X — Opportunistic</option>
+      </select>
+      <select class="filter-select" id="filter-stage" aria-label="Filter by stage"><option value="">All Stages</option></select>
+      <select class="filter-select" id="filter-priority" aria-label="Filter by priority">
+        <option value="">All Priorities</option>
+        <option>P1 - Act Now</option><option>P2 - High</option><option>P3 - Normal</option><option>P4 - Low</option><option>Skip</option>
+      </select>
+      <select class="filter-select" id="filter-source" aria-label="Filter by source"><option value="">All Sources</option></select>
+      <button type="button" class="f-clear-btn" id="clear-filters-btn">✕ Clear</button>
+      <div class="view-toggle" style="margin-left:auto;">
+        <button type="button" class="active" data-view="table">Table</button>
+        <button type="button" data-view="kanban">Kanban</button>
+      </div>
+    </div>
+
+    <div id="table-view">
+      <div class="table-card">
+        <div class="table-toolbar">
+          <span class="table-title">Opportunities</span>
+          <span class="count-label" id="opp-count"></span>
+        </div>
+        <div class="scroll-x">
+          <table>
+            <thead>
+              <tr>
+                <th>Company / Title</th><th>Track</th><th>Location</th><th>Fit</th><th>Priority</th>
+                <th>Stage</th><th>Deadline</th><th>Next Action</th><th>Follow-up</th><th></th>
+              </tr>
+            </thead>
+            <tbody id="opp-tbody">
+              <tr><td colspan="10"><div class="empty-state"><div class="empty-icon">⏳</div>Loading...</div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div id="kanban-view" style="display:none;">
+      <div class="kanban-board" id="kanban-board"></div>
+    </div>
+  </div>
+
+  <!-- Add/Edit Opportunity Modal -->
+  <div class="modal-overlay" id="modal">
+    <div class="modal">
+      <div class="modal-title" id="modal-title">Add Opportunity</div>
+
+      <div class="ai-box" id="ai-box">
+        <div class="ai-box-title">✦ Import with AI — paste a job description</div>
+        <div class="form-group" style="margin-bottom:10px;">
+          <label>Job URL (optional)</label>
+          <input type="url" id="ai-url" placeholder="https://...">
+        </div>
+        <div class="form-group">
+          <label>Job Description</label>
+          <textarea id="ai-paste" rows="6" placeholder="Paste the full vacancy text here..."></textarea>
+        </div>
+        <div class="modal-actions" style="margin-top:10px;justify-content:flex-start;">
+          <button type="button" class="btn primary sm" id="ai-extract-btn">Extract with AI</button>
+          <span id="ai-status" style="font-size:12px;color:var(--cl);"></span>
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group span2"><label>Company *</label><input type="text" id="f-company"></div>
+        <div class="form-group"><label>Job Title *</label><input type="text" id="f-job_title"></div>
+        <div class="form-group"><label>Career Track</label>
+          <select id="f-career_track"><option value="">Select...</option><option value="A">A — BD/Commercial</option><option value="B">B — Analytics</option><option value="C">C — Operations/SC</option><option value="X">X — Opportunistic</option></select>
+        </div>
+        <div class="form-group"><label>Job URL</label><input type="url" id="f-job_url"></div>
+        <div class="form-group"><label>Location</label><input type="text" id="f-location"></div>
+        <div class="form-group"><label>Employment Type</label>
+          <select id="f-employment_type"><option value="">Select...</option><option>Werkstudent</option><option>Internship</option><option>Part-Time</option><option>Full-Time</option><option>Graduate Programme</option><option>Temporary</option><option>Freelance</option><option>Other</option></select>
+        </div>
+        <div class="form-group"><label>Source</label>
+          <select id="f-source"><option value="">Select...</option><option>LinkedIn</option><option>Company Website</option><option>Referral</option><option>Recruiter</option><option>University</option><option>Indeed</option><option>StepStone</option><option>Bundesagentur fur Arbeit</option><option>Networking</option><option>Professor / Advisor</option><option>Agency</option><option>Other</option></select>
+        </div>
+        <div class="form-group"><label>Application Deadline</label><input type="date" id="f-application_deadline"></div>
+        <div class="form-group span2"><label>Job Description</label><textarea id="f-job_description" rows="4"></textarea></div>
+      </div>
+
+      <span class="more-toggle" id="more-toggle">+ More Details</span>
+      <div class="form-grid more-fields" id="more-fields">
+        <div class="form-group"><label>Role Family</label><input type="text" id="f-role_family"></div>
+        <div class="form-group"><label>Country</label><input type="text" id="f-country"></div>
+        <div class="form-group"><label>Work Mode</label><select id="f-work_mode"><option value="">Select...</option><option value="remote">Remote</option><option value="hybrid">Hybrid</option><option value="onsite">On-site</option></select></div>
+        <div class="form-group"><label>Posting Date</label><input type="date" id="f-posting_date"></div>
+        <div class="form-group"><label>German Requirement</label>
+          <select id="f-german_requirement"><option value="">Select...</option><option>None</option><option>Preferred</option><option>A1</option><option>A2</option><option>B1</option><option>B2</option><option>C1</option><option>Fluent</option><option>Native</option></select>
+        </div>
+        <div class="form-group"><label>English Requirement</label><input type="text" id="f-english_requirement"></div>
+        <div class="form-group"><label>Working Hours</label><input type="text" id="f-working_hours"></div>
+        <div class="form-group"><label>International Candidate Friendly</label><select id="f-international_candidate_friendly"><option value="">Select...</option><option>Yes</option><option>No</option><option>Unclear</option></select></div>
+        <div class="form-group span2"><label>Visa / Work Authorisation Notes</label><textarea id="f-visa_notes" rows="2"></textarea></div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn" id="modal-cancel">Cancel</button>
+        <button class="btn primary" id="modal-save">Save Opportunity</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-wrap" id="toast-wrap"></div>
+
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+    import { requireAdmin }  from '/src/admin-auth.js';
+    import { mountAdminNav } from '/src/admin-nav.js';
+    import { loadAiCfg, chatComplete, formatAiError } from '/src/ai-client.js';
+    import { localDateStr } from '/src/date-utils.js';
+    import { readFiltersFromURL, writeFiltersToURL } from '/src/filter-state.js';
+    import { subscribeRealtime, injectRealtimeStyles } from '/src/realtime.js';
+    import { computeFitScore, computePriority, eligibilityStatus, followUpStatus, jobRef } from '/src/job-scoring.js';
+
+    document.documentElement.classList.add('auth-checking');
+    const sb = createClient(
+      import.meta.env.VITE_SUPABASE_URL,
+      import.meta.env.VITE_SUPABASE_ANON_KEY
+    );
+
+    const session = await requireAdmin(sb);
+    if (!session) { window.location.href = 'orders.html'; }
+    document.documentElement.classList.remove('auth-checking');
+    mountAdminNav({ page: 'job-opportunities', supabase: sb, email: session.user.email });
+
+    const STAGES = [
+      ['discovered','Discovered'],['evaluating','Evaluating'],['preparing','Preparing'],
+      ['ready_to_apply','Ready to Apply'],['applied','Applied'],['recruiter_screen','Recruiter Screen'],
+      ['hiring_manager','Hiring Manager'],['assessment','Assessment'],['further_interview','Further Interview'],
+      ['final_interview','Final Interview'],['offer','Offer'],['negotiation','Negotiation'],['accepted','Accepted'],
+    ];
+    const STAGE_LABEL = Object.fromEntries(STAGES);
+
+    document.getElementById('filter-stage').innerHTML += STAGES.map(([v,l]) => `<option value="${v}">${l}</option>`).join('');
+
+    function toast(msg, type='ok') {
+      const el = document.createElement('div');
+      el.className = `toast ${type}`;
+      el.textContent = msg;
+      document.getElementById('toast-wrap').appendChild(el);
+      setTimeout(()=>el.remove(), 3500);
+    }
+    const fmtDate = d => d || '—';
+
+    let _all = [], _editId = null, _view = 'table', _tab = 'active', _lastAiExtracted = null;
+
+    const FILTER_DEFAULTS = { q:'', track:'', stage:'', priority:'', source:'', view:'table', tab:'active' };
+    function applyFiltersFromURL() {
+      const f = readFiltersFromURL(FILTER_DEFAULTS);
+      document.getElementById('search-input').value = f.q;
+      document.getElementById('filter-track').value = f.track;
+      document.getElementById('filter-stage').value = f.stage;
+      document.getElementById('filter-priority').value = f.priority;
+      document.getElementById('filter-source').value = f.source;
+      _view = f.view; _tab = f.tab;
+      setView(_view, false);
+      setTab(_tab, false);
+    }
+    function syncFiltersURL() {
+      writeFiltersToURL({
+        q: document.getElementById('search-input').value.trim(),
+        track: document.getElementById('filter-track').value,
+        stage: document.getElementById('filter-stage').value,
+        priority: document.getElementById('filter-priority').value,
+        source: document.getElementById('filter-source').value,
+        view: _view, tab: _tab,
+      }, FILTER_DEFAULTS);
+    }
+
+    async function load() {
+      const { data, error } = await sb.from('job_opportunities').select('*').order('updated_at', { ascending: false });
+      if (error) { toast(error.message, 'err'); return; }
+      _all = data || [];
+      const sources = [...new Set(_all.map(r=>r.source).filter(Boolean))].sort();
+      document.getElementById('filter-source').innerHTML = '<option value="">All Sources</option>' + sources.map(s=>`<option>${s}</option>`).join('');
+      render();
+    }
+
+    function filtered() {
+      const search = document.getElementById('search-input').value.toLowerCase();
+      const track = document.getElementById('filter-track').value;
+      const stage = document.getElementById('filter-stage').value;
+      const priority = document.getElementById('filter-priority').value;
+      const source = document.getElementById('filter-source').value;
+      return _all.filter(r =>
+        (_tab === 'all' || (_tab === 'active' ? !r.closed : r.closed)) &&
+        (!search || r.company?.toLowerCase().includes(search) || r.job_title?.toLowerCase().includes(search)) &&
+        (!track || r.career_track === track) &&
+        (!stage || r.stage === stage) &&
+        (!priority || computePriority(r).label === priority) &&
+        (!source || r.source === source)
+      );
+    }
+
+    function render() {
+      if (_view === 'table') renderTable(); else renderKanban();
+    }
+
+    function priorityPillClass(label) {
+      if (label === 'P1 - Act Now') return 'pill-p1';
+      if (label === 'P2 - High') return 'pill-p2';
+      if (label === 'P3 - Normal') return 'pill-p3';
+      if (label === 'P4 - Low') return 'pill-p4';
+      return 'pill-skip';
+    }
+
+    function followUpBadge(r) {
+      if (r.closed) return '';
+      const status = followUpStatus(r.next_action_date);
+      if (status === 'Overdue') return `<span class="follow-up-badge overdue">⚠ ${r.next_action_date}</span>`;
+      if (status === 'Due Today') return `<span class="follow-up-badge today">📅 Today</span>`;
+      if (status === 'Due Soon') return `<span class="follow-up-badge soon">${r.next_action_date}</span>`;
+      return r.next_action_date ? `<span style="color:var(--cl);font-size:12px;">${r.next_action_date}</span>` : '';
+    }
+
+    function renderTable() {
+      const rows = filtered();
+      document.getElementById('opp-count').textContent = `${rows.length} opportunit${rows.length!==1?'ies':'y'}`;
+      if (!rows.length) {
+        document.getElementById('opp-tbody').innerHTML = '<tr><td colspan="10"><div class="empty-state"><div class="empty-icon">💼</div>No opportunities yet — add your first one, or paste a job description and let AI structure it.</div></td></tr>';
+        return;
+      }
+      document.getElementById('opp-tbody').innerHTML = rows.map(r => {
+        const fit = computeFitScore(r.fit_manual, r.fit_ai);
+        const prio = computePriority(r);
+        return `<tr>
+          <td><a class="row-link" href="job-opportunity.html?id=${r.id}">
+            <div class="company-name" style="font-weight:600;">${r.company}</div>
+            <div style="font-size:12px;color:var(--cl);">${r.job_title}</div>
+          </a></td>
+          <td style="color:var(--cl);">${r.career_track||'—'}</td>
+          <td style="color:var(--cl);font-size:13px;">${r.location||'—'}</td>
+          <td class="fit-badge">${fit!==null?fit:'—'}</td>
+          <td>${prio.label?`<span class="pill ${priorityPillClass(prio.label)}">${prio.label}</span>`:'—'}</td>
+          <td><span class="pill pill-stage">${STAGE_LABEL[r.stage]||r.stage}</span></td>
+          <td style="color:var(--cl);font-size:13px;">${fmtDate(r.application_deadline)}</td>
+          <td style="font-size:13px;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${r.next_action||'—'}</td>
+          <td>${followUpBadge(r)}</td>
+          <td>
+            <div class="td-actions">
+              <button class="btn sm" onclick="window.editOpp('${r.id}')">Edit</button>
+              <button class="btn danger sm" onclick="window.deleteOpp('${r.id}')">Del</button>
+            </div>
+          </td>
+        </tr>`;
+      }).join('');
+    }
+
+    function renderKanban() {
+      const rows = filtered().filter(r => !r.closed);
+      const board = document.getElementById('kanban-board');
+      board.innerHTML = STAGES.map(([stageKey, label]) => {
+        const cards = rows.filter(r => r.stage === stageKey);
+        return `<div class="kanban-col" data-stage="${stageKey}">
+          <div class="kanban-col-head"><span>${label}</span><span>${cards.length}</span></div>
+          <div class="kanban-col-body" data-stage="${stageKey}">
+            ${cards.map(r => {
+              const fit = computeFitScore(r.fit_manual, r.fit_ai);
+              const prio = computePriority(r);
+              return `<div class="kanban-card" draggable="true" data-id="${r.id}" onclick="window.editOpp('${r.id}')">
+                <div class="kc-company">${r.company}</div>
+                <div class="kc-title">${r.job_title}</div>
+                <div class="kc-meta">
+                  ${fit!==null?`<span class="fit-badge">${fit}</span>`:''}
+                  ${prio.label?`<span class="pill ${priorityPillClass(prio.label)}">${prio.label}</span>`:''}
+                </div>
+              </div>`;
+            }).join('')}
+          </div>
+        </div>`;
+      }).join('');
+      wireDragDrop();
+    }
+
+    function wireDragDrop() {
+      document.querySelectorAll('.kanban-card').forEach(card => {
+        card.addEventListener('dragstart', e => {
+          card.classList.add('dragging');
+          e.dataTransfer.setData('text/plain', card.dataset.id);
+        });
+        card.addEventListener('dragend', () => card.classList.remove('dragging'));
+      });
+      document.querySelectorAll('.kanban-col-body').forEach(col => {
+        col.addEventListener('dragover', e => { e.preventDefault(); col.classList.add('drag-over'); });
+        col.addEventListener('dragleave', () => col.classList.remove('drag-over'));
+        col.addEventListener('drop', async e => {
+          e.preventDefault();
+          col.classList.remove('drag-over');
+          const id = e.dataTransfer.getData('text/plain');
+          const newStage = col.dataset.stage;
+          const opp = _all.find(r => r.id === id);
+          if (!opp || opp.stage === newStage) return;
+          const { error } = await sb.from('job_opportunities')
+            .update({ stage: newStage, stage_entered_at: new Date().toISOString() })
+            .eq('id', id);
+          if (error) { toast(error.message, 'err'); return; }
+          await sb.from('job_activities').insert([{
+            opportunity_id: id, activity_type: 'Other', activity_date: localDateStr(),
+            summary: `Stage changed: ${STAGE_LABEL[opp.stage]} → ${STAGE_LABEL[newStage]}`,
+          }]);
+          toast('Stage updated');
+          load();
+        });
+      });
+    }
+
+    function setView(view, sync=true) {
+      _view = view;
+      document.querySelectorAll('.view-toggle button').forEach(b => b.classList.toggle('active', b.dataset.view === view));
+      document.getElementById('table-view').style.display = view === 'table' ? '' : 'none';
+      document.getElementById('kanban-view').style.display = view === 'kanban' ? '' : 'none';
+      if (sync) { syncFiltersURL(); render(); }
+    }
+    function setTab(tab, sync=true) {
+      _tab = tab;
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+      if (sync) { syncFiltersURL(); render(); }
+    }
+    document.querySelectorAll('.view-toggle button').forEach(b => b.addEventListener('click', () => setView(b.dataset.view)));
+    document.querySelectorAll('.tab-btn').forEach(b => b.addEventListener('click', () => setTab(b.dataset.tab)));
+
+    /* ── Filters ── */
+    let searchTimer;
+    document.getElementById('search-input').addEventListener('input', ()=>{ clearTimeout(searchTimer); searchTimer=setTimeout(()=>{ syncFiltersURL(); render(); },250); });
+    ['filter-track','filter-stage','filter-priority','filter-source'].forEach(id => {
+      document.getElementById(id).addEventListener('change', () => { syncFiltersURL(); render(); });
+    });
+    document.getElementById('clear-filters-btn').addEventListener('click', () => {
+      document.getElementById('search-input').value = '';
+      document.getElementById('filter-track').value = '';
+      document.getElementById('filter-stage').value = '';
+      document.getElementById('filter-priority').value = '';
+      document.getElementById('filter-source').value = '';
+      syncFiltersURL(); render();
+    });
+
+    /* ── Add/Edit Modal ── */
+    const MODAL_FIELDS = ['company','job_title','career_track','job_url','location','employment_type','source',
+      'application_deadline','job_description','role_family','country','work_mode','posting_date',
+      'german_requirement','english_requirement','working_hours','international_candidate_friendly','visa_notes'];
+
+    function openModal(opp=null) {
+      _editId = opp?.id || null;
+      document.getElementById('modal-title').textContent = opp ? 'Edit Opportunity' : 'Add Opportunity';
+      document.getElementById('ai-box').style.display = opp ? 'none' : '';
+      document.getElementById('ai-paste').value = '';
+      document.getElementById('ai-url').value = '';
+      document.getElementById('ai-status').textContent = '';
+      _lastAiExtracted = null;
+      MODAL_FIELDS.forEach(f => { document.getElementById('f-'+f).value = opp?.[f] || ''; });
+      document.getElementById('modal').classList.add('open');
+    }
+    function closeModal() { document.getElementById('modal').classList.remove('open'); _editId = null; }
+
+    document.getElementById('add-btn').addEventListener('click', () => openModal());
+    document.getElementById('modal-cancel').addEventListener('click', closeModal);
+    document.getElementById('modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
+    document.getElementById('more-toggle').addEventListener('click', () => {
+      const el = document.getElementById('more-fields');
+      const open = el.classList.toggle('open');
+      document.getElementById('more-toggle').textContent = open ? '− Fewer Details' : '+ More Details';
+    });
+
+    document.getElementById('modal-save').addEventListener('click', async () => {
+      const company = document.getElementById('f-company').value.trim();
+      const title = document.getElementById('f-job_title').value.trim();
+      if (!company || !title) { toast('Company and Job Title are required', 'err'); return; }
+      const payload = {};
+      MODAL_FIELDS.forEach(f => {
+        const el = document.getElementById('f-'+f);
+        payload[f] = el.value.trim() || null;
+      });
+      payload.company = company;
+      payload.job_title = title;
+
+      let error;
+      if (_editId) {
+        ({ error } = await sb.from('job_opportunities').update(payload).eq('id', _editId));
+      } else {
+        if (_lastAiExtracted) payload.ai_extracted = _lastAiExtracted;
+        const { data, error: insErr } = await sb.from('job_opportunities').insert([payload]).select().single();
+        error = insErr;
+        if (!error) {
+          await sb.from('job_activities').insert([{ opportunity_id: data.id, activity_type: 'Other', activity_date: localDateStr(), summary: 'Opportunity created' }]);
+        }
+      }
+      if (error) { toast(error.message, 'err'); return; }
+      toast(_editId ? 'Opportunity updated' : 'Opportunity added');
+      closeModal();
+      load();
+    });
+
+    window.editOpp = (id) => openModal(_all.find(r => r.id === id));
+    window.deleteOpp = async (id) => {
+      if (!confirm('Delete this opportunity? This cannot be undone — consider marking it Closed instead if you want to keep it in historical analytics.')) return;
+      const { error } = await sb.from('job_opportunities').delete().eq('id', id);
+      if (error) { toast(error.message, 'err'); return; }
+      toast('Deleted');
+      load();
+    };
+
+    /* ── AI Import ── */
+    document.getElementById('ai-extract-btn').addEventListener('click', async () => {
+      const jd = document.getElementById('ai-paste').value.trim();
+      if (!jd) { toast('Paste a job description first', 'err'); return; }
+      const statusEl = document.getElementById('ai-status');
+      statusEl.textContent = 'Extracting...';
+      const cfg = await loadAiCfg(sb);
+      if (cfg.provider === 'openai' && !cfg.key) {
+        statusEl.textContent = 'API key needed — configure it on the Home page AI settings.';
+        return;
+      }
+      const shape = `{"company":string,"job_title":string,"career_track":"A"|"B"|"C"|"X"|null,"role_family":string|null,"employment_type":"Werkstudent"|"Internship"|"Part-Time"|"Full-Time"|"Graduate Programme"|"Temporary"|"Freelance"|"Other"|null,"location":string|null,"country":string|null,"work_mode":"remote"|"hybrid"|"onsite"|null,"application_deadline":"YYYY-MM-DD"|null,"german_requirement":"None"|"Preferred"|"A1"|"A2"|"B1"|"B2"|"C1"|"Fluent"|"Native"|null,"english_requirement":string|null,"working_hours":string|null,"international_candidate_friendly":"Yes"|"No"|"Unclear"|null}`;
+      const messages = [
+        { role: 'system', content: `You extract structured fields from a pasted job vacancy for a job-search tracker. Return ONLY a single JSON object matching exactly this shape (no markdown, no commentary): ${shape}. Use null for anything not explicitly stated in the text — never guess or invent a value. career_track is your best-effort classification: A=Business Development/Commercial/Sales, B=Business/Commercial/Data Analytics, C=Operations/Supply Chain/Procurement/Logistics, X=anything else (Strategy/PMO/other). If genuinely unclear, use null.` },
+        { role: 'user', content: jd },
+      ];
+      try {
+        const reply = await chatComplete(cfg, messages, { json: true });
+        const parsed = JSON.parse(reply);
+        _lastAiExtracted = parsed;
+        Object.keys(parsed).forEach(k => {
+          const el = document.getElementById('f-'+k);
+          if (el && parsed[k]) el.value = parsed[k];
+        });
+        document.getElementById('f-job_description').value = jd;
+        const url = document.getElementById('ai-url').value.trim();
+        if (url) document.getElementById('f-job_url').value = url;
+        statusEl.textContent = '✓ Extracted — review the fields below before saving.';
+      } catch (e) {
+        statusEl.textContent = 'Could not parse AI response — ' + formatAiError(cfg, e).replace(/\*\*/g,'').split('\n')[0] + ' You can still fill in fields manually.';
+      }
+    });
+
+    applyFiltersFromURL();
+    if (new URLSearchParams(location.search).get('new') === '1') openModal();
+    load();
+    injectRealtimeStyles();
+    subscribeRealtime(sb, 'job-opportunities-live', ['job_opportunities'], load, { indicatorId: 'rt-indicator' });
+  </script>
+</body>
+</html>

@@ -41,8 +41,12 @@ export async function saveAiCfg(supabase, cfg, { force = false } = {}) {
 
 /* Sends `messages` ([{role,content}]) to whichever provider `cfg` names,
    returns the assistant's reply text, or throws with a raw Error whose
-   .message is provider-specific (see formatAiError for a friendly version). */
-export async function chatComplete(cfg, messages) {
+   .message is provider-specific (see formatAiError for a friendly version).
+   Pass { json: true } to request JSON-object output on OpenAI-compatible
+   providers (Groq supports response_format; Ollama support varies by model
+   so json is ignored there) — callers still JSON.parse defensively, this
+   only improves the odds the model returns clean JSON in the first place. */
+export async function chatComplete(cfg, messages, { json = false } = {}) {
   if (cfg.provider === 'ollama') {
     const r = await fetch(`${cfg.url}/api/chat`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -57,7 +61,7 @@ export async function chatComplete(cfg, messages) {
   const r = await fetch(`${cfg.url}/v1/chat/completions`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${cfg.key}` },
-    body: JSON.stringify({ model: cfg.model, messages }),
+    body: JSON.stringify({ model: cfg.model, messages, ...(json ? { response_format: { type: 'json_object' } } : {}) }),
   });
   if (!r.ok) {
     const hint = r.status === 401 ? 'Invalid API key — check it was pasted correctly and saved.'

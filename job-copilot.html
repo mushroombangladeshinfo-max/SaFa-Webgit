@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Copilot — SaFa Naturals</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>html.auth-checking *:not(style){visibility:hidden!important;}</style>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;}
+    html{font-size:15px;}
+    :root{--bg:#060d09;--bg2:#0d1f12;--bg3:#122018;--border:rgba(255,255,255,.07);--c:#f5efe6;--cm:rgba(245,239,230,.6);--cl:rgba(245,239,230,.35);--al:#c49a3c;--green:#5fcf80;--red:#e05a2b;}
+    body{font-family:'DM Sans','Hind Siliguri',sans-serif;background:var(--bg);color:var(--c);min-height:100vh;margin:0;-webkit-font-smoothing:antialiased;}
+    .page{max-width:820px;margin:0 auto;padding:28px 24px 32px;height:calc(100vh - 56px);display:flex;flex-direction:column;}
+    .page-header{margin-bottom:16px;}
+    .page-title{font-family:'Syne','Hind Siliguri',sans-serif;font-size:22px;font-weight:700;color:var(--c);margin:0 0 4px;}
+    .page-sub{font-size:13px;color:var(--cl);}
+    .quick-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+    .quick-btn{font-family:'DM Sans',sans-serif;font-size:12px;padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:rgba(196,154,60,.06);color:var(--al);cursor:pointer;}
+    .quick-btn:hover{background:rgba(196,154,60,.12);}
+    .chat-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:0;}
+    .chat-messages{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;}
+    .ai-msg{max-width:85%;padding:10px 14px;border-radius:12px;font-size:13.5px;line-height:1.6;white-space:pre-wrap;}
+    .ai-msg-user{align-self:flex-end;background:var(--al);color:var(--bg);border-bottom-right-radius:3px;}
+    .ai-msg-assistant{align-self:flex-start;background:var(--bg3);color:var(--cm);border:1px solid var(--border);border-bottom-left-radius:3px;}
+    .ai-msg-assistant strong{color:var(--c);}
+    .ai-msg-error{align-self:flex-start;background:rgba(224,90,43,.1);color:var(--red);border:1px solid rgba(224,90,43,.25);font-size:12.5px;}
+    .ai-empty{text-align:center;padding:40px 14px;color:var(--cl);font-size:13px;}
+    .ai-typing{display:flex;gap:4px;padding:0 16px 10px;flex-shrink:0;}
+    .ai-typing.hidden{display:none;}
+    .ai-typing span{width:6px;height:6px;border-radius:50%;background:var(--cl);animation:aiBounce 1.2s infinite;}
+    .ai-typing span:nth-child(2){animation-delay:.2s;} .ai-typing span:nth-child(3){animation-delay:.4s;}
+    @keyframes aiBounce{0%,60%,100%{transform:translateY(0);opacity:.4;}30%{transform:translateY(-4px);opacity:1;}}
+    .chat-input-row{display:flex;gap:8px;padding:12px 14px;border-top:1px solid var(--border);flex-shrink:0;}
+    .chat-input-row textarea{flex:1;resize:none;background:var(--bg3);border:1px solid var(--border);color:var(--c);border-radius:8px;padding:9px 12px;font-size:13.5px;font-family:inherit;max-height:100px;outline:none;}
+    .chat-input-row textarea:focus{border-color:rgba(196,154,60,.4);}
+    .chat-send{background:var(--al);color:var(--bg);border:none;width:38px;height:38px;border-radius:8px;cursor:pointer;flex-shrink:0;font-size:16px;font-family:'Syne',sans-serif;font-weight:700;}
+    .chat-send:disabled{opacity:.5;cursor:not-allowed;}
+  </style>
+</head>
+<body>
+
+  <div class="page">
+    <div class="page-header">
+      <div class="page-title">AI <span style="color:var(--al)">Copilot</span></div>
+      <div class="page-sub">Ask about your pipeline, priorities, or any opportunity — grounded in your actual tracker data.</div>
+    </div>
+    <div class="quick-row">
+      <button class="quick-btn" data-q="What should I do today?">What should I do today?</button>
+      <button class="quick-btn" data-q="Which jobs should I prioritize right now?">Which jobs should I prioritize?</button>
+      <button class="quick-btn" data-q="Analyse my pipeline — where is it working, and where is it weak?">Analyse my pipeline</button>
+    </div>
+    <div class="chat-card">
+      <div class="chat-messages" id="chat-messages"></div>
+      <div class="ai-typing hidden" id="ai-typing"><span></span><span></span><span></span></div>
+      <div class="chat-input-row">
+        <textarea id="chat-input" rows="1" placeholder="Ask anything about your job search..."></textarea>
+        <button class="chat-send" id="chat-send">↑</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+    import { requireAdmin }  from '/src/admin-auth.js';
+    import { mountAdminNav } from '/src/admin-nav.js';
+    import { loadAiCfg, chatComplete, formatAiError, renderAiText } from '/src/ai-client.js';
+    import { localDateStr } from '/src/date-utils.js';
+    import { computeFitScore, computePriority, followUpStatus } from '/src/job-scoring.js';
+
+    document.documentElement.classList.add('auth-checking');
+    const sb = createClient(
+      import.meta.env.VITE_SUPABASE_URL,
+      import.meta.env.VITE_SUPABASE_ANON_KEY
+    );
+    const session = await requireAdmin(sb);
+    if (!session) { window.location.href = 'orders.html'; }
+    document.documentElement.classList.remove('auth-checking');
+    mountAdminNav({ page: 'job-copilot', supabase: sb, email: session.user.email });
+
+    let messages = JSON.parse(sessionStorage.getItem('jobCopilotHistory') || '[]');
+
+    function persist() { sessionStorage.setItem('jobCopilotHistory', JSON.stringify(messages)); }
+    function renderMessages() {
+      const el = document.getElementById('chat-messages');
+      el.innerHTML = messages.length
+        ? messages.map(m => `<div class="ai-msg ai-msg-${m.role}">${renderAiText(m.content)}</div>`).join('')
+        : `<div class="ai-empty">Ask about today's priorities, a specific opportunity, or your overall pipeline — answers are grounded in your real tracker data, never invented.</div>`;
+      el.scrollTop = el.scrollHeight;
+    }
+    function renderError(text) {
+      const el = document.getElementById('chat-messages');
+      el.insertAdjacentHTML('beforeend', `<div class="ai-msg ai-msg-error">${renderAiText(text)}</div>`);
+      el.scrollTop = el.scrollHeight;
+    }
+
+    /* Small, current snapshot of the tracker — same context-stuffing pattern
+       as home.html's SaFa Assistant, scoped to job-search data. */
+    async function buildSnapshot() {
+      const [{ data: opps }, { data: interviews }, { data: profile }] = await Promise.all([
+        sb.from('job_opportunities').select('*').eq('closed', false),
+        sb.from('job_interviews').select('*, job_opportunities(company,job_title)').eq('status', 'scheduled'),
+        sb.from('job_career_profile').select('target_roles,target_locations,career_preferences').eq('id', true).maybeSingle(),
+      ]);
+      const today = localDateStr();
+      const opportunities = (opps||[]).map(o => ({
+        company: o.company, title: o.job_title, stage: o.stage,
+        fit: computeFitScore(o.fit_manual, o.fit_ai), priority: computePriority(o).label,
+        applied: o.applied, deadline: o.application_deadline,
+        next_action: o.next_action, next_action_date: o.next_action_date,
+        follow_up_status: followUpStatus(o.next_action_date),
+      }));
+      const upcomingInterviews = (interviews||[]).map(iv => ({
+        company: iv.job_opportunities?.company, title: iv.job_opportunities?.job_title,
+        round: iv.round, type: iv.interview_type, date: iv.interview_date,
+      }));
+      return { today, career_preferences: profile || null, active_opportunities: opportunities, upcoming_interviews: upcomingInterviews };
+    }
+
+    function systemPrompt(snap) {
+      return `You are a personal AI copilot for a job search tracker (a "Job Search Command Center"). You help the user decide what to do next to increase their chances of getting a job.
+
+Live snapshot (JSON) of their current tracker data:
+${JSON.stringify(snap)}
+
+Rules: use ONLY the data given above — never invent a job, contact, deadline, or fact not present in the snapshot. If something isn't in the snapshot, say so plainly rather than guessing. Distinguish facts (directly in the data) from your own recommendations. Keep answers concrete and specific — name real companies/jobs from the snapshot when relevant. Be direct and conversational, not a formal report.`;
+    }
+
+    async function send(text) {
+      text = text.trim();
+      if (!text) return;
+      const cfg = await loadAiCfg(sb);
+      messages.push({ role: 'user', content: text });
+      renderMessages();
+      persist();
+
+      if (cfg.provider === 'openai' && !cfg.key) {
+        renderError('**API key needed.** Configure a Groq key on the Home page AI settings first.');
+        return;
+      }
+
+      document.getElementById('ai-typing').classList.remove('hidden');
+      document.getElementById('chat-send').disabled = true;
+      try {
+        const snap = await buildSnapshot();
+        const payload = [{ role: 'system', content: systemPrompt(snap) }, ...messages];
+        const reply = await chatComplete(cfg, payload);
+        messages.push({ role: 'assistant', content: reply });
+        renderMessages();
+        persist();
+      } catch (e) {
+        renderError(formatAiError(cfg, e));
+      } finally {
+        document.getElementById('ai-typing').classList.add('hidden');
+        document.getElementById('chat-send').disabled = false;
+      }
+    }
+
+    document.getElementById('chat-send').addEventListener('click', () => {
+      const input = document.getElementById('chat-input');
+      send(input.value);
+      input.value = '';
+    });
+    document.getElementById('chat-input').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        document.getElementById('chat-send').click();
+      }
+    });
+    document.querySelectorAll('.quick-btn').forEach(b => b.addEventListener('click', () => send(b.dataset.q)));
+
+    renderMessages();
+  </script>
+</body>
+</html>

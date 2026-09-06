@@ -28,6 +28,15 @@ const FARM_LINKS = [
   { href: 'dashboard.html',      label: '📡 IoT Dashboard'  },
 ];
 
+const JOB_LINKS = [
+  { href: 'job-dashboard.html',    label: '🎯 Dashboard'    },
+  { href: 'job-opportunities.html', label: '💼 Opportunities' },
+  { href: 'job-contacts.html',     label: '🗂 Contacts'      },
+  { href: 'job-interviews.html',   label: '🎤 Interviews'    },
+  { href: 'job-copilot.html',      label: '✦ AI Copilot'    },
+  { href: 'job-settings.html',     label: '⚙ Career Profile' },
+];
+
 /* Searchable via Cmd+K palette — every backend destination in one place,
    with keyword aliases so e.g. "sales" finds Orders. */
 const SEARCH_INDEX = [
@@ -43,6 +52,12 @@ const SEARCH_INDEX = [
   { href: 'spawn-lab.html',      label: 'Spawn Lab',      icon: '🧫', hint: 'In-house culture & grain spawn production', keywords: 'spawn lab culture agar petri liquid grain inoculation production' },
   { href: 'farm-analytics.html', label: 'Farm Analytics',  icon: '📈', hint: 'Growth & yield charts',    keywords: 'farm analytics yield growth charts' },
   { href: 'dashboard.html',      label: 'IoT Dashboard',  icon: '📡', hint: 'Simulated sensor preview', keywords: 'iot dashboard sensors demo' },
+  { href: 'job-dashboard.html',     label: 'Job Dashboard',   icon: '🎯', hint: 'Job search command center', keywords: 'job search dashboard priorities pipeline funnel' },
+  { href: 'job-opportunities.html', label: 'Opportunities',   icon: '💼', hint: 'Job applications tracker', keywords: 'job opportunities applications kanban ats fit score' },
+  { href: 'job-contacts.html',      label: 'Job Contacts',    icon: '🗂', hint: 'Networking CRM',           keywords: 'job contacts networking recruiter referral' },
+  { href: 'job-interviews.html',    label: 'Interviews',      icon: '🎤', hint: 'Interview prep & tracking', keywords: 'job interviews prep questions star' },
+  { href: 'job-copilot.html',       label: 'AI Copilot',      icon: '✦', hint: 'Job search AI assistant',  keywords: 'job ai copilot assistant chat' },
+  { href: 'job-settings.html',      label: 'Career Profile',  icon: '⚙', hint: 'Background used by AI',    keywords: 'job career profile settings resume cv' },
 ];
 
 function injectStyles() {
@@ -149,6 +164,10 @@ export function mountAdminNav({ page, supabase, email, lastLogin }) {
     `<a href="${l.href}">${l.label}</a>`
   ).join('');
 
+  const jobLinksHTML = JOB_LINKS.map(l =>
+    `<a href="${l.href}">${l.label}</a>`
+  ).join('');
+
   const html = `
     <header class="an" role="banner">
       <a href="home.html" class="an-logo">
@@ -167,6 +186,15 @@ export function mountAdminNav({ page, supabase, email, lastLogin }) {
           </button>
           <div class="an-drop-menu" id="an-farm-menu" role="menu">
             ${farmLinksHTML}
+          </div>
+        </div>
+        <div class="an-drop">
+          <button type="button" class="an-drop-trigger" id="an-jobs-btn" aria-haspopup="true" aria-expanded="false">
+            <span class="an-link-icon">💼</span>Jobs
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="an-drop-menu" id="an-jobs-menu" role="menu">
+            ${jobLinksHTML}
           </div>
         </div>
       </nav>
@@ -202,6 +230,9 @@ export function mountAdminNav({ page, supabase, email, lastLogin }) {
       <div style="font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(245,239,230,.2);padding:4px 16px;">Farm Tools</div>
       ${FARM_LINKS.map(l => `<a href="${l.href}" class="an-link" style="letter-spacing:0;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:400;text-transform:none;">${l.label}</a>`).join('')}
       <div style="height:1px;background:rgba(255,255,255,.06);margin:8px 0;"></div>
+      <div style="font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(245,239,230,.2);padding:4px 16px;">Job Search</div>
+      ${JOB_LINKS.map(l => `<a href="${l.href}" class="an-link" style="letter-spacing:0;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:400;text-transform:none;">${l.label}</a>`).join('')}
+      <div style="height:1px;background:rgba(255,255,255,.06);margin:8px 0;"></div>
       <button type="button" class="an-link" id="an-logout-mobile" style="color:rgba(245,239,230,.4);">Log Out</button>
     </div>
     <!-- Command palette -->
@@ -221,7 +252,7 @@ export function mountAdminNav({ page, supabase, email, lastLogin }) {
   wrap.innerHTML = html;
   document.body.prepend(...wrap.children);
 
-  /* ── Farm dropdown ── */
+  /* ── Farm / Jobs dropdowns ── */
   const farmBtn  = document.getElementById('an-farm-btn');
   const farmMenu = document.getElementById('an-farm-menu');
   farmBtn?.addEventListener('click', (e) => {
@@ -229,11 +260,26 @@ export function mountAdminNav({ page, supabase, email, lastLogin }) {
     const open = farmMenu.classList.toggle('open');
     farmBtn.classList.toggle('open', open);
     farmBtn.setAttribute('aria-expanded', open);
+    jobsMenu?.classList.remove('open');
+    jobsBtn?.classList.remove('open');
+  });
+  const jobsBtn  = document.getElementById('an-jobs-btn');
+  const jobsMenu = document.getElementById('an-jobs-menu');
+  jobsBtn?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const open = jobsMenu.classList.toggle('open');
+    jobsBtn.classList.toggle('open', open);
+    jobsBtn.setAttribute('aria-expanded', open);
+    farmMenu?.classList.remove('open');
+    farmBtn?.classList.remove('open');
   });
   document.addEventListener('click', () => {
     farmMenu?.classList.remove('open');
     farmBtn?.classList.remove('open');
     farmBtn?.setAttribute('aria-expanded', 'false');
+    jobsMenu?.classList.remove('open');
+    jobsBtn?.classList.remove('open');
+    jobsBtn?.setAttribute('aria-expanded', 'false');
   });
 
   /* ── Mobile hamburger ── */

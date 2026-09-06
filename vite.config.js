@@ -23,6 +23,13 @@ export default defineConfig({
         insights:      './insights.html',
         harvestLog:    './harvest-log.html',
         spawnLab:      './spawn-lab.html',
+        jobDashboard:     './job-dashboard.html',
+        jobOpportunities: './job-opportunities.html',
+        jobOpportunity:   './job-opportunity.html',
+        jobContacts:      './job-contacts.html',
+        jobInterviews:    './job-interviews.html',
+        jobCopilot:       './job-copilot.html',
+        jobSettings:      './job-settings.html',
       }
     }
   }
