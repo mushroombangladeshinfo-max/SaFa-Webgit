@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Skills Intelligence — SaFa Naturals</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>html.auth-checking *:not(style){visibility:hidden!important;}</style>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;}
+    html{font-size:15px;}
+    :root{--bg:#060d09;--bg2:#0d1f12;--bg3:#122018;--border:rgba(255,255,255,.07);--c:#f5efe6;--cm:rgba(245,239,230,.6);--cl:rgba(245,239,230,.35);--al:#c49a3c;--green:#5fcf80;--red:#e05a2b;}
+    body{font-family:'DM Sans','Hind Siliguri',sans-serif;background:var(--bg);color:var(--c);min-height:100vh;margin:0;-webkit-font-smoothing:antialiased;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+    .page{max-width:1200px;margin:0 auto;padding:28px 24px 64px;}
+    .page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;}
+    .page-title{font-family:'Syne','Hind Siliguri',sans-serif;font-size:22px;font-weight:700;color:var(--c);margin:0 0 4px;}
+    .page-sub{font-size:13px;color:var(--cl);}
+    .top-actions{display:flex;gap:8px;}
+    .btn{font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:9px 16px;border-radius:6px;border:1px solid var(--border);background:rgba(255,255,255,.04);color:var(--cl);cursor:pointer;}
+    .btn:hover{color:var(--c);background:rgba(255,255,255,.08);}
+    .btn.primary{background:rgba(196,154,60,.12);border-color:rgba(196,154,60,.3);color:var(--al);}
+    .btn.primary:hover{background:rgba(196,154,60,.2);}
+    .btn.sm{padding:6px 10px;font-size:8px;}
+    .table-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:18px;}
+    .table-toolbar{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);}
+    .table-title{font-family:'Syne','Hind Siliguri',sans-serif;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--cl);}
+    .scroll-x{overflow-x:auto;}
+    table{width:100%;border-collapse:collapse;}
+    th{font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--cl);padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap;}
+    td{padding:12px 14px;font-size:14px;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:middle;}
+    tr:last-child td{border-bottom:none;}
+    tr:hover td{background:rgba(255,255,255,.02);}
+    .empty-state{text-align:center;padding:48px 20px;color:var(--cl);}
+    .empty-icon{font-size:32px;margin-bottom:10px;}
+    .pill{display:inline-flex;padding:3px 9px;border-radius:20px;font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;}
+    .gap-high{background:rgba(224,90,43,.12);color:var(--red);}
+    .gap-medium{background:rgba(196,154,60,.12);color:var(--al);}
+    .gap-low{background:rgba(95,207,128,.12);color:var(--green);}
+    .mention-count{font-family:'DM Mono',monospace;}
+
+    .suggest-box{background:rgba(196,154,60,.06);border:1px solid rgba(196,154,60,.2);border-radius:10px;padding:16px;margin-bottom:18px;display:none;}
+    .suggest-box.open{display:block;}
+    .suggest-item{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05);}
+    .suggest-item:last-child{border-bottom:none;}
+    .suggest-item-main strong{font-size:13px;}
+    .suggest-item-main div{font-size:12px;color:var(--cl);margin-top:2px;}
+
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:500;padding:20px;}
+    .modal-overlay.open{display:flex;animation:fadeUp .2s ease;}
+    .modal{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:28px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;}
+    .modal-title{font-family:'Syne','Hind Siliguri',sans-serif;font-size:15px;font-weight:700;color:var(--c);margin-bottom:20px;}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+    @media(max-width:520px){.form-grid{grid-template-columns:1fr;}}
+    .form-group{display:flex;flex-direction:column;gap:6px;}
+    .form-group.span2{grid-column:span 2;}
+    label{font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--cl);}
+    input,select,textarea{background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--c);font-family:'DM Sans','Hind Siliguri',sans-serif;font-size:14px;padding:9px 12px;outline:none;width:100%;}
+    input:focus,select:focus,textarea:focus{border-color:rgba(196,154,60,.5);}
+    .modal-actions{display:flex;gap:10px;margin-top:20px;justify-content:flex-end;}
+    .toast-wrap{position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;gap:8px;}
+    .toast{padding:12px 18px;border-radius:8px;font-family:'Syne','Hind Siliguri',sans-serif;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;animation:fadeUp .3s ease;}
+    .toast.ok{background:#1a3322;border:1px solid rgba(95,207,128,.3);color:var(--green);}
+    .toast.err{background:#2a1510;border:1px solid rgba(224,90,43,.3);color:var(--red);}
+  </style>
+  <script type="module" crossorigin src="/assets/jobSkills-DaKF3YbS.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="/assets/admin-auth-4ZiUUGs_.js">
+  <link rel="modulepreload" crossorigin href="/assets/admin-nav-DwveRXqR.js">
+  <link rel="modulepreload" crossorigin href="/assets/ai-client-Ym7whptS.js">
+  <link rel="modulepreload" crossorigin href="/assets/realtime-D7K--cdb.js">
+  <link rel="modulepreload" crossorigin href="/assets/job-constants-CRXIg69m.js">
+  <link rel="modulepreload" crossorigin href="/assets/date-utils-D3sh9T8I.js">
+  <link rel="modulepreload" crossorigin href="/assets/job-scoring-t91_muSC.js">
+</head>
+<body>
+
+  <div class="page">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Skills <span style="color:var(--al)">Intelligence</span></div>
+        <div class="page-sub">Which skill investment would unlock the largest number of realistic opportunities?</div>
+      </div>
+      <span class="rt-indicator" id="rt-indicator"><span class="rt-dot"></span>Live</span>
+      <div class="top-actions">
+        <button class="btn" id="suggest-btn">✦ Suggest Skills with AI</button>
+        <button class="btn primary" id="add-btn">+ Add Skill</button>
+      </div>
+    </div>
+
+    <div class="suggest-box" id="suggest-box">
+      <div style="font-family:'Syne',sans-serif;font-size:11px;font-weight:700;color:var(--al);margin-bottom:8px;">✦ Suggested Skills — grounded only in skills explicitly named in your stored job descriptions</div>
+      <div id="suggest-list"></div>
+      <div style="margin-top:10px;"><button class="btn sm" id="suggest-close-btn">Close</button></div>
+    </div>
+
+    <div class="table-card">
+      <div class="table-toolbar"><span class="table-title">Tracked Skills</span><span class="count-label" id="skill-count" style="font-size:13px;color:var(--cl);"></span></div>
+      <div class="scroll-x">
+        <table>
+          <thead><tr><th>Skill</th><th>Category</th><th>My Level</th><th>Job Mentions</th><th>High-Fit Mentions</th><th>Gap</th><th></th></tr></thead>
+          <tbody id="tbody"><tr><td colspan="7"><div class="empty-state"><div class="empty-icon">⏳</div>Loading...</div></td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add/Edit Skill modal -->
+  <div class="modal-overlay" id="modal">
+    <div class="modal">
+      <div class="modal-title" id="modal-title">Add Skill</div>
+      <div class="form-grid">
+        <div class="form-group span2"><label>Skill *</label><input type="text" id="f-skill"></div>
+        <div class="form-group"><label>Category</label><select id="f-category"></select></div>
+        <div class="form-group"><label>My Level</label><select id="f-my_level"></select></div>
+        <div class="form-group span2"><label>Evidence</label><textarea id="f-evidence" rows="2" placeholder="Where does this show up in your background?"></textarea></div>
+        <div class="form-group span2"><label>Notes / Suggested Action</label><textarea id="f-notes" rows="2"></textarea></div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn" id="modal-cancel">Cancel</button>
+        <button class="btn primary" id="modal-save">Save Skill</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-wrap" id="toast-wrap"></div>
+
+</body>
+</html>

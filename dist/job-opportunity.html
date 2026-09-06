@@ -104,14 +104,14 @@
     .toast.ok{background:#1a3322;border:1px solid rgba(95,207,128,.3);color:var(--green);}
     .toast.err{background:#2a1510;border:1px solid rgba(224,90,43,.3);color:var(--red);}
   </style>
-  <script type="module" crossorigin src="/assets/jobOpportunity-DhsGGVCE.js"></script>
+  <script type="module" crossorigin src="/assets/jobOpportunity-SBe_kvO_.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
   <link rel="modulepreload" crossorigin href="/assets/admin-auth-4ZiUUGs_.js">
-  <link rel="modulepreload" crossorigin href="/assets/admin-nav-Bdcu9bMl.js">
+  <link rel="modulepreload" crossorigin href="/assets/admin-nav-DwveRXqR.js">
   <link rel="modulepreload" crossorigin href="/assets/ai-client-Ym7whptS.js">
   <link rel="modulepreload" crossorigin href="/assets/date-utils-D3sh9T8I.js">
   <link rel="modulepreload" crossorigin href="/assets/job-scoring-t91_muSC.js">
-  <link rel="modulepreload" crossorigin href="/assets/job-constants-CgQ_aIyb.js">
+  <link rel="modulepreload" crossorigin href="/assets/job-constants-CRXIg69m.js">
 </head>
 <body>
 
@@ -153,6 +153,10 @@
         <div class="card-title">Notes</div>
         <textarea id="f-notes" rows="4" placeholder="Freeform notes — AI never overwrites this."></textarea>
         <div style="margin-top:10px;"><button class="btn sm" id="save-notes-btn">Save Notes</button></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Stage History</div>
+        <div id="stage-history-list"></div>
       </div>
     </div>
 
@@ -340,6 +344,9 @@
       <div class="modal-title">Mark Closed</div>
       <div class="form-grid">
         <div class="form-group"><label class="f">Closed Date</label><input type="date" id="cl-closed_date"></div>
+        <div class="form-group"><label class="f">Closed Outcome</label>
+          <select id="cl-closed_outcome"><option value="">Select...</option></select>
+        </div>
         <div class="form-group"><label class="f">Known Reason</label>
           <select id="cl-known_reason"><option value="">Select...</option></select>
         </div>
