@@ -41,6 +41,15 @@
     .pill-scheduled{background:rgba(80,200,255,.1);color:var(--blue);}
     .pill-completed{background:rgba(95,207,128,.12);color:var(--green);}
     .pill-cancelled{background:rgba(255,255,255,.05);color:var(--cl);}
+    #f-preparation_status{border-radius:20px;font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:6px 12px;border:1px solid var(--border);background:var(--bg2);color:var(--cl);cursor:pointer;}
+    #f-preparation_status.prep-in_progress{background:rgba(196,154,60,.12);color:var(--al);border-color:rgba(196,154,60,.3);}
+    #f-preparation_status.prep-ready{background:rgba(95,207,128,.12);color:var(--green);border-color:rgba(95,207,128,.3);}
+    .accordion{border:1px solid var(--border);border-radius:8px;margin-bottom:8px;overflow:hidden;}
+    .accordion summary{padding:10px 12px;cursor:pointer;font-size:13px;list-style:none;display:flex;gap:10px;align-items:center;}
+    .accordion summary::-webkit-details-marker{display:none;}
+    .accordion summary .q-cat{font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--al);background:rgba(196,154,60,.1);padding:2px 7px;border-radius:4px;flex-shrink:0;}
+    .accordion-body{padding:0 12px 12px;font-size:12.5px;color:var(--cm);line-height:1.6;}
+    .accordion-body p{margin:4px 0;}
     .row-link{color:inherit;text-decoration:none;}
     .row-link:hover .iv-company{color:var(--al);}
 
@@ -107,7 +116,10 @@
           <div class="page-title" id="dv-title">—</div>
           <div class="page-sub" id="dv-sub"></div>
         </div>
-        <button class="btn primary" id="ai-prep-btn">✦ Prepare Interview with AI</button>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <select id="f-preparation_status" aria-label="Preparation status"></select>
+          <button class="btn primary" id="ai-prep-btn">✦ Prepare Interview with AI</button>
+        </div>
       </div>
 
       <div class="card">
@@ -195,7 +207,7 @@
     import { localDateStr } from '/src/date-utils.js';
     import { subscribeRealtime, injectRealtimeStyles } from '/src/realtime.js';
     import { escapeHtml } from '/src/html-utils.js';
-    import { INTERVIEW_TYPES, QUESTION_TAGS, optionsHtml } from '/src/job-constants.js';
+    import { INTERVIEW_TYPES, QUESTION_TAGS, PREPARATION_STATUSES, optionsHtml, valueLabelOptionsHtml } from '/src/job-constants.js';
 
     document.documentElement.classList.add('auth-checking');
     const sb = createClient(
@@ -210,6 +222,7 @@
     document.getElementById('f-interview_type').innerHTML += optionsHtml(INTERVIEW_TYPES);
     document.getElementById('q-tag').innerHTML += optionsHtml(QUESTION_TAGS);
     document.getElementById('m-interview_type').innerHTML += optionsHtml(INTERVIEW_TYPES);
+    document.getElementById('f-preparation_status').innerHTML = valueLabelOptionsHtml(PREPARATION_STATUSES);
 
     function toast(msg, type='ok') {
       const el = document.createElement('div');
@@ -291,9 +304,22 @@
       PREP_FIELDS.forEach(f => { document.getElementById('f-'+f).value = iv[f] || ''; });
       document.getElementById('f-post_interview_reflection').value = iv.post_interview_reflection || '';
       document.getElementById('f-outcome').value = iv.outcome || '';
+      setPrepStatusUI(iv.preparation_status || 'not_started');
       renderSelfAssessment();
       loadQuestions();
     }
+
+    function setPrepStatusUI(status) {
+      const sel = document.getElementById('f-preparation_status');
+      sel.value = status;
+      sel.className = status === 'not_started' ? '' : 'prep-' + status;
+    }
+    async function setPrepStatus(status) {
+      const { error } = await sb.from('job_interviews').update({ preparation_status: status }).eq('id', ivId);
+      if (error) { toast(error.message, 'err'); return; }
+      setPrepStatusUI(status);
+    }
+    document.getElementById('f-preparation_status').addEventListener('change', (e) => setPrepStatus(e.target.value));
 
     document.getElementById('save-logistics-btn').addEventListener('click', async () => {
       const payload = {};
@@ -312,6 +338,9 @@
     });
 
     /* ── AI Interview Prep ── */
+    function listOrDash(arr, render) {
+      return (arr && arr.length) ? `<ul>${arr.map(x=>`<li>${render ? render(x) : escapeHtml(x)}</li>`).join('')}</ul>` : '<div style="color:var(--cl)">None.</div>';
+    }
     document.getElementById('ai-prep-btn').addEventListener('click', async () => {
       const btn = document.getElementById('ai-prep-btn');
       btn.textContent = 'Preparing...'; btn.disabled = true;
@@ -322,32 +351,49 @@
         const profileText = ['education','work_experience','projects','skills','languages','career_narrative']
           .map(k => profile?.[k] ? `${k}: ${profile[k]}` : null).filter(Boolean).join('\n') || '(no career profile saved yet)';
         const jd = iv.job_opportunities?.job_description || '(no job description saved)';
-        const shape = `{"top_questions":[{"question":string,"why":string}],"best_experience":string,"star_stories":[string],"technical_areas":[string],"risks":[string],"questions_to_ask":[string],"intro_30s":string,"intro_60s":string,"motivation_answer":string}`;
+        const { data: priorRows } = await sb.from('job_interviews').select('round,interview_type,post_interview_reflection').eq('opportunity_id', iv.opportunity_id).neq('id', ivId).not('post_interview_reflection', 'is', null);
+        const priorText = (priorRows||[]).map(p => `${p.round||p.interview_type}: ${p.post_interview_reflection}`).join('\n') || '(none yet)';
+
+        const shape = `{"top_questions":[{"category":string,"question":string,"why":string,"best_evidence":string,"answer_structure":string,"avoid":string}],"best_experience":string,"star_stories":[{"competency":string,"evidence":string,"story_angle":string}],"technical_areas":[string],"company_research_checklist":[string],"preparation_checklist":[string],"risks":[{"risk":string,"how_to_handle":string}],"questions_to_ask":[string],"intro_30s":string,"intro_60s":string,"motivation_answer":string,"confidence_note":string}`;
         const messages = [
-          { role: 'system', content: `You prepare a candidate for a job interview. Return ONLY a single JSON object matching exactly this shape (no markdown, no commentary): ${shape}. Base every suggestion ONLY on the candidate's stated career profile and the job description below — never invent experience or credentials. "best_experience" names which specific stored experience to lead with. Keep intro_30s/intro_60s/motivation_answer in first person, ready to speak aloud.` },
-          { role: 'user', content: `CAREER PROFILE:\n${profileText}\n\nJOB DESCRIPTION (${iv.job_opportunities?.company} — ${iv.job_opportunities?.job_title}):\n${jd}\n\nINTERVIEW TYPE: ${iv.interview_type||'unspecified'}` },
+          { role: 'system', content: `You prepare a candidate for a job interview. Return ONLY a single JSON object matching exactly this shape (no markdown, no commentary): ${shape}. Base every suggestion ONLY on the candidate's stated career profile and the job description below — never invent experience or credentials. "best_experience" names which specific stored experience to lead with. For each of top_questions, "best_evidence" must point to something actually in the career profile, and "answer_structure" is a one-line approach (e.g. "STAR: situation from X project, ..."). Keep intro_30s/intro_60s/motivation_answer in first person, ready to speak aloud. confidence_note should honestly flag if the career profile or job description was too sparse to prepare well. Use any prior-round reflections given to avoid repeating stale advice and to build on what already happened.` },
+          { role: 'user', content: `CAREER PROFILE:\n${profileText}\n\nJOB DESCRIPTION (${iv.job_opportunities?.company} — ${iv.job_opportunities?.job_title}):\n${jd}\n\nINTERVIEW TYPE: ${iv.interview_type||'unspecified'}\n\nPRIOR ROUNDS FOR THIS OPPORTUNITY:\n${priorText}` },
         ];
         const reply = await chatComplete(cfg, messages, { json: true });
         const ai = JSON.parse(reply);
         const box = document.getElementById('ai-output');
         box.style.display = '';
-        const list = arr => (arr&&arr.length) ? `<ul>${arr.map(x=>`<li>${typeof x==='object'?`<b>${escapeHtml(x.question)}</b> — ${escapeHtml(x.why)}`:escapeHtml(x)}</li>`).join('')}</ul>` : '<div style="color:var(--cl)">None.</div>';
         box.innerHTML = `
-          <h4>Top Likely Questions</h4>${list(ai.top_questions)}
+          <h4>Top Likely Questions</h4>
+          ${(ai.top_questions&&ai.top_questions.length) ? ai.top_questions.map(q => `
+            <details class="accordion">
+              <summary><span class="q-cat">${escapeHtml(q.category)||'General'}</span><span>${escapeHtml(q.question)}</span></summary>
+              <div class="accordion-body">
+                <p><b>Why they may ask:</b> ${escapeHtml(q.why)}</p>
+                <p><b>Your best evidence:</b> ${escapeHtml(q.best_evidence)}</p>
+                <p><b>Answer structure:</b> ${escapeHtml(q.answer_structure)}</p>
+                <p><b>Avoid:</b> ${escapeHtml(q.avoid)}</p>
+              </div>
+            </details>`).join('') : '<div style="color:var(--cl)">None.</div>'}
           <h4>Best Experience to Lead With</h4><div>${escapeHtml(ai.best_experience)||'—'}</div>
-          <h4>STAR Stories to Prepare</h4>${list(ai.star_stories)}
-          <h4>Technical / Business Areas to Review</h4>${list(ai.technical_areas)}
-          <h4>Risks They May Probe</h4>${list(ai.risks)}
-          <h4>Questions to Ask Them</h4>${list(ai.questions_to_ask)}
+          <h4>STAR Stories to Prepare</h4>${listOrDash(ai.star_stories, s => `<b>${escapeHtml(s.competency)}:</b> ${escapeHtml(s.evidence)} — ${escapeHtml(s.story_angle)}`)}
+          <h4>Technical / Business Areas to Review</h4>${listOrDash(ai.technical_areas)}
+          <h4>Company Research Checklist</h4>${listOrDash(ai.company_research_checklist)}
+          <h4>Preparation Checklist</h4>${listOrDash(ai.preparation_checklist)}
+          <h4>Risks They May Probe</h4>${listOrDash(ai.risks, r => `<b>${escapeHtml(r.risk)}:</b> ${escapeHtml(r.how_to_handle)}`)}
+          <h4>Questions to Ask Them</h4>${listOrDash(ai.questions_to_ask)}
           <h4>30-Second Introduction</h4><div>${escapeHtml(ai.intro_30s)||'—'}</div>
           <h4>60-Second Introduction</h4><div>${escapeHtml(ai.intro_60s)||'—'}</div>
           <h4>Motivation Answer</h4><div>${escapeHtml(ai.motivation_answer)||'—'}</div>
+          ${ai.confidence_note ? `<h4>AI Confidence Note</h4><div style="font-style:italic;color:var(--cl);">${escapeHtml(ai.confidence_note)}</div>` : ''}
         `;
         // Pre-fill prep fields only if currently empty, so it never clobbers existing notes.
-        if (!document.getElementById('f-expected_questions').value) document.getElementById('f-expected_questions').value = (ai.top_questions||[]).map(q=>`${q.question} — ${q.why}`).join('\n');
-        if (!document.getElementById('f-star_stories').value) document.getElementById('f-star_stories').value = (ai.star_stories||[]).join('\n');
+        if (!document.getElementById('f-expected_questions').value) document.getElementById('f-expected_questions').value = (ai.top_questions||[]).map(q=>`[${q.category}] ${q.question} — ${q.why}`).join('\n');
+        if (!document.getElementById('f-star_stories').value) document.getElementById('f-star_stories').value = (ai.star_stories||[]).map(s=>`${s.competency}: ${s.evidence} — ${s.story_angle}`).join('\n');
         if (!document.getElementById('f-tech_prep').value) document.getElementById('f-tech_prep').value = (ai.technical_areas||[]).join('\n');
+        if (!document.getElementById('f-company_research').value) document.getElementById('f-company_research').value = (ai.company_research_checklist||[]).join('\n');
         if (!document.getElementById('f-questions_to_ask').value) document.getElementById('f-questions_to_ask').value = (ai.questions_to_ask||[]).join('\n');
+        if (iv.preparation_status === 'not_started') await setPrepStatus('in_progress');
         toast('AI prep ready — review below, then Save Prep to keep it.');
       } catch (e) {
         toast('AI prep failed: ' + e.message, 'err');

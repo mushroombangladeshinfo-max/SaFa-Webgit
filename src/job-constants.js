@@ -44,6 +44,8 @@ export const YES_NO_UNCLEAR = ['Yes','No','Unclear'];
 
 export const QUESTION_TAGS = ['Leadership','Conflict','Failure','Teamwork','Analytics','Sales','Commercial','Technical','Motivation','Company','Salary','Availability','German','Visa','Behavioural','Case','Other'];
 
+export const PREPARATION_STATUSES = [['not_started','Not Started'],['in_progress','In Progress'],['ready','Ready']];
+
 /** `<option>` list for a flat array of plain strings (value === label). */
 export function optionsHtml(list, selected = '') {
   return list.map(v => `<option ${v === selected ? 'selected' : ''}>${v}</option>`).join('');

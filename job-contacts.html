@@ -52,6 +52,7 @@
     .st-contacted,.st-responded,.st-conversation{background:rgba(80,200,255,.1);color:var(--blue);}
     .st-warm,.st-referral-requested,.st-referral-offered{background:rgba(196,154,60,.12);color:var(--al);}
     .st-referral-submitted,.st-long-term-relationship{background:rgba(95,207,128,.12);color:var(--green);}
+    .job-chip{display:inline-block;font-size:11px;color:var(--cl);background:rgba(255,255,255,.05);border-radius:4px;padding:2px 7px;margin:1px 3px 1px 0;white-space:nowrap;}
 
     .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:500;padding:20px;}
     .modal-overlay.open{display:flex;animation:fadeUp .2s ease;}
@@ -90,7 +91,7 @@
     <div class="kpi-grid">
       <div class="kpi"><div class="kpi-label">Messages Sent</div><div class="kpi-val" id="kpi-sent">—</div></div>
       <div class="kpi"><div class="kpi-label">Response Rate</div><div class="kpi-val" id="kpi-rate">—</div></div>
-      <div class="kpi"><div class="kpi-label">Conversations</div><div class="kpi-val" id="kpi-conv">—</div></div>
+      <div class="kpi"><div class="kpi-label">Responded</div><div class="kpi-val" id="kpi-conv">—</div></div>
       <div class="kpi"><div class="kpi-label">Referrals</div><div class="kpi-val" id="kpi-referrals">—</div></div>
       <div class="kpi"><div class="kpi-label">Follow-ups Due</div><div class="kpi-val" id="kpi-followups" style="color:var(--al);">—</div></div>
     </div>
@@ -108,8 +109,8 @@
       </div>
       <div class="scroll-x">
         <table>
-          <thead><tr><th>Name</th><th>Company</th><th>Type</th><th>Stage</th><th>Last Interaction</th><th>Next Follow-up</th><th></th></tr></thead>
-          <tbody id="tbody"><tr><td colspan="7"><div class="empty-state"><div class="empty-icon">⏳</div>Loading...</div></td></tr></tbody>
+          <thead><tr><th>Name</th><th>Company</th><th>Type</th><th>Stage</th><th>Related Jobs</th><th>Last Interaction</th><th>Next Follow-up</th><th></th></tr></thead>
+          <tbody id="tbody"><tr><td colspan="8"><div class="empty-state"><div class="empty-icon">⏳</div>Loading...</div></td></tr></tbody>
         </table>
       </div>
     </div>
@@ -207,27 +208,46 @@
     }
     function stageClass(s) { return 'st-' + (s||'cold').toLowerCase().replace(/\s+/g,'-'); }
 
-    let _all = [], _editId = null;
+    let _all = [], _editId = null, _relatedJobs = new Map();
 
     async function load() {
       const { data, error } = await sb.from('job_contacts').select('*').order('updated_at', { ascending: false });
       if (error) { toast(error.message, 'err'); return; }
       _all = data || [];
+      await loadRelatedJobs();
       renderTable();
       loadNetworkingKpis();
     }
 
+    // Contacts link to opportunities indirectly, via job_activities rows that
+    // carry both contact_id and opportunity_id — there's no direct join
+    // table. One batch query avoids an N+1 lookup per contact row.
+    async function loadRelatedJobs() {
+      _relatedJobs = new Map();
+      const { data } = await sb.from('job_activities').select('contact_id, job_opportunities(company)').not('contact_id', 'is', null).not('opportunity_id', 'is', null);
+      (data || []).forEach(a => {
+        if (!a.job_opportunities?.company) return;
+        const set = _relatedJobs.get(a.contact_id) || new Set();
+        set.add(a.job_opportunities.company);
+        _relatedJobs.set(a.contact_id, set);
+      });
+    }
+
+    const RESPONDED_STAGES = ['Responded','Conversation','Warm','Referral Requested','Referral Offered','Referral Submitted','Long-Term Relationship'];
     async function loadNetworkingKpis() {
-      const { data: acts } = await sb.from('job_activities').select('activity_type,outcome,contact_id').not('contact_id', 'is', null);
-      const rows = acts || [];
-      const sent = rows.filter(a => ['LinkedIn Message','Email','Networking Meeting'].includes(a.activity_type)).length;
-      const responded = rows.filter(a => (a.outcome||'').toLowerCase().includes('respond')).length;
-      const conversations = _all.filter(c => ['Conversation','Warm','Referral Requested','Referral Offered','Referral Submitted','Long-Term Relationship'].includes(c.relationship_stage)).length;
+      const { data: acts } = await sb.from('job_activities').select('activity_type,contact_id').not('contact_id', 'is', null);
+      const sent = (acts||[]).filter(a => ['LinkedIn Message','Email','Networking Meeting'].includes(a.activity_type)).length;
+      // Response rate is computed from each contact's CURRENT relationship_stage
+      // rather than parsing free-text activity outcomes — a contact who has
+      // moved past Cold/Identified has demonstrably responded, which is more
+      // robust than relying on how consistently "outcome" text was filled in.
+      const contacted = _all.filter(c => !['Cold','Identified'].includes(c.relationship_stage||'Cold')).length;
+      const responded = _all.filter(c => RESPONDED_STAGES.includes(c.relationship_stage)).length;
       const referrals = _all.filter(c => c.referral_received).length;
       const followupsDue = _all.filter(c => c.next_followup_date && c.next_followup_date <= localDateStr()).length;
       document.getElementById('kpi-sent').textContent = sent;
-      document.getElementById('kpi-rate').textContent = sent ? Math.round((responded/sent)*100)+'%' : '—';
-      document.getElementById('kpi-conv').textContent = conversations;
+      document.getElementById('kpi-rate').textContent = contacted ? Math.round((responded/contacted)*100)+'%' : '—';
+      document.getElementById('kpi-conv').textContent = responded;
       document.getElementById('kpi-referrals').textContent = referrals;
       document.getElementById('kpi-followups').textContent = followupsDue;
     }
@@ -247,7 +267,7 @@
       const rows = filtered();
       document.getElementById('contact-count').textContent = `${rows.length} contact${rows.length!==1?'s':''}`;
       if (!rows.length) {
-        document.getElementById('tbody').innerHTML = '<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">🗂</div>No contacts yet — add recruiters, hiring managers, alumni and other useful professional contacts.</div></td></tr>';
+        document.getElementById('tbody').innerHTML = '<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">🗂</div>No contacts yet — add recruiters, hiring managers, alumni and other useful professional contacts.</div></td></tr>';
         return;
       }
       document.getElementById('tbody').innerHTML = rows.map(c => `<tr>
@@ -255,6 +275,7 @@
         <td style="color:var(--cl);">${escapeHtml(c.company)||'—'}</td>
         <td style="color:var(--cl);font-size:13px;">${escapeHtml(c.contact_type)||'—'}</td>
         <td><span class="pill ${stageClass(c.relationship_stage)}">${escapeHtml(c.relationship_stage)||'Cold'}</span></td>
+        <td>${[..._relatedJobs.get(c.id)||[]].map(j=>`<span class="job-chip">${escapeHtml(j)}</span>`).join('')||'<span style="color:var(--cl);font-size:12px;">—</span>'}</td>
         <td style="color:var(--cl);font-size:13px;">${c.last_interaction||'—'}</td>
         <td style="color:var(--cl);font-size:13px;">${c.next_followup_date||'—'}</td>
         <td>

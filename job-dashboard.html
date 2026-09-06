@@ -59,6 +59,15 @@
     .top-fit-title{font-size:12px;color:var(--cl);margin-top:2px;}
     .top-fit-score{font-family:'DM Mono',monospace;font-size:18px;color:var(--al);width:34px;text-align:right;flex-shrink:0;}
 
+    .interview-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.04);text-decoration:none;color:inherit;}
+    .interview-row:last-child{border-bottom:none;}
+    .interview-date-box{width:38px;height:38px;border-radius:8px;background:var(--bg3);border:1px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;}
+    .interview-date-box strong{font-family:'DM Mono',monospace;font-size:14px;line-height:1;color:var(--c);}
+    .interview-date-box span{font-size:8px;text-transform:uppercase;color:var(--cl);letter-spacing:.04em;}
+    .interview-row-main{flex:1;min-width:0;}
+    .interview-row-company{font-weight:600;font-size:13px;}
+    .interview-row-detail{font-size:11.5px;color:var(--cl);margin-top:1px;}
+
     .stage-row{display:flex;align-items:center;gap:10px;padding:8px 0;font-size:13px;}
     .stage-row a{color:var(--c);text-decoration:none;flex:1;}
     .stage-row a:hover{color:var(--al);}
@@ -130,8 +139,16 @@
       </div>
     </div>
 
-    <div class="section-title">Priority Opportunities</div>
-    <div class="card"><div id="top-fit-list"></div></div>
+    <div class="grid2">
+      <div>
+        <div class="section-title">Priority Opportunities</div>
+        <div class="card"><div id="top-fit-list"></div></div>
+      </div>
+      <div>
+        <div class="section-title">Upcoming Interviews</div>
+        <div class="card"><div id="upcoming-interviews-list"></div></div>
+      </div>
+    </div>
   </div>
 
   <!-- Quick Log Activity modal -->
@@ -198,6 +215,24 @@
       renderStages();
       renderChart();
       renderTopFit();
+      renderUpcomingInterviews();
+    }
+
+    function renderUpcomingInterviews() {
+      const today = localDateStr();
+      const upcoming = _interviews.filter(iv => iv.status === 'scheduled' && iv.interview_date && iv.interview_date >= today)
+        .sort((a,b) => (a.interview_date+(a.interview_time||'')).localeCompare(b.interview_date+(b.interview_time||'')))
+        .slice(0, 4);
+      document.getElementById('upcoming-interviews-list').innerHTML = upcoming.length ? upcoming.map(iv => {
+        const d = new Date(iv.interview_date+'T00:00:00');
+        return `<a class="interview-row" href="job-interviews.html?id=${iv.id}">
+          <div class="interview-date-box"><strong>${d.getDate()}</strong><span>${d.toLocaleDateString('en',{month:'short'})}</span></div>
+          <div class="interview-row-main">
+            <div class="interview-row-company">${escapeHtml(iv.job_opportunities?.company)}</div>
+            <div class="interview-row-detail">${escapeHtml(iv.round)||escapeHtml(iv.interview_type)||'Interview'}${iv.interview_time?' · '+escapeHtml(iv.interview_time):''}</div>
+          </div>
+        </a>`;
+      }).join('') : '<div class="empty-mini">No interviews scheduled yet.</div>';
     }
 
     /* Zero-cost, computed-not-AI heuristic — no API call, no latency, no
