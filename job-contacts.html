@@ -97,17 +97,8 @@
 
     <div class="toolbar">
       <input type="text" class="search-input" id="search-input" placeholder="Search name or company...">
-      <select class="filter-select" id="filter-type" aria-label="Filter by contact type">
-        <option value="">All Types</option>
-        <option>Recruiter</option><option>Hiring Manager</option><option>Employee</option><option>Alumni</option>
-        <option>Professor</option><option>Career Services</option><option>Agency Recruiter</option><option>Startup Contact</option>
-        <option>Former Colleague</option><option>Former Manager</option><option>Personal Contact</option><option>Other</option>
-      </select>
-      <select class="filter-select" id="filter-stage" aria-label="Filter by relationship stage">
-        <option value="">All Stages</option>
-        <option>Cold</option><option>Identified</option><option>Contacted</option><option>Responded</option><option>Conversation</option>
-        <option>Warm</option><option>Referral Requested</option><option>Referral Offered</option><option>Referral Submitted</option><option>Long-Term Relationship</option>
-      </select>
+      <select class="filter-select" id="filter-type" aria-label="Filter by contact type"><option value="">All Types</option></select>
+      <select class="filter-select" id="filter-stage" aria-label="Filter by relationship stage"><option value="">All Stages</option></select>
     </div>
 
     <div class="table-card">
@@ -134,14 +125,14 @@
         <div class="form-group"><label>Role / Position</label><input type="text" id="f-role_position"></div>
         <div class="form-group"><label>Department</label><input type="text" id="f-department"></div>
         <div class="form-group"><label>Contact Type</label>
-          <select id="f-contact_type"><option value="">Select...</option><option>Recruiter</option><option>Hiring Manager</option><option>Employee</option><option>Alumni</option><option>Professor</option><option>Career Services</option><option>Agency Recruiter</option><option>Startup Contact</option><option>Former Colleague</option><option>Former Manager</option><option>Personal Contact</option><option>Other</option></select>
+          <select id="f-contact_type"><option value="">Select...</option></select>
         </div>
         <div class="form-group"><label>LinkedIn URL</label><input type="url" id="f-linkedin_url"></div>
         <div class="form-group"><label>Email</label><input type="email" id="f-email"></div>
         <div class="form-group"><label>How Found</label><input type="text" id="f-how_found"></div>
         <div class="form-group"><label>Shared Institution</label><input type="text" id="f-shared_institution"></div>
         <div class="form-group"><label>Relationship Stage</label>
-          <select id="f-relationship_stage"><option>Identified</option><option>Cold</option><option>Contacted</option><option>Responded</option><option>Conversation</option><option>Warm</option><option>Referral Requested</option><option>Referral Offered</option><option>Referral Submitted</option><option>Long-Term Relationship</option></select>
+          <select id="f-relationship_stage"></select>
         </div>
         <div class="form-group"><label>First Contact Date</label><input type="date" id="f-first_contact_date"></div>
         <div class="form-group"><label>Last Interaction</label><input type="date" id="f-last_interaction"></div>
@@ -189,6 +180,8 @@
     import { loadAiCfg, chatComplete, formatAiError } from '/src/ai-client.js';
     import { localDateStr } from '/src/date-utils.js';
     import { subscribeRealtime, injectRealtimeStyles } from '/src/realtime.js';
+    import { escapeHtml } from '/src/html-utils.js';
+    import { CONTACT_TYPES, RELATIONSHIP_STAGES, optionsHtml } from '/src/job-constants.js';
 
     document.documentElement.classList.add('auth-checking');
     const sb = createClient(
@@ -199,6 +192,11 @@
     if (!session) { window.location.href = 'orders.html'; }
     document.documentElement.classList.remove('auth-checking');
     mountAdminNav({ page: 'job-contacts', supabase: sb, email: session.user.email });
+
+    document.getElementById('filter-type').innerHTML += optionsHtml(CONTACT_TYPES);
+    document.getElementById('filter-stage').innerHTML += optionsHtml(RELATIONSHIP_STAGES);
+    document.getElementById('f-contact_type').innerHTML += optionsHtml(CONTACT_TYPES);
+    document.getElementById('f-relationship_stage').innerHTML = optionsHtml(RELATIONSHIP_STAGES, 'Identified');
 
     function toast(msg, type='ok') {
       const el = document.createElement('div');
@@ -253,10 +251,10 @@
         return;
       }
       document.getElementById('tbody').innerHTML = rows.map(c => `<tr>
-        <td style="font-weight:600;">${c.full_name}</td>
-        <td style="color:var(--cl);">${c.company||'—'}</td>
-        <td style="color:var(--cl);font-size:13px;">${c.contact_type||'—'}</td>
-        <td><span class="pill ${stageClass(c.relationship_stage)}">${c.relationship_stage||'Cold'}</span></td>
+        <td style="font-weight:600;">${escapeHtml(c.full_name)}</td>
+        <td style="color:var(--cl);">${escapeHtml(c.company)||'—'}</td>
+        <td style="color:var(--cl);font-size:13px;">${escapeHtml(c.contact_type)||'—'}</td>
+        <td><span class="pill ${stageClass(c.relationship_stage)}">${escapeHtml(c.relationship_stage)||'Cold'}</span></td>
         <td style="color:var(--cl);font-size:13px;">${c.last_interaction||'—'}</td>
         <td style="color:var(--cl);font-size:13px;">${c.next_followup_date||'—'}</td>
         <td>

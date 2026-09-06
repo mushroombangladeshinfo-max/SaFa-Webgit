@@ -47,6 +47,18 @@
     .p-low{background:rgba(255,255,255,.05);color:var(--cl);}
     .empty-mini{color:var(--cl);font-size:13px;padding:16px 0;text-align:center;}
 
+    .best-move-box{display:flex;gap:12px;background:rgba(196,154,60,.07);border:1px solid rgba(196,154,60,.22);border-radius:10px;padding:14px 16px;margin-bottom:22px;align-items:flex-start;}
+    .best-move-icon{width:26px;height:26px;border-radius:8px;background:rgba(196,154,60,.14);color:var(--al);display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;font-size:13px;}
+    .best-move-label{font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--al);margin-bottom:3px;}
+    .best-move-text{font-size:13px;color:var(--cm);line-height:1.5;}
+
+    .top-fit-row{display:flex;align-items:center;gap:14px;padding:11px 0;border-bottom:1px solid rgba(255,255,255,.04);text-decoration:none;color:inherit;}
+    .top-fit-row:last-child{border-bottom:none;}
+    .top-fit-main{flex:1;min-width:0;}
+    .top-fit-company{font-weight:600;font-size:14px;}
+    .top-fit-title{font-size:12px;color:var(--cl);margin-top:2px;}
+    .top-fit-score{font-family:'DM Mono',monospace;font-size:18px;color:var(--al);width:34px;text-align:right;flex-shrink:0;}
+
     .stage-row{display:flex;align-items:center;gap:10px;padding:8px 0;font-size:13px;}
     .stage-row a{color:var(--c);text-decoration:none;flex:1;}
     .stage-row a:hover{color:var(--al);}
@@ -102,6 +114,8 @@
       <div class="kpi"><div class="kpi-label">Avg Fit Score</div><div class="kpi-val" id="kpi-fit">—</div></div>
     </div>
 
+    <div class="best-move-box" id="best-move-box"></div>
+
     <div class="section-title">Today's Priorities</div>
     <div class="card"><div id="priorities-list"></div></div>
 
@@ -115,6 +129,9 @@
         <div class="card"><canvas id="apps-chart"></canvas></div>
       </div>
     </div>
+
+    <div class="section-title">Priority Opportunities</div>
+    <div class="card"><div id="top-fit-list"></div></div>
   </div>
 
   <!-- Quick Log Activity modal -->
@@ -144,6 +161,8 @@
     import { localDateStr, daysAgoStr } from '/src/date-utils.js';
     import { subscribeRealtime, injectRealtimeStyles } from '/src/realtime.js';
     import { computeFitScore, followUpStatus } from '/src/job-scoring.js';
+    import { escapeHtml } from '/src/html-utils.js';
+    import { STAGES } from '/src/job-constants.js';
 
     document.documentElement.classList.add('auth-checking');
     const sb = createClient(
@@ -163,13 +182,6 @@
       setTimeout(()=>el.remove(), 3500);
     }
 
-    const STAGES = [
-      ['discovered','Discovered'],['evaluating','Evaluating'],['preparing','Preparing'],
-      ['ready_to_apply','Ready to Apply'],['applied','Applied'],['recruiter_screen','Recruiter Screen'],
-      ['hiring_manager','Hiring Manager'],['assessment','Assessment'],['further_interview','Further Interview'],
-      ['final_interview','Final Interview'],['offer','Offer'],['negotiation','Negotiation'],['accepted','Accepted'],
-    ];
-
     let _opps = [], _interviews = [];
 
     async function load() {
@@ -181,9 +193,52 @@
       _opps = opps || [];
       _interviews = interviews || [];
       renderKpis();
+      renderBestMove();
       renderPriorities();
       renderStages();
       renderChart();
+      renderTopFit();
+    }
+
+    /* Zero-cost, computed-not-AI heuristic — no API call, no latency, no
+       cost, always available. Complements (doesn't replace) the real AI
+       Copilot chat for anything deeper. */
+    function renderBestMove() {
+      const box = document.getElementById('best-move-box');
+      const active = _opps.filter(o => !o.closed);
+      if (!active.length) {
+        box.innerHTML = `<div class="best-move-icon">✦</div><div><div class="best-move-label">Best Next Move</div><div class="best-move-text">Add your first opportunity so priorities can start surfacing here.</div></div>`;
+        return;
+      }
+      const urgent = active.filter(o => ['Overdue','Due Today'].includes(followUpStatus(o.next_action_date)));
+      let text, href;
+      if (urgent.length) {
+        const o = [...urgent].sort((a,b) => (computeFitScore(b.fit_manual,b.fit_ai)||0) - (computeFitScore(a.fit_manual,a.fit_ai)||0))[0];
+        const fit = computeFitScore(o.fit_manual, o.fit_ai);
+        text = `${o.company} is your clearest immediate action${o.next_action ? ': '+o.next_action : ''}.${fit!==null?' Fit '+fit+'/100.':''}`;
+        href = `job-opportunity.html?id=${o.id}`;
+      } else {
+        const scored = active.map(o => ({ o, fit: computeFitScore(o.fit_manual, o.fit_ai) })).filter(x => x.fit !== null).sort((a,b) => b.fit - a.fit);
+        if (scored.length) {
+          const { o, fit } = scored[0];
+          text = `${o.company} currently has your strongest fit (${fit}/100). Next action: ${o.next_action || 'review and decide the next step'}.`;
+          href = `job-opportunity.html?id=${o.id}`;
+        } else {
+          text = 'Rate fit on your active opportunities so this can start recommending where to focus.';
+          href = 'job-opportunities.html';
+        }
+      }
+      box.innerHTML = `<div class="best-move-icon">✦</div><div><div class="best-move-label">Best Next Move</div><div class="best-move-text"><a href="${href}" style="color:inherit;">${escapeHtml(text)}</a></div></div>`;
+    }
+
+    function renderTopFit() {
+      const active = _opps.filter(o => !o.closed);
+      const scored = active.map(o => ({ o, fit: computeFitScore(o.fit_manual, o.fit_ai) })).filter(x => x.fit !== null).sort((a,b) => b.fit - a.fit).slice(0, 5);
+      document.getElementById('top-fit-list').innerHTML = scored.length ? scored.map(({o,fit}) => `
+        <a class="top-fit-row" href="job-opportunity.html?id=${o.id}">
+          <div class="top-fit-main"><div class="top-fit-company">${escapeHtml(o.company)}</div><div class="top-fit-title">${escapeHtml(o.job_title)}</div></div>
+          <div class="top-fit-score">${fit}</div>
+        </a>`).join('') : '<div class="empty-mini">Rate fit on your opportunities to see the strongest ones here.</div>';
     }
 
     function renderKpis() {
@@ -233,7 +288,7 @@
       const top = items.slice(0, 8);
       document.getElementById('priorities-list').innerHTML = top.length ? top.map(i => `
         <div class="priority-item">
-          <div class="priority-main"><div class="priority-company">${i.company}</div><div class="priority-detail">${i.detail}</div></div>
+          <div class="priority-main"><div class="priority-company">${escapeHtml(i.company)}</div><div class="priority-detail">${escapeHtml(i.detail)}</div></div>
           <a class="priority-pill p-${i.level.toLowerCase()}" href="${i.href}" style="text-decoration:none;">${i.level}</a>
         </div>`).join('') : '<div class="empty-mini">Nothing urgent — nice work staying on top of things.</div>';
     }

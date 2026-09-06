@@ -115,7 +115,7 @@
         <div class="form-grid">
           <div class="form-group"><label class="f">Round</label><input type="text" id="f-round"></div>
           <div class="form-group"><label class="f">Type</label>
-            <select id="f-interview_type"><option value="">Select...</option><option>Recruiter Screen</option><option>Hiring Manager</option><option>Behavioural</option><option>Technical</option><option>Case Study</option><option>Presentation</option><option>Panel</option><option>Final Interview</option><option>HR</option><option>Informal Conversation</option><option>Other</option></select>
+            <select id="f-interview_type"><option value="">Select...</option></select>
           </div>
           <div class="form-group"><label class="f">Date</label><input type="date" id="f-interview_date"></div>
           <div class="form-group"><label class="f">Time</label><input type="text" id="f-interview_time"></div>
@@ -149,7 +149,7 @@
         <div class="form-grid" style="margin-top:10px;">
           <div class="form-group span2"><label class="f">Question Asked</label><input type="text" id="q-question"></div>
           <div class="form-group"><label class="f">Tag</label>
-            <select id="q-tag"><option value="">Select...</option><option>Leadership</option><option>Conflict</option><option>Failure</option><option>Teamwork</option><option>Analytics</option><option>Sales</option><option>Commercial</option><option>Technical</option><option>Motivation</option><option>Company</option><option>Salary</option><option>Availability</option><option>German</option><option>Visa</option><option>Behavioural</option><option>Case</option><option>Other</option></select>
+            <select id="q-tag"><option value="">Select...</option></select>
           </div>
         </div>
         <div style="margin-top:10px;"><button class="btn sm" id="add-question-btn">+ Add Question</button></div>
@@ -173,7 +173,7 @@
         <div class="form-group span2"><label class="f">Opportunity *</label><select id="m-opportunity_id"></select></div>
         <div class="form-group"><label class="f">Round</label><input type="text" id="m-round"></div>
         <div class="form-group"><label class="f">Type</label>
-          <select id="m-interview_type"><option value="">Select...</option><option>Recruiter Screen</option><option>Hiring Manager</option><option>Behavioural</option><option>Technical</option><option>Case Study</option><option>Presentation</option><option>Panel</option><option>Final Interview</option><option>HR</option><option>Informal Conversation</option><option>Other</option></select>
+          <select id="m-interview_type"><option value="">Select...</option></select>
         </div>
         <div class="form-group"><label class="f">Date</label><input type="date" id="m-interview_date"></div>
         <div class="form-group"><label class="f">Time</label><input type="text" id="m-interview_time"></div>
@@ -194,6 +194,8 @@
     import { loadAiCfg, chatComplete } from '/src/ai-client.js';
     import { localDateStr } from '/src/date-utils.js';
     import { subscribeRealtime, injectRealtimeStyles } from '/src/realtime.js';
+    import { escapeHtml } from '/src/html-utils.js';
+    import { INTERVIEW_TYPES, QUESTION_TAGS, optionsHtml } from '/src/job-constants.js';
 
     document.documentElement.classList.add('auth-checking');
     const sb = createClient(
@@ -204,6 +206,10 @@
     if (!session) { window.location.href = 'orders.html'; }
     document.documentElement.classList.remove('auth-checking');
     mountAdminNav({ page: 'job-interviews', supabase: sb, email: session.user.email });
+
+    document.getElementById('f-interview_type').innerHTML += optionsHtml(INTERVIEW_TYPES);
+    document.getElementById('q-tag').innerHTML += optionsHtml(QUESTION_TAGS);
+    document.getElementById('m-interview_type').innerHTML += optionsHtml(INTERVIEW_TYPES);
 
     function toast(msg, type='ok') {
       const el = document.createElement('div');
@@ -237,10 +243,10 @@
       }
       document.getElementById('tbody').innerHTML = rows.map(iv => `
         <tr><td><a class="row-link" href="job-interviews.html?id=${iv.id}">
-          <div class="iv-company" style="font-weight:600;">${iv.job_opportunities?.company||'—'}</div>
-          <div style="font-size:12px;color:var(--cl);">${iv.job_opportunities?.job_title||''}</div>
+          <div class="iv-company" style="font-weight:600;">${escapeHtml(iv.job_opportunities?.company)||'—'}</div>
+          <div style="font-size:12px;color:var(--cl);">${escapeHtml(iv.job_opportunities?.job_title)}</div>
         </a></td>
-        <td>${iv.round||'—'}</td><td style="color:var(--cl);font-size:13px;">${iv.interview_type||'—'}</td>
+        <td>${escapeHtml(iv.round)||'—'}</td><td style="color:var(--cl);font-size:13px;">${escapeHtml(iv.interview_type)||'—'}</td>
         <td style="color:var(--cl);font-size:13px;">${iv.interview_date||'—'}</td>
         <td><span class="pill pill-${iv.status}">${iv.status}</span></td></tr>`).join('');
     }
@@ -325,17 +331,17 @@
         const ai = JSON.parse(reply);
         const box = document.getElementById('ai-output');
         box.style.display = '';
-        const list = arr => (arr&&arr.length) ? `<ul>${arr.map(x=>`<li>${typeof x==='object'?`<b>${x.question}</b> — ${x.why}`:x}</li>`).join('')}</ul>` : '<div style="color:var(--cl)">None.</div>';
+        const list = arr => (arr&&arr.length) ? `<ul>${arr.map(x=>`<li>${typeof x==='object'?`<b>${escapeHtml(x.question)}</b> — ${escapeHtml(x.why)}`:escapeHtml(x)}</li>`).join('')}</ul>` : '<div style="color:var(--cl)">None.</div>';
         box.innerHTML = `
           <h4>Top Likely Questions</h4>${list(ai.top_questions)}
-          <h4>Best Experience to Lead With</h4><div>${ai.best_experience||'—'}</div>
+          <h4>Best Experience to Lead With</h4><div>${escapeHtml(ai.best_experience)||'—'}</div>
           <h4>STAR Stories to Prepare</h4>${list(ai.star_stories)}
           <h4>Technical / Business Areas to Review</h4>${list(ai.technical_areas)}
           <h4>Risks They May Probe</h4>${list(ai.risks)}
           <h4>Questions to Ask Them</h4>${list(ai.questions_to_ask)}
-          <h4>30-Second Introduction</h4><div>${ai.intro_30s||'—'}</div>
-          <h4>60-Second Introduction</h4><div>${ai.intro_60s||'—'}</div>
-          <h4>Motivation Answer</h4><div>${ai.motivation_answer||'—'}</div>
+          <h4>30-Second Introduction</h4><div>${escapeHtml(ai.intro_30s)||'—'}</div>
+          <h4>60-Second Introduction</h4><div>${escapeHtml(ai.intro_60s)||'—'}</div>
+          <h4>Motivation Answer</h4><div>${escapeHtml(ai.motivation_answer)||'—'}</div>
         `;
         // Pre-fill prep fields only if currently empty, so it never clobbers existing notes.
         if (!document.getElementById('f-expected_questions').value) document.getElementById('f-expected_questions').value = (ai.top_questions||[]).map(q=>`${q.question} — ${q.why}`).join('\n');
@@ -353,7 +359,7 @@
     /* ── Question log ── */
     async function loadQuestions() {
       const { data } = await sb.from('job_interview_questions').select('*').eq('interview_id', ivId).order('created_at', { ascending: false });
-      document.getElementById('q-list').innerHTML = (data||[]).map(q => `<div class="q-item"><span>${q.question}</span><span class="q-tag">${q.tag||''}</span></div>`).join('') || '<div style="color:var(--cl);font-size:13px;">No questions logged yet.</div>';
+      document.getElementById('q-list').innerHTML = (data||[]).map(q => `<div class="q-item"><span>${escapeHtml(q.question)}</span><span class="q-tag">${escapeHtml(q.tag)}</span></div>`).join('') || '<div style="color:var(--cl);font-size:13px;">No questions logged yet.</div>';
     }
     document.getElementById('add-question-btn').addEventListener('click', async () => {
       const question = document.getElementById('q-question').value.trim();
