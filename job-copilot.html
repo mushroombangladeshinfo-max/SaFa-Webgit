@@ -82,6 +82,7 @@
       </div>
       <button class="btn primary" id="log-update-btn">📝 Log an Update</button>
     </div>
+    <div id="profile-bar"></div>
     <div class="quick-row">
       <button class="quick-btn" data-q="What should I do today?">What should I do today?</button>
       <button class="quick-btn" data-q="Which jobs should I prioritize right now?">Which jobs should I prioritize?</button>
@@ -129,6 +130,7 @@
     import { computeFitScore, computePriority, followUpStatus, computeDerivedFields } from '/src/job-scoring.js';
     import { escapeHtml } from '/src/html-utils.js';
     import { STAGE_LABEL, STAGE_ORDER, ACTIVITY_TYPES, QUESTION_TAGS } from '/src/job-constants.js';
+    import { ensureActiveProfileId, renderProfileSwitcher } from '/src/job-profile.js';
 
     document.documentElement.classList.add('auth-checking');
     const sb = createClient(
@@ -140,6 +142,7 @@
     document.documentElement.classList.remove('auth-checking');
     mountAdminNav({ page: 'job-copilot', supabase: sb, email: session.user.email });
 
+    let profileId = null;
     let messages = JSON.parse(sessionStorage.getItem('jobCopilotHistory') || '[]');
 
     function persist() { sessionStorage.setItem('jobCopilotHistory', JSON.stringify(messages)); }
@@ -160,10 +163,10 @@
        as home.html's SaFa Assistant, scoped to job-search data. */
     async function buildSnapshot() {
       const [{ data: opps }, { data: interviews }, { data: profile }, { data: offers }] = await Promise.all([
-        sb.from('job_opportunities').select('*').eq('closed', false),
-        sb.from('job_interviews').select('*, job_opportunities(company,job_title)').eq('status', 'scheduled'),
-        sb.from('job_career_profile').select('target_roles,target_locations,career_preferences').eq('id', true).maybeSingle(),
-        sb.from('job_offers').select('*, job_opportunities(company,job_title)').in('status', ['pending','negotiating']),
+        sb.from('job_opportunities').select('*').eq('profile_id', profileId).eq('closed', false),
+        sb.from('job_interviews').select('*, job_opportunities(company,job_title)').eq('profile_id', profileId).eq('status', 'scheduled'),
+        sb.from('job_profiles').select('target_roles,target_locations,career_preferences').eq('id', profileId).maybeSingle(),
+        sb.from('job_offers').select('*, job_opportunities(company,job_title)').eq('profile_id', profileId).in('status', ['pending','negotiating']),
       ]);
       const today = localDateStr();
       const opportunities = (opps||[]).map(o => ({
@@ -272,8 +275,9 @@ Rules: use ONLY the data given above — never invent a job, contact, deadline, 
         if (cfg.provider === 'openai' && !cfg.key) { statusEl.textContent = 'Configure a Groq key on the Home page first.'; return; }
 
         const [{ data: opps }, { data: interviews }] = await Promise.all([
-          sb.from('job_opportunities').select('id,company,job_title,stage').eq('closed', false),
+          sb.from('job_opportunities').select('id,company,job_title,stage').eq('profile_id', profileId).eq('closed', false),
           sb.from('job_interviews').select('id,opportunity_id,round,interview_date,status,job_opportunities(company,job_title)')
+            .eq('profile_id', profileId)
             .or(`status.eq.scheduled,and(status.eq.completed,post_interview_reflection.is.null)`),
         ]);
         const oppList = (opps||[]).map(o => ({ id: o.id, company: o.company, job_title: o.job_title, stage: o.stage }));
@@ -391,6 +395,7 @@ Rules: matched_opportunity_id and matched_interview_id must be one of the exact 
           }
         }
         const { error: actErr } = await sb.from('job_activities').insert([{
+          profile_id: profileId,
           opportunity_id: p._effective_opportunity_id || null,
           activity_type: p.activity_type || 'Other',
           activity_date: p.activity_date || localDateStr(),
@@ -426,6 +431,8 @@ Rules: matched_opportunity_id and matched_interview_id must be one of the exact 
       setTimeout(()=>el.remove(), 3500);
     }
 
+    profileId = await ensureActiveProfileId(sb);
+    renderProfileSwitcher(sb, document.getElementById('profile-bar'), async () => { profileId = await ensureActiveProfileId(sb); });
     renderMessages();
   </script>
 </body>

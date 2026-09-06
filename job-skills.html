@@ -82,6 +82,8 @@
       </div>
     </div>
 
+    <div id="profile-bar"></div>
+
     <div class="suggest-box" id="suggest-box">
       <div style="font-family:'Syne',sans-serif;font-size:11px;font-weight:700;color:var(--al);margin-bottom:8px;">✦ Suggested Skills — grounded only in skills explicitly named in your stored job descriptions</div>
       <div id="suggest-list"></div>
@@ -128,6 +130,7 @@
     import { escapeHtml } from '/src/html-utils.js';
     import { computeFitScore } from '/src/job-scoring.js';
     import { SKILL_CATEGORIES, SKILL_LEVELS, optionsHtml } from '/src/job-constants.js';
+    import { ensureActiveProfileId, renderProfileSwitcher } from '/src/job-profile.js';
 
     document.documentElement.classList.add('auth-checking');
     const sb = createClient(
@@ -162,12 +165,12 @@
       return 'Low';
     }
 
-    let _skills = [], _opps = [];
+    let _skills = [], _opps = [], profileId = null;
 
     async function load() {
       const [{ data: skills, error: e1 }, { data: opps, error: e2 }] = await Promise.all([
-        sb.from('job_skills').select('*').order('skill'),
-        sb.from('job_opportunities').select('job_description, fit_manual, fit_ai'),
+        sb.from('job_skills').select('*').eq('profile_id', profileId).order('skill'),
+        sb.from('job_opportunities').select('job_description, fit_manual, fit_ai').eq('profile_id', profileId),
       ]);
       if (e1 || e2) { toast((e1||e2).message, 'err'); return; }
       _skills = skills || [];
@@ -230,7 +233,7 @@
     document.getElementById('modal-save').addEventListener('click', async () => {
       const skill = document.getElementById('f-skill').value.trim();
       if (!skill) { toast('Skill name is required', 'err'); return; }
-      const payload = { skill };
+      const payload = { profile_id: profileId, skill };
       ['category','my_level'].forEach(f => { payload[f] = document.getElementById('f-'+f).value || null; });
       ['evidence','notes'].forEach(f => { payload[f] = document.getElementById('f-'+f).value.trim() || null; });
 
@@ -260,7 +263,7 @@
         if (!_opps.length) { toast('Add some opportunities with job descriptions first', 'err'); return; }
         const cfg = await loadAiCfg(sb);
         if (cfg.provider === 'openai' && !cfg.key) { toast('Configure a Groq key on the Home page first', 'err'); return; }
-        const { data: profile } = await sb.from('job_career_profile').select('skills').eq('id', true).maybeSingle();
+        const { data: profile } = await sb.from('job_profiles').select('skills').eq('id', profileId).maybeSingle();
         const trackedSkills = _skills.map(s => s.skill);
         const shape = `{"suggested_skills":[{"skill":string,"category":${JSON.stringify(SKILL_CATEGORIES)}[number]|null,"reason":string}]}`;
         const messages = [
@@ -282,7 +285,7 @@
             </div>`).join('');
           list.querySelectorAll('[data-add-suggestion]').forEach(b => b.addEventListener('click', async () => {
             const s = suggestions[+b.dataset.addSuggestion];
-            const { error } = await sb.from('job_skills').insert([{ skill: s.skill, category: SKILL_CATEGORIES.includes(s.category) ? s.category : 'Other', notes: s.reason }]);
+            const { error } = await sb.from('job_skills').insert([{ profile_id: profileId, skill: s.skill, category: SKILL_CATEGORIES.includes(s.category) ? s.category : 'Other', notes: s.reason }]);
             if (error) { toast(error.message, 'err'); return; }
             b.textContent = 'Added ✓'; b.disabled = true;
             load();
@@ -297,6 +300,8 @@
     });
     document.getElementById('suggest-close-btn').addEventListener('click', () => document.getElementById('suggest-box').classList.remove('open'));
 
+    profileId = await ensureActiveProfileId(sb);
+    renderProfileSwitcher(sb, document.getElementById('profile-bar'), async () => { profileId = await ensureActiveProfileId(sb); load(); });
     load();
     injectRealtimeStyles();
     subscribeRealtime(sb, 'job-skills-live', ['job_skills','job_opportunities'], load, { indicatorId: 'rt-indicator' });

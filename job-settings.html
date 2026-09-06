@@ -34,6 +34,12 @@
     .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
     @media(max-width:640px){.grid2{grid-template-columns:1fr;}}
     .save-bar{position:sticky;bottom:0;background:var(--bg);padding:16px 0;display:flex;justify-content:flex-end;gap:10px;border-top:1px solid var(--border);margin-top:8px;}
+    .profile-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05);}
+    .profile-row:last-child{border-bottom:none;}
+    .profile-row-name{font-size:14px;color:var(--c);}
+    .profile-row-name.active{color:var(--al);font-weight:500;}
+    .profile-row-actions{display:flex;gap:6px;}
+    .btn.sm{padding:6px 10px;font-size:8px;}
     .toast-wrap{position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;gap:8px;}
     .toast{padding:12px 18px;border-radius:8px;font-family:'Syne','Hind Siliguri',sans-serif;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;animation:fadeUp .3s ease;}
     .toast.ok{background:#1a3322;border:1px solid rgba(95,207,128,.3);color:var(--green);}
@@ -46,6 +52,15 @@
     <div class="page-header">
       <div class="page-title">Career <span style="color:var(--al)">Profile</span></div>
       <div class="page-sub">Your reusable background — every AI feature (fit analysis, interview prep, outreach drafting) reads this instead of you re-typing it per job. Nothing here is invented by AI; it only reflects what you write.</div>
+    </div>
+
+    <div id="profile-bar"></div>
+
+    <div class="card">
+      <div class="card-title">Profiles</div>
+      <div class="card-hint">Separate job searches tracked side by side — each has its own opportunities, contacts, interviews, offers, skills, and the career profile below. The highlighted one is active everywhere else in Job Search.</div>
+      <div id="profiles-list"></div>
+      <div style="margin-top:12px;"><button class="btn" id="add-profile-btn">+ Add Profile</button></div>
     </div>
 
     <div class="card">
@@ -112,6 +127,8 @@
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
     import { requireAdmin }  from '/src/admin-auth.js';
     import { mountAdminNav } from '/src/admin-nav.js';
+    import { escapeHtml } from '/src/html-utils.js';
+    import { getActiveProfileId, setActiveProfileId, loadProfiles, ensureActiveProfileId, renderProfileSwitcher } from '/src/job-profile.js';
 
     document.documentElement.classList.add('auth-checking');
     const sb = createClient(
@@ -136,8 +153,10 @@
       'career_preferences','work_authorization','target_locations','target_roles','salary_preferences',
       'availability','career_narrative'];
 
+    let profileId = null;
+
     async function load() {
-      const { data, error } = await sb.from('job_career_profile').select('*').eq('id', true).maybeSingle();
+      const { data, error } = await sb.from('job_profiles').select('*').eq('id', profileId).maybeSingle();
       if (error) { toast(error.message, 'err'); return; }
       FIELDS.forEach(f => { document.getElementById('f-'+f).value = data?.[f] || ''; });
     }
@@ -145,12 +164,65 @@
     document.getElementById('save-btn').addEventListener('click', async () => {
       const payload = {};
       FIELDS.forEach(f => { payload[f] = document.getElementById('f-'+f).value.trim() || null; });
-      const { error } = await sb.from('job_career_profile').update(payload).eq('id', true);
+      const { error } = await sb.from('job_profiles').update(payload).eq('id', profileId);
       if (error) { toast(error.message, 'err'); return; }
       toast('Profile saved');
     });
 
-    load();
+    /* ── Profiles management ── */
+    async function renderProfilesList() {
+      const profiles = await loadProfiles(sb);
+      const activeId = getActiveProfileId();
+      document.getElementById('profiles-list').innerHTML = profiles.map(p => `
+        <div class="profile-row">
+          <span class="profile-row-name${p.id===activeId?' active':''}">${escapeHtml(p.profile_name)}${p.id===activeId?' (active)':''}</span>
+          <div class="profile-row-actions">
+            <button class="btn sm" data-rename="${p.id}">Rename</button>
+            <button class="btn sm" data-delete="${p.id}">Delete</button>
+          </div>
+        </div>`).join('');
+      document.getElementById('profiles-list').querySelectorAll('[data-rename]').forEach(b => b.addEventListener('click', async () => {
+        const id = +b.dataset.rename;
+        const current = profiles.find(p => p.id === id);
+        const name = prompt('Rename profile:', current?.profile_name || '');
+        if (!name || !name.trim()) return;
+        const { error } = await sb.from('job_profiles').update({ profile_name: name.trim() }).eq('id', id);
+        if (error) { toast(error.message, 'err'); return; }
+        await refreshProfileUi();
+      }));
+      document.getElementById('profiles-list').querySelectorAll('[data-delete]').forEach(b => b.addEventListener('click', async () => {
+        const id = +b.dataset.delete;
+        if (profiles.length <= 1) { toast("Can't delete the only remaining profile", 'err'); return; }
+        const current = profiles.find(p => p.id === id);
+        if (!confirm(`Delete profile "${current?.profile_name}"? This permanently deletes ALL its opportunities, contacts, interviews, offers, skills, and activities.`)) return;
+        const { error } = await sb.from('job_profiles').delete().eq('id', id);
+        if (error) { toast(error.message, 'err'); return; }
+        if (id === activeId) {
+          const remaining = profiles.filter(p => p.id !== id);
+          setActiveProfileId(remaining[0].id);
+        }
+        toast('Profile deleted');
+        await refreshProfileUi();
+      }));
+    }
+
+    async function refreshProfileUi() {
+      profileId = await ensureActiveProfileId(sb);
+      await renderProfileSwitcher(sb, document.getElementById('profile-bar'), refreshProfileUi);
+      await renderProfilesList();
+      await load();
+    }
+
+    document.getElementById('add-profile-btn').addEventListener('click', async () => {
+      const name = prompt('Name for the new profile (e.g. "My Job Search", "Sunny\'s Search"):');
+      if (!name || !name.trim()) return;
+      const { data, error } = await sb.from('job_profiles').insert([{ profile_name: name.trim() }]).select().single();
+      if (error) { toast(error.message, 'err'); return; }
+      setActiveProfileId(data.id);
+      await refreshProfileUi();
+    });
+
+    refreshProfileUi();
   </script>
 </body>
 </html>

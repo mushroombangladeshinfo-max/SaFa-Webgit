@@ -49,6 +49,8 @@
       <span class="rt-indicator" id="rt-indicator"><span class="rt-dot"></span>Live</span>
     </div>
 
+    <div id="profile-bar"></div>
+
     <div class="kpi-grid">
       <div class="kpi"><div class="kpi-label">Total Opportunities</div><div class="kpi-val" id="kpi-total">—</div></div>
       <div class="kpi"><div class="kpi-label">Applications</div><div class="kpi-val" id="kpi-applied">—</div></div>
@@ -93,6 +95,7 @@
     import { subscribeRealtime, injectRealtimeStyles } from '/src/realtime.js';
     import { escapeHtml } from '/src/html-utils.js';
     import { STAGES, STAGE_LABEL, STAGE_ORDER, CAREER_TRACKS } from '/src/job-constants.js';
+    import { ensureActiveProfileId, renderProfileSwitcher } from '/src/job-profile.js';
 
     document.documentElement.classList.add('auth-checking');
     const sb = createClient(
@@ -116,11 +119,11 @@
       return STAGE_ORDER.indexOf(opp.stage) >= STAGE_ORDER.indexOf(stageKey);
     }
 
-    let _opps = [];
+    let _opps = [], profileId = null;
     let funnelChart = null, rejectionChart = null;
 
     async function load() {
-      const { data, error } = await sb.from('job_opportunities').select('*');
+      const { data, error } = await sb.from('job_opportunities').select('*').eq('profile_id', profileId);
       if (error) { toast(error.message); return; }
       _opps = data || [];
       renderKpis();
@@ -215,6 +218,8 @@
       });
     }
 
+    profileId = await ensureActiveProfileId(sb);
+    renderProfileSwitcher(sb, document.getElementById('profile-bar'), async () => { profileId = await ensureActiveProfileId(sb); load(); });
     load();
     injectRealtimeStyles();
     subscribeRealtime(sb, 'job-analytics-live', ['job_opportunities'], load, { indicatorId: 'rt-indicator' });

@@ -76,6 +76,8 @@
       <button class="btn primary" id="add-btn">+ Log Activity</button>
     </div>
 
+    <div id="profile-bar"></div>
+
     <div class="kpi-grid">
       <div class="kpi"><div class="kpi-label">Total Activities</div><div class="kpi-val" id="kpi-total">—</div></div>
       <div class="kpi"><div class="kpi-label">This Week</div><div class="kpi-val" id="kpi-week">—</div></div>
@@ -133,6 +135,7 @@
     import { subscribeRealtime, injectRealtimeStyles } from '/src/realtime.js';
     import { escapeHtml } from '/src/html-utils.js';
     import { ACTIVITY_TYPES, optionsHtml } from '/src/job-constants.js';
+    import { ensureActiveProfileId, renderProfileSwitcher } from '/src/job-profile.js';
 
     document.documentElement.classList.add('auth-checking');
     const sb = createClient(
@@ -156,10 +159,10 @@
     }
     const NETWORKING_TYPES = ['LinkedIn Message','Email','Phone Call','Recruiter Call','Networking Meeting'];
 
-    let _all = [];
+    let _all = [], profileId = null;
 
     async function load() {
-      const { data, error } = await sb.from('job_activities').select('*, job_opportunities(id,company,job_title), job_contacts(id,full_name)').order('activity_date', { ascending: false });
+      const { data, error } = await sb.from('job_activities').select('*, job_opportunities(id,company,job_title), job_contacts(id,full_name)').eq('profile_id', profileId).order('activity_date', { ascending: false });
       if (error) { toast(error.message, 'err'); return; }
       _all = data || [];
       renderKpis();
@@ -225,8 +228,8 @@
       _editId = activity?.id || null;
       document.getElementById('modal-title').textContent = activity ? 'Edit Activity' : 'Log Activity';
       const [{ data: opps }, { data: contacts }] = await Promise.all([
-        sb.from('job_opportunities').select('id,company,job_title').order('company'),
-        sb.from('job_contacts').select('id,full_name').order('full_name'),
+        sb.from('job_opportunities').select('id,company,job_title').eq('profile_id', profileId).order('company'),
+        sb.from('job_contacts').select('id,full_name').eq('profile_id', profileId).order('full_name'),
       ]);
       document.getElementById('f-opportunity_id').innerHTML = '<option value="">None</option>' + (opps||[]).map(o => `<option value="${o.id}">${escapeHtml(o.company)} — ${escapeHtml(o.job_title)}</option>`).join('');
       document.getElementById('f-contact_id').innerHTML = '<option value="">None</option>' + (contacts||[]).map(c => `<option value="${c.id}">${escapeHtml(c.full_name)}</option>`).join('');
@@ -245,7 +248,7 @@
 
       let error;
       if (_editId) ({ error } = await sb.from('job_activities').update(payload).eq('id', _editId));
-      else ({ error } = await sb.from('job_activities').insert([payload]));
+      else ({ error } = await sb.from('job_activities').insert([{ ...payload, profile_id: profileId }]));
       if (error) { toast(error.message, 'err'); return; }
       toast(_editId ? 'Activity updated' : 'Activity logged');
       closeModal();
@@ -261,6 +264,8 @@
       load();
     };
 
+    profileId = await ensureActiveProfileId(sb);
+    renderProfileSwitcher(sb, document.getElementById('profile-bar'), async () => { profileId = await ensureActiveProfileId(sb); load(); });
     load();
     injectRealtimeStyles();
     subscribeRealtime(sb, 'job-activities-live', ['job_activities'], load, { indicatorId: 'rt-indicator' });

@@ -97,6 +97,7 @@
         <span class="rt-indicator" id="rt-indicator"><span class="rt-dot"></span>Live</span>
         <button class="btn primary" id="add-btn">+ Schedule Interview</button>
       </div>
+      <div id="profile-bar"></div>
       <div class="table-card">
         <div class="table-toolbar"><span class="table-title">Interviews</span><span class="count-label" id="iv-count" style="font-size:13px;color:var(--cl);"></span></div>
         <div class="scroll-x">
@@ -208,6 +209,7 @@
     import { subscribeRealtime, injectRealtimeStyles } from '/src/realtime.js';
     import { escapeHtml } from '/src/html-utils.js';
     import { INTERVIEW_TYPES, QUESTION_TAGS, PREPARATION_STATUSES, optionsHtml, valueLabelOptionsHtml } from '/src/job-constants.js';
+    import { ensureActiveProfileId, renderProfileSwitcher } from '/src/job-profile.js';
 
     document.documentElement.classList.add('auth-checking');
     const sb = createClient(
@@ -234,6 +236,7 @@
 
     const params = new URLSearchParams(location.search);
     const ivId = params.get('id');
+    let profileId = null;
 
     const SELF_DIMS = [
       ['communication','Communication'],['structure','Answer Structure'],['role_knowledge','Role Knowledge'],
@@ -241,12 +244,24 @@
       ['confidence','Confidence'],['motivation','Motivation'],['questions_asked','Questions Asked'],['german_performance','German Performance'],
     ];
 
-    if (ivId) { document.getElementById('list-view').style.display = 'none'; loadDetail(); }
-    else { document.getElementById('detail-view').style.display = 'none'; loadList(); }
+    // Detail mode (?id=) shows no switcher — it's already one specific
+    // interview, unambiguously belonging to one profile (derived from the
+    // loaded row itself in loadDetail(), never from whichever profile the
+    // switcher elsewhere happens to be on). List mode shows the switcher
+    // and scopes the list query to the active profile.
+    if (ivId) {
+      document.getElementById('list-view').style.display = 'none';
+      loadDetail();
+    } else {
+      document.getElementById('detail-view').style.display = 'none';
+      profileId = await ensureActiveProfileId(sb);
+      renderProfileSwitcher(sb, document.getElementById('profile-bar'), async () => { profileId = await ensureActiveProfileId(sb); loadList(); });
+      loadList();
+    }
 
     /* ── List ── */
     async function loadList() {
-      const { data, error } = await sb.from('job_interviews').select('*, job_opportunities(company,job_title)').order('interview_date', { ascending: false });
+      const { data, error } = await sb.from('job_interviews').select('*, job_opportunities(company,job_title)').eq('profile_id', profileId).order('interview_date', { ascending: false });
       if (error) { toast(error.message, 'err'); return; }
       const rows = data || [];
       document.getElementById('iv-count').textContent = `${rows.length} interview${rows.length!==1?'s':''}`;
@@ -265,7 +280,7 @@
     }
 
     document.getElementById('add-btn').addEventListener('click', async () => {
-      const { data } = await sb.from('job_opportunities').select('id,company,job_title').eq('closed', false).order('company');
+      const { data } = await sb.from('job_opportunities').select('id,company,job_title').eq('profile_id', profileId).eq('closed', false).order('company');
       document.getElementById('m-opportunity_id').innerHTML = (data||[]).map(o => `<option value="${o.id}">${o.company} — ${o.job_title}</option>`).join('');
       ['m-round','m-interview_type','m-interview_date','m-interview_time'].forEach(id => document.getElementById(id).value = '');
       document.getElementById('modal').classList.add('open');
@@ -276,6 +291,7 @@
       const opportunity_id = document.getElementById('m-opportunity_id').value;
       if (!opportunity_id) { toast('Pick an opportunity', 'err'); return; }
       const payload = {
+        profile_id: profileId,
         opportunity_id,
         round: document.getElementById('m-round').value.trim() || null,
         interview_type: document.getElementById('m-interview_type').value || null,
@@ -284,7 +300,7 @@
       };
       const { data, error } = await sb.from('job_interviews').insert([payload]).select().single();
       if (error) { toast(error.message, 'err'); return; }
-      await sb.from('job_activities').insert([{ opportunity_id, activity_type: 'Interview', activity_date: payload.interview_date || localDateStr(), summary: `Interview scheduled${payload.round?': '+payload.round:''}` }]);
+      await sb.from('job_activities').insert([{ profile_id: profileId, opportunity_id, activity_type: 'Interview', activity_date: payload.interview_date || localDateStr(), summary: `Interview scheduled${payload.round?': '+payload.round:''}` }]);
       toast('Interview scheduled');
       window.location.href = `job-interviews.html?id=${data.id}`;
     });
@@ -347,7 +363,7 @@
       try {
         const cfg = await loadAiCfg(sb);
         if (cfg.provider === 'openai' && !cfg.key) { toast('Configure a Groq key on the Home page first', 'err'); return; }
-        const { data: profile } = await sb.from('job_career_profile').select('*').eq('id', true).maybeSingle();
+        const { data: profile } = await sb.from('job_profiles').select('*').eq('id', iv.profile_id).maybeSingle();
         const profileText = ['education','work_experience','projects','skills','languages','career_narrative']
           .map(k => profile?.[k] ? `${k}: ${profile[k]}` : null).filter(Boolean).join('\n') || '(no career profile saved yet)';
         const jd = iv.job_opportunities?.job_description || '(no job description saved)';

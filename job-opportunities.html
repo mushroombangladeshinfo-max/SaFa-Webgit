@@ -151,6 +151,8 @@
       <button class="btn primary" id="add-btn">+ Add Opportunity</button>
     </div>
 
+    <div id="profile-bar"></div>
+
     <div class="tabs">
       <button class="tab-btn active" data-tab="active">Active</button>
       <button class="tab-btn" data-tab="closed">Closed</button>
@@ -283,6 +285,7 @@
     import { computeFitScore, computePriority, eligibilityStatus, followUpStatus, jobRef, fitClassification, recommendation, computeDerivedFields, ELIGIBILITY_FIELDS } from '/src/job-scoring.js';
     import { escapeHtml } from '/src/html-utils.js';
     import { STAGES, STAGE_LABEL, CAREER_TRACKS, EMPLOYMENT_TYPES, SOURCES, GERMAN_REQUIREMENTS, YES_NO_UNCLEAR, valueLabelOptionsHtml, optionsHtml } from '/src/job-constants.js';
+    import { ensureActiveProfileId, renderProfileSwitcher } from '/src/job-profile.js';
 
     document.documentElement.classList.add('auth-checking');
     const sb = createClient(
@@ -312,7 +315,7 @@
     }
     const fmtDate = d => d || '—';
 
-    let _all = [], _editId = null, _view = 'table', _tab = 'active', _lastAiExtracted = null;
+    let _all = [], _editId = null, _view = 'table', _tab = 'active', _lastAiExtracted = null, profileId = null;
 
     const FILTER_DEFAULTS = { q:'', track:'', stage:'', priority:'', source:'', view:'table', tab:'active' };
     function applyFiltersFromURL() {
@@ -338,7 +341,7 @@
     }
 
     async function load() {
-      const { data, error } = await sb.from('job_opportunities').select('*').order('updated_at', { ascending: false });
+      const { data, error } = await sb.from('job_opportunities').select('*').eq('profile_id', profileId).order('updated_at', { ascending: false });
       if (error) { toast(error.message, 'err'); return; }
       _all = data || [];
       const sources = [...new Set(_all.map(r=>r.source).filter(Boolean))].sort();
@@ -465,7 +468,7 @@
             .eq('id', id);
           if (error) { toast(error.message, 'err'); return; }
           await sb.from('job_activities').insert([{
-            opportunity_id: id, activity_type: 'Other', activity_date: localDateStr(),
+            profile_id: profileId, opportunity_id: id, activity_type: 'Other', activity_date: localDateStr(),
             summary: `Stage changed: ${STAGE_LABEL[opp.stage]} → ${STAGE_LABEL[newStage]}`,
           }]);
           toast('Stage updated');
@@ -567,10 +570,11 @@
         if (_lastFitAi) payload.fit_ai = _lastFitAi;
         if (_lastElig) Object.assign(payload, _lastElig);
         Object.assign(payload, computeDerivedFields(payload));
+        payload.profile_id = profileId;
         const { data, error: insErr } = await sb.from('job_opportunities').insert([payload]).select().single();
         error = insErr;
         if (!error) {
-          await sb.from('job_activities').insert([{ opportunity_id: data.id, activity_type: 'Other', activity_date: localDateStr(), summary: 'Opportunity created' }]);
+          await sb.from('job_activities').insert([{ profile_id: profileId, opportunity_id: data.id, activity_type: 'Other', activity_date: localDateStr(), summary: 'Opportunity created' }]);
         }
       }
       if (error) { toast(error.message, 'err'); return; }
@@ -649,7 +653,7 @@
         return;
       }
       try {
-        const { data: profile } = await sb.from('job_career_profile').select('*').eq('id', true).maybeSingle();
+        const { data: profile } = await sb.from('job_profiles').select('*').eq('id', profileId).maybeSingle();
         const profileText = ['education','work_experience','projects','skills','languages','certifications','career_preferences','work_authorization','target_locations','target_roles','salary_preferences','availability','career_narrative']
           .map(k => profile?.[k] ? `${k}: ${profile[k]}` : null).filter(Boolean).join('\n') || '(No career profile saved yet — fit judgement will be limited. Fill one in on the Career Profile page for better results.)';
 
@@ -701,6 +705,8 @@ Fit-analysis rules: base every rating and claim ONLY on what's explicitly in the
     });
 
     applyFiltersFromURL();
+    profileId = await ensureActiveProfileId(sb);
+    renderProfileSwitcher(sb, document.getElementById('profile-bar'), async () => { profileId = await ensureActiveProfileId(sb); load(); });
     if (new URLSearchParams(location.search).get('new') === '1') openModal();
     load();
     injectRealtimeStyles();

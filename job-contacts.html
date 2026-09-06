@@ -88,6 +88,8 @@
       <button class="btn primary" id="add-btn">+ Add Contact</button>
     </div>
 
+    <div id="profile-bar"></div>
+
     <div class="kpi-grid">
       <div class="kpi"><div class="kpi-label">Messages Sent</div><div class="kpi-val" id="kpi-sent">—</div></div>
       <div class="kpi"><div class="kpi-label">Response Rate</div><div class="kpi-val" id="kpi-rate">—</div></div>
@@ -187,6 +189,7 @@
     import { subscribeRealtime, injectRealtimeStyles } from '/src/realtime.js';
     import { escapeHtml } from '/src/html-utils.js';
     import { CONTACT_TYPES, RELATIONSHIP_STAGES, optionsHtml } from '/src/job-constants.js';
+    import { ensureActiveProfileId, renderProfileSwitcher } from '/src/job-profile.js';
 
     document.documentElement.classList.add('auth-checking');
     const sb = createClient(
@@ -212,10 +215,10 @@
     }
     function stageClass(s) { return 'st-' + (s||'cold').toLowerCase().replace(/\s+/g,'-'); }
 
-    let _all = [], _editId = null, _relatedJobs = new Map();
+    let _all = [], _editId = null, _relatedJobs = new Map(), profileId = null;
 
     async function load() {
-      const { data, error } = await sb.from('job_contacts').select('*').order('updated_at', { ascending: false });
+      const { data, error } = await sb.from('job_contacts').select('*').eq('profile_id', profileId).order('updated_at', { ascending: false });
       if (error) { toast(error.message, 'err'); return; }
       _all = data || [];
       await loadRelatedJobs();
@@ -228,7 +231,7 @@
     // table. One batch query avoids an N+1 lookup per contact row.
     async function loadRelatedJobs() {
       _relatedJobs = new Map();
-      const { data } = await sb.from('job_activities').select('contact_id, job_opportunities(company)').not('contact_id', 'is', null).not('opportunity_id', 'is', null);
+      const { data } = await sb.from('job_activities').select('contact_id, job_opportunities(company)').eq('profile_id', profileId).not('contact_id', 'is', null).not('opportunity_id', 'is', null);
       (data || []).forEach(a => {
         if (!a.job_opportunities?.company) return;
         const set = _relatedJobs.get(a.contact_id) || new Set();
@@ -239,7 +242,7 @@
 
     const RESPONDED_STAGES = ['Responded','Conversation','Warm','Referral Requested','Referral Offered','Referral Submitted','Long-Term Relationship'];
     async function loadNetworkingKpis() {
-      const { data: acts } = await sb.from('job_activities').select('activity_type,contact_id').not('contact_id', 'is', null);
+      const { data: acts } = await sb.from('job_activities').select('activity_type,contact_id').eq('profile_id', profileId).not('contact_id', 'is', null);
       const sent = (acts||[]).filter(a => ['LinkedIn Message','Email','Networking Meeting'].includes(a.activity_type)).length;
       // Response rate is computed from each contact's CURRENT relationship_stage
       // rather than parsing free-text activity outcomes — a contact who has
@@ -327,7 +330,7 @@
 
       let error;
       if (_editId) ({ error } = await sb.from('job_contacts').update(payload).eq('id', _editId));
-      else ({ error } = await sb.from('job_contacts').insert([payload]));
+      else { payload.profile_id = profileId; ({ error } = await sb.from('job_contacts').insert([payload])); }
       if (error) { toast(error.message, 'err'); return; }
       toast(_editId ? 'Contact updated' : 'Contact added');
       closeModal();
@@ -379,6 +382,8 @@
       navigator.clipboard.writeText(text).then(() => toast('Copied to clipboard'));
     });
 
+    profileId = await ensureActiveProfileId(sb);
+    renderProfileSwitcher(sb, document.getElementById('profile-bar'), async () => { profileId = await ensureActiveProfileId(sb); load(); });
     if (new URLSearchParams(location.search).get('new') === '1') openModal();
     load();
     injectRealtimeStyles();

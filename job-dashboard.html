@@ -107,6 +107,8 @@
       <a class="btn primary" href="job-opportunities.html?new=1">+ Add Opportunity</a>
     </div>
 
+    <div id="profile-bar"></div>
+
     <div class="quick-actions">
       <a class="btn" href="job-contacts.html?new=1">+ Add Contact</a>
       <button class="btn" id="log-activity-btn">+ Log Activity</button>
@@ -180,6 +182,7 @@
     import { computeFitScore, followUpStatus } from '/src/job-scoring.js';
     import { escapeHtml } from '/src/html-utils.js';
     import { STAGES } from '/src/job-constants.js';
+    import { ensureActiveProfileId, renderProfileSwitcher } from '/src/job-profile.js';
 
     document.documentElement.classList.add('auth-checking');
     const sb = createClient(
@@ -199,13 +202,13 @@
       setTimeout(()=>el.remove(), 3500);
     }
 
-    let _opps = [], _interviews = [], _offers = [];
+    let _opps = [], _interviews = [], _offers = [], profileId = null;
 
     async function load() {
       const [{ data: opps, error: e1 }, { data: interviews, error: e2 }, { data: offers, error: e3 }] = await Promise.all([
-        sb.from('job_opportunities').select('*'),
-        sb.from('job_interviews').select('*, job_opportunities(company,job_title)'),
-        sb.from('job_offers').select('id,status').in('status', ['pending','negotiating','accepted']),
+        sb.from('job_opportunities').select('*').eq('profile_id', profileId),
+        sb.from('job_interviews').select('*, job_opportunities(company,job_title)').eq('profile_id', profileId),
+        sb.from('job_offers').select('id,status').eq('profile_id', profileId).in('status', ['pending','negotiating','accepted']),
       ]);
       if (e1 || e2 || e3) { toast((e1||e2||e3).message, 'err'); return; }
       _opps = opps || [];
@@ -376,6 +379,7 @@
     document.getElementById('activity-modal').addEventListener('click', e => { if (e.target === e.currentTarget) e.currentTarget.classList.remove('open'); });
     document.getElementById('activity-modal-save').addEventListener('click', async () => {
       const payload = {
+        profile_id: profileId,
         activity_type: document.getElementById('am-activity_type').value || null,
         activity_date: document.getElementById('am-activity_date').value || localDateStr(),
         summary: document.getElementById('am-summary').value.trim() || null,
@@ -386,6 +390,8 @@
       document.getElementById('activity-modal').classList.remove('open');
     });
 
+    profileId = await ensureActiveProfileId(sb);
+    renderProfileSwitcher(sb, document.getElementById('profile-bar'), async () => { profileId = await ensureActiveProfileId(sb); load(); });
     load();
     injectRealtimeStyles();
     subscribeRealtime(sb, 'job-dashboard-live', ['job_opportunities','job_interviews','job_offers'], load, { indicatorId: 'rt-indicator' });

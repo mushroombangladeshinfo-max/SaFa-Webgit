@@ -89,6 +89,8 @@
       <button class="btn primary" id="add-btn">+ Add Offer</button>
     </div>
 
+    <div id="profile-bar"></div>
+
     <div class="kpi-grid">
       <div class="kpi"><div class="kpi-label">Total Offers</div><div class="kpi-val" id="kpi-total">—</div></div>
       <div class="kpi"><div class="kpi-label">Pending / Negotiating</div><div class="kpi-val" id="kpi-pending">—</div></div>
@@ -149,6 +151,7 @@
     import { subscribeRealtime, injectRealtimeStyles } from '/src/realtime.js';
     import { escapeHtml } from '/src/html-utils.js';
     import { OFFER_STATUSES, optionsHtml, valueLabelOptionsHtml } from '/src/job-constants.js';
+    import { ensureActiveProfileId, renderProfileSwitcher } from '/src/job-profile.js';
 
     document.documentElement.classList.add('auth-checking');
     const sb = createClient(
@@ -174,10 +177,10 @@
     // throughout) — offers are in EUR, not the farm business's BDT.
     const fmtMoney = n => n === null || n === undefined ? '—' : '€' + Number(n).toLocaleString('en');
 
-    let _all = [], _editId = null, _view = 'table';
+    let _all = [], _editId = null, _view = 'table', profileId = null;
 
     async function load() {
-      const { data, error } = await sb.from('job_offers').select('*, job_opportunities(id,company,job_title)').order('created_at', { ascending: false });
+      const { data, error } = await sb.from('job_offers').select('*, job_opportunities(id,company,job_title)').eq('profile_id', profileId).order('created_at', { ascending: false });
       if (error) { toast(error.message, 'err'); return; }
       _all = data || [];
       renderKpis();
@@ -254,7 +257,7 @@
     async function openModal(offer=null) {
       _editId = offer?.id || null;
       document.getElementById('modal-title').textContent = offer ? 'Edit Offer' : 'Add Offer';
-      const { data: opps } = await sb.from('job_opportunities').select('id,company,job_title').eq('closed', false).order('company');
+      const { data: opps } = await sb.from('job_opportunities').select('id,company,job_title').eq('profile_id', profileId).eq('closed', false).order('company');
       document.getElementById('f-opportunity_id').innerHTML = (opps||[]).map(o => `<option value="${o.id}" ${offer?.opportunity_id===o.id?'selected':''}>${escapeHtml(o.company)} — ${escapeHtml(o.job_title)}</option>`).join('');
       FIELDS.forEach(f => { if (f==='opportunity_id') return; const el = document.getElementById('f-'+f); el.value = offer?.[f] ?? (f==='status' ? 'pending' : ''); });
       document.getElementById('modal').classList.add('open');
@@ -267,7 +270,7 @@
     document.getElementById('modal-save').addEventListener('click', async () => {
       const opportunity_id = document.getElementById('f-opportunity_id').value;
       if (!opportunity_id) { toast('Select an opportunity', 'err'); return; }
-      const payload = { opportunity_id };
+      const payload = { profile_id: profileId, opportunity_id };
       payload.base_salary = document.getElementById('f-base_salary').value ? +document.getElementById('f-base_salary').value : null;
       payload.status = document.getElementById('f-status').value || 'pending';
       payload.start_date = document.getElementById('f-start_date').value || null;
@@ -302,7 +305,7 @@
         stage: 'accepted', closed: true, closed_outcome: 'Accepted', closed_date: localDateStr(),
       }).eq('id', opportunityId);
       await sb.from('job_activities').insert([{
-        opportunity_id: opportunityId, activity_type: 'Offer Discussion', activity_date: localDateStr(),
+        profile_id: profileId, opportunity_id: opportunityId, activity_type: 'Offer Discussion', activity_date: localDateStr(),
         summary: `Offer accepted${opp?.stage ? ' (was: '+opp.stage+')' : ''}`,
       }]);
       // Any other still-open offer for the SAME opportunity is now moot —
@@ -321,6 +324,8 @@
       load();
     };
 
+    profileId = await ensureActiveProfileId(sb);
+    renderProfileSwitcher(sb, document.getElementById('profile-bar'), async () => { profileId = await ensureActiveProfileId(sb); load(); });
     load();
     injectRealtimeStyles();
     subscribeRealtime(sb, 'job-offers-live', ['job_offers'], load, { indicatorId: 'rt-indicator' });

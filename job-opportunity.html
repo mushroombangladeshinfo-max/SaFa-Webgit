@@ -478,7 +478,7 @@
         const newStage = e.target.value;
         const { error } = await sb.from('job_opportunities').update({ stage: newStage, stage_entered_at: new Date().toISOString() }).eq('id', oppId);
         if (error) { toast(error.message, 'err'); return; }
-        await sb.from('job_activities').insert([{ opportunity_id: oppId, activity_type: 'Other', activity_date: localDateStr(), summary: `Stage changed: ${STAGE_LABEL[opp.stage]} → ${STAGE_LABEL[newStage]}` }]);
+        await sb.from('job_activities').insert([{ profile_id: opp.profile_id, opportunity_id: oppId, activity_type: 'Other', activity_date: localDateStr(), summary: `Stage changed: ${STAGE_LABEL[opp.stage]} → ${STAGE_LABEL[newStage]}` }]);
         toast('Stage updated');
         load();
       });
@@ -618,7 +618,7 @@
       try {
         const cfg = await loadAiCfg(sb);
         if (cfg.provider === 'openai' && !cfg.key) { toast('Configure a Groq key on the Home page first', 'err'); return; }
-        const { data: profile } = await sb.from('job_career_profile').select('*').eq('id', true).maybeSingle();
+        const { data: profile } = await sb.from('job_profiles').select('*').eq('id', opp.profile_id).maybeSingle();
         const profileText = ['education','work_experience','projects','skills','languages','certifications','career_preferences','work_authorization','target_locations','target_roles','salary_preferences','availability','career_narrative']
           .map(k => profile?.[k] ? `${k}: ${profile[k]}` : null).filter(Boolean).join('\n') || '(No career profile saved yet — ratings and analysis will be limited.)';
         const shape = `{"recommendation":"APPLY STRONGLY"|"APPLY"|"APPLY SELECTIVELY"|"REVIEW"|"SKIP","reasons":[string],"ratings":{"exp":1-5,"skills":1-5,"role":1-5,"edu":1-5,"lang":1-5,"career_value":1-5,"location":1-5,"company_attract":1-5,"networking":1-5},"strong_matches":[string],"gaps":[string],"hard_blockers":[string],"recoverable_gaps":[string],"application_strategy":string,"networking_recommendation":string,"best_cv":string,"best_next_action":string}`;
@@ -683,7 +683,7 @@
       const { error } = await sb.from('job_opportunities').update(payload).eq('id', oppId);
       if (error) { toast(error.message, 'err'); return; }
       if (justApplied) {
-        await sb.from('job_activities').insert([{ opportunity_id: oppId, activity_type: 'Application', activity_date: payload.applied_date || localDateStr(), summary: 'Application submitted' }]);
+        await sb.from('job_activities').insert([{ profile_id: opp.profile_id, opportunity_id: oppId, activity_type: 'Application', activity_date: payload.applied_date || localDateStr(), summary: 'Application submitted' }]);
       }
       toast('Application details saved');
       load();
@@ -728,7 +728,7 @@
       const ids = [...new Set((acts||[]).map(a=>a.contact_id))];
       let rows = [];
       if (ids.length) {
-        const { data } = await sb.from('job_contacts').select('*').in('id', ids);
+        const { data } = await sb.from('job_contacts').select('*').in('id', ids).eq('profile_id', opp.profile_id);
         rows = data || [];
       }
       const tbody = document.querySelector('#contacts-table tbody');
@@ -739,7 +739,7 @@
       </tr>`).join('');
     }
     document.getElementById('add-contact-btn').addEventListener('click', async () => {
-      const { data } = await sb.from('job_contacts').select('id,full_name,company').order('full_name');
+      const { data } = await sb.from('job_contacts').select('id,full_name,company').eq('profile_id', opp.profile_id).order('full_name');
       document.getElementById('cm-existing').innerHTML = '<option value="">— None, create new below —</option>' +
         (data||[]).map(c => `<option value="${c.id}">${escapeHtml(c.full_name)}${c.company?' ('+escapeHtml(c.company)+')':''}</option>`).join('');
       document.getElementById('cm-full_name').value = '';
@@ -754,13 +754,13 @@
         const fullName = document.getElementById('cm-full_name').value.trim();
         if (!fullName) { toast('Pick an existing contact or enter a name', 'err'); return; }
         const { data, error } = await sb.from('job_contacts').insert([{
-          full_name: fullName, contact_type: document.getElementById('cm-contact_type').value || null, company: opp.company,
+          profile_id: opp.profile_id, full_name: fullName, contact_type: document.getElementById('cm-contact_type').value || null, company: opp.company,
         }]).select().single();
         if (error) { toast(error.message, 'err'); return; }
         contactId = data.id;
       }
       const { error: actErr } = await sb.from('job_activities').insert([{
-        opportunity_id: oppId, contact_id: contactId, activity_type: 'Other', activity_date: localDateStr(), summary: 'Contact linked to this opportunity',
+        profile_id: opp.profile_id, opportunity_id: oppId, contact_id: contactId, activity_type: 'Other', activity_date: localDateStr(), summary: 'Contact linked to this opportunity',
       }]);
       if (actErr) { toast(actErr.message, 'err'); return; }
       toast('Contact linked');
@@ -788,6 +788,7 @@
     document.getElementById('interview-modal').addEventListener('click', e => { if (e.target === e.currentTarget) e.currentTarget.classList.remove('open'); });
     document.getElementById('interview-modal-save').addEventListener('click', async () => {
       const payload = {
+        profile_id: opp.profile_id,
         opportunity_id: oppId,
         round: document.getElementById('im-round').value.trim() || null,
         interview_type: document.getElementById('im-interview_type').value || null,
@@ -796,7 +797,7 @@
       };
       const { error } = await sb.from('job_interviews').insert([payload]);
       if (error) { toast(error.message, 'err'); return; }
-      await sb.from('job_activities').insert([{ opportunity_id: oppId, activity_type: 'Interview', activity_date: payload.interview_date || localDateStr(), summary: `Interview scheduled${payload.round?': '+payload.round:''}` }]);
+      await sb.from('job_activities').insert([{ profile_id: opp.profile_id, opportunity_id: oppId, activity_type: 'Interview', activity_date: payload.interview_date || localDateStr(), summary: `Interview scheduled${payload.round?': '+payload.round:''}` }]);
       toast('Interview added');
       document.getElementById('interview-modal').classList.remove('open');
       loadInterviews();
@@ -836,6 +837,7 @@
     document.getElementById('activity-modal').addEventListener('click', e => { if (e.target === e.currentTarget) e.currentTarget.classList.remove('open'); });
     document.getElementById('activity-modal-save').addEventListener('click', async () => {
       const payload = {
+        profile_id: opp.profile_id,
         opportunity_id: oppId,
         activity_type: document.getElementById('am-activity_type').value || null,
         activity_date: document.getElementById('am-activity_date').value || localDateStr(),
@@ -876,7 +878,7 @@
       if (closedOutcome === 'Accepted') payload.stage = 'accepted';
       const { error } = await sb.from('job_opportunities').update(payload).eq('id', oppId);
       if (error) { toast(error.message, 'err'); return; }
-      await sb.from('job_activities').insert([{ opportunity_id: oppId, activity_type: 'Rejection Feedback', activity_date: payload.closed_date, summary: `Opportunity closed${payload.known_reason?': '+payload.known_reason:''}` }]);
+      await sb.from('job_activities').insert([{ profile_id: opp.profile_id, opportunity_id: oppId, activity_type: 'Rejection Feedback', activity_date: payload.closed_date, summary: `Opportunity closed${payload.known_reason?': '+payload.known_reason:''}` }]);
       // Mirrors job-offers.html's accept cascade in reverse: closing with
       // any non-accepted outcome means no offer for this role is still
       // live, so any dangling pending/negotiating offer would otherwise
