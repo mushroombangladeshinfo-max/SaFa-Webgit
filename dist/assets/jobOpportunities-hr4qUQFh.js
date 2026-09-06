@@ -20,7 +20,7 @@ import"./modulepreload-polyfill-B5Qt9EMX.js";import{createClient as Q}from"https
         </tr>`}).join("")}function be(){const e=Y().filter(n=>!n.closed),t=document.getElementById("kanban-board");t.innerHTML=N.map(([n,i])=>{const o=e.filter(a=>a.stage===n);return`<div class="kanban-col" data-stage="${n}">
           <div class="kanban-col-head"><span>${i}</span><span>${o.length}</span></div>
           <div class="kanban-col-body" data-stage="${n}">
-            ${o.map(a=>{const c=T(a.fit_manual,a.fit_ai),f=S(a);return`<div class="kanban-card" draggable="true" data-id="${a.id}" onclick="window.editOpp('${a.id}')">
+            ${o.map(a=>{const c=T(a.fit_manual,a.fit_ai),f=S(a);return`<div class="kanban-card" draggable="true" data-id="${a.id}" onclick="window.location.href='job-opportunity.html?id=${a.id}'">
                 <div class="kc-company">${r(a.company)}</div>
                 <div class="kc-title">${r(a.job_title)}</div>
                 <div class="kc-meta">
