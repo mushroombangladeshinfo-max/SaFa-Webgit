@@ -40,17 +40,41 @@
     .profile-row-name.active{color:var(--al);font-weight:500;}
     .profile-row-actions{display:flex;gap:6px;}
     .btn.sm{padding:6px 10px;font-size:8px;}
+    .diagnostic-status{display:inline-flex;align-items:center;gap:6px;font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:5px 10px;border-radius:20px;margin-bottom:14px;}
+    .diagnostic-status.draft{background:rgba(196,154,60,.12);color:var(--al);}
+    .diagnostic-status.confirmed{background:rgba(95,207,128,.12);color:var(--green);}
+    .diag-section{margin-top:16px;}
+    .diag-section h4{font-family:'Syne','Hind Siliguri',sans-serif;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--cl);margin:0 0 6px;}
+    .diag-section ul{margin:0;padding-left:18px;font-size:13px;}
+    .diag-section p{margin:4px 0;}
+    .diag-stat-row{display:flex;gap:16px;margin:10px 0;flex-wrap:wrap;}
+    .diag-stat{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--cm);}
+    .diag-stat strong{color:var(--c);}
+    .weakness-item{border-left:3px solid var(--red);padding:6px 0 6px 10px;margin-bottom:8px;font-size:13px;}
+    .weakness-item.medium{border-left-color:var(--al);}
+    .weakness-item.low{border-left-color:var(--cl);}
+    .evidence-item{font-size:13px;padding:4px 0;}
+    .evidence-tag{display:inline-block;font-family:'Syne','Hind Siliguri',sans-serif;font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:2px 6px;border-radius:4px;margin-right:6px;}
+    .evidence-tag.verified{background:rgba(95,207,128,.15);color:var(--green);}
+    .evidence-tag.inferred{background:rgba(80,200,255,.15);color:#50c8ff;}
+    .evidence-tag.unknown{background:rgba(255,255,255,.06);color:var(--cl);}
+    .question-card{background:rgba(196,154,60,.06);border:1px solid rgba(196,154,60,.2);border-radius:10px;padding:16px;margin-top:14px;}
+    .question-card .q-meta{font-size:11px;color:var(--cl);margin-bottom:8px;}
+    .question-card .q-text{font-size:15px;color:var(--c);margin-bottom:6px;}
+    .question-card .q-why{font-size:12px;color:var(--cl);margin-bottom:12px;font-style:italic;}
     .toast-wrap{position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;gap:8px;}
     .toast{padding:12px 18px;border-radius:8px;font-family:'Syne','Hind Siliguri',sans-serif;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;animation:fadeUp .3s ease;}
     .toast.ok{background:#1a3322;border:1px solid rgba(95,207,128,.3);color:var(--green);}
     .toast.err{background:#2a1510;border:1px solid rgba(224,90,43,.3);color:var(--red);}
   </style>
-  <script type="module" crossorigin src="/assets/jobSettings-D9-LqXq_.js"></script>
+  <script type="module" crossorigin src="/assets/jobSettings-CcuAO4It.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
   <link rel="modulepreload" crossorigin href="/assets/admin-auth-4ZiUUGs_.js">
   <link rel="modulepreload" crossorigin href="/assets/admin-nav-XMl22aYY.js">
   <link rel="modulepreload" crossorigin href="/assets/html-utils-B4ngS3jJ.js">
   <link rel="modulepreload" crossorigin href="/assets/job-profile-CmQMFR3w.js">
+  <link rel="modulepreload" crossorigin href="/assets/ai-client-Ym7whptS.js">
+  <link rel="modulepreload" crossorigin href="/assets/career-diagnostic-DIerwbN9.js">
 </head>
 <body>
 
@@ -67,6 +91,19 @@
       <div class="card-hint">Separate job searches tracked side by side — each has its own opportunities, contacts, interviews, offers, skills, and the career profile below. The highlighted one is active everywhere else in Job Search.</div>
       <div id="profiles-list"></div>
       <div style="margin-top:12px;"><button class="btn" id="add-profile-btn">+ Add Profile</button></div>
+    </div>
+
+    <div class="card" id="diagnostic-card">
+      <div class="card-title">Career Diagnostic</div>
+      <div class="card-hint">Paste your CV/background once — AI critically reviews it, asks only the questions that actually change your job-search strategy, then you confirm a structured profile. AI Fit Analysis and Interview Prep won't run against an unconfirmed profile.</div>
+      <div id="diagnostic-status" class="diagnostic-status draft">Draft — not yet confirmed</div>
+      <div class="field"><label for="f-master_cv_text">Paste your CV / background</label><textarea id="f-master_cv_text" rows="8" placeholder="Paste your CV text, LinkedIn summary, or a plain description of your education, experience, skills, and what you're looking for."></textarea></div>
+      <button class="btn primary" id="run-diagnostic-btn">Run Career Diagnostic</button>
+      <div id="diagnostic-results" style="display:none;margin-top:18px;"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Manual Fields <span style="color:var(--cl);font-weight:400;text-transform:none;letter-spacing:0;">(optional — the Career Diagnostic above is the primary way AI understands your background)</span></div>
     </div>
 
     <div class="card">
