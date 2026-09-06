@@ -210,6 +210,7 @@
     import { escapeHtml } from '/src/html-utils.js';
     import { INTERVIEW_TYPES, QUESTION_TAGS, PREPARATION_STATUSES, optionsHtml, valueLabelOptionsHtml } from '/src/job-constants.js';
     import { ensureActiveProfileId, renderProfileSwitcher } from '/src/job-profile.js';
+    import { structuredProfileToText } from '/src/career-diagnostic.js';
 
     document.documentElement.classList.add('auth-checking');
     const sb = createClient(
@@ -364,8 +365,11 @@
         const cfg = await loadAiCfg(sb);
         if (cfg.provider === 'openai' && !cfg.key) { toast('Configure a Groq key on the Home page first', 'err'); return; }
         const { data: profile } = await sb.from('job_profiles').select('*').eq('id', iv.profile_id).maybeSingle();
-        const profileText = ['education','work_experience','projects','skills','languages','career_narrative']
-          .map(k => profile?.[k] ? `${k}: ${profile[k]}` : null).filter(Boolean).join('\n') || '(no career profile saved yet)';
+        if (profile?.status !== 'confirmed') { toast('Complete and confirm your Career Profile diagnostic first — go to Career Profile page', 'err'); return; }
+        const profileText = structuredProfileToText(profile.structured_profile)
+          || ['education','work_experience','projects','skills','languages','career_narrative']
+            .map(k => profile?.[k] ? `${k}: ${profile[k]}` : null).filter(Boolean).join('\n')
+          || '(no career profile saved yet)';
         const jd = iv.job_opportunities?.job_description || '(no job description saved)';
         const { data: priorRows } = await sb.from('job_interviews').select('round,interview_type,post_interview_reflection').eq('opportunity_id', iv.opportunity_id).neq('id', ivId).not('post_interview_reflection', 'is', null);
         const priorText = (priorRows||[]).map(p => `${p.round||p.interview_type}: ${p.post_interview_reflection}`).join('\n') || '(none yet)';

@@ -40,6 +40,28 @@
     .profile-row-name.active{color:var(--al);font-weight:500;}
     .profile-row-actions{display:flex;gap:6px;}
     .btn.sm{padding:6px 10px;font-size:8px;}
+    .diagnostic-status{display:inline-flex;align-items:center;gap:6px;font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:5px 10px;border-radius:20px;margin-bottom:14px;}
+    .diagnostic-status.draft{background:rgba(196,154,60,.12);color:var(--al);}
+    .diagnostic-status.confirmed{background:rgba(95,207,128,.12);color:var(--green);}
+    .diag-section{margin-top:16px;}
+    .diag-section h4{font-family:'Syne','Hind Siliguri',sans-serif;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--cl);margin:0 0 6px;}
+    .diag-section ul{margin:0;padding-left:18px;font-size:13px;}
+    .diag-section p{margin:4px 0;}
+    .diag-stat-row{display:flex;gap:16px;margin:10px 0;flex-wrap:wrap;}
+    .diag-stat{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--cm);}
+    .diag-stat strong{color:var(--c);}
+    .weakness-item{border-left:3px solid var(--red);padding:6px 0 6px 10px;margin-bottom:8px;font-size:13px;}
+    .weakness-item.medium{border-left-color:var(--al);}
+    .weakness-item.low{border-left-color:var(--cl);}
+    .evidence-item{font-size:13px;padding:4px 0;}
+    .evidence-tag{display:inline-block;font-family:'Syne','Hind Siliguri',sans-serif;font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:2px 6px;border-radius:4px;margin-right:6px;}
+    .evidence-tag.verified{background:rgba(95,207,128,.15);color:var(--green);}
+    .evidence-tag.inferred{background:rgba(80,200,255,.15);color:#50c8ff;}
+    .evidence-tag.unknown{background:rgba(255,255,255,.06);color:var(--cl);}
+    .question-card{background:rgba(196,154,60,.06);border:1px solid rgba(196,154,60,.2);border-radius:10px;padding:16px;margin-top:14px;}
+    .question-card .q-meta{font-size:11px;color:var(--cl);margin-bottom:8px;}
+    .question-card .q-text{font-size:15px;color:var(--c);margin-bottom:6px;}
+    .question-card .q-why{font-size:12px;color:var(--cl);margin-bottom:12px;font-style:italic;}
     .toast-wrap{position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;gap:8px;}
     .toast{padding:12px 18px;border-radius:8px;font-family:'Syne','Hind Siliguri',sans-serif;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;animation:fadeUp .3s ease;}
     .toast.ok{background:#1a3322;border:1px solid rgba(95,207,128,.3);color:var(--green);}
@@ -61,6 +83,19 @@
       <div class="card-hint">Separate job searches tracked side by side — each has its own opportunities, contacts, interviews, offers, skills, and the career profile below. The highlighted one is active everywhere else in Job Search.</div>
       <div id="profiles-list"></div>
       <div style="margin-top:12px;"><button class="btn" id="add-profile-btn">+ Add Profile</button></div>
+    </div>
+
+    <div class="card" id="diagnostic-card">
+      <div class="card-title">Career Diagnostic</div>
+      <div class="card-hint">Paste your CV/background once — AI critically reviews it, asks only the questions that actually change your job-search strategy, then you confirm a structured profile. AI Fit Analysis and Interview Prep won't run against an unconfirmed profile.</div>
+      <div id="diagnostic-status" class="diagnostic-status draft">Draft — not yet confirmed</div>
+      <div class="field"><label for="f-master_cv_text">Paste your CV / background</label><textarea id="f-master_cv_text" rows="8" placeholder="Paste your CV text, LinkedIn summary, or a plain description of your education, experience, skills, and what you're looking for."></textarea></div>
+      <button class="btn primary" id="run-diagnostic-btn">Run Career Diagnostic</button>
+      <div id="diagnostic-results" style="display:none;margin-top:18px;"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Manual Fields <span style="color:var(--cl);font-weight:400;text-transform:none;letter-spacing:0;">(optional — the Career Diagnostic above is the primary way AI understands your background)</span></div>
     </div>
 
     <div class="card">
@@ -129,6 +164,11 @@
     import { mountAdminNav } from '/src/admin-nav.js';
     import { escapeHtml } from '/src/html-utils.js';
     import { getActiveProfileId, setActiveProfileId, loadProfiles, ensureActiveProfileId, renderProfileSwitcher } from '/src/job-profile.js';
+    import { loadAiCfg, chatComplete } from '/src/ai-client.js';
+    import {
+      MAX_DIAGNOSTIC_QUESTIONS, buildInitialMessages, buildContinuationMessages,
+      buildCorrectionMessages, enforceDiagnosticConsistency, minimiseCvPiiForAi,
+    } from '/src/career-diagnostic.js';
 
     document.documentElement.classList.add('auth-checking');
     const sb = createClient(
@@ -154,11 +194,16 @@
       'availability','career_narrative'];
 
     let profileId = null;
+    let diagProfile = null;
+    let diagBusy = false;
 
     async function load() {
       const { data, error } = await sb.from('job_profiles').select('*').eq('id', profileId).maybeSingle();
       if (error) { toast(error.message, 'err'); return; }
       FIELDS.forEach(f => { document.getElementById('f-'+f).value = data?.[f] || ''; });
+      diagProfile = data || {};
+      document.getElementById('f-master_cv_text').value = diagProfile.master_cv_text || '';
+      renderDiagnostic();
     }
 
     document.getElementById('save-btn').addEventListener('click', async () => {
@@ -168,6 +213,230 @@
       if (error) { toast(error.message, 'err'); return; }
       toast('Profile saved');
     });
+
+    /* ── Career Diagnostic ── */
+    function currentInitialIntent() {
+      return {
+        career_preferences: document.getElementById('f-career_preferences').value.trim(),
+        target_roles: document.getElementById('f-target_roles').value.trim(),
+        target_locations: document.getElementById('f-target_locations').value.trim(),
+        work_authorization: document.getElementById('f-work_authorization').value.trim(),
+        salary_preferences: document.getElementById('f-salary_preferences').value.trim(),
+        availability: document.getElementById('f-availability').value.trim(),
+      };
+    }
+
+    function diagListOrDash(arr) {
+      return (arr && arr.length) ? `<ul>${arr.map(x=>`<li>${escapeHtml(x)}</li>`).join('')}</ul>` : '<div style="color:var(--cl);font-size:13px;">None noted.</div>';
+    }
+
+    function renderDiagnostic() {
+      const statusEl = document.getElementById('diagnostic-status');
+      const confirmed = diagProfile.status === 'confirmed';
+      statusEl.className = `diagnostic-status ${confirmed ? 'confirmed' : 'draft'}`;
+      statusEl.textContent = confirmed
+        ? `Confirmed ✓ — v${diagProfile.profile_version}${diagProfile.confirmed_at ? ' · ' + new Date(diagProfile.confirmed_at).toLocaleDateString() : ''}`
+        : 'Draft — not yet confirmed';
+      document.getElementById('run-diagnostic-btn').textContent = diagProfile.diagnostic_session ? 'Re-run Career Diagnostic' : 'Run Career Diagnostic';
+
+      const results = document.getElementById('diagnostic-results');
+      const session = diagProfile.diagnostic_session;
+      if (!session) { results.style.display = 'none'; results.innerHTML = ''; return; }
+      results.style.display = '';
+      results.innerHTML = renderDiagnosticHtml(session);
+      wireDiagnosticActions(session);
+    }
+
+    function renderDiagnosticHtml(session) {
+      const d = session.diagnostic || {};
+      const pd = session.profileDraft || {};
+      const sd = session.strategyDraft || {};
+      const q = session.nextQuestion;
+
+      const weaknesses = (d.weaknesses||[]).map(w => `<div class="weakness-item ${escapeHtml(w.severity)}"><strong>${escapeHtml(w.issue)}</strong><div style="color:var(--cl);font-size:12px;margin-top:2px;">${escapeHtml(w.whyItMatters)}</div><div style="font-size:12px;margin-top:2px;">→ ${escapeHtml(w.recommendedAction)}</div></div>`).join('') || '<div style="color:var(--cl);font-size:13px;">None noted.</div>';
+
+      const targetAlignment = (d.targetAlignment||[]).map(t => `<div class="evidence-item"><strong>${escapeHtml(t.role)}</strong> — ${Number(t.alignment)||0}/100<div style="color:var(--cl);font-size:12px;">${escapeHtml(t.rationale)}${t.majorGap ? ' · Gap: '+escapeHtml(t.majorGap) : ''}</div></div>`).join('') || '<div style="color:var(--cl);font-size:13px;">Not assessed.</div>';
+
+      const skillsHtml = (pd.skills||[]).map(s => `<div class="evidence-item"><span class="evidence-tag ${escapeHtml(s.status)}">${escapeHtml(s.status)}</span><strong>${escapeHtml(s.name)}</strong> <span style="color:var(--cl);font-size:12px;">(${escapeHtml(s.strength)} evidence)</span>${s.evidence ? `<div style="color:var(--cl);font-size:12px;">${escapeHtml(s.evidence)}</div>` : ''}</div>`).join('') || '<div style="color:var(--cl);font-size:13px;">None found.</div>';
+
+      const experienceHtml = (pd.experienceEvidence||[]).map(e => `<div class="evidence-item"><span class="evidence-tag ${escapeHtml(e.status)}">${escapeHtml(e.status)}</span>${escapeHtml(e.claim)}<div style="color:var(--cl);font-size:12px;">${escapeHtml(e.evidence)}</div></div>`).join('') || '<div style="color:var(--cl);font-size:13px;">None found.</div>';
+
+      const languagesHtml = (pd.languages||[]).map(l => `<div class="evidence-item"><span class="evidence-tag ${escapeHtml(l.status)}">${escapeHtml(l.status)}</span>${escapeHtml(l.language)} — ${escapeHtml(l.level)}${l.practicalUse ? ' · '+escapeHtml(l.practicalUse) : ''}</div>`).join('') || '<div style="color:var(--cl);font-size:13px;">None found.</div>';
+
+      let actionHtml;
+      if (q) {
+        const answered = (diagProfile.diagnostic_answers||[]).length;
+        const choiceButtons = (q.answerType === 'yes_no')
+          ? `<div style="display:flex;gap:10px;">${['Yes','No'].map(o=>`<button class="btn" data-answer="${o}">${o}</button>`).join('')}</div>`
+          : ((q.answerType === 'single_choice' || q.answerType === 'multi_choice') && q.options?.length)
+          ? `<div style="display:flex;gap:8px;flex-wrap:wrap;">${q.options.map(o=>`<button class="btn" data-answer="${escapeHtml(o)}">${escapeHtml(o)}</button>`).join('')}</div>`
+          : '';
+        actionHtml = `
+          <div class="question-card">
+            <div class="q-meta">Question ${answered+1} of up to ${MAX_DIAGNOSTIC_QUESTIONS} · ${escapeHtml(q.category)}</div>
+            <div class="q-text">${escapeHtml(q.question)}</div>
+            <div class="q-why">Why this matters: ${escapeHtml(q.whyItMatters)}</div>
+            ${choiceButtons}
+            <textarea id="answer-free-text" rows="2" placeholder="${choiceButtons ? 'Or type your own answer...' : 'Your answer...'}" style="margin-top:8px;"></textarea>
+            <button class="btn primary" id="submit-free-answer-btn" style="margin-top:8px;">Submit</button>
+          </div>`;
+      } else {
+        actionHtml = `
+          <div class="question-card">
+            <div class="q-text">Ready for confirmation.</div>
+            <div class="q-why">Review the profile above — confirm it, or describe what's wrong before confirming.</div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;">
+              <button class="btn primary" id="confirm-profile-btn">Confirm Profile</button>
+              <button class="btn" id="show-correct-btn">Something's Wrong — Correct It</button>
+            </div>
+            <div id="correct-box" style="display:none;margin-top:12px;">
+              <textarea id="correction-text" rows="3" placeholder="What did the AI get wrong? e.g. &quot;My German is actually B2, not B1&quot; or &quot;I don't want Business Development at all.&quot;"></textarea>
+              <button class="btn primary" id="submit-correction-btn" style="margin-top:8px;">Submit Correction</button>
+            </div>
+          </div>`;
+      }
+
+      return `
+        <div class="diag-stat-row">
+          <div class="diag-stat">Profile completeness <strong>${session.profileCompleteness ?? 0}%</strong></div>
+          <div class="diag-stat">Intent confidence <strong>${escapeHtml(session.careerIntentConfidence || '—')}</strong></div>
+          <div class="diag-stat">CV quality <strong>${d.cvQualityScore ?? '—'}/100</strong></div>
+        </div>
+        <div class="diag-section"><h4>Current Positioning</h4><p style="font-size:13px;">${escapeHtml(d.currentPositioning)||'—'}</p></div>
+        <div class="diag-section"><h4>Likely Seniority</h4><p style="font-size:13px;">${escapeHtml(d.likelySeniority)||'—'}</p></div>
+        <div class="diag-section"><h4>Realism Assessment</h4><p style="font-size:13px;">${escapeHtml(d.realismAssessment)||'—'}</p></div>
+        <div class="diag-section"><h4>Strongest Assets</h4>${diagListOrDash(d.strongestAssets)}</div>
+        <div class="diag-section"><h4>Weaknesses</h4>${weaknesses}</div>
+        <div class="diag-section"><h4>Contradictions</h4>${diagListOrDash(d.contradictions)}</div>
+        <div class="diag-section"><h4>Missing Evidence</h4>${diagListOrDash(d.missingEvidence)}</div>
+        <div class="diag-section"><h4>Target Role Alignment</h4>${targetAlignment}</div>
+        <div class="diag-section"><h4>Experience Evidence</h4>${experienceHtml}</div>
+        <div class="diag-section"><h4>Skills</h4>${skillsHtml}</div>
+        <div class="diag-section"><h4>Languages</h4>${languagesHtml}</div>
+        <div class="diag-section"><h4>Recommended Strategy</h4>
+          <p style="font-size:13px;"><strong>Primary path:</strong> ${escapeHtml(sd.recommendedPrimaryPath)||'—'}</p>
+          <p style="font-size:13px;"><strong>Secondary path:</strong> ${escapeHtml(sd.secondaryPath)||'—'}</p>
+          ${sd.roleSearchAllocation?.length ? `<p style="font-size:13px;"><strong>Allocation:</strong> ${sd.roleSearchAllocation.map(escapeHtml).join(', ')}</p>` : ''}
+          ${sd.immediatePriorities?.length ? `<p style="font-size:13px;"><strong>Immediate priorities:</strong> ${sd.immediatePriorities.map(escapeHtml).join(', ')}</p>` : ''}
+          ${sd.avoidForNow?.length ? `<p style="font-size:13px;"><strong>Avoid for now:</strong> ${sd.avoidForNow.map(escapeHtml).join(', ')}</p>` : ''}
+        </div>
+        ${actionHtml}
+      `;
+    }
+
+    function wireDiagnosticActions(session) {
+      const q = session.nextQuestion;
+      if (q) {
+        document.querySelectorAll('[data-answer]').forEach(b => b.addEventListener('click', () => submitAnswer(q, b.dataset.answer)));
+        document.getElementById('submit-free-answer-btn')?.addEventListener('click', () => {
+          const val = document.getElementById('answer-free-text').value.trim();
+          if (!val) { toast('Type an answer first', 'err'); return; }
+          submitAnswer(q, val);
+        });
+      } else {
+        document.getElementById('confirm-profile-btn')?.addEventListener('click', confirmProfile);
+        document.getElementById('show-correct-btn')?.addEventListener('click', () => { document.getElementById('correct-box').style.display = ''; });
+        document.getElementById('submit-correction-btn')?.addEventListener('click', submitCorrection);
+      }
+    }
+
+    document.getElementById('run-diagnostic-btn').addEventListener('click', async () => {
+      const cvText = document.getElementById('f-master_cv_text').value.trim();
+      if (cvText.length < 80) { toast('Paste a fuller CV/background first', 'err'); return; }
+      if (diagBusy) return;
+      diagBusy = true;
+      const btn = document.getElementById('run-diagnostic-btn');
+      btn.textContent = 'Analysing...'; btn.disabled = true;
+      try {
+        const cfg = await loadAiCfg(sb);
+        if (cfg.provider === 'openai' && !cfg.key) { toast('Configure a Groq key on the Home page first', 'err'); return; }
+        const messages = buildInitialMessages({ cvText: minimiseCvPiiForAi(cvText), initialIntent: currentInitialIntent() });
+        const reply = await chatComplete(cfg, messages, { json: true });
+        const data = enforceDiagnosticConsistency(JSON.parse(reply));
+        const { error } = await sb.from('job_profiles').update({
+          master_cv_text: cvText,
+          diagnostic_session: data,
+          diagnostic_answers: [],
+        }).eq('id', profileId);
+        if (error) { toast(error.message, 'err'); return; }
+        toast('Diagnostic complete');
+        await load();
+      } catch (e) {
+        toast('Diagnostic failed: ' + e.message, 'err');
+      } finally {
+        btn.textContent = diagProfile?.diagnostic_session ? 'Re-run Career Diagnostic' : 'Run Career Diagnostic';
+        btn.disabled = false;
+        diagBusy = false;
+      }
+    });
+
+    async function submitAnswer(question, answerText) {
+      if (diagBusy) return;
+      diagBusy = true;
+      try {
+        const cfg = await loadAiCfg(sb);
+        const answers = [...(diagProfile.diagnostic_answers||[]), { question: question.question, answer: answerText, answered_at: new Date().toISOString() }];
+        const questionLimitReached = answers.length >= MAX_DIAGNOSTIC_QUESTIONS;
+        const messages = buildContinuationMessages({ initialIntent: currentInitialIntent(), previousResult: diagProfile.diagnostic_session, answers, questionLimitReached });
+        const reply = await chatComplete(cfg, messages, { json: true });
+        const data = enforceDiagnosticConsistency(JSON.parse(reply), { forceReady: questionLimitReached });
+        const { error } = await sb.from('job_profiles').update({ diagnostic_session: data, diagnostic_answers: answers }).eq('id', profileId);
+        if (error) { toast(error.message, 'err'); return; }
+        await load();
+      } catch (e) {
+        toast('Failed to process answer: ' + e.message, 'err');
+      } finally {
+        diagBusy = false;
+      }
+    }
+
+    async function submitCorrection() {
+      const correction = document.getElementById('correction-text').value.trim();
+      if (!correction) { toast('Describe the correction first', 'err'); return; }
+      if (diagBusy) return;
+      diagBusy = true;
+      const btn = document.getElementById('submit-correction-btn');
+      btn.disabled = true;
+      try {
+        const cfg = await loadAiCfg(sb);
+        const answers = [...(diagProfile.diagnostic_answers||[]), { question: 'User correction before confirmation', answer: correction, answered_at: new Date().toISOString() }];
+        const messages = buildCorrectionMessages({ initialIntent: currentInitialIntent(), previousResult: diagProfile.diagnostic_session, answers, correction });
+        const reply = await chatComplete(cfg, messages, { json: true });
+        const data = enforceDiagnosticConsistency(JSON.parse(reply));
+        const { error } = await sb.from('job_profiles').update({ diagnostic_session: data, diagnostic_answers: answers }).eq('id', profileId);
+        if (error) { toast(error.message, 'err'); return; }
+        await load();
+      } catch (e) {
+        toast('Correction failed: ' + e.message, 'err');
+      } finally {
+        btn.disabled = false;
+        diagBusy = false;
+      }
+    }
+
+    async function confirmProfile() {
+      const session = diagProfile.diagnostic_session;
+      if (!session || session.status !== 'ready_for_confirmation') { toast('Not ready to confirm yet', 'err'); return; }
+      if (diagBusy) return;
+      diagBusy = true;
+      try {
+        const payload = {
+          status: 'confirmed',
+          structured_profile: session.profileDraft,
+          strategy_json: session.strategyDraft,
+          profile_completeness: session.profileCompleteness,
+          intent_confidence: session.careerIntentConfidence,
+          profile_version: (diagProfile.profile_version || 0) + 1,
+          confirmed_at: new Date().toISOString(),
+        };
+        const { error } = await sb.from('job_profiles').update(payload).eq('id', profileId);
+        if (error) { toast(error.message, 'err'); return; }
+        toast('Career profile confirmed — AI Fit Analysis and Interview Prep are now unlocked');
+        await load();
+      } finally {
+        diagBusy = false;
+      }
+    }
 
     /* ── Profiles management ── */
     async function renderProfilesList() {

@@ -374,6 +374,7 @@
     import { escapeHtml } from '/src/html-utils.js';
     import { STAGES, STAGE_LABEL, STAGE_ORDER, CAREER_TRACKS, EMPLOYMENT_TYPES, SOURCES, GERMAN_REQUIREMENTS, YES_NO_UNCLEAR, CONTACT_TYPES, INTERVIEW_TYPES, KNOWN_REASONS, ACTIVITY_TYPES, CLOSE_OUTCOMES, optionsHtml, valueLabelOptionsHtml } from '/src/job-constants.js';
     import { subscribeRealtime, injectRealtimeStyles } from '/src/realtime.js';
+    import { structuredProfileToText } from '/src/career-diagnostic.js';
 
     document.documentElement.classList.add('auth-checking');
     const sb = createClient(
@@ -586,10 +587,12 @@
         <h4>Weakest Areas</h4>${listOrDash(ai.gaps)}
         ${ai.hard_blockers?.length ? `<h4>Hard Blockers</h4>${listOrDash(ai.hard_blockers)}` : ''}
         ${ai.recoverable_gaps?.length ? `<h4>Recoverable Gaps</h4>${listOrDash(ai.recoverable_gaps)}` : ''}
+        ${ai.missing_evidence?.length ? `<h4>Missing Evidence</h4>${listOrDash(ai.missing_evidence)}` : ''}
         ${ai.application_strategy ? `<h4>Application Strategy</h4><div>${escapeHtml(ai.application_strategy)}</div>` : ''}
         ${ai.networking_recommendation ? `<h4>Networking Recommendation</h4><div>${escapeHtml(ai.networking_recommendation)}</div>` : ''}
         ${ai.best_cv ? `<h4>Best CV</h4><div>${escapeHtml(ai.best_cv)}</div>` : ''}
         ${ai.best_next_action ? `<h4>Best Next Action</h4><div>${escapeHtml(ai.best_next_action)}</div>` : ''}
+        ${ai.confidence_note ? `<h4>Confidence Note</h4><div style="color:var(--cl);font-style:italic;">${escapeHtml(ai.confidence_note)}</div>` : ''}
       `;
     }
 
@@ -619,11 +622,14 @@
         const cfg = await loadAiCfg(sb);
         if (cfg.provider === 'openai' && !cfg.key) { toast('Configure a Groq key on the Home page first', 'err'); return; }
         const { data: profile } = await sb.from('job_profiles').select('*').eq('id', opp.profile_id).maybeSingle();
-        const profileText = ['education','work_experience','projects','skills','languages','certifications','career_preferences','work_authorization','target_locations','target_roles','salary_preferences','availability','career_narrative']
-          .map(k => profile?.[k] ? `${k}: ${profile[k]}` : null).filter(Boolean).join('\n') || '(No career profile saved yet — ratings and analysis will be limited.)';
-        const shape = `{"recommendation":"APPLY STRONGLY"|"APPLY"|"APPLY SELECTIVELY"|"REVIEW"|"SKIP","reasons":[string],"ratings":{"exp":1-5,"skills":1-5,"role":1-5,"edu":1-5,"lang":1-5,"career_value":1-5,"location":1-5,"company_attract":1-5,"networking":1-5},"strong_matches":[string],"gaps":[string],"hard_blockers":[string],"recoverable_gaps":[string],"application_strategy":string,"networking_recommendation":string,"best_cv":string,"best_next_action":string}`;
+        if (profile?.status !== 'confirmed') { toast('Complete and confirm your Career Profile diagnostic first — go to Career Profile page', 'err'); return; }
+        const profileText = structuredProfileToText(profile.structured_profile)
+          || ['education','work_experience','projects','skills','languages','certifications','career_preferences','work_authorization','target_locations','target_roles','salary_preferences','availability','career_narrative']
+            .map(k => profile?.[k] ? `${k}: ${profile[k]}` : null).filter(Boolean).join('\n')
+          || '(No career profile saved yet — ratings and analysis will be limited.)';
+        const shape = `{"recommendation":"APPLY STRONGLY"|"APPLY"|"APPLY SELECTIVELY"|"REVIEW"|"SKIP","reasons":[string],"ratings":{"exp":1-5,"skills":1-5,"role":1-5,"edu":1-5,"lang":1-5,"career_value":1-5,"location":1-5,"company_attract":1-5,"networking":1-5},"strong_matches":[string],"gaps":[string],"hard_blockers":[string],"recoverable_gaps":[string],"missing_evidence":[string],"application_strategy":string,"networking_recommendation":string,"best_cv":string,"best_next_action":string,"confidence_note":string}`;
         const messages = [
-          { role: 'system', content: `You are a career-fit analyst. Compare the candidate's stored career profile against a job description and return ONLY a single JSON object matching exactly this shape (no markdown, no commentary): ${shape}. Base every rating and claim ONLY on what's explicitly in the profile and job description — never invent experience, skills, or credentials the candidate hasn't stated. If something can't be judged from the given information, still provide your best-effort integer rating 1-5 but keep the "gaps" or "recoverable_gaps" honest about the uncertainty. Ratings are 1 (poor match) to 5 (excellent match).` },
+          { role: 'system', content: `You are a critical career-fit analyst. Compare the candidate's stored career profile against a job description and return ONLY a single JSON object matching exactly this shape (no markdown, no commentary): ${shape}. Base every rating and claim ONLY on what's explicitly in the profile and job description — never invent experience, skills, or credentials the candidate hasn't stated. Ratings are 1 (poor match) to 5 (excellent match). Distinguish "gaps" (a requirement genuinely not met) from "missing_evidence" (you simply can't tell from what's given, not necessarily a real gap). Challenge unrealistic matches — do not inflate the score to be encouraging. Preferred/nice-to-have requirements are not hard blockers; only a clear mandatory incompatibility belongs in hard_blockers. confidence_note should honestly flag if the career profile or job description was too sparse to judge well.` },
           { role: 'user', content: `CAREER PROFILE:\n${profileText}\n\nJOB DESCRIPTION (${opp.company} — ${opp.job_title}):\n${opp.job_description}` },
         ];
         const reply = await chatComplete(cfg, messages, { json: true });

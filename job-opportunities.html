@@ -286,6 +286,7 @@
     import { escapeHtml } from '/src/html-utils.js';
     import { STAGES, STAGE_LABEL, CAREER_TRACKS, EMPLOYMENT_TYPES, SOURCES, GERMAN_REQUIREMENTS, YES_NO_UNCLEAR, valueLabelOptionsHtml, optionsHtml } from '/src/job-constants.js';
     import { ensureActiveProfileId, renderProfileSwitcher } from '/src/job-profile.js';
+    import { structuredProfileToText } from '/src/career-diagnostic.js';
 
     document.documentElement.classList.add('auth-checking');
     const sb = createClient(
@@ -654,8 +655,15 @@
       }
       try {
         const { data: profile } = await sb.from('job_profiles').select('*').eq('id', profileId).maybeSingle();
-        const profileText = ['education','work_experience','projects','skills','languages','certifications','career_preferences','work_authorization','target_locations','target_roles','salary_preferences','availability','career_narrative']
-          .map(k => profile?.[k] ? `${k}: ${profile[k]}` : null).filter(Boolean).join('\n') || '(No career profile saved yet — fit judgement will be limited. Fill one in on the Career Profile page for better results.)';
+        if (profile?.status !== 'confirmed') {
+          statusEl.textContent = 'Complete and confirm your Career Profile diagnostic first — go to Career Profile page.';
+          btn.disabled = false;
+          return;
+        }
+        const profileText = structuredProfileToText(profile.structured_profile)
+          || ['education','work_experience','projects','skills','languages','certifications','career_preferences','work_authorization','target_locations','target_roles','salary_preferences','availability','career_narrative']
+            .map(k => profile?.[k] ? `${k}: ${profile[k]}` : null).filter(Boolean).join('\n')
+          || '(No career profile saved yet — fit judgement will be limited. Fill one in on the Career Profile page for better results.)';
 
         const shape = `{"company":string,"job_title":string,"career_track":"A"|"B"|"C"|"X"|null,"role_family":string|null,"employment_type":"Werkstudent"|"Internship"|"Part-Time"|"Full-Time"|"Graduate Programme"|"Temporary"|"Freelance"|"Other"|null,"location":string|null,"country":string|null,"work_mode":"remote"|"hybrid"|"onsite"|null,"application_deadline":"YYYY-MM-DD"|null,"german_requirement":"None"|"Preferred"|"A1"|"A2"|"B1"|"B2"|"C1"|"Fluent"|"Native"|null,"english_requirement":string|null,"working_hours":string|null,"international_candidate_friendly":"Yes"|"No"|"Unclear"|null,"student_status_required":true|false|null,"relocation_required":true|false|null,"eligibility":{"elig_student_status":"yes"|"no"|"unclear","elig_working_hours":"yes"|"no"|"unclear","elig_location":"yes"|"no"|"unclear","elig_language":"yes"|"no"|"unclear","elig_work_auth":"yes"|"no"|"unclear","elig_experience":"yes"|"no"|"unclear","elig_mandatory_tech":"yes"|"no"|"unclear"},"analysis":{"reasons":[string],"ratings":{"exp":1,"skills":1,"role":1,"edu":1,"lang":1,"career_value":1,"location":1,"company_attract":1,"networking":1},"strong_matches":[string],"gaps":[string],"hard_blockers":[string],"recoverable_gaps":[string],"application_strategy":string,"networking_recommendation":string,"best_cv":string,"best_next_action":string,"confidence_note":string}}`;
         const messages = [

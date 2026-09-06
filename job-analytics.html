@@ -73,6 +73,9 @@
       </div>
     </div>
 
+    <div class="section-title">Conversion by Role Family</div>
+    <div class="card"><div class="scroll-x" id="rolefamily-table"></div></div>
+
     <div class="grid2">
       <div>
         <div class="section-title">CV Version Performance</div>
@@ -130,6 +133,7 @@
       renderFunnel();
       renderTrackTable();
       renderSourceTable();
+      renderRoleFamilyTable();
       renderCvTable();
       renderRejectionChart();
     }
@@ -188,6 +192,10 @@
     function renderSourceTable() {
       const sources = [...new Set(_opps.map(o=>o.source).filter(Boolean))];
       renderGroupTable('source-table', groupTable(o=>o.source, sources), 'Source');
+    }
+    function renderRoleFamilyTable() {
+      const families = [...new Set(_opps.map(o=>o.role_family).filter(Boolean))];
+      renderGroupTable('rolefamily-table', groupTable(o=>o.role_family, families), 'Role Family');
     }
     function renderCvTable() {
       const versions = [...new Set(_opps.map(o=>o.cv_version).filter(Boolean))];
