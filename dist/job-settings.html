@@ -9,6 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>html.auth-checking *:not(style){visibility:hidden!important;}</style>
+  <script src="https://cdn.jsdelivr.net/npm/mammoth@1.11.0/mammoth.browser.min.js"></script>
   <style>
     *,*::before,*::after{box-sizing:border-box;}
     html{font-size:15px;}
@@ -67,7 +68,7 @@
     .toast.ok{background:#1a3322;border:1px solid rgba(95,207,128,.3);color:var(--green);}
     .toast.err{background:#2a1510;border:1px solid rgba(224,90,43,.3);color:var(--red);}
   </style>
-  <script type="module" crossorigin src="/assets/jobSettings-BOzRSs4s.js"></script>
+  <script type="module" crossorigin src="/assets/jobSettings-B4oP1Ua5.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
   <link rel="modulepreload" crossorigin href="/assets/admin-auth-4ZiUUGs_.js">
   <link rel="modulepreload" crossorigin href="/assets/admin-nav-DWS8XQYO.js">
@@ -97,6 +98,11 @@
       <div class="card-title">Career Diagnostic</div>
       <div class="card-hint">Paste your CV/background once — AI critically reviews it, asks only the questions that actually change your job-search strategy, then you confirm a structured profile. AI Fit Analysis and Interview Prep won't run against an unconfirmed profile.</div>
       <div id="diagnostic-status" class="diagnostic-status draft">Draft — not yet confirmed</div>
+      <div class="field">
+        <label for="cv-file-input">Upload a CV file (PDF, DOCX, or TXT) — or paste below</label>
+        <input type="file" id="cv-file-input" accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain">
+        <div id="cv-file-status" style="font-size:12px;color:var(--cl);margin-top:6px;min-height:16px;"></div>
+      </div>
       <div class="field"><label for="f-master_cv_text">Paste your CV / background</label><textarea id="f-master_cv_text" rows="8" placeholder="Paste your CV text, LinkedIn summary, or a plain description of your education, experience, skills, and what you're looking for."></textarea></div>
       <button class="btn primary" id="run-diagnostic-btn">Run Career Diagnostic</button>
       <div id="diagnostic-results" style="display:none;margin-top:18px;"></div>
