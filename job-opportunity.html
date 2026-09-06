@@ -603,7 +603,7 @@
         ${ai.recoverable_gaps?.length ? `<h4>Recoverable Gaps</h4>${listOrDash(ai.recoverable_gaps)}` : ''}
         ${ai.missing_evidence?.length ? `<h4>Missing Evidence</h4>${listOrDash(ai.missing_evidence)}` : ''}
         ${ai.application_strategy ? `<h4>Application Strategy</h4><div>${escapeHtml(ai.application_strategy)}</div>` : ''}
-        ${ai.networking_recommendation ? `<h4>Networking Recommendation</h4><div>${escapeHtml(ai.networking_recommendation)}</div>` : ''}
+        ${ai.networking_target ? `<h4>Networking Target</h4><div>${ai.networking_target.contact_id ? `<a href="job-contacts.html?id=${ai.networking_target.contact_id}" style="color:var(--al);">${escapeHtml(ai.networking_target.contact_name)}</a> — ` : ''}${escapeHtml(ai.networking_target.reason)}</div>` : ai.networking_recommendation ? `<h4>Networking Recommendation</h4><div>${escapeHtml(ai.networking_recommendation)}</div>` : ''}
         ${ai.best_cv ? `<h4>Best CV</h4><div>${escapeHtml(ai.best_cv)} — <a href="job-resumes.html" style="color:var(--al);">tailor one in CV Studio →</a></div>` : ''}
         ${ai.best_next_action ? `<h4>Best Next Action</h4><div>${escapeHtml(ai.best_next_action)}</div>` : ''}
         ${ai.confidence_note ? `<h4>Confidence Note</h4><div style="color:var(--cl);font-style:italic;">${escapeHtml(ai.confidence_note)}</div>` : ''}
@@ -646,13 +646,22 @@
           || ['education','work_experience','projects','skills','languages','certifications','career_preferences','work_authorization','target_locations','target_roles','salary_preferences','availability','career_narrative']
             .map(k => profile?.[k] ? `${k}: ${profile[k]}` : null).filter(Boolean).join('\n')
           || '(No career profile saved yet — ratings and analysis will be limited.)';
-        const shape = `{"recommendation":"APPLY STRONGLY"|"APPLY"|"APPLY SELECTIVELY"|"REVIEW"|"SKIP","reasons":[string],"ratings":{"exp":1-5,"skills":1-5,"role":1-5,"edu":1-5,"lang":1-5,"career_value":1-5,"location":1-5,"company_attract":1-5,"networking":1-5},"strong_matches":[string],"gaps":[string],"hard_blockers":[string],"recoverable_gaps":[string],"missing_evidence":[string],"application_strategy":string,"networking_recommendation":string,"best_cv":string,"best_next_action":string,"confidence_note":string}`;
+        const { data: contacts } = await sb.from('job_contacts').select('id,full_name,company,contact_type,relationship_stage').eq('profile_id', opp.profile_id);
+        const contactList = (contacts||[]).map(c => ({ id: c.id, name: c.full_name, company: c.company, type: c.contact_type, relationship: c.relationship_stage }));
+        const shape = `{"recommendation":"APPLY STRONGLY"|"APPLY"|"APPLY SELECTIVELY"|"REVIEW"|"SKIP","reasons":[string],"ratings":{"exp":1-5,"skills":1-5,"role":1-5,"edu":1-5,"lang":1-5,"career_value":1-5,"location":1-5,"company_attract":1-5,"networking":1-5},"strong_matches":[string],"gaps":[string],"hard_blockers":[string],"recoverable_gaps":[string],"missing_evidence":[string],"application_strategy":string,"networking_target":{"contact_id":"uuid|null","contact_name":"string|null","reason":string},"best_cv":string,"best_next_action":string,"confidence_note":string}`;
         const messages = [
-          { role: 'system', content: `You are a critical career-fit analyst. Compare the candidate's stored career profile against a job description and return ONLY a single JSON object matching exactly this shape (no markdown, no commentary): ${shape}. Base every rating and claim ONLY on what's explicitly in the profile and job description — never invent experience, skills, or credentials the candidate hasn't stated. Ratings are 1 (poor match) to 5 (excellent match). Distinguish "gaps" (a requirement genuinely not met) from "missing_evidence" (you simply can't tell from what's given, not necessarily a real gap). Challenge unrealistic matches — do not inflate the score to be encouraging. Preferred/nice-to-have requirements are not hard blockers; only a clear mandatory incompatibility belongs in hard_blockers. confidence_note should honestly flag if the career profile or job description was too sparse to judge well.` },
-          { role: 'user', content: `CAREER PROFILE:\n${profileText}\n\nJOB DESCRIPTION (${opp.company} — ${opp.job_title}):\n${opp.job_description}` },
+          { role: 'system', content: `You are a critical career-fit analyst. Compare the candidate's stored career profile against a job description and return ONLY a single JSON object matching exactly this shape (no markdown, no commentary): ${shape}. Base every rating and claim ONLY on what's explicitly in the profile and job description — never invent experience, skills, or credentials the candidate hasn't stated. Ratings are 1 (poor match) to 5 (excellent match). Distinguish "gaps" (a requirement genuinely not met) from "missing_evidence" (you simply can't tell from what's given, not necessarily a real gap). Challenge unrealistic matches — do not inflate the score to be encouraging. Preferred/nice-to-have requirements are not hard blockers; only a clear mandatory incompatibility belongs in hard_blockers. confidence_note should honestly flag if the career profile or job description was too sparse to judge well. For networking_target: contact_id/contact_name MUST be one of the exact ids/names in CURRENT CONTACTS below, or both null — never invent a contact. Only name one if they're a genuinely good networking fit for THIS specific vacancy (same company, related industry/role, an alum, etc.); otherwise leave both null and use reason to describe what kind of person to look for instead.` },
+          { role: 'user', content: `CAREER PROFILE:\n${profileText}\n\nCURRENT CONTACTS:\n${JSON.stringify(contactList)}\n\nJOB DESCRIPTION (${opp.company} — ${opp.job_title}):\n${opp.job_description}` },
         ];
         const reply = await chatComplete(cfg, messages, { json: true });
         const parsed = JSON.parse(reply);
+        // Defense in depth: never trust an AI-returned id without checking
+        // it against the contacts actually offered.
+        const validContactIds = new Set(contactList.map(c => c.id));
+        if (parsed.networking_target && !validContactIds.has(parsed.networking_target.contact_id)) {
+          parsed.networking_target.contact_id = null;
+          parsed.networking_target.contact_name = null;
+        }
         const payload = { fit_ai: parsed };
         Object.assign(payload, computeDerivedFields({ ...opp, ...payload }));
         const { error } = await sb.from('job_opportunities').update(payload).eq('id', oppId);

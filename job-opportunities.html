@@ -635,6 +635,7 @@
             <div><span>Next Action</span><strong>${escapeHtml(facts._analysis.best_next_action)||'—'}</strong></div>
           </div>
         </div>
+        ${facts._analysis.networking_target ? `<div class="review-card"><h4>Networking Target</h4><div style="font-size:12.5px;color:var(--cm);">${facts._analysis.networking_target.contact_id ? `<a href="job-contacts.html?id=${facts._analysis.networking_target.contact_id}" style="color:var(--al);">${escapeHtml(facts._analysis.networking_target.contact_name)}</a> — ` : ''}${escapeHtml(facts._analysis.networking_target.reason)}</div></div>` : ''}
         ${facts._analysis.confidence_note ? `<p class="confidence-note">AI confidence note: ${escapeHtml(facts._analysis.confidence_note)}</p>` : ''}
       </div>`;
     }
@@ -665,17 +666,25 @@
             .map(k => profile?.[k] ? `${k}: ${profile[k]}` : null).filter(Boolean).join('\n')
           || '(No career profile saved yet — fit judgement will be limited. Fill one in on the Career Profile page for better results.)';
 
-        const shape = `{"company":string,"job_title":string,"career_track":"A"|"B"|"C"|"X"|null,"role_family":string|null,"employment_type":"Werkstudent"|"Internship"|"Part-Time"|"Full-Time"|"Graduate Programme"|"Temporary"|"Freelance"|"Other"|null,"location":string|null,"country":string|null,"work_mode":"remote"|"hybrid"|"onsite"|null,"application_deadline":"YYYY-MM-DD"|null,"german_requirement":"None"|"Preferred"|"A1"|"A2"|"B1"|"B2"|"C1"|"Fluent"|"Native"|null,"english_requirement":string|null,"working_hours":string|null,"international_candidate_friendly":"Yes"|"No"|"Unclear"|null,"student_status_required":true|false|null,"relocation_required":true|false|null,"eligibility":{"elig_student_status":"yes"|"no"|"unclear","elig_working_hours":"yes"|"no"|"unclear","elig_location":"yes"|"no"|"unclear","elig_language":"yes"|"no"|"unclear","elig_work_auth":"yes"|"no"|"unclear","elig_experience":"yes"|"no"|"unclear","elig_mandatory_tech":"yes"|"no"|"unclear"},"analysis":{"reasons":[string],"ratings":{"exp":1,"skills":1,"role":1,"edu":1,"lang":1,"career_value":1,"location":1,"company_attract":1,"networking":1},"strong_matches":[string],"gaps":[string],"hard_blockers":[string],"recoverable_gaps":[string],"application_strategy":string,"networking_recommendation":string,"best_cv":string,"best_next_action":string,"confidence_note":string}}`;
+        const { data: contacts } = await sb.from('job_contacts').select('id,full_name,company,contact_type,relationship_stage').eq('profile_id', profileId);
+        const contactList = (contacts||[]).map(c => ({ id: c.id, name: c.full_name, company: c.company, type: c.contact_type, relationship: c.relationship_stage }));
+
+        const shape = `{"company":string,"job_title":string,"career_track":"A"|"B"|"C"|"X"|null,"role_family":string|null,"employment_type":"Werkstudent"|"Internship"|"Part-Time"|"Full-Time"|"Graduate Programme"|"Temporary"|"Freelance"|"Other"|null,"location":string|null,"country":string|null,"work_mode":"remote"|"hybrid"|"onsite"|null,"application_deadline":"YYYY-MM-DD"|null,"german_requirement":"None"|"Preferred"|"A1"|"A2"|"B1"|"B2"|"C1"|"Fluent"|"Native"|null,"english_requirement":string|null,"working_hours":string|null,"international_candidate_friendly":"Yes"|"No"|"Unclear"|null,"student_status_required":true|false|null,"relocation_required":true|false|null,"eligibility":{"elig_student_status":"yes"|"no"|"unclear","elig_working_hours":"yes"|"no"|"unclear","elig_location":"yes"|"no"|"unclear","elig_language":"yes"|"no"|"unclear","elig_work_auth":"yes"|"no"|"unclear","elig_experience":"yes"|"no"|"unclear","elig_mandatory_tech":"yes"|"no"|"unclear"},"analysis":{"reasons":[string],"ratings":{"exp":1,"skills":1,"role":1,"edu":1,"lang":1,"career_value":1,"location":1,"company_attract":1,"networking":1},"strong_matches":[string],"gaps":[string],"hard_blockers":[string],"recoverable_gaps":[string],"application_strategy":string,"networking_target":{"contact_id":"uuid|null","contact_name":"string|null","reason":string},"best_cv":string,"best_next_action":string,"confidence_note":string}}`;
         const messages = [
           { role: 'system', content: `You extract structured fields from a pasted job vacancy AND assess candidate fit against a stored career profile, for a personal job-search tracker. Return ONLY a single JSON object matching exactly this shape (no markdown, no commentary): ${shape}.
 
 Field-extraction rules: use null for anything not explicitly stated in the vacancy text — never guess or invent a value. career_track is your best-effort classification: A=Business Development/Commercial/Sales, B=Business/Commercial/Data Analytics, C=Operations/Supply Chain/Procurement/Logistics, X=anything else. eligibility.* fields compare the vacancy's stated requirements against the career profile — use "unclear" whenever the profile doesn't state enough to judge, never guess "yes" to be optimistic.
 
-Fit-analysis rules: base every rating and claim ONLY on what's explicitly in the career profile and the job description — never invent experience, skills, or credentials the candidate hasn't stated. Ratings are integers 1 (poor match) to 5 (excellent match) for each of the 9 keys in analysis.ratings. confidence_note should honestly flag if the career profile was too sparse to judge well.` },
-          { role: 'user', content: `CAREER PROFILE:\n${profileText}\n\nJOB DESCRIPTION:\n${jd}` },
+Fit-analysis rules: base every rating and claim ONLY on what's explicitly in the career profile and the job description — never invent experience, skills, or credentials the candidate hasn't stated. Ratings are integers 1 (poor match) to 5 (excellent match) for each of the 9 keys in analysis.ratings. confidence_note should honestly flag if the career profile was too sparse to judge well. For networking_target: contact_id/contact_name MUST be one of the exact ids/names in CURRENT CONTACTS below, or both null — never invent a contact. Only name one if they're a genuinely good networking fit for THIS specific vacancy (same company, related industry/role, an alum, etc.); otherwise leave both null and use reason to describe what kind of person to look for instead.` },
+          { role: 'user', content: `CAREER PROFILE:\n${profileText}\n\nCURRENT CONTACTS:\n${JSON.stringify(contactList)}\n\nJOB DESCRIPTION:\n${jd}` },
         ];
         const reply = await chatComplete(cfg, messages, { json: true });
         const parsed = JSON.parse(reply);
+        const validContactIds = new Set(contactList.map(c => c.id));
+        if (parsed.analysis?.networking_target && !validContactIds.has(parsed.analysis.networking_target.contact_id)) {
+          parsed.analysis.networking_target.contact_id = null;
+          parsed.analysis.networking_target.contact_name = null;
+        }
         _lastAiExtracted = parsed;
 
         Object.keys(parsed).forEach(k => {

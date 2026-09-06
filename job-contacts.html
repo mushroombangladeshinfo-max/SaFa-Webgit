@@ -224,6 +224,21 @@
       await loadRelatedJobs();
       renderTable();
       loadNetworkingKpis();
+      openContactFromUrl();
+    }
+
+    // Lets another page (e.g. a networking-target link from AI Fit
+    // Analysis) deep-link straight to one contact's edit modal, matching
+    // the ?id= convention already used by job-opportunity.html /
+    // job-interviews.html — this page previously had no way to open a
+    // specific contact except by clicking its row in the full list.
+    let _openedFromUrl = false;
+    function openContactFromUrl() {
+      if (_openedFromUrl) return;
+      const id = new URLSearchParams(location.search).get('id');
+      if (!id) return;
+      const contact = _all.find(c => c.id === id);
+      if (contact) { _openedFromUrl = true; openModal(contact); }
     }
 
     // Contacts link to opportunities indirectly, via job_activities rows that
