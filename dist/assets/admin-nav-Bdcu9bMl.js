@@ -1,4 +1,4 @@
-import{f as A}from"./admin-auth-4ZiUUGs_.js";const E=[{key:"home",href:"home.html",label:"Overview",icon:"🏠"},{key:"orders",href:"orders.html",label:"Orders",icon:"📦"},{key:"customers",href:"customers.html",label:"Customers",icon:"👤"},{key:"products",href:"products.html",label:"Products",icon:"🍄"},{key:"expenses",href:"expenses.html",label:"Expenses",icon:"💰"},{key:"pipeline",href:"pipeline.html",label:"B2B",icon:"🤝"},{key:"insights",href:"insights.html",label:"Insights",icon:"📊"}],S=[{href:"quick-log.html",label:"⚡ Quick Log"},{href:"harvest-log.html",label:"🍄 Harvest Log"},{href:"spawn-lab.html",label:"🧫 Spawn Lab"},{href:"farm-analytics.html",label:"📈 Farm Analytics"},{href:"dashboard.html",label:"📡 IoT Dashboard"}],M=[{href:"home.html",label:"Overview",icon:"🏠",hint:"Dashboard & KPIs",keywords:"home dashboard summary kpi"},{href:"orders.html",label:"Orders",icon:"📦",hint:"Manage customer orders",keywords:"sales orders shipping fulfillment"},{href:"customers.html",label:"Customers",icon:"👤",hint:"Customer directory",keywords:"customers users contacts crm"},{href:"products.html",label:"Products",icon:"🍄",hint:"Catalog & inventory",keywords:"products catalog inventory stock"},{href:"expenses.html",label:"Expenses",icon:"💰",hint:"Costs & P&L",keywords:"expenses costs finance pnl profit loss"},{href:"pipeline.html",label:"B2B",icon:"🤝",hint:"Wholesale pipeline",keywords:"b2b pipeline wholesale deals leads"},{href:"insights.html",label:"Insights",icon:"📊",hint:"AI analyst & trends",keywords:"insights analytics ai reports trends"},{href:"quick-log.html",label:"Quick Log",icon:"⚡",hint:"Mobile daily farm log",keywords:"quick log daily farm mobile harvest"},{href:"harvest-log.html",label:"Harvest Log",icon:"🍄",hint:"Every harvest entry, filterable",keywords:"harvest log entries batches rooms pivot table"},{href:"spawn-lab.html",label:"Spawn Lab",icon:"🧫",hint:"In-house culture & grain spawn production",keywords:"spawn lab culture agar petri liquid grain inoculation production"},{href:"farm-analytics.html",label:"Farm Analytics",icon:"📈",hint:"Growth & yield charts",keywords:"farm analytics yield growth charts"},{href:"dashboard.html",label:"IoT Dashboard",icon:"📡",hint:"Simulated sensor preview",keywords:"iot dashboard sensors demo"}];function H(){if(document.getElementById("admin-nav-styles"))return;const o=document.createElement("style");o.id="admin-nav-styles",o.textContent=`
+import{f as K}from"./admin-auth-4ZiUUGs_.js";const j=[{key:"home",href:"home.html",label:"Overview",icon:"🏠"},{key:"orders",href:"orders.html",label:"Orders",icon:"📦"},{key:"customers",href:"customers.html",label:"Customers",icon:"👤"},{key:"products",href:"products.html",label:"Products",icon:"🍄"},{key:"expenses",href:"expenses.html",label:"Expenses",icon:"💰"},{key:"pipeline",href:"pipeline.html",label:"B2B",icon:"🤝"},{key:"insights",href:"insights.html",label:"Insights",icon:"📊"}],I=[{href:"quick-log.html",label:"⚡ Quick Log"},{href:"harvest-log.html",label:"🍄 Harvest Log"},{href:"spawn-lab.html",label:"🧫 Spawn Lab"},{href:"farm-analytics.html",label:"📈 Farm Analytics"},{href:"dashboard.html",label:"📡 IoT Dashboard"}],M=[{href:"job-dashboard.html",label:"🎯 Dashboard"},{href:"job-opportunities.html",label:"💼 Opportunities"},{href:"job-contacts.html",label:"🗂 Contacts"},{href:"job-interviews.html",label:"🎤 Interviews"},{href:"job-copilot.html",label:"✦ AI Copilot"},{href:"job-settings.html",label:"⚙ Career Profile"}],$=[{href:"home.html",label:"Overview",icon:"🏠",hint:"Dashboard & KPIs",keywords:"home dashboard summary kpi"},{href:"orders.html",label:"Orders",icon:"📦",hint:"Manage customer orders",keywords:"sales orders shipping fulfillment"},{href:"customers.html",label:"Customers",icon:"👤",hint:"Customer directory",keywords:"customers users contacts crm"},{href:"products.html",label:"Products",icon:"🍄",hint:"Catalog & inventory",keywords:"products catalog inventory stock"},{href:"expenses.html",label:"Expenses",icon:"💰",hint:"Costs & P&L",keywords:"expenses costs finance pnl profit loss"},{href:"pipeline.html",label:"B2B",icon:"🤝",hint:"Wholesale pipeline",keywords:"b2b pipeline wholesale deals leads"},{href:"insights.html",label:"Insights",icon:"📊",hint:"AI analyst & trends",keywords:"insights analytics ai reports trends"},{href:"quick-log.html",label:"Quick Log",icon:"⚡",hint:"Mobile daily farm log",keywords:"quick log daily farm mobile harvest"},{href:"harvest-log.html",label:"Harvest Log",icon:"🍄",hint:"Every harvest entry, filterable",keywords:"harvest log entries batches rooms pivot table"},{href:"spawn-lab.html",label:"Spawn Lab",icon:"🧫",hint:"In-house culture & grain spawn production",keywords:"spawn lab culture agar petri liquid grain inoculation production"},{href:"farm-analytics.html",label:"Farm Analytics",icon:"📈",hint:"Growth & yield charts",keywords:"farm analytics yield growth charts"},{href:"dashboard.html",label:"IoT Dashboard",icon:"📡",hint:"Simulated sensor preview",keywords:"iot dashboard sensors demo"},{href:"job-dashboard.html",label:"Job Dashboard",icon:"🎯",hint:"Job search command center",keywords:"job search dashboard priorities pipeline funnel"},{href:"job-opportunities.html",label:"Opportunities",icon:"💼",hint:"Job applications tracker",keywords:"job opportunities applications kanban ats fit score"},{href:"job-contacts.html",label:"Job Contacts",icon:"🗂",hint:"Networking CRM",keywords:"job contacts networking recruiter referral"},{href:"job-interviews.html",label:"Interviews",icon:"🎤",hint:"Interview prep & tracking",keywords:"job interviews prep questions star"},{href:"job-copilot.html",label:"AI Copilot",icon:"✦",hint:"Job search AI assistant",keywords:"job ai copilot assistant chat"},{href:"job-settings.html",label:"Career Profile",icon:"⚙",hint:"Background used by AI",keywords:"job career profile settings resume cv"}];function O(){if(document.getElementById("admin-nav-styles"))return;const o=document.createElement("style");o.id="admin-nav-styles",o.textContent=`
     .an{background:#0d1f12;border-bottom:1px solid rgba(255,255,255,.07);height:56px;display:flex;align-items:center;padding:0 24px;gap:16px;position:sticky;top:0;z-index:200;font-family:'DM Sans',sans-serif;}
     .an-logo{display:flex;align-items:center;gap:6px;text-decoration:none;flex-shrink:0;}
     .an-logo-main{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:#f5efe6;}
@@ -69,10 +69,10 @@ import{f as A}from"./admin-auth-4ZiUUGs_.js";const E=[{key:"home",href:"home.htm
       .an-burger{display:flex;}
       .an-right .an-logout{display:none;}
     }
-  `,document.head.appendChild(o)}function N({page:o,supabase:z,email:m,lastLogin:h}){H();const c=A(m),$=c.includes("&")?"F·S":c.charAt(0);document.querySelector("header.an")?.remove(),document.getElementById("an-mobile-drawer")?.remove(),document.getElementById("an-palette-overlay")?.remove();const I=E.map(e=>`
+  `,document.head.appendChild(o)}function T({page:o,supabase:z,email:u,lastLogin:x}){O();const g=K(u),C=g.includes("&")?"F·S":g.charAt(0);document.querySelector("header.an")?.remove(),document.getElementById("an-mobile-drawer")?.remove(),document.getElementById("an-palette-overlay")?.remove();const B=j.map(e=>`
     <a href="${e.href}" class="an-link${o===e.key?" active":""}" aria-current="${o===e.key?"page":"false"}">
       <span class="an-link-icon">${e.icon}</span>${e.label}
-    </a>`).join(""),B=S.map(e=>`<a href="${e.href}">${e.label}</a>`).join(""),C=`
+    </a>`).join(""),D=I.map(e=>`<a href="${e.href}">${e.label}</a>`).join(""),A=M.map(e=>`<a href="${e.href}">${e.label}</a>`).join(""),H=`
     <header class="an" role="banner">
       <a href="home.html" class="an-logo">
         <span class="an-logo-main">SaFa</span>
@@ -82,14 +82,23 @@ import{f as A}from"./admin-auth-4ZiUUGs_.js";const E=[{key:"home",href:"home.htm
       </a>
       <div class="an-sep" aria-hidden="true"></div>
       <nav class="an-links" aria-label="Admin navigation">
-        ${I}
+        ${B}
         <div class="an-drop">
           <button type="button" class="an-drop-trigger" id="an-farm-btn" aria-haspopup="true" aria-expanded="false">
             <span class="an-link-icon">🌿</span>Farm
             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
           </button>
           <div class="an-drop-menu" id="an-farm-menu" role="menu">
-            ${B}
+            ${D}
+          </div>
+        </div>
+        <div class="an-drop">
+          <button type="button" class="an-drop-trigger" id="an-jobs-btn" aria-haspopup="true" aria-expanded="false">
+            <span class="an-link-icon">💼</span>Jobs
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="an-drop-menu" id="an-jobs-menu" role="menu">
+            ${A}
           </div>
         </div>
       </nav>
@@ -103,11 +112,11 @@ import{f as A}from"./admin-auth-4ZiUUGs_.js";const E=[{key:"home",href:"home.htm
           <span class="an-search-label">Search</span>
           <span class="an-search-kbd">⌘K</span>
         </button>
-        ${h?`<span class="an-last">${h}</span>`:""}
+        ${x?`<span class="an-last">${x}</span>`:""}
         <span class="an-dot" title="Live"></span>
-        <span class="an-user" title="${m||""}">
-          <span class="an-avatar">${$}</span>
-          <span class="an-name">${c}</span>
+        <span class="an-user" title="${u||""}">
+          <span class="an-avatar">${C}</span>
+          <span class="an-name">${g}</span>
         </span>
         <button type="button" class="an-logout" id="an-logout-btn">Log Out</button>
       </div>
@@ -117,13 +126,16 @@ import{f as A}from"./admin-auth-4ZiUUGs_.js";const E=[{key:"home",href:"home.htm
     </header>
     <!-- Mobile drawer -->
     <div class="an-mobile-drawer" id="an-mobile-drawer" role="navigation" aria-label="Mobile navigation">
-      ${E.map(e=>`
+      ${j.map(e=>`
         <a href="${e.href}" class="an-link${o===e.key?" active":""}">
           <span class="an-link-icon">${e.icon}</span>${e.label}
         </a>`).join("")}
       <div style="height:1px;background:rgba(255,255,255,.06);margin:8px 0;"></div>
       <div style="font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(245,239,230,.2);padding:4px 16px;">Farm Tools</div>
-      ${S.map(e=>`<a href="${e.href}" class="an-link" style="letter-spacing:0;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:400;text-transform:none;">${e.label}</a>`).join("")}
+      ${I.map(e=>`<a href="${e.href}" class="an-link" style="letter-spacing:0;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:400;text-transform:none;">${e.label}</a>`).join("")}
+      <div style="height:1px;background:rgba(255,255,255,.06);margin:8px 0;"></div>
+      <div style="font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(245,239,230,.2);padding:4px 16px;">Job Search</div>
+      ${M.map(e=>`<a href="${e.href}" class="an-link" style="letter-spacing:0;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:400;text-transform:none;">${e.label}</a>`).join("")}
       <div style="height:1px;background:rgba(255,255,255,.06);margin:8px 0;"></div>
       <button type="button" class="an-link" id="an-logout-mobile" style="color:rgba(245,239,230,.4);">Log Out</button>
     </div>
@@ -137,11 +149,11 @@ import{f as A}from"./admin-auth-4ZiUUGs_.js";const E=[{key:"home",href:"home.htm
         </div>
         <div class="an-palette-list" id="an-palette-list"></div>
       </div>
-    </div>`,b=document.createElement("div");b.innerHTML=C,document.body.prepend(...b.children);const s=document.getElementById("an-farm-btn"),u=document.getElementById("an-farm-menu");s?.addEventListener("click",e=>{e.stopPropagation();const a=u.classList.toggle("open");s.classList.toggle("open",a),s.setAttribute("aria-expanded",a)}),document.addEventListener("click",()=>{u?.classList.remove("open"),s?.classList.remove("open"),s?.setAttribute("aria-expanded","false")});const x=document.getElementById("an-burger"),D=document.getElementById("an-mobile-drawer");x?.addEventListener("click",()=>{const e=D.classList.toggle("open");x.setAttribute("aria-expanded",e)});async function y(){await z.auth.signOut(),window.location.href="orders.html"}document.getElementById("an-logout-btn")?.addEventListener("click",y),document.getElementById("an-logout-mobile")?.addEventListener("click",y);const r=document.getElementById("an-palette-overlay"),l=document.getElementById("an-palette-input"),g=document.getElementById("an-palette-list");let n=M.filter(e=>e.href!==v()),t=0;function v(){return location.pathname.split("/").pop()||"home.html"}function d(){if(!n.length){g.innerHTML='<div class="an-palette-empty">No pages match that search.</div>';return}g.innerHTML=n.map((e,a)=>`
+    </div>`,y=document.createElement("div");y.innerHTML=H,document.body.prepend(...y.children);const r=document.getElementById("an-farm-btn"),b=document.getElementById("an-farm-menu");r?.addEventListener("click",e=>{e.stopPropagation();const a=b.classList.toggle("open");r.classList.toggle("open",a),r.setAttribute("aria-expanded",a),h?.classList.remove("open"),i?.classList.remove("open")});const i=document.getElementById("an-jobs-btn"),h=document.getElementById("an-jobs-menu");i?.addEventListener("click",e=>{e.stopPropagation();const a=h.classList.toggle("open");i.classList.toggle("open",a),i.setAttribute("aria-expanded",a),b?.classList.remove("open"),r?.classList.remove("open")}),document.addEventListener("click",()=>{b?.classList.remove("open"),r?.classList.remove("open"),r?.setAttribute("aria-expanded","false"),h?.classList.remove("open"),i?.classList.remove("open"),i?.setAttribute("aria-expanded","false")});const v=document.getElementById("an-burger"),N=document.getElementById("an-mobile-drawer");v?.addEventListener("click",()=>{const e=N.classList.toggle("open");v.setAttribute("aria-expanded",e)});async function k(){await z.auth.signOut(),window.location.href="orders.html"}document.getElementById("an-logout-btn")?.addEventListener("click",k),document.getElementById("an-logout-mobile")?.addEventListener("click",k);const s=document.getElementById("an-palette-overlay"),p=document.getElementById("an-palette-input"),f=document.getElementById("an-palette-list");let n=$.filter(e=>e.href!==w()),t=0;function w(){return location.pathname.split("/").pop()||"home.html"}function c(){if(!n.length){f.innerHTML='<div class="an-palette-empty">No pages match that search.</div>';return}f.innerHTML=n.map((e,a)=>`
       <a href="${e.href}" class="an-palette-item${a===t?" active":""}" data-idx="${a}">
         <span class="an-palette-item-icon">${e.icon}</span>
         <span>
           <div class="an-palette-item-label">${e.label}</div>
           <div class="an-palette-item-hint">${e.hint}</div>
         </span>
-      </a>`).join("")}function k(e){const a=e.trim().toLowerCase(),p=M.filter(i=>i.href!==v());n=a?p.filter(i=>i.label.toLowerCase().includes(a)||i.keywords.includes(a)||a.split(/\s+/).every(L=>i.keywords.includes(L)||i.label.toLowerCase().includes(L))):p,t=0,d()}function w(){r.classList.add("open"),l.value="",k(""),setTimeout(()=>l.focus(),0)}function f(){r.classList.remove("open")}document.getElementById("an-search-btn")?.addEventListener("click",w),document.addEventListener("keydown",e=>{(e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==="k"?(e.preventDefault(),r.classList.contains("open")?f():w()):e.key==="Escape"&&r.classList.contains("open")&&f()}),r.addEventListener("mousedown",e=>{e.target===r&&f()}),l.addEventListener("input",()=>k(l.value)),l.addEventListener("keydown",e=>{if(e.key==="ArrowDown")e.preventDefault(),n.length&&(t=(t+1)%n.length,d());else if(e.key==="ArrowUp")e.preventDefault(),n.length&&(t=(t-1+n.length)%n.length,d());else if(e.key==="Enter"){e.preventDefault();const a=n[t];a&&(window.location.href=a.href)}}),g.addEventListener("mousemove",e=>{const a=e.target.closest(".an-palette-item");if(!a)return;const p=Number(a.dataset.idx);p!==t&&(t=p,d())})}export{N as m};
+      </a>`).join("")}function L(e){const a=e.trim().toLowerCase(),d=$.filter(l=>l.href!==w());n=a?d.filter(l=>l.label.toLowerCase().includes(a)||l.keywords.includes(a)||a.split(/\s+/).every(S=>l.keywords.includes(S)||l.label.toLowerCase().includes(S))):d,t=0,c()}function E(){s.classList.add("open"),p.value="",L(""),setTimeout(()=>p.focus(),0)}function m(){s.classList.remove("open")}document.getElementById("an-search-btn")?.addEventListener("click",E),document.addEventListener("keydown",e=>{(e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==="k"?(e.preventDefault(),s.classList.contains("open")?m():E()):e.key==="Escape"&&s.classList.contains("open")&&m()}),s.addEventListener("mousedown",e=>{e.target===s&&m()}),p.addEventListener("input",()=>L(p.value)),p.addEventListener("keydown",e=>{if(e.key==="ArrowDown")e.preventDefault(),n.length&&(t=(t+1)%n.length,c());else if(e.key==="ArrowUp")e.preventDefault(),n.length&&(t=(t-1+n.length)%n.length,c());else if(e.key==="Enter"){e.preventDefault();const a=n[t];a&&(window.location.href=a.href)}}),f.addEventListener("mousemove",e=>{const a=e.target.closest(".an-palette-item");if(!a)return;const d=Number(a.dataset.idx);d!==t&&(t=d,c())})}export{T as m};

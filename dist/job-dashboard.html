@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Job Search Dashboard — SaFa Naturals</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>html.auth-checking *:not(style){visibility:hidden!important;}</style>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;}
+    html{font-size:15px;}
+    :root{--bg:#060d09;--bg2:#0d1f12;--bg3:#122018;--border:rgba(255,255,255,.07);--c:#f5efe6;--cm:rgba(245,239,230,.6);--cl:rgba(245,239,230,.35);--al:#c49a3c;--green:#5fcf80;--red:#e05a2b;--blue:#50c8ff;}
+    body{font-family:'DM Sans','Hind Siliguri',sans-serif;background:var(--bg);color:var(--c);min-height:100vh;margin:0;-webkit-font-smoothing:antialiased;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+    .page{max-width:1280px;margin:0 auto;padding:28px 24px 64px;}
+    .page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;}
+    .page-title{font-family:'Syne','Hind Siliguri',sans-serif;font-size:22px;font-weight:700;color:var(--c);margin:0 0 4px;}
+    .page-sub{font-size:13px;color:var(--cl);}
+    .btn{font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:9px 16px;border-radius:6px;border:1px solid var(--border);background:rgba(255,255,255,.04);color:var(--cl);cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:6px;text-decoration:none;}
+    .btn:hover{color:var(--c);background:rgba(255,255,255,.08);}
+    .btn.primary{background:rgba(196,154,60,.12);border-color:rgba(196,154,60,.3);color:var(--al);}
+    .quick-actions{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px;}
+
+    .kpi-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:24px;}
+    @media(max-width:1000px){.kpi-grid{grid-template-columns:repeat(3,1fr);}}
+    @media(max-width:560px){.kpi-grid{grid-template-columns:repeat(2,1fr);}}
+    .kpi{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;}
+    .kpi-label{font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--cl);margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;}
+    .kpi-val{font-family:'DM Mono','Hind Siliguri',monospace;font-size:20px;font-weight:500;color:var(--c);}
+    .kpi-select{background:none;border:none;color:var(--cl);font-size:9px;font-family:'Syne',sans-serif;text-transform:uppercase;letter-spacing:.06em;}
+
+    .section-title{font-family:'Syne','Hind Siliguri',sans-serif;font-size:13px;font-weight:700;color:var(--c);margin:26px 0 12px;}
+    .card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:18px;}
+    .priority-item{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.04);gap:12px;}
+    .priority-item:last-child{border-bottom:none;}
+    .priority-main{min-width:0;}
+    .priority-company{font-weight:600;font-size:14px;}
+    .priority-detail{font-size:12px;color:var(--cl);margin-top:2px;}
+    .priority-pill{font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:20px;white-space:nowrap;}
+    .p-critical{background:rgba(224,90,43,.14);color:var(--red);}
+    .p-high{background:rgba(196,154,60,.14);color:var(--al);}
+    .p-medium{background:rgba(80,200,255,.1);color:var(--blue);}
+    .p-low{background:rgba(255,255,255,.05);color:var(--cl);}
+    .empty-mini{color:var(--cl);font-size:13px;padding:16px 0;text-align:center;}
+
+    .stage-row{display:flex;align-items:center;gap:10px;padding:8px 0;font-size:13px;}
+    .stage-row a{color:var(--c);text-decoration:none;flex:1;}
+    .stage-row a:hover{color:var(--al);}
+    .stage-bar-wrap{flex:1;background:rgba(255,255,255,.04);border-radius:4px;height:6px;overflow:hidden;min-width:60px;}
+    .stage-bar{background:var(--al);height:100%;}
+    .stage-count{font-family:'DM Mono',monospace;color:var(--cl);width:24px;text-align:right;}
+
+    .grid2{display:grid;grid-template-columns:1.1fr .9fr;gap:16px;}
+    @media(max-width:900px){.grid2{grid-template-columns:1fr;}}
+    canvas{max-height:220px;}
+
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:500;padding:20px;}
+    .modal-overlay.open{display:flex;animation:fadeUp .2s ease;}
+    .modal{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:26px;width:100%;max-width:520px;}
+    .modal-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:16px;}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+    .form-group.span2{grid-column:span 2;}
+    label{font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--cl);}
+    input,select,textarea{background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--c);font-family:'DM Sans',sans-serif;font-size:14px;padding:9px 12px;outline:none;width:100%;}
+    .modal-actions{display:flex;gap:10px;margin-top:18px;justify-content:flex-end;}
+
+    .toast-wrap{position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;gap:8px;}
+    .toast{padding:12px 18px;border-radius:8px;font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;animation:fadeUp .3s ease;}
+    .toast.ok{background:#1a3322;border:1px solid rgba(95,207,128,.3);color:var(--green);}
+    .toast.err{background:#2a1510;border:1px solid rgba(224,90,43,.3);color:var(--red);}
+  </style>
+  <script type="module" crossorigin src="/assets/jobDashboard-BXUeB5s9.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="/assets/admin-auth-4ZiUUGs_.js">
+  <link rel="modulepreload" crossorigin href="/assets/admin-nav-Bdcu9bMl.js">
+  <link rel="modulepreload" crossorigin href="/assets/date-utils-D3sh9T8I.js">
+  <link rel="modulepreload" crossorigin href="/assets/realtime-D7K--cdb.js">
+  <link rel="modulepreload" crossorigin href="/assets/job-scoring-B-_zPRZd.js">
+</head>
+<body>
+
+  <div class="page">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Job Search <span style="color:var(--al)">Command Center</span></div>
+        <div class="page-sub">Manage opportunities, applications, networking, interviews and offers from one place.</div>
+      </div>
+      <span class="rt-indicator" id="rt-indicator"><span class="rt-dot"></span>Live</span>
+      <a class="btn primary" href="job-opportunities.html?new=1">+ Add Opportunity</a>
+    </div>
+
+    <div class="quick-actions">
+      <a class="btn" href="job-contacts.html?new=1">+ Add Contact</a>
+      <button class="btn" id="log-activity-btn">+ Log Activity</button>
+      <a class="btn" href="job-interviews.html">+ Add Interview</a>
+      <a class="btn" href="job-copilot.html">✦ Ask AI</a>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi"><div class="kpi-label">Active Opportunities</div><div class="kpi-val" id="kpi-active">—</div></div>
+      <div class="kpi"><div class="kpi-label">Applications<select class="kpi-select" id="kpi-period" aria-label="Applications period"><option value="week">Week</option><option value="month">Month</option><option value="all" selected>All</option></select></div><div class="kpi-val" id="kpi-applications">—</div></div>
+      <div class="kpi"><div class="kpi-label">Interviews</div><div class="kpi-val" id="kpi-interviews">—</div></div>
+      <div class="kpi"><div class="kpi-label">Offers</div><div class="kpi-val" id="kpi-offers">—</div></div>
+      <div class="kpi"><div class="kpi-label">Follow-ups Due</div><div class="kpi-val" id="kpi-followups" style="color:var(--al);">—</div></div>
+      <div class="kpi"><div class="kpi-label">Avg Fit Score</div><div class="kpi-val" id="kpi-fit">—</div></div>
+    </div>
+
+    <div class="section-title">Today's Priorities</div>
+    <div class="card"><div id="priorities-list"></div></div>
+
+    <div class="grid2">
+      <div>
+        <div class="section-title">Pipeline Overview</div>
+        <div class="card"><div id="stage-list"></div></div>
+      </div>
+      <div>
+        <div class="section-title">Applications Over Time</div>
+        <div class="card"><canvas id="apps-chart"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Log Activity modal -->
+  <div class="modal-overlay" id="activity-modal">
+    <div class="modal">
+      <div class="modal-title">Log Activity</div>
+      <div class="form-grid">
+        <div class="form-group"><label>Type</label>
+          <select id="am-activity_type"><option value="">Select...</option><option>Application</option><option>LinkedIn Message</option><option>Email</option><option>Phone Call</option><option>Recruiter Call</option><option>Networking Meeting</option><option>Interview</option><option>Follow-up</option><option>Thank-you</option><option>Assessment</option><option>Offer Discussion</option><option>Rejection Feedback</option><option>Other</option></select>
+        </div>
+        <div class="form-group"><label>Date</label><input type="date" id="am-activity_date"></div>
+        <div class="form-group span2"><label>Summary</label><textarea id="am-summary" rows="2"></textarea></div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn" id="activity-modal-cancel">Cancel</button>
+        <button class="btn primary" id="activity-modal-save">Add</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-wrap" id="toast-wrap"></div>
+
+</body>
+</html>

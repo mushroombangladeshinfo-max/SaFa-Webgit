@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Career Profile — SaFa Naturals</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>html.auth-checking *:not(style){visibility:hidden!important;}</style>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;}
+    html{font-size:15px;}
+    :root{--bg:#060d09;--bg2:#0d1f12;--bg3:#122018;--border:rgba(255,255,255,.07);--c:#f5efe6;--cm:rgba(245,239,230,.6);--cl:rgba(245,239,230,.35);--al:#c49a3c;--green:#5fcf80;--red:#e05a2b;}
+    body{font-family:'DM Sans','Hind Siliguri',sans-serif;background:var(--bg);color:var(--c);min-height:100vh;margin:0;-webkit-font-smoothing:antialiased;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+    .page{max-width:920px;margin:0 auto;padding:28px 24px 64px;}
+    .page-header{margin-bottom:24px;}
+    .page-title{font-family:'Syne','Hind Siliguri',sans-serif;font-size:22px;font-weight:700;color:var(--c);margin:0 0 4px;}
+    .page-sub{font-size:13px;color:var(--cl);}
+    .btn{font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:9px 16px;border-radius:6px;border:1px solid var(--border);background:rgba(255,255,255,.04);color:var(--cl);cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:6px;}
+    .btn:hover{color:var(--c);background:rgba(255,255,255,.08);}
+    .btn.primary{background:rgba(196,154,60,.12);border-color:rgba(196,154,60,.3);color:var(--al);}
+    .btn.primary:hover{background:rgba(196,154,60,.2);}
+    .card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:22px;margin-bottom:16px;}
+    .card-title{font-family:'Syne','Hind Siliguri',sans-serif;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--al);margin-bottom:4px;}
+    .card-hint{font-size:12px;color:var(--cl);margin-bottom:14px;}
+    label{display:block;font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--cl);margin-bottom:6px;}
+    textarea,input{background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--c);font-family:'DM Sans','Hind Siliguri',sans-serif;font-size:14px;padding:10px 12px;outline:none;width:100%;resize:vertical;}
+    textarea:focus,input:focus{border-color:rgba(196,154,60,.5);}
+    .field{margin-bottom:16px;}
+    .field:last-child{margin-bottom:0;}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+    @media(max-width:640px){.grid2{grid-template-columns:1fr;}}
+    .save-bar{position:sticky;bottom:0;background:var(--bg);padding:16px 0;display:flex;justify-content:flex-end;gap:10px;border-top:1px solid var(--border);margin-top:8px;}
+    .toast-wrap{position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;gap:8px;}
+    .toast{padding:12px 18px;border-radius:8px;font-family:'Syne','Hind Siliguri',sans-serif;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;animation:fadeUp .3s ease;}
+    .toast.ok{background:#1a3322;border:1px solid rgba(95,207,128,.3);color:var(--green);}
+    .toast.err{background:#2a1510;border:1px solid rgba(224,90,43,.3);color:var(--red);}
+  </style>
+  <script type="module" crossorigin src="/assets/jobSettings-DsT-nHoZ.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="/assets/admin-auth-4ZiUUGs_.js">
+  <link rel="modulepreload" crossorigin href="/assets/admin-nav-Bdcu9bMl.js">
+</head>
+<body>
+
+  <div class="page">
+    <div class="page-header">
+      <div class="page-title">Career <span style="color:var(--al)">Profile</span></div>
+      <div class="page-sub">Your reusable background — every AI feature (fit analysis, interview prep, outreach drafting) reads this instead of you re-typing it per job. Nothing here is invented by AI; it only reflects what you write.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Education</div>
+      <div class="field"><textarea id="f-education" rows="3" placeholder="Degrees, institutions, dates, relevant coursework..."></textarea></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Work Experience</div>
+      <div class="field"><textarea id="f-work_experience" rows="6" placeholder="Roles, companies, dates, responsibilities and achievements — the raw material AI will match against job descriptions."></textarea></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Projects</div>
+      <div class="field"><textarea id="f-projects" rows="4" placeholder="Personal, academic, or freelance projects worth citing in applications/interviews."></textarea></div>
+    </div>
+
+    <div class="card">
+      <div class="grid2">
+        <div class="field"><label>Skills</label><textarea id="f-skills" rows="3" placeholder="Tools, languages, methods — e.g. SQL, Power BI, Salesforce, R..."></textarea></div>
+        <div class="field"><label>Languages</label><textarea id="f-languages" rows="3" placeholder="e.g. English (fluent), German (B1)..."></textarea></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="grid2">
+        <div class="field"><label>Certifications</label><textarea id="f-certifications" rows="3"></textarea></div>
+        <div class="field"><label>Career Preferences</label><textarea id="f-career_preferences" rows="3" placeholder="What you're optimizing for right now..."></textarea></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="grid2">
+        <div class="field"><label>Work Authorization</label><textarea id="f-work_authorization" rows="3" placeholder="Visa/residency status, restrictions..."></textarea></div>
+        <div class="field"><label>Target Locations</label><textarea id="f-target_locations" rows="3"></textarea></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="grid2">
+        <div class="field"><label>Target Roles</label><textarea id="f-target_roles" rows="3" placeholder="Career tracks / role families you're pursuing"></textarea></div>
+        <div class="field"><label>Salary Preferences</label><textarea id="f-salary_preferences" rows="3"></textarea></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="field"><label>Availability</label><textarea id="f-availability" rows="2" placeholder="Start date, notice period, working hours available..."></textarea></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Career Narrative</div>
+      <div class="card-hint">Your own words on your story/motivation — the source for 30/60-second introductions and motivation answers.</div>
+      <div class="field"><textarea id="f-career_narrative" rows="5"></textarea></div>
+    </div>
+
+    <div class="save-bar">
+      <button class="btn primary" id="save-btn">Save Profile</button>
+    </div>
+  </div>
+
+  <div class="toast-wrap" id="toast-wrap"></div>
+
+</body>
+</html>
