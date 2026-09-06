@@ -146,6 +146,10 @@
         <textarea id="f-notes" rows="4" placeholder="Freeform notes — AI never overwrites this."></textarea>
         <div style="margin-top:10px;"><button class="btn sm" id="save-notes-btn">Save Notes</button></div>
       </div>
+      <div class="card">
+        <div class="card-title">Stage History</div>
+        <div id="stage-history-list"></div>
+      </div>
     </div>
 
     <!-- Job Description -->
@@ -332,6 +336,9 @@
       <div class="modal-title">Mark Closed</div>
       <div class="form-grid">
         <div class="form-group"><label class="f">Closed Date</label><input type="date" id="cl-closed_date"></div>
+        <div class="form-group"><label class="f">Closed Outcome</label>
+          <select id="cl-closed_outcome"><option value="">Select...</option></select>
+        </div>
         <div class="form-group"><label class="f">Known Reason</label>
           <select id="cl-known_reason"><option value="">Select...</option></select>
         </div>
@@ -354,7 +361,7 @@
     import { localDateStr } from '/src/date-utils.js';
     import { FIT_DIMENSIONS, effectiveRating, computeFitScore, fitClassification, eligibilityStatus, recommendation, computePriority, ELIGIBILITY_FIELDS } from '/src/job-scoring.js';
     import { escapeHtml } from '/src/html-utils.js';
-    import { STAGES, STAGE_LABEL, STAGE_ORDER, CAREER_TRACKS, EMPLOYMENT_TYPES, SOURCES, GERMAN_REQUIREMENTS, YES_NO_UNCLEAR, CONTACT_TYPES, INTERVIEW_TYPES, KNOWN_REASONS, ACTIVITY_TYPES, optionsHtml, valueLabelOptionsHtml } from '/src/job-constants.js';
+    import { STAGES, STAGE_LABEL, STAGE_ORDER, CAREER_TRACKS, EMPLOYMENT_TYPES, SOURCES, GERMAN_REQUIREMENTS, YES_NO_UNCLEAR, CONTACT_TYPES, INTERVIEW_TYPES, KNOWN_REASONS, ACTIVITY_TYPES, CLOSE_OUTCOMES, optionsHtml, valueLabelOptionsHtml } from '/src/job-constants.js';
 
     document.documentElement.classList.add('auth-checking');
     const sb = createClient(
@@ -378,6 +385,7 @@
     document.getElementById('cm-contact_type').innerHTML += optionsHtml(CONTACT_TYPES);
     document.getElementById('im-interview_type').innerHTML += optionsHtml(INTERVIEW_TYPES);
     document.getElementById('cl-known_reason').innerHTML += optionsHtml(KNOWN_REASONS);
+    document.getElementById('cl-closed_outcome').innerHTML += optionsHtml(CLOSE_OUTCOMES);
     document.getElementById('am-activity_type').innerHTML += optionsHtml(ACTIVITY_TYPES);
     document.getElementById('f-application_channel').innerHTML += optionsHtml(SOURCES);
 
@@ -403,6 +411,19 @@
       loadContacts();
       loadInterviews();
       loadActivities();
+      loadStageHistory();
+    }
+
+    // No separate stage-history table needed — every stage change already
+    // inserts a "Stage changed: X → Y" job_activities row (Kanban drag, the
+    // stage-select dropdown, and the natural-language update flow all do
+    // this), so the timeline is just a filtered view of existing data.
+    async function loadStageHistory() {
+      const { data } = await sb.from('job_activities').select('activity_date, summary').eq('opportunity_id', oppId).ilike('summary', 'Stage changed:%').order('activity_date', { ascending: false });
+      const rows = data || [];
+      document.getElementById('stage-history-list').innerHTML = rows.length
+        ? rows.map(r => `<div class="timeline-item"><div class="timeline-date">${r.activity_date}</div><div class="timeline-summary">${escapeHtml(r.summary)}</div></div>`).join('')
+        : '<div style="color:var(--cl);font-size:13px;">No stage changes logged yet.</div>';
     }
 
     function priorityPillClass(label) {
@@ -781,6 +802,7 @@
     /* ── Mark Closed / Reopen ── */
     document.getElementById('close-btn').addEventListener('click', () => {
       document.getElementById('cl-closed_date').value = localDateStr();
+      document.getElementById('cl-closed_outcome').value = '';
       document.getElementById('cl-known_reason').value = '';
       document.getElementById('cl-closed_reason').value = '';
       document.getElementById('close-modal').classList.add('open');
@@ -788,13 +810,19 @@
     document.getElementById('close-modal-cancel').addEventListener('click', () => document.getElementById('close-modal').classList.remove('open'));
     document.getElementById('close-modal').addEventListener('click', e => { if (e.target === e.currentTarget) e.currentTarget.classList.remove('open'); });
     document.getElementById('close-modal-save').addEventListener('click', async () => {
+      const closedOutcome = document.getElementById('cl-closed_outcome').value || null;
       const payload = {
         closed: true,
         closed_date: document.getElementById('cl-closed_date').value || localDateStr(),
+        closed_outcome: closedOutcome,
         known_reason: document.getElementById('cl-known_reason').value || null,
         closed_reason: document.getElementById('cl-closed_reason').value.trim() || null,
         rejection_stage: STAGE_LABEL[opp.stage],
       };
+      // An accepted offer/outcome should also read as accepted everywhere
+      // else the app shows stage — otherwise a "closed, Accepted" opportunity
+      // could still display an earlier stage like "Recruiter Screen".
+      if (closedOutcome === 'Accepted') payload.stage = 'accepted';
       const { error } = await sb.from('job_opportunities').update(payload).eq('id', oppId);
       if (error) { toast(error.message, 'err'); return; }
       await sb.from('job_activities').insert([{ opportunity_id: oppId, activity_type: 'Rejection Feedback', activity_date: payload.closed_date, summary: `Opportunity closed${payload.known_reason?': '+payload.known_reason:''}` }]);

@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Skills Intelligence — SaFa Naturals</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>html.auth-checking *:not(style){visibility:hidden!important;}</style>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;}
+    html{font-size:15px;}
+    :root{--bg:#060d09;--bg2:#0d1f12;--bg3:#122018;--border:rgba(255,255,255,.07);--c:#f5efe6;--cm:rgba(245,239,230,.6);--cl:rgba(245,239,230,.35);--al:#c49a3c;--green:#5fcf80;--red:#e05a2b;}
+    body{font-family:'DM Sans','Hind Siliguri',sans-serif;background:var(--bg);color:var(--c);min-height:100vh;margin:0;-webkit-font-smoothing:antialiased;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+    .page{max-width:1200px;margin:0 auto;padding:28px 24px 64px;}
+    .page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;}
+    .page-title{font-family:'Syne','Hind Siliguri',sans-serif;font-size:22px;font-weight:700;color:var(--c);margin:0 0 4px;}
+    .page-sub{font-size:13px;color:var(--cl);}
+    .top-actions{display:flex;gap:8px;}
+    .btn{font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:9px 16px;border-radius:6px;border:1px solid var(--border);background:rgba(255,255,255,.04);color:var(--cl);cursor:pointer;}
+    .btn:hover{color:var(--c);background:rgba(255,255,255,.08);}
+    .btn.primary{background:rgba(196,154,60,.12);border-color:rgba(196,154,60,.3);color:var(--al);}
+    .btn.primary:hover{background:rgba(196,154,60,.2);}
+    .btn.sm{padding:6px 10px;font-size:8px;}
+    .table-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:18px;}
+    .table-toolbar{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);}
+    .table-title{font-family:'Syne','Hind Siliguri',sans-serif;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--cl);}
+    .scroll-x{overflow-x:auto;}
+    table{width:100%;border-collapse:collapse;}
+    th{font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--cl);padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap;}
+    td{padding:12px 14px;font-size:14px;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:middle;}
+    tr:last-child td{border-bottom:none;}
+    tr:hover td{background:rgba(255,255,255,.02);}
+    .empty-state{text-align:center;padding:48px 20px;color:var(--cl);}
+    .empty-icon{font-size:32px;margin-bottom:10px;}
+    .pill{display:inline-flex;padding:3px 9px;border-radius:20px;font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;}
+    .gap-high{background:rgba(224,90,43,.12);color:var(--red);}
+    .gap-medium{background:rgba(196,154,60,.12);color:var(--al);}
+    .gap-low{background:rgba(95,207,128,.12);color:var(--green);}
+    .mention-count{font-family:'DM Mono',monospace;}
+
+    .suggest-box{background:rgba(196,154,60,.06);border:1px solid rgba(196,154,60,.2);border-radius:10px;padding:16px;margin-bottom:18px;display:none;}
+    .suggest-box.open{display:block;}
+    .suggest-item{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05);}
+    .suggest-item:last-child{border-bottom:none;}
+    .suggest-item-main strong{font-size:13px;}
+    .suggest-item-main div{font-size:12px;color:var(--cl);margin-top:2px;}
+
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:500;padding:20px;}
+    .modal-overlay.open{display:flex;animation:fadeUp .2s ease;}
+    .modal{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:28px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;}
+    .modal-title{font-family:'Syne','Hind Siliguri',sans-serif;font-size:15px;font-weight:700;color:var(--c);margin-bottom:20px;}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+    @media(max-width:520px){.form-grid{grid-template-columns:1fr;}}
+    .form-group{display:flex;flex-direction:column;gap:6px;}
+    .form-group.span2{grid-column:span 2;}
+    label{font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--cl);}
+    input,select,textarea{background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--c);font-family:'DM Sans','Hind Siliguri',sans-serif;font-size:14px;padding:9px 12px;outline:none;width:100%;}
+    input:focus,select:focus,textarea:focus{border-color:rgba(196,154,60,.5);}
+    .modal-actions{display:flex;gap:10px;margin-top:20px;justify-content:flex-end;}
+    .toast-wrap{position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;gap:8px;}
+    .toast{padding:12px 18px;border-radius:8px;font-family:'Syne','Hind Siliguri',sans-serif;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;animation:fadeUp .3s ease;}
+    .toast.ok{background:#1a3322;border:1px solid rgba(95,207,128,.3);color:var(--green);}
+    .toast.err{background:#2a1510;border:1px solid rgba(224,90,43,.3);color:var(--red);}
+  </style>
+</head>
+<body>
+
+  <div class="page">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Skills <span style="color:var(--al)">Intelligence</span></div>
+        <div class="page-sub">Which skill investment would unlock the largest number of realistic opportunities?</div>
+      </div>
+      <span class="rt-indicator" id="rt-indicator"><span class="rt-dot"></span>Live</span>
+      <div class="top-actions">
+        <button class="btn" id="suggest-btn">✦ Suggest Skills with AI</button>
+        <button class="btn primary" id="add-btn">+ Add Skill</button>
+      </div>
+    </div>
+
+    <div class="suggest-box" id="suggest-box">
+      <div style="font-family:'Syne',sans-serif;font-size:11px;font-weight:700;color:var(--al);margin-bottom:8px;">✦ Suggested Skills — grounded only in skills explicitly named in your stored job descriptions</div>
+      <div id="suggest-list"></div>
+      <div style="margin-top:10px;"><button class="btn sm" id="suggest-close-btn">Close</button></div>
+    </div>
+
+    <div class="table-card">
+      <div class="table-toolbar"><span class="table-title">Tracked Skills</span><span class="count-label" id="skill-count" style="font-size:13px;color:var(--cl);"></span></div>
+      <div class="scroll-x">
+        <table>
+          <thead><tr><th>Skill</th><th>Category</th><th>My Level</th><th>Job Mentions</th><th>High-Fit Mentions</th><th>Gap</th><th></th></tr></thead>
+          <tbody id="tbody"><tr><td colspan="7"><div class="empty-state"><div class="empty-icon">⏳</div>Loading...</div></td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add/Edit Skill modal -->
+  <div class="modal-overlay" id="modal">
+    <div class="modal">
+      <div class="modal-title" id="modal-title">Add Skill</div>
+      <div class="form-grid">
+        <div class="form-group span2"><label>Skill *</label><input type="text" id="f-skill"></div>
+        <div class="form-group"><label>Category</label><select id="f-category"></select></div>
+        <div class="form-group"><label>My Level</label><select id="f-my_level"></select></div>
+        <div class="form-group span2"><label>Evidence</label><textarea id="f-evidence" rows="2" placeholder="Where does this show up in your background?"></textarea></div>
+        <div class="form-group span2"><label>Notes / Suggested Action</label><textarea id="f-notes" rows="2"></textarea></div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn" id="modal-cancel">Cancel</button>
+        <button class="btn primary" id="modal-save">Save Skill</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-wrap" id="toast-wrap"></div>
+
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+    import { requireAdmin }  from '/src/admin-auth.js';
+    import { mountAdminNav } from '/src/admin-nav.js';
+    import { loadAiCfg, chatComplete, formatAiError } from '/src/ai-client.js';
+    import { subscribeRealtime, injectRealtimeStyles } from '/src/realtime.js';
+    import { escapeHtml } from '/src/html-utils.js';
+    import { computeFitScore } from '/src/job-scoring.js';
+    import { SKILL_CATEGORIES, SKILL_LEVELS, optionsHtml } from '/src/job-constants.js';
+
+    document.documentElement.classList.add('auth-checking');
+    const sb = createClient(
+      import.meta.env.VITE_SUPABASE_URL,
+      import.meta.env.VITE_SUPABASE_ANON_KEY
+    );
+    const session = await requireAdmin(sb);
+    if (!session) { window.location.href = 'orders.html'; }
+    document.documentElement.classList.remove('auth-checking');
+    mountAdminNav({ page: 'job-skills', supabase: sb, email: session.user.email });
+
+    document.getElementById('f-category').innerHTML = optionsHtml(SKILL_CATEGORIES);
+    document.getElementById('f-my_level').innerHTML = optionsHtml(SKILL_LEVELS);
+
+    function toast(msg, type='ok') {
+      const el = document.createElement('div');
+      el.className = `toast ${type}`;
+      el.textContent = msg;
+      document.getElementById('toast-wrap').appendChild(el);
+      setTimeout(()=>el.remove(), 3500);
+    }
+
+    const LEVEL_RANK = { None: 0, Basic: 1, Intermediate: 2, Advanced: 3, Expert: 4 };
+    // Gap is a plain deterministic function of data already on the page —
+    // frequent mentions + low current level = high gap — not another AI
+    // call, since there's nothing here an AI could judge better than a
+    // simple rule over real counts.
+    function gapLevel(myLevel, mentions) {
+      const rank = LEVEL_RANK[myLevel] ?? 0;
+      if (rank <= 1 && mentions >= 3) return 'High';
+      if (rank <= 2 && mentions >= 1) return 'Medium';
+      return 'Low';
+    }
+
+    let _skills = [], _opps = [];
+
+    async function load() {
+      const [{ data: skills, error: e1 }, { data: opps, error: e2 }] = await Promise.all([
+        sb.from('job_skills').select('*').order('skill'),
+        sb.from('job_opportunities').select('job_description, fit_manual, fit_ai'),
+      ]);
+      if (e1 || e2) { toast((e1||e2).message, 'err'); return; }
+      _skills = skills || [];
+      _opps = (opps || []).filter(o => o.job_description);
+      renderTable();
+    }
+
+    function countMentions(skill) {
+      const needle = skill.toLowerCase();
+      let total = 0, highFit = 0;
+      _opps.forEach(o => {
+        if (!o.job_description.toLowerCase().includes(needle)) return;
+        total++;
+        const fit = computeFitScore(o.fit_manual, o.fit_ai);
+        if (fit !== null && fit >= 65) highFit++;
+      });
+      return { total, highFit };
+    }
+
+    function renderTable() {
+      document.getElementById('skill-count').textContent = `${_skills.length} skill${_skills.length!==1?'s':''}`;
+      if (!_skills.length) {
+        document.getElementById('tbody').innerHTML = '<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">✦</div>No skills tracked yet — add one manually, or use Suggest Skills with AI to find candidates from your stored job descriptions.</div></td></tr>';
+        return;
+      }
+      document.getElementById('tbody').innerHTML = _skills.map(s => {
+        const { total, highFit } = countMentions(s.skill);
+        const gap = gapLevel(s.my_level, total);
+        return `<tr>
+          <td><strong>${escapeHtml(s.skill)}</strong>${s.notes?`<div style="font-size:12px;color:var(--cl);margin-top:2px;">${escapeHtml(s.notes)}</div>`:''}</td>
+          <td style="color:var(--cl);font-size:13px;">${escapeHtml(s.category)||'—'}</td>
+          <td>${escapeHtml(s.my_level)}</td>
+          <td class="mention-count">${total}</td>
+          <td class="mention-count">${highFit}</td>
+          <td><span class="pill gap-${gap.toLowerCase()}">${gap}</span></td>
+          <td>
+            <div style="display:flex;gap:6px;">
+              <button class="btn sm" onclick="window.editSkill(${s.id})">Edit</button>
+              <button class="btn sm" onclick="window.deleteSkill(${s.id})">Del</button>
+            </div>
+          </td>
+        </tr>`;
+      }).join('');
+    }
+
+    /* ── Modal ── */
+    const FIELDS = ['skill','category','my_level','evidence','notes'];
+    let _editId = null;
+    function openModal(skill=null) {
+      _editId = skill?.id || null;
+      document.getElementById('modal-title').textContent = skill ? 'Edit Skill' : 'Add Skill';
+      FIELDS.forEach(f => { document.getElementById('f-'+f).value = skill?.[f] || (f==='my_level' ? 'None' : ''); });
+      document.getElementById('modal').classList.add('open');
+    }
+    function closeModal() { document.getElementById('modal').classList.remove('open'); _editId = null; }
+    document.getElementById('add-btn').addEventListener('click', () => openModal());
+    document.getElementById('modal-cancel').addEventListener('click', closeModal);
+    document.getElementById('modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
+
+    document.getElementById('modal-save').addEventListener('click', async () => {
+      const skill = document.getElementById('f-skill').value.trim();
+      if (!skill) { toast('Skill name is required', 'err'); return; }
+      const payload = { skill };
+      ['category','my_level'].forEach(f => { payload[f] = document.getElementById('f-'+f).value || null; });
+      ['evidence','notes'].forEach(f => { payload[f] = document.getElementById('f-'+f).value.trim() || null; });
+
+      let error;
+      if (_editId) ({ error } = await sb.from('job_skills').update(payload).eq('id', _editId));
+      else ({ error } = await sb.from('job_skills').insert([payload]));
+      if (error) { toast(error.message, 'err'); return; }
+      toast(_editId ? 'Skill updated' : 'Skill added');
+      closeModal();
+      load();
+    });
+
+    window.editSkill = (id) => openModal(_skills.find(s => s.id === id));
+    window.deleteSkill = async (id) => {
+      if (!confirm('Delete this tracked skill?')) return;
+      const { error } = await sb.from('job_skills').delete().eq('id', id);
+      if (error) { toast(error.message, 'err'); return; }
+      toast('Deleted');
+      load();
+    };
+
+    /* ── Suggest Skills with AI ── */
+    document.getElementById('suggest-btn').addEventListener('click', async () => {
+      const btn = document.getElementById('suggest-btn');
+      btn.textContent = 'Thinking...'; btn.disabled = true;
+      try {
+        if (!_opps.length) { toast('Add some opportunities with job descriptions first', 'err'); return; }
+        const cfg = await loadAiCfg(sb);
+        if (cfg.provider === 'openai' && !cfg.key) { toast('Configure a Groq key on the Home page first', 'err'); return; }
+        const { data: profile } = await sb.from('job_career_profile').select('skills').eq('id', true).maybeSingle();
+        const trackedSkills = _skills.map(s => s.skill);
+        const shape = `{"suggested_skills":[{"skill":string,"category":${JSON.stringify(SKILL_CATEGORIES)}[number]|null,"reason":string}]}`;
+        const messages = [
+          { role: 'system', content: `You analyse a set of job descriptions to find skills worth investing in. Return ONLY a single JSON object matching exactly this shape (no markdown, no commentary): ${shape}. Only suggest a skill if it is EXPLICITLY named in at least one of the job descriptions given below — never invent one. Do not suggest a skill already in the candidate's tracked list or their stated career-profile skills (both given below). Suggest at most 10, ordered by how many job descriptions mention them.` },
+          { role: 'user', content: `ALREADY TRACKED: ${JSON.stringify(trackedSkills)}\n\nCAREER PROFILE SKILLS: ${profile?.skills || '(none saved)'}\n\nJOB DESCRIPTIONS:\n${_opps.map((o,i)=>`--- JD ${i+1} ---\n${o.job_description}`).join('\n\n')}` },
+        ];
+        const reply = await chatComplete(cfg, messages, { json: true });
+        const parsed = JSON.parse(reply);
+        const suggestions = (parsed.suggested_skills || []).filter(s => s.skill && !trackedSkills.some(t => t.toLowerCase() === s.skill.toLowerCase()));
+        const box = document.getElementById('suggest-box');
+        const list = document.getElementById('suggest-list');
+        if (!suggestions.length) {
+          list.innerHTML = '<div style="color:var(--cl);font-size:13px;">No new skill suggestions — your tracked list already covers what shows up in your saved job descriptions.</div>';
+        } else {
+          list.innerHTML = suggestions.map((s,i) => `
+            <div class="suggest-item">
+              <div class="suggest-item-main"><strong>${escapeHtml(s.skill)}</strong><div>${escapeHtml(s.category)||'Other'} — ${escapeHtml(s.reason)}</div></div>
+              <button class="btn sm primary" data-add-suggestion="${i}">+ Add</button>
+            </div>`).join('');
+          list.querySelectorAll('[data-add-suggestion]').forEach(b => b.addEventListener('click', async () => {
+            const s = suggestions[+b.dataset.addSuggestion];
+            const { error } = await sb.from('job_skills').insert([{ skill: s.skill, category: SKILL_CATEGORIES.includes(s.category) ? s.category : 'Other', notes: s.reason }]);
+            if (error) { toast(error.message, 'err'); return; }
+            b.textContent = 'Added ✓'; b.disabled = true;
+            load();
+          }));
+        }
+        box.classList.add('open');
+      } catch (e) {
+        toast('Suggestion failed: ' + e.message, 'err');
+      } finally {
+        btn.textContent = '✦ Suggest Skills with AI'; btn.disabled = false;
+      }
+    });
+    document.getElementById('suggest-close-btn').addEventListener('click', () => document.getElementById('suggest-box').classList.remove('open'));
+
+    load();
+    injectRealtimeStyles();
+    subscribeRealtime(sb, 'job-skills-live', ['job_skills','job_opportunities'], load, { indicatorId: 'rt-indicator' });
+  </script>
+</body>
+</html>

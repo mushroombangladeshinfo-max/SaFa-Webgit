@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Offers — SaFa Naturals</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>html.auth-checking *:not(style){visibility:hidden!important;}</style>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;}
+    html{font-size:15px;}
+    :root{--bg:#060d09;--bg2:#0d1f12;--bg3:#122018;--border:rgba(255,255,255,.07);--c:#f5efe6;--cm:rgba(245,239,230,.6);--cl:rgba(245,239,230,.35);--al:#c49a3c;--green:#5fcf80;--red:#e05a2b;--blue:#50c8ff;}
+    body{font-family:'DM Sans','Hind Siliguri',sans-serif;background:var(--bg);color:var(--c);min-height:100vh;margin:0;-webkit-font-smoothing:antialiased;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+    .page{max-width:1200px;margin:0 auto;padding:28px 24px 64px;}
+    .page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;}
+    .page-title{font-family:'Syne','Hind Siliguri',sans-serif;font-size:22px;font-weight:700;color:var(--c);margin:0 0 4px;}
+    .page-sub{font-size:13px;color:var(--cl);}
+    .btn{font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:9px 16px;border-radius:6px;border:1px solid var(--border);background:rgba(255,255,255,.04);color:var(--cl);cursor:pointer;}
+    .btn:hover{color:var(--c);background:rgba(255,255,255,.08);}
+    .btn.primary{background:rgba(196,154,60,.12);border-color:rgba(196,154,60,.3);color:var(--al);}
+    .btn.primary:hover{background:rgba(196,154,60,.2);}
+    .btn.sm{padding:6px 10px;font-size:8px;}
+    .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px;}
+    @media(max-width:700px){.kpi-grid{grid-template-columns:repeat(2,1fr);}}
+    .kpi{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;}
+    .kpi-label{font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--cl);margin-bottom:6px;}
+    .kpi-val{font-family:'DM Mono','Hind Siliguri',monospace;font-size:20px;font-weight:500;color:var(--c);}
+    .view-toggle{display:flex;gap:2px;background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:2px;margin-bottom:16px;width:fit-content;}
+    .view-toggle button{background:none;border:none;color:var(--cl);font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:6px 12px;border-radius:5px;cursor:pointer;}
+    .view-toggle button.active{background:rgba(196,154,60,.14);color:var(--al);}
+    .table-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+    .table-toolbar{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);}
+    .table-title{font-family:'Syne','Hind Siliguri',sans-serif;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--cl);}
+    .scroll-x{overflow-x:auto;}
+    table{width:100%;border-collapse:collapse;}
+    th{font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--cl);padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap;}
+    td{padding:12px 14px;font-size:14px;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:middle;}
+    tr:last-child td{border-bottom:none;}
+    tr:hover td{background:rgba(255,255,255,.02);}
+    .empty-state{text-align:center;padding:48px 20px;color:var(--cl);}
+    .empty-icon{font-size:32px;margin-bottom:10px;}
+    .pill{display:inline-flex;padding:3px 9px;border-radius:20px;font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;}
+    .pill-pending{background:rgba(80,200,255,.1);color:var(--blue);}
+    .pill-negotiating{background:rgba(196,154,60,.12);color:var(--al);}
+    .pill-accepted{background:rgba(95,207,128,.12);color:var(--green);}
+    .pill-declined,.pill-expired{background:rgba(255,255,255,.05);color:var(--cl);}
+
+    .compare-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;}
+    .compare-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:18px;}
+    .compare-company{font-family:'Syne','Hind Siliguri',sans-serif;font-size:15px;font-weight:700;color:var(--c);}
+    .compare-title{font-size:12px;color:var(--cl);margin-bottom:12px;}
+    .compare-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:13px;}
+    .compare-row:last-of-type{border-bottom:none;}
+    .compare-label{color:var(--cl);}
+    .compare-val{color:var(--c);font-weight:500;text-align:right;}
+    .compare-salary{font-family:'DM Mono',monospace;font-size:22px;color:var(--al);margin-bottom:10px;}
+
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:500;padding:20px;}
+    .modal-overlay.open{display:flex;animation:fadeUp .2s ease;}
+    .modal{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:28px;width:100%;max-width:600px;max-height:90vh;overflow-y:auto;}
+    .modal-title{font-family:'Syne','Hind Siliguri',sans-serif;font-size:15px;font-weight:700;color:var(--c);margin-bottom:20px;}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+    @media(max-width:520px){.form-grid{grid-template-columns:1fr;}}
+    .form-group{display:flex;flex-direction:column;gap:6px;}
+    .form-group.span2{grid-column:span 2;}
+    label{font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--cl);}
+    input,select,textarea{background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--c);font-family:'DM Sans','Hind Siliguri',sans-serif;font-size:14px;padding:9px 12px;outline:none;width:100%;}
+    input:focus,select:focus,textarea:focus{border-color:rgba(196,154,60,.5);}
+    .modal-actions{display:flex;gap:10px;margin-top:20px;justify-content:flex-end;}
+    .toast-wrap{position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;gap:8px;}
+    .toast{padding:12px 18px;border-radius:8px;font-family:'Syne','Hind Siliguri',sans-serif;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;animation:fadeUp .3s ease;}
+    .toast.ok{background:#1a3322;border:1px solid rgba(95,207,128,.3);color:var(--green);}
+    .toast.err{background:#2a1510;border:1px solid rgba(224,90,43,.3);color:var(--red);}
+  </style>
+</head>
+<body>
+
+  <div class="page">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Job <span style="color:var(--al)">Offers</span></div>
+        <div class="page-sub">Track and compare every offer you receive.</div>
+      </div>
+      <span class="rt-indicator" id="rt-indicator"><span class="rt-dot"></span>Live</span>
+      <button class="btn primary" id="add-btn">+ Add Offer</button>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi"><div class="kpi-label">Total Offers</div><div class="kpi-val" id="kpi-total">—</div></div>
+      <div class="kpi"><div class="kpi-label">Pending / Negotiating</div><div class="kpi-val" id="kpi-pending">—</div></div>
+      <div class="kpi"><div class="kpi-label">Avg Base Salary</div><div class="kpi-val" id="kpi-avg">—</div></div>
+      <div class="kpi"><div class="kpi-label">Deadlines Due Soon</div><div class="kpi-val" id="kpi-due" style="color:var(--al);">—</div></div>
+    </div>
+
+    <div class="view-toggle">
+      <button type="button" class="active" data-view="table">Table</button>
+      <button type="button" data-view="compare">Compare</button>
+    </div>
+
+    <div id="table-view">
+      <div class="table-card">
+        <div class="table-toolbar"><span class="table-title">Offers</span><span class="count-label" id="offer-count" style="font-size:13px;color:var(--cl);"></span></div>
+        <div class="scroll-x">
+          <table>
+            <thead><tr><th>Company / Role</th><th>Base Salary</th><th>Start Date</th><th>Response Deadline</th><th>Status</th><th></th></tr></thead>
+            <tbody id="tbody"><tr><td colspan="6"><div class="empty-state"><div class="empty-icon">⏳</div>Loading...</div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div id="compare-view" style="display:none;">
+      <div class="compare-grid" id="compare-grid"></div>
+    </div>
+  </div>
+
+  <!-- Add/Edit Offer modal -->
+  <div class="modal-overlay" id="modal">
+    <div class="modal">
+      <div class="modal-title" id="modal-title">Add Offer</div>
+      <div class="form-grid">
+        <div class="form-group span2"><label>Opportunity *</label><select id="f-opportunity_id"></select></div>
+        <div class="form-group"><label>Base Salary</label><input type="number" id="f-base_salary" min="0" step="0.01"></div>
+        <div class="form-group"><label>Status</label><select id="f-status"></select></div>
+        <div class="form-group"><label>Start Date</label><input type="date" id="f-start_date"></div>
+        <div class="form-group"><label>Response Deadline</label><input type="date" id="f-response_deadline"></div>
+        <div class="form-group span2"><label>Bonus / Notes on Compensation</label><textarea id="f-bonus_notes" rows="2"></textarea></div>
+        <div class="form-group span2"><label>Benefits</label><textarea id="f-benefits" rows="2"></textarea></div>
+        <div class="form-group span2"><label>Notes</label><textarea id="f-notes" rows="2"></textarea></div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn" id="modal-cancel">Cancel</button>
+        <button class="btn primary" id="modal-save">Save Offer</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-wrap" id="toast-wrap"></div>
+
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+    import { requireAdmin }  from '/src/admin-auth.js';
+    import { mountAdminNav } from '/src/admin-nav.js';
+    import { localDateStr } from '/src/date-utils.js';
+    import { subscribeRealtime, injectRealtimeStyles } from '/src/realtime.js';
+    import { escapeHtml } from '/src/html-utils.js';
+    import { OFFER_STATUSES, optionsHtml, valueLabelOptionsHtml } from '/src/job-constants.js';
+
+    document.documentElement.classList.add('auth-checking');
+    const sb = createClient(
+      import.meta.env.VITE_SUPABASE_URL,
+      import.meta.env.VITE_SUPABASE_ANON_KEY
+    );
+    const session = await requireAdmin(sb);
+    if (!session) { window.location.href = 'orders.html'; }
+    document.documentElement.classList.remove('auth-checking');
+    mountAdminNav({ page: 'job-offers', supabase: sb, email: session.user.email });
+
+    document.getElementById('f-status').innerHTML = valueLabelOptionsHtml(OFFER_STATUSES, 'pending');
+
+    function toast(msg, type='ok') {
+      const el = document.createElement('div');
+      el.className = `toast ${type}`;
+      el.textContent = msg;
+      document.getElementById('toast-wrap').appendChild(el);
+      setTimeout(()=>el.remove(), 3500);
+    }
+    const fmtMoney = n => n === null || n === undefined ? '—' : '৳' + Number(n).toLocaleString('en');
+
+    let _all = [], _editId = null, _view = 'table';
+
+    async function load() {
+      const { data, error } = await sb.from('job_offers').select('*, job_opportunities(id,company,job_title)').order('created_at', { ascending: false });
+      if (error) { toast(error.message, 'err'); return; }
+      _all = data || [];
+      renderKpis();
+      render();
+    }
+
+    function renderKpis() {
+      document.getElementById('kpi-total').textContent = _all.length;
+      document.getElementById('kpi-pending').textContent = _all.filter(o => ['pending','negotiating'].includes(o.status)).length;
+      const salaries = _all.filter(o => o.base_salary !== null).map(o => Number(o.base_salary));
+      document.getElementById('kpi-avg').textContent = salaries.length ? fmtMoney(Math.round(salaries.reduce((a,b)=>a+b,0)/salaries.length)) : '—';
+      const today = localDateStr();
+      const dueSoon = _all.filter(o => {
+        if (!o.response_deadline || !['pending','negotiating'].includes(o.status)) return false;
+        const days = Math.ceil((new Date(o.response_deadline+'T00:00:00') - new Date(today+'T00:00:00')) / 86400000);
+        return days <= 3;
+      }).length;
+      document.getElementById('kpi-due').textContent = dueSoon;
+    }
+
+    function render() { _view === 'table' ? renderTable() : renderCompare(); }
+
+    function renderTable() {
+      document.getElementById('offer-count').textContent = `${_all.length} offer${_all.length!==1?'s':''}`;
+      if (!_all.length) {
+        document.getElementById('tbody').innerHTML = '<tr><td colspan="6"><div class="empty-state"><div class="empty-icon">◆</div>No offers yet.</div></td></tr>';
+        return;
+      }
+      document.getElementById('tbody').innerHTML = _all.map(o => `<tr>
+        <td><strong>${escapeHtml(o.job_opportunities?.company)}</strong><div style="font-size:12px;color:var(--cl);">${escapeHtml(o.job_opportunities?.job_title)}</div></td>
+        <td style="font-family:'DM Mono',monospace;">${fmtMoney(o.base_salary)}</td>
+        <td style="color:var(--cl);font-size:13px;">${o.start_date||'—'}</td>
+        <td style="color:var(--cl);font-size:13px;">${o.response_deadline||'—'}</td>
+        <td><span class="pill pill-${o.status}">${o.status}</span></td>
+        <td>
+          <div style="display:flex;gap:6px;">
+            <button class="btn sm" onclick="window.editOffer('${o.id}')">Edit</button>
+            <button class="btn sm" onclick="window.deleteOffer('${o.id}')">Del</button>
+          </div>
+        </td>
+      </tr>`).join('');
+    }
+
+    function renderCompare() {
+      const rows = _all.filter(o => ['pending','negotiating'].includes(o.status));
+      const grid = document.getElementById('compare-grid');
+      if (rows.length < 1) {
+        grid.innerHTML = '<div class="empty-state"><div class="empty-icon">◆</div>No pending or negotiating offers to compare yet.</div>';
+        return;
+      }
+      grid.innerHTML = rows.map(o => `
+        <div class="compare-card">
+          <div class="compare-company">${escapeHtml(o.job_opportunities?.company)}</div>
+          <div class="compare-title">${escapeHtml(o.job_opportunities?.job_title)}</div>
+          <div class="compare-salary">${fmtMoney(o.base_salary)}</div>
+          <div class="compare-row"><span class="compare-label">Status</span><span class="compare-val"><span class="pill pill-${o.status}">${o.status}</span></span></div>
+          <div class="compare-row"><span class="compare-label">Bonus</span><span class="compare-val">${escapeHtml(o.bonus_notes)||'—'}</span></div>
+          <div class="compare-row"><span class="compare-label">Benefits</span><span class="compare-val">${escapeHtml(o.benefits)||'—'}</span></div>
+          <div class="compare-row"><span class="compare-label">Start Date</span><span class="compare-val">${o.start_date||'—'}</span></div>
+          <div class="compare-row"><span class="compare-label">Response Deadline</span><span class="compare-val">${o.response_deadline||'—'}</span></div>
+        </div>`).join('');
+    }
+
+    document.querySelectorAll('.view-toggle button').forEach(b => b.addEventListener('click', () => {
+      _view = b.dataset.view;
+      document.querySelectorAll('.view-toggle button').forEach(x => x.classList.toggle('active', x===b));
+      document.getElementById('table-view').style.display = _view === 'table' ? '' : 'none';
+      document.getElementById('compare-view').style.display = _view === 'compare' ? '' : 'none';
+      render();
+    }));
+
+    /* ── Modal ── */
+    const FIELDS = ['opportunity_id','base_salary','status','start_date','response_deadline','bonus_notes','benefits','notes'];
+    async function openModal(offer=null) {
+      _editId = offer?.id || null;
+      document.getElementById('modal-title').textContent = offer ? 'Edit Offer' : 'Add Offer';
+      const { data: opps } = await sb.from('job_opportunities').select('id,company,job_title').eq('closed', false).order('company');
+      document.getElementById('f-opportunity_id').innerHTML = (opps||[]).map(o => `<option value="${o.id}" ${offer?.opportunity_id===o.id?'selected':''}>${escapeHtml(o.company)} — ${escapeHtml(o.job_title)}</option>`).join('');
+      FIELDS.forEach(f => { if (f==='opportunity_id') return; const el = document.getElementById('f-'+f); el.value = offer?.[f] ?? (f==='status' ? 'pending' : ''); });
+      document.getElementById('modal').classList.add('open');
+    }
+    function closeModal() { document.getElementById('modal').classList.remove('open'); _editId = null; }
+    document.getElementById('add-btn').addEventListener('click', () => openModal());
+    document.getElementById('modal-cancel').addEventListener('click', closeModal);
+    document.getElementById('modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
+
+    document.getElementById('modal-save').addEventListener('click', async () => {
+      const opportunity_id = document.getElementById('f-opportunity_id').value;
+      if (!opportunity_id) { toast('Select an opportunity', 'err'); return; }
+      const payload = { opportunity_id };
+      payload.base_salary = document.getElementById('f-base_salary').value ? +document.getElementById('f-base_salary').value : null;
+      payload.status = document.getElementById('f-status').value || 'pending';
+      payload.start_date = document.getElementById('f-start_date').value || null;
+      payload.response_deadline = document.getElementById('f-response_deadline').value || null;
+      payload.bonus_notes = document.getElementById('f-bonus_notes').value.trim() || null;
+      payload.benefits = document.getElementById('f-benefits').value.trim() || null;
+      payload.notes = document.getElementById('f-notes').value.trim() || null;
+
+      let error, savedId = _editId;
+      if (_editId) {
+        ({ error } = await sb.from('job_offers').update(payload).eq('id', _editId));
+      } else {
+        const { data, error: insErr } = await sb.from('job_offers').insert([payload]).select().single();
+        error = insErr;
+        if (data) savedId = data.id;
+      }
+      if (error) { toast(error.message, 'err'); return; }
+
+      if (payload.status === 'accepted') await acceptOfferCascade(opportunity_id, savedId);
+
+      toast(_editId ? 'Offer updated' : 'Offer added');
+      closeModal();
+      load();
+    });
+
+    // Same cascade as marking an opportunity Closed with outcome=Accepted on
+    // job-opportunity.html: an accepted offer should read as accepted
+    // everywhere else the app shows stage/closed status.
+    async function acceptOfferCascade(opportunityId, offerId) {
+      const { data: opp } = await sb.from('job_opportunities').select('stage').eq('id', opportunityId).maybeSingle();
+      await sb.from('job_opportunities').update({
+        stage: 'accepted', closed: true, closed_outcome: 'Accepted', closed_date: localDateStr(),
+      }).eq('id', opportunityId);
+      await sb.from('job_activities').insert([{
+        opportunity_id: opportunityId, activity_type: 'Offer Discussion', activity_date: localDateStr(),
+        summary: `Offer accepted${opp?.stage ? ' (was: '+opp.stage+')' : ''}`,
+      }]);
+    }
+
+    window.editOffer = (id) => openModal(_all.find(o => o.id === id));
+    window.deleteOffer = async (id) => {
+      if (!confirm('Delete this offer?')) return;
+      const { error } = await sb.from('job_offers').delete().eq('id', id);
+      if (error) { toast(error.message, 'err'); return; }
+      toast('Deleted');
+      load();
+    };
+
+    load();
+    injectRealtimeStyles();
+    subscribeRealtime(sb, 'job-offers-live', ['job_offers'], load, { indicatorId: 'rt-indicator' });
+  </script>
+</body>
+</html>

@@ -30,6 +30,9 @@ export default defineConfig({
         jobInterviews:    './job-interviews.html',
         jobCopilot:       './job-copilot.html',
         jobSettings:      './job-settings.html',
+        jobOffers:        './job-offers.html',
+        jobSkills:        './job-skills.html',
+        jobAnalytics:     './job-analytics.html',
       }
     }
   }

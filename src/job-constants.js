@@ -46,6 +46,14 @@ export const QUESTION_TAGS = ['Leadership','Conflict','Failure','Teamwork','Anal
 
 export const PREPARATION_STATUSES = [['not_started','Not Started'],['in_progress','In Progress'],['ready','Ready']];
 
+export const CLOSE_OUTCOMES = ['Rejected','Withdrawn','No Response','Role Filled','Role Cancelled','Accepted','Other'];
+
+export const OFFER_STATUSES = [['pending','Pending'],['negotiating','Negotiating'],['accepted','Accepted'],['declined','Declined'],['expired','Expired']];
+
+export const SKILL_CATEGORIES = ['Technical','Analytics','CRM','Commercial','Marketing','Sales','Operations','Supply Chain','Finance','Project Management','Communication','Language','Industry Knowledge','Other'];
+
+export const SKILL_LEVELS = ['None','Basic','Intermediate','Advanced','Expert'];
+
 /** `<option>` list for a flat array of plain strings (value === label). */
 export function optionsHtml(list, selected = '') {
   return list.map(v => `<option ${v === selected ? 'selected' : ''}>${v}</option>`).join('');

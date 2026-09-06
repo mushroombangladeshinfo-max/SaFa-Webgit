@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Job Analytics — SaFa Naturals</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>html.auth-checking *:not(style){visibility:hidden!important;}</style>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;}
+    html{font-size:15px;}
+    :root{--bg:#060d09;--bg2:#0d1f12;--bg3:#122018;--border:rgba(255,255,255,.07);--c:#f5efe6;--cm:rgba(245,239,230,.6);--cl:rgba(245,239,230,.35);--al:#c49a3c;--green:#5fcf80;--red:#e05a2b;}
+    body{font-family:'DM Sans','Hind Siliguri',sans-serif;background:var(--bg);color:var(--c);min-height:100vh;margin:0;-webkit-font-smoothing:antialiased;}
+    .page{max-width:1280px;margin:0 auto;padding:28px 24px 64px;}
+    .page-header{margin-bottom:22px;}
+    .page-title{font-family:'Syne','Hind Siliguri',sans-serif;font-size:22px;font-weight:700;color:var(--c);margin:0 0 4px;}
+    .page-sub{font-size:13px;color:var(--cl);}
+    .kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:26px;}
+    @media(max-width:900px){.kpi-grid{grid-template-columns:repeat(3,1fr);}}
+    .kpi{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;}
+    .kpi-label{font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--cl);margin-bottom:6px;}
+    .kpi-val{font-family:'DM Mono','Hind Siliguri',monospace;font-size:20px;font-weight:500;color:var(--c);}
+    .section-title{font-family:'Syne','Hind Siliguri',sans-serif;font-size:13px;font-weight:700;color:var(--c);margin:26px 0 12px;}
+    .card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:18px;}
+    canvas{max-height:260px;}
+    table{width:100%;border-collapse:collapse;}
+    th{font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--cl);padding:8px 10px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap;}
+    td{padding:9px 10px;font-size:13px;border-bottom:1px solid rgba(255,255,255,.04);}
+    tr:last-child td{border-bottom:none;}
+    .th-r,.td-r{text-align:right;}
+    .scroll-x{overflow-x:auto;}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+    @media(max-width:900px){.grid2{grid-template-columns:1fr;}}
+    .empty-mini{color:var(--cl);font-size:13px;padding:16px 0;text-align:center;}
+  </style>
+</head>
+<body>
+
+  <div class="page">
+    <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;">
+      <div>
+        <div class="page-title">Job Search <span style="color:var(--al)">Analytics</span></div>
+        <div class="page-sub">Where the pipeline works, and where it breaks.</div>
+      </div>
+      <span class="rt-indicator" id="rt-indicator"><span class="rt-dot"></span>Live</span>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi"><div class="kpi-label">Total Opportunities</div><div class="kpi-val" id="kpi-total">—</div></div>
+      <div class="kpi"><div class="kpi-label">Applications</div><div class="kpi-val" id="kpi-applied">—</div></div>
+      <div class="kpi"><div class="kpi-label">Reached Interview</div><div class="kpi-val" id="kpi-interview">—</div></div>
+      <div class="kpi"><div class="kpi-label">Offers</div><div class="kpi-val" id="kpi-offers">—</div></div>
+      <div class="kpi"><div class="kpi-label">Apply → Offer</div><div class="kpi-val" id="kpi-conv">—</div></div>
+    </div>
+
+    <div class="section-title">Application Funnel</div>
+    <div class="card"><canvas id="funnel-chart"></canvas></div>
+
+    <div class="grid2">
+      <div>
+        <div class="section-title">Conversion by Career Track</div>
+        <div class="card"><div class="scroll-x" id="track-table"></div></div>
+      </div>
+      <div>
+        <div class="section-title">Performance by Source</div>
+        <div class="card"><div class="scroll-x" id="source-table"></div></div>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div>
+        <div class="section-title">CV Version Performance</div>
+        <div class="card"><div class="scroll-x" id="cv-table"></div></div>
+      </div>
+      <div>
+        <div class="section-title">Rejection Reasons</div>
+        <div class="card">
+          <canvas id="rejection-chart"></canvas>
+          <div class="empty-mini" id="rejection-chart-empty" style="display:none;">No rejection reasons logged yet.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+    import { requireAdmin }  from '/src/admin-auth.js';
+    import { mountAdminNav } from '/src/admin-nav.js';
+    import { subscribeRealtime, injectRealtimeStyles } from '/src/realtime.js';
+    import { escapeHtml } from '/src/html-utils.js';
+    import { STAGES, STAGE_LABEL, STAGE_ORDER, CAREER_TRACKS } from '/src/job-constants.js';
+
+    document.documentElement.classList.add('auth-checking');
+    const sb = createClient(
+      import.meta.env.VITE_SUPABASE_URL,
+      import.meta.env.VITE_SUPABASE_ANON_KEY
+    );
+    const session = await requireAdmin(sb);
+    if (!session) { window.location.href = 'orders.html'; }
+    document.documentElement.classList.remove('auth-checking');
+    mountAdminNav({ page: 'job-analytics', supabase: sb, email: session.user.email });
+
+    function toast(msg) { console.warn(msg); }
+
+    // "Reached at least this far" — a standard funnel approximation for a
+    // tracker that stores current-stage-only rather than a full per-
+    // opportunity stage-entry timeline (that fuller history exists as
+    // job_activities rows per opportunity, not as one comparable dataset
+    // across all opportunities, so this threshold read is the practical
+    // approximation here).
+    function reached(opp, stageKey) {
+      return STAGE_ORDER.indexOf(opp.stage) >= STAGE_ORDER.indexOf(stageKey);
+    }
+
+    let _opps = [];
+    let funnelChart = null, rejectionChart = null;
+
+    async function load() {
+      const { data, error } = await sb.from('job_opportunities').select('*');
+      if (error) { toast(error.message); return; }
+      _opps = data || [];
+      renderKpis();
+      renderFunnel();
+      renderTrackTable();
+      renderSourceTable();
+      renderCvTable();
+      renderRejectionChart();
+    }
+
+    function renderKpis() {
+      const applied = _opps.filter(o => reached(o, 'applied')).length;
+      const interview = _opps.filter(o => reached(o, 'recruiter_screen')).length;
+      const offers = _opps.filter(o => reached(o, 'offer')).length;
+      document.getElementById('kpi-total').textContent = _opps.length;
+      document.getElementById('kpi-applied').textContent = applied;
+      document.getElementById('kpi-interview').textContent = interview;
+      document.getElementById('kpi-offers').textContent = offers;
+      document.getElementById('kpi-conv').textContent = applied ? Math.round((offers/applied)*100)+'%' : '—';
+    }
+
+    function renderFunnel() {
+      const counts = STAGES.map(([key]) => _opps.filter(o => reached(o, key)).length);
+      if (funnelChart) funnelChart.destroy();
+      funnelChart = new Chart(document.getElementById('funnel-chart'), {
+        type: 'bar',
+        data: { labels: STAGES.map(([,l])=>l), datasets: [{ data: counts, backgroundColor: 'rgba(196,154,60,.5)', borderRadius: 4 }] },
+        options: { indexAxis: 'y', responsive: true, plugins: { legend: { display: false } },
+          scales: { x: { beginAtZero: true, ticks: { color: 'rgba(245,239,230,.4)', font: { size: 10 }, precision: 0 }, grid: { color: 'rgba(255,255,255,.05)' } },
+                    y: { ticks: { color: 'rgba(245,239,230,.6)', font: { size: 11 } }, grid: { display: false } } } }
+      });
+    }
+
+    function groupTable(groupFn, groups) {
+      return groups.map(g => {
+        const rows = _opps.filter(o => groupFn(o) === g);
+        const discovered = rows.length;
+        const applied = rows.filter(o => reached(o,'applied')).length;
+        const interview = rows.filter(o => reached(o,'recruiter_screen')).length;
+        const offer = rows.filter(o => reached(o,'offer')).length;
+        const accepted = rows.filter(o => o.stage === 'accepted').length;
+        return { g, discovered, applied, interview, offer, accepted };
+      }).filter(r => r.discovered > 0);
+    }
+    function renderGroupTable(elId, rows, labelHeader) {
+      const el = document.getElementById(elId);
+      if (!rows.length) { el.innerHTML = '<div class="empty-mini">No data yet.</div>'; return; }
+      el.innerHTML = `<table>
+        <thead><tr><th>${labelHeader}</th><th class="th-r">Discovered</th><th class="th-r">Applied</th><th class="th-r">Interview+</th><th class="th-r">Offer+</th><th class="th-r">Accepted</th><th class="th-r">Conv %</th></tr></thead>
+        <tbody>${rows.map(r => `<tr>
+          <td>${escapeHtml(r.g)}</td><td class="td-r">${r.discovered}</td><td class="td-r">${r.applied}</td>
+          <td class="td-r">${r.interview}</td><td class="td-r">${r.offer}</td><td class="td-r">${r.accepted}</td>
+          <td class="td-r">${r.applied ? Math.round((r.offer/r.applied)*100) : 0}%</td>
+        </tr>`).join('')}</tbody>
+      </table>`;
+    }
+
+    function renderTrackTable() {
+      const tracks = [...new Set(_opps.map(o=>o.career_track).filter(Boolean))];
+      renderGroupTable('track-table', groupTable(o=>o.career_track, tracks), 'Track');
+    }
+    function renderSourceTable() {
+      const sources = [...new Set(_opps.map(o=>o.source).filter(Boolean))];
+      renderGroupTable('source-table', groupTable(o=>o.source, sources), 'Source');
+    }
+    function renderCvTable() {
+      const versions = [...new Set(_opps.map(o=>o.cv_version).filter(Boolean))];
+      renderGroupTable('cv-table', groupTable(o=>o.cv_version, versions), 'CV Version');
+    }
+
+    function renderRejectionChart() {
+      const closed = _opps.filter(o => o.closed && o.closed_outcome !== 'Accepted' && o.known_reason);
+      const counts = {};
+      closed.forEach(o => { counts[o.known_reason] = (counts[o.known_reason]||0) + 1; });
+      const labels = Object.keys(counts);
+      if (rejectionChart) { rejectionChart.destroy(); rejectionChart = null; }
+      const canvas = document.getElementById('rejection-chart');
+      const emptyEl = document.getElementById('rejection-chart-empty');
+      if (!labels.length) {
+        canvas.style.display = 'none';
+        emptyEl.style.display = '';
+        return;
+      }
+      canvas.style.display = '';
+      emptyEl.style.display = 'none';
+      rejectionChart = new Chart(canvas, {
+        type: 'bar',
+        data: { labels, datasets: [{ data: labels.map(l=>counts[l]), backgroundColor: 'rgba(224,90,43,.5)', borderRadius: 4 }] },
+        options: { responsive: true, plugins: { legend: { display: false } },
+          scales: { x: { ticks: { color: 'rgba(245,239,230,.5)', font: { size: 9 }, maxRotation: 40, minRotation: 40 }, grid: { display: false } },
+                    y: { beginAtZero: true, ticks: { color: 'rgba(245,239,230,.4)', font: { size: 10 }, precision: 0 }, grid: { color: 'rgba(255,255,255,.05)' } } } }
+      });
+    }
+
+    load();
+    injectRealtimeStyles();
+    subscribeRealtime(sb, 'job-analytics-live', ['job_opportunities'], load, { indicatorId: 'rt-indicator' });
+  </script>
+</body>
+</html>

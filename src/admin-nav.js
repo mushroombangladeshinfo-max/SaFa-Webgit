@@ -33,6 +33,9 @@ const JOB_LINKS = [
   { href: 'job-opportunities.html', label: '💼 Opportunities' },
   { href: 'job-contacts.html',     label: '🗂 Contacts'      },
   { href: 'job-interviews.html',   label: '🎤 Interviews'    },
+  { href: 'job-offers.html',       label: '◆ Offers'        },
+  { href: 'job-skills.html',       label: '✦ Skills Intelligence' },
+  { href: 'job-analytics.html',    label: '▥ Analytics'     },
   { href: 'job-copilot.html',      label: '✦ AI Copilot'    },
   { href: 'job-settings.html',     label: '⚙ Career Profile' },
 ];
@@ -56,6 +59,9 @@ const SEARCH_INDEX = [
   { href: 'job-opportunities.html', label: 'Opportunities',   icon: '💼', hint: 'Job applications tracker', keywords: 'job opportunities applications kanban ats fit score' },
   { href: 'job-contacts.html',      label: 'Job Contacts',    icon: '🗂', hint: 'Networking CRM',           keywords: 'job contacts networking recruiter referral' },
   { href: 'job-interviews.html',    label: 'Interviews',      icon: '🎤', hint: 'Interview prep & tracking', keywords: 'job interviews prep questions star' },
+  { href: 'job-offers.html',        label: 'Job Offers',      icon: '◆', hint: 'Track and compare offers',  keywords: 'job offers salary compare negotiation' },
+  { href: 'job-skills.html',        label: 'Skills Intelligence', icon: '✦', hint: 'Skill gaps across your job search', keywords: 'job skills intelligence gaps proficiency' },
+  { href: 'job-analytics.html',     label: 'Job Analytics',   icon: '▥', hint: 'Funnel, conversion, CV performance', keywords: 'job analytics funnel conversion rejection cv performance' },
   { href: 'job-copilot.html',       label: 'AI Copilot',      icon: '✦', hint: 'Job search AI assistant',  keywords: 'job ai copilot assistant chat' },
   { href: 'job-settings.html',      label: 'Career Profile',  icon: '⚙', hint: 'Background used by AI',    keywords: 'job career profile settings resume cv' },
 ];
