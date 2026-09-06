@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Quick Log — SaFa Naturals</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>html.auth-checking *:not(style){visibility:hidden!important;}</style>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;}
+    html{font-size:16px;}
+    :root{--bg:#060d09;--bg2:#0d1f12;--bg3:#122018;--border:rgba(255,255,255,.08);--c:#f5efe6;--cm:rgba(245,239,230,.6);--cl:rgba(245,239,230,.35);--al:#c49a3c;--green:#5fcf80;--red:#e05a2b;}
+    body{font-family:'DM Sans','Hind Siliguri',sans-serif;background:var(--bg);color:var(--c);min-height:100vh;margin:0;-webkit-font-smoothing:antialiased;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+    .page{max-width:520px;margin:0 auto;padding:16px 16px 40px;}
+    .hdr{display:flex;align-items:center;gap:12px;margin-bottom:18px;}
+    .hdr-back{color:var(--cl);text-decoration:none;font-size:22px;line-height:1;padding:4px 6px;flex-shrink:0;}
+    .hdr-title{font-family:'Syne','Hind Siliguri',sans-serif;font-size:19px;font-weight:700;color:var(--c);}
+    .hdr-sub{font-size:12.5px;color:var(--cl);margin-top:2px;}
+    textarea{background:var(--bg2);border:1px solid var(--border);border-radius:10px;color:var(--c);font-family:'DM Sans','Hind Siliguri',sans-serif;font-size:16px;padding:14px;outline:none;width:100%;resize:vertical;min-height:120px;}
+    textarea:focus{border-color:rgba(196,154,60,.5);}
+    .btn{font-family:'Syne','Hind Siliguri',sans-serif;font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:16px 20px;border-radius:10px;border:1px solid var(--border);background:rgba(255,255,255,.05);color:var(--cl);cursor:pointer;width:100%;margin-top:12px;-webkit-tap-highlight-color:transparent;}
+    .btn.primary{background:rgba(196,154,60,.16);border-color:rgba(196,154,60,.35);color:var(--al);}
+    .btn.sm{width:auto;padding:9px 16px;font-size:11px;margin-top:0;}
+    .btn:disabled{opacity:.5;}
+    .status-line{font-size:13px;color:var(--cl);min-height:20px;margin-top:10px;text-align:center;}
+    .interpret-spinner{display:inline-block;width:12px;height:12px;border:2px solid rgba(196,154,60,.25);border-top-color:var(--al);border-radius:50%;animation:iSpin .7s linear infinite;vertical-align:-1px;margin-right:6px;}
+    @keyframes iSpin{to{transform:rotate(360deg);}}
+    .review{background:rgba(196,154,60,.07);border:1px solid rgba(196,154,60,.22);border-radius:10px;padding:16px;margin-top:16px;animation:fadeUp .25s ease;}
+    .review-title{font-family:'Syne','Hind Siliguri',sans-serif;font-size:15px;font-weight:700;color:var(--c);}
+    .review-sub{font-size:12px;color:var(--cl);margin:2px 0 10px;}
+    .diff-row{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:13.5px;}
+    .diff-row:last-child{border-bottom:none;}
+    .diff-label{color:var(--cl);flex-shrink:0;}
+    .diff-val{color:var(--c);font-weight:500;text-align:right;}
+    .unclear-note{font-size:12px;color:var(--cl);font-style:italic;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.06);}
+    .no-match-note{font-size:13.5px;color:var(--cl);}
+    .toast-wrap{position:fixed;bottom:20px;left:16px;right:16px;z-index:999;display:flex;flex-direction:column;gap:8px;max-width:520px;margin:0 auto;}
+    .toast{padding:12px 18px;border-radius:8px;font-family:'Syne','Hind Siliguri',sans-serif;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;animation:fadeUp .3s ease;text-align:center;}
+    .toast.ok{background:#1a3322;border:1px solid rgba(95,207,128,.3);color:var(--green);}
+    .toast.err{background:#2a1510;border:1px solid rgba(224,90,43,.3);color:var(--red);}
+  </style>
+</head>
+<body>
+
+  <div class="page">
+    <div class="hdr">
+      <a href="job-dashboard.html" class="hdr-back" aria-label="Back to Dashboard">←</a>
+      <div>
+        <div class="hdr-title">📝 Quick Log</div>
+        <div class="hdr-sub">Describe what just happened — AI matches it to your tracker.</div>
+      </div>
+    </div>
+
+    <div id="profile-bar"></div>
+
+    <label for="update-input" style="display:none;">What happened?</label>
+    <textarea id="update-input" rows="5" placeholder="e.g. Had a call with the recruiter at Bosch, they want a 2nd interview next Tuesday"></textarea>
+    <button class="btn primary" id="interpret-btn">Interpret</button>
+    <div class="status-line" id="update-status"></div>
+    <div id="update-review" style="display:none;"></div>
+    <button class="btn primary" id="confirm-update-btn" style="display:none;">Confirm &amp; Update</button>
+    <button class="btn" id="log-another-btn" style="display:none;">Log Another</button>
+  </div>
+
+  <div class="toast-wrap" id="toast-wrap"></div>
+
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+    import { requireAdmin } from '/src/admin-auth.js';
+    import { loadAiCfg, chatComplete } from '/src/ai-client.js';
+    import { escapeHtml } from '/src/html-utils.js';
+    import { STAGE_LABEL } from '/src/job-constants.js';
+    import { ensureActiveProfileId, renderProfileSwitcher } from '/src/job-profile.js';
+    import { buildInterpretMessages, validateAndPrepareParsedUpdate, applyLogUpdate } from '/src/log-update.js';
+
+    document.documentElement.classList.add('auth-checking');
+    const sb = createClient(
+      import.meta.env.VITE_SUPABASE_URL,
+      import.meta.env.VITE_SUPABASE_ANON_KEY
+    );
+    const session = await requireAdmin(sb);
+    if (!session) { window.location.href = 'orders.html'; }
+    document.documentElement.classList.remove('auth-checking');
+    // Deliberately no mountAdminNav() here — this page exists to be fast
+    // and thumb-friendly on a phone, matching quick-log.html's own
+    // minimal-chrome convention on the farm side.
+
+    function toast(msg, type='ok') {
+      const el = document.createElement('div');
+      el.className = `toast ${type}`;
+      el.textContent = msg;
+      document.getElementById('toast-wrap').appendChild(el);
+      setTimeout(()=>el.remove(), 3500);
+    }
+
+    let profileId = null;
+    let _pendingUpdate = null;
+
+    function resetForm() {
+      document.getElementById('update-input').value = '';
+      document.getElementById('update-status').textContent = '';
+      document.getElementById('update-review').style.display = 'none';
+      document.getElementById('confirm-update-btn').style.display = 'none';
+      document.getElementById('log-another-btn').style.display = 'none';
+      document.getElementById('interpret-btn').style.display = '';
+      document.getElementById('update-input').style.display = '';
+      _pendingUpdate = null;
+      document.getElementById('update-input').focus();
+    }
+
+    document.getElementById('interpret-btn').addEventListener('click', async () => {
+      const text = document.getElementById('update-input').value.trim();
+      if (!text) { toast('Describe what happened first', 'err'); return; }
+      const statusEl = document.getElementById('update-status');
+      const btn = document.getElementById('interpret-btn');
+      statusEl.innerHTML = '<span class="interpret-spinner"></span>Interpreting...';
+      btn.disabled = true;
+      document.getElementById('update-review').style.display = 'none';
+      document.getElementById('confirm-update-btn').style.display = 'none';
+
+      try {
+        const cfg = await loadAiCfg(sb);
+        if (cfg.provider === 'openai' && !cfg.key) { statusEl.textContent = 'Configure a Groq key on the Home page first.'; return; }
+
+        const [{ data: opps }, { data: interviews }] = await Promise.all([
+          sb.from('job_opportunities').select('id,company,job_title,stage').eq('profile_id', profileId).eq('closed', false),
+          sb.from('job_interviews').select('id,opportunity_id,round,interview_date,status,job_opportunities(company,job_title)')
+            .eq('profile_id', profileId)
+            .or(`status.eq.scheduled,and(status.eq.completed,post_interview_reflection.is.null)`),
+        ]);
+        const oppList = (opps||[]).map(o => ({ id: o.id, company: o.company, job_title: o.job_title, stage: o.stage }));
+        const ivList = (interviews||[]).map(iv => ({ id: iv.id, opportunity_id: iv.opportunity_id, company: iv.job_opportunities?.company, job_title: iv.job_opportunities?.job_title, round: iv.round, interview_date: iv.interview_date, status: iv.status }));
+
+        const messages = buildInterpretMessages({ oppList, ivList, text });
+        const reply = await chatComplete(cfg, messages, { json: true });
+        const parsed = validateAndPrepareParsedUpdate(JSON.parse(reply), { oppList, ivList });
+
+        if (!parsed.matched_opportunity_id && !parsed.matched_interview_id) {
+          statusEl.textContent = '';
+          const review = document.getElementById('update-review');
+          review.style.display = '';
+          review.innerHTML = `<div class="no-match-note">Couldn't confidently match this to an existing opportunity or interview — nothing has been changed. Try naming the company more explicitly, or log it manually later.${parsed.unclear_notes ? '<div class="unclear-note">'+escapeHtml(parsed.unclear_notes)+'</div>' : ''}</div>`;
+          document.getElementById('log-another-btn').style.display = '';
+          document.getElementById('interpret-btn').style.display = 'none';
+          document.getElementById('update-input').style.display = 'none';
+          _pendingUpdate = null;
+          return;
+        }
+
+        _pendingUpdate = { parsed, oppList, ivList };
+        renderUpdateReview(parsed, oppList, ivList);
+        statusEl.textContent = '';
+        document.getElementById('confirm-update-btn').style.display = '';
+        btn.style.display = 'none';
+        document.getElementById('update-input').style.display = 'none';
+      } catch (e) {
+        statusEl.textContent = 'Interpretation failed: ' + e.message;
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    function renderUpdateReview(parsed, oppList, ivList) {
+      const opp = parsed.matched_opportunity_id ? oppList.find(o=>o.id===parsed.matched_opportunity_id) : null;
+      const iv = parsed.matched_interview_id ? ivList.find(i=>i.id===parsed.matched_interview_id) : null;
+      const title = opp ? `${opp.company} — ${opp.job_title}` : iv ? `${iv.company} — ${iv.round||'Interview'}` : 'Unmatched';
+
+      const rows = [];
+      const ou = parsed.opportunity_updates || {};
+      if (ou.stage) rows.push(['Stage', STAGE_LABEL[ou.stage] || ou.stage]);
+      if (ou.applied) rows.push(['Applied', 'Yes' + (ou.applied_date ? ' ('+ou.applied_date+')' : '')]);
+      if (ou.cv_version) rows.push(['CV Version', ou.cv_version]);
+      if (ou.next_action) rows.push(['Next Action', ou.next_action + (ou.next_action_date ? ' — '+ou.next_action_date : '')]);
+      const iu = parsed.interview_updates || {};
+      if (iu.status) rows.push(['Interview Status', iu.status]);
+      if (iu.outcome) rows.push(['Outcome', iu.outcome]);
+      if (iu.post_interview_reflection) rows.push(['Reflection', iu.post_interview_reflection]);
+      if (parsed.new_interview_questions?.length) rows.push(['Questions Logged', String(parsed.new_interview_questions.length)]);
+      rows.push(['New Activity', parsed.summary || '—']);
+
+      const review = document.getElementById('update-review');
+      review.style.display = '';
+      review.innerHTML = `<div class="review">
+        <div class="review-title">${escapeHtml(title)}</div>
+        <div class="review-sub">Proposed changes — review before confirming</div>
+        ${rows.map(([l,v]) => `<div class="diff-row"><span class="diff-label">${escapeHtml(l)}</span><span class="diff-val">${escapeHtml(v)}</span></div>`).join('')}
+        ${parsed.unclear_notes ? `<div class="unclear-note">${escapeHtml(parsed.unclear_notes)}</div>` : ''}
+      </div>`;
+    }
+
+    document.getElementById('confirm-update-btn').addEventListener('click', async () => {
+      if (!_pendingUpdate) return;
+      const { parsed: p } = _pendingUpdate;
+      const btn = document.getElementById('confirm-update-btn');
+      btn.disabled = true;
+      try {
+        const { link, isInterview } = await applyLogUpdate(sb, p, profileId);
+        toast('Tracker updated');
+        document.getElementById('update-review').innerHTML = `<div class="review">
+          <div class="review-title">✓ Updated</div>
+          <div class="review-sub">${escapeHtml(p.summary || '')}</div>
+          ${link ? `<a href="${link}" class="btn primary sm" style="text-decoration:none;display:inline-block;margin-top:10px;">View ${isInterview ? 'Interview' : 'Opportunity'} →</a>` : ''}
+        </div>`;
+        document.getElementById('confirm-update-btn').style.display = 'none';
+        document.getElementById('log-another-btn').style.display = '';
+        _pendingUpdate = null;
+      } catch (e) {
+        toast('Update failed: ' + e.message, 'err');
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    document.getElementById('log-another-btn').addEventListener('click', resetForm);
+
+    profileId = await ensureActiveProfileId(sb);
+    renderProfileSwitcher(sb, document.getElementById('profile-bar'), async () => { profileId = await ensureActiveProfileId(sb); });
+    document.getElementById('update-input').focus();
+  </script>
+</body>
+</html>

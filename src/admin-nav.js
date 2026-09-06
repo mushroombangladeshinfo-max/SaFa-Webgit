@@ -34,6 +34,7 @@ const FARM_LINKS = [
 // settings page nobody urgently needs."
 const JOB_LINKS = [
   { href: 'job-dashboard.html',    label: '🎯 Dashboard'    },
+  { href: 'job-quick-log.html',    label: '📝 Quick Log'    },
   { href: 'job-settings.html',     label: '⚙ Career Profile' },
   { href: 'job-resumes.html',      label: '📄 CV Studio'    },
   { href: 'job-opportunities.html', label: '💼 Opportunities' },
@@ -72,6 +73,7 @@ const SEARCH_INDEX = [
   { href: 'job-copilot.html',       label: 'AI Copilot',      icon: '✦', hint: 'Job search AI assistant',  keywords: 'job ai copilot assistant chat' },
   { href: 'job-settings.html',      label: 'Career Profile',  icon: '⚙', hint: 'Background used by AI',    keywords: 'job career profile settings resume cv' },
   { href: 'job-resumes.html',       label: 'CV Studio',       icon: '📄', hint: 'Generate & tailor CVs', keywords: 'job cv studio resume tailor ats base' },
+  { href: 'job-quick-log.html',     label: 'Quick Log',       icon: '📝', hint: 'Fast mobile-friendly update logging', keywords: 'job quick log update mobile fast' },
 ];
 
 function injectStyles() {
