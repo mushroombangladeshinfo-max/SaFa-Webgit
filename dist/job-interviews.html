@@ -74,13 +74,14 @@
     .toast.ok{background:#1a3322;border:1px solid rgba(95,207,128,.3);color:var(--green);}
     .toast.err{background:#2a1510;border:1px solid rgba(224,90,43,.3);color:var(--red);}
   </style>
-  <script type="module" crossorigin src="/assets/jobInterviews-2ac6ZU3d.js"></script>
+  <script type="module" crossorigin src="/assets/jobInterviews-DfhSn8RZ.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
   <link rel="modulepreload" crossorigin href="/assets/admin-auth-4ZiUUGs_.js">
   <link rel="modulepreload" crossorigin href="/assets/admin-nav-Bdcu9bMl.js">
   <link rel="modulepreload" crossorigin href="/assets/ai-client-Ym7whptS.js">
   <link rel="modulepreload" crossorigin href="/assets/date-utils-D3sh9T8I.js">
   <link rel="modulepreload" crossorigin href="/assets/realtime-D7K--cdb.js">
+  <link rel="modulepreload" crossorigin href="/assets/job-constants-CiU4xxo3.js">
 </head>
 <body>
 
@@ -122,7 +123,7 @@
         <div class="form-grid">
           <div class="form-group"><label class="f">Round</label><input type="text" id="f-round"></div>
           <div class="form-group"><label class="f">Type</label>
-            <select id="f-interview_type"><option value="">Select...</option><option>Recruiter Screen</option><option>Hiring Manager</option><option>Behavioural</option><option>Technical</option><option>Case Study</option><option>Presentation</option><option>Panel</option><option>Final Interview</option><option>HR</option><option>Informal Conversation</option><option>Other</option></select>
+            <select id="f-interview_type"><option value="">Select...</option></select>
           </div>
           <div class="form-group"><label class="f">Date</label><input type="date" id="f-interview_date"></div>
           <div class="form-group"><label class="f">Time</label><input type="text" id="f-interview_time"></div>
@@ -156,7 +157,7 @@
         <div class="form-grid" style="margin-top:10px;">
           <div class="form-group span2"><label class="f">Question Asked</label><input type="text" id="q-question"></div>
           <div class="form-group"><label class="f">Tag</label>
-            <select id="q-tag"><option value="">Select...</option><option>Leadership</option><option>Conflict</option><option>Failure</option><option>Teamwork</option><option>Analytics</option><option>Sales</option><option>Commercial</option><option>Technical</option><option>Motivation</option><option>Company</option><option>Salary</option><option>Availability</option><option>German</option><option>Visa</option><option>Behavioural</option><option>Case</option><option>Other</option></select>
+            <select id="q-tag"><option value="">Select...</option></select>
           </div>
         </div>
         <div style="margin-top:10px;"><button class="btn sm" id="add-question-btn">+ Add Question</button></div>
@@ -180,7 +181,7 @@
         <div class="form-group span2"><label class="f">Opportunity *</label><select id="m-opportunity_id"></select></div>
         <div class="form-group"><label class="f">Round</label><input type="text" id="m-round"></div>
         <div class="form-group"><label class="f">Type</label>
-          <select id="m-interview_type"><option value="">Select...</option><option>Recruiter Screen</option><option>Hiring Manager</option><option>Behavioural</option><option>Technical</option><option>Case Study</option><option>Presentation</option><option>Panel</option><option>Final Interview</option><option>HR</option><option>Informal Conversation</option><option>Other</option></select>
+          <select id="m-interview_type"><option value="">Select...</option></select>
         </div>
         <div class="form-group"><label class="f">Date</label><input type="date" id="m-interview_date"></div>
         <div class="form-group"><label class="f">Time</label><input type="text" id="m-interview_time"></div>

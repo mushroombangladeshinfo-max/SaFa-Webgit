@@ -104,13 +104,14 @@
     .toast.ok{background:#1a3322;border:1px solid rgba(95,207,128,.3);color:var(--green);}
     .toast.err{background:#2a1510;border:1px solid rgba(224,90,43,.3);color:var(--red);}
   </style>
-  <script type="module" crossorigin src="/assets/jobOpportunity-D3JAg3pN.js"></script>
+  <script type="module" crossorigin src="/assets/jobOpportunity-C8pqijHP.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
   <link rel="modulepreload" crossorigin href="/assets/admin-auth-4ZiUUGs_.js">
   <link rel="modulepreload" crossorigin href="/assets/admin-nav-Bdcu9bMl.js">
   <link rel="modulepreload" crossorigin href="/assets/ai-client-Ym7whptS.js">
   <link rel="modulepreload" crossorigin href="/assets/date-utils-D3sh9T8I.js">
-  <link rel="modulepreload" crossorigin href="/assets/job-scoring-B-_zPRZd.js">
+  <link rel="modulepreload" crossorigin href="/assets/job-scoring-t91_muSC.js">
+  <link rel="modulepreload" crossorigin href="/assets/job-constants-CiU4xxo3.js">
 </head>
 <body>
 
@@ -195,7 +196,7 @@
         <div class="form-grid">
           <div class="form-group"><label class="f">Applied Date</label><input type="date" id="f-applied_date"></div>
           <div class="form-group"><label class="f">Application Channel</label>
-            <select id="f-application_channel"><option value="">Select...</option><option>LinkedIn</option><option>Company Website</option><option>Referral</option><option>Recruiter</option><option>University</option><option>Indeed</option><option>StepStone</option><option>Bundesagentur fur Arbeit</option><option>Networking</option><option>Professor / Advisor</option><option>Agency</option><option>Other</option></select>
+            <select id="f-application_channel"><option value="">Select...</option></select>
           </div>
           <div class="form-group"><label class="f">CV Version</label><input type="text" id="f-cv_version" placeholder="e.g. CV-Analytics-v2.1"></div>
           <div class="form-group"><label class="f">Application Reference Number</label><input type="text" id="f-application_reference_number"></div>
@@ -250,20 +251,20 @@
       <div class="form-grid">
         <div class="form-group span2"><label class="f">Company *</label><input type="text" id="ed-company"></div>
         <div class="form-group"><label class="f">Job Title *</label><input type="text" id="ed-job_title"></div>
-        <div class="form-group"><label class="f">Career Track</label><select id="ed-career_track"><option value="">Select...</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="X">X</option></select></div>
+        <div class="form-group"><label class="f">Career Track</label><select id="ed-career_track"><option value="">Select...</option></select></div>
         <div class="form-group"><label class="f">Job URL</label><input type="url" id="ed-job_url"></div>
         <div class="form-group"><label class="f">Location</label><input type="text" id="ed-location"></div>
         <div class="form-group"><label class="f">Country</label><input type="text" id="ed-country"></div>
         <div class="form-group"><label class="f">Work Mode</label><select id="ed-work_mode"><option value="">Select...</option><option value="remote">Remote</option><option value="hybrid">Hybrid</option><option value="onsite">On-site</option></select></div>
         <div class="form-group"><label class="f">Role Family</label><input type="text" id="ed-role_family"></div>
-        <div class="form-group"><label class="f">Employment Type</label><select id="ed-employment_type"><option value="">Select...</option><option>Werkstudent</option><option>Internship</option><option>Part-Time</option><option>Full-Time</option><option>Graduate Programme</option><option>Temporary</option><option>Freelance</option><option>Other</option></select></div>
-        <div class="form-group"><label class="f">Source</label><select id="ed-source"><option value="">Select...</option><option>LinkedIn</option><option>Company Website</option><option>Referral</option><option>Recruiter</option><option>University</option><option>Indeed</option><option>StepStone</option><option>Bundesagentur fur Arbeit</option><option>Networking</option><option>Professor / Advisor</option><option>Agency</option><option>Other</option></select></div>
+        <div class="form-group"><label class="f">Employment Type</label><select id="ed-employment_type"><option value="">Select...</option></select></div>
+        <div class="form-group"><label class="f">Source</label><select id="ed-source"><option value="">Select...</option></select></div>
         <div class="form-group"><label class="f">Posting Date</label><input type="date" id="ed-posting_date"></div>
         <div class="form-group"><label class="f">Application Deadline</label><input type="date" id="ed-application_deadline"></div>
-        <div class="form-group"><label class="f">German Requirement</label><select id="ed-german_requirement"><option value="">Select...</option><option>None</option><option>Preferred</option><option>A1</option><option>A2</option><option>B1</option><option>B2</option><option>C1</option><option>Fluent</option><option>Native</option></select></div>
+        <div class="form-group"><label class="f">German Requirement</label><select id="ed-german_requirement"><option value="">Select...</option></select></div>
         <div class="form-group"><label class="f">English Requirement</label><input type="text" id="ed-english_requirement"></div>
         <div class="form-group"><label class="f">Working Hours</label><input type="text" id="ed-working_hours"></div>
-        <div class="form-group"><label class="f">Int'l Candidate Friendly</label><select id="ed-international_candidate_friendly"><option value="">Select...</option><option>Yes</option><option>No</option><option>Unclear</option></select></div>
+        <div class="form-group"><label class="f">Int'l Candidate Friendly</label><select id="ed-international_candidate_friendly"><option value="">Select...</option></select></div>
         <div class="form-group span2"><label class="f">Visa / Work Authorisation Notes</label><textarea id="ed-visa_notes" rows="2"></textarea></div>
         <div class="form-group span2"><label class="f">Job Description</label><textarea id="ed-job_description" rows="4"></textarea></div>
       </div>
@@ -284,7 +285,7 @@
       <div class="form-grid">
         <div class="form-group span2"><label class="f">Full Name (new contact)</label><input type="text" id="cm-full_name"></div>
         <div class="form-group"><label class="f">Contact Type</label>
-          <select id="cm-contact_type"><option value="">Select...</option><option>Recruiter</option><option>Hiring Manager</option><option>Employee</option><option>Alumni</option><option>Professor</option><option>Career Services</option><option>Agency Recruiter</option><option>Startup Contact</option><option>Former Colleague</option><option>Former Manager</option><option>Personal Contact</option><option>Other</option></select>
+          <select id="cm-contact_type"><option value="">Select...</option></select>
         </div>
       </div>
       <div class="modal-actions">
@@ -301,7 +302,7 @@
       <div class="form-grid">
         <div class="form-group"><label class="f">Round</label><input type="text" id="im-round" placeholder="e.g. 1st round"></div>
         <div class="form-group"><label class="f">Type</label>
-          <select id="im-interview_type"><option value="">Select...</option><option>Recruiter Screen</option><option>Hiring Manager</option><option>Behavioural</option><option>Technical</option><option>Case Study</option><option>Presentation</option><option>Panel</option><option>Final Interview</option><option>HR</option><option>Informal Conversation</option><option>Other</option></select>
+          <select id="im-interview_type"><option value="">Select...</option></select>
         </div>
         <div class="form-group"><label class="f">Date</label><input type="date" id="im-interview_date"></div>
         <div class="form-group"><label class="f">Time</label><input type="text" id="im-interview_time" placeholder="e.g. 14:00"></div>
@@ -319,7 +320,7 @@
       <div class="modal-title">Add Activity</div>
       <div class="form-grid">
         <div class="form-group"><label class="f">Type</label>
-          <select id="am-activity_type"><option value="">Select...</option><option>Application</option><option>LinkedIn Message</option><option>Email</option><option>Phone Call</option><option>Recruiter Call</option><option>Networking Meeting</option><option>Interview</option><option>Follow-up</option><option>Thank-you</option><option>Assessment</option><option>Offer Discussion</option><option>Rejection Feedback</option><option>Other</option></select>
+          <select id="am-activity_type"><option value="">Select...</option></select>
         </div>
         <div class="form-group"><label class="f">Date</label><input type="date" id="am-activity_date"></div>
         <div class="form-group span2"><label class="f">Summary</label><textarea id="am-summary" rows="2"></textarea></div>
@@ -340,7 +341,7 @@
       <div class="form-grid">
         <div class="form-group"><label class="f">Closed Date</label><input type="date" id="cl-closed_date"></div>
         <div class="form-group"><label class="f">Known Reason</label>
-          <select id="cl-known_reason"><option value="">Select...</option><option>No Response</option><option>Automatic Rejection</option><option>Experience Mismatch</option><option>German Requirement</option><option>Technical Skill Gap</option><option>Seniority</option><option>Location</option><option>Work Authorization</option><option>Availability</option><option>Salary</option><option>Recruiter Screen</option><option>Interview</option><option>Assessment</option><option>Internal Candidate</option><option>Role Cancelled</option><option>Role Filled</option><option>Unknown</option></select>
+          <select id="cl-known_reason"><option value="">Select...</option></select>
         </div>
         <div class="form-group span2"><label class="f">Notes</label><textarea id="cl-closed_reason" rows="2"></textarea></div>
       </div>

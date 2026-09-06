@@ -47,6 +47,18 @@
     .p-low{background:rgba(255,255,255,.05);color:var(--cl);}
     .empty-mini{color:var(--cl);font-size:13px;padding:16px 0;text-align:center;}
 
+    .best-move-box{display:flex;gap:12px;background:rgba(196,154,60,.07);border:1px solid rgba(196,154,60,.22);border-radius:10px;padding:14px 16px;margin-bottom:22px;align-items:flex-start;}
+    .best-move-icon{width:26px;height:26px;border-radius:8px;background:rgba(196,154,60,.14);color:var(--al);display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;font-size:13px;}
+    .best-move-label{font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--al);margin-bottom:3px;}
+    .best-move-text{font-size:13px;color:var(--cm);line-height:1.5;}
+
+    .top-fit-row{display:flex;align-items:center;gap:14px;padding:11px 0;border-bottom:1px solid rgba(255,255,255,.04);text-decoration:none;color:inherit;}
+    .top-fit-row:last-child{border-bottom:none;}
+    .top-fit-main{flex:1;min-width:0;}
+    .top-fit-company{font-weight:600;font-size:14px;}
+    .top-fit-title{font-size:12px;color:var(--cl);margin-top:2px;}
+    .top-fit-score{font-family:'DM Mono',monospace;font-size:18px;color:var(--al);width:34px;text-align:right;flex-shrink:0;}
+
     .stage-row{display:flex;align-items:center;gap:10px;padding:8px 0;font-size:13px;}
     .stage-row a{color:var(--c);text-decoration:none;flex:1;}
     .stage-row a:hover{color:var(--al);}
@@ -73,13 +85,14 @@
     .toast.ok{background:#1a3322;border:1px solid rgba(95,207,128,.3);color:var(--green);}
     .toast.err{background:#2a1510;border:1px solid rgba(224,90,43,.3);color:var(--red);}
   </style>
-  <script type="module" crossorigin src="/assets/jobDashboard-BXUeB5s9.js"></script>
+  <script type="module" crossorigin src="/assets/jobDashboard-C3hyb23J.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
   <link rel="modulepreload" crossorigin href="/assets/admin-auth-4ZiUUGs_.js">
   <link rel="modulepreload" crossorigin href="/assets/admin-nav-Bdcu9bMl.js">
   <link rel="modulepreload" crossorigin href="/assets/date-utils-D3sh9T8I.js">
   <link rel="modulepreload" crossorigin href="/assets/realtime-D7K--cdb.js">
-  <link rel="modulepreload" crossorigin href="/assets/job-scoring-B-_zPRZd.js">
+  <link rel="modulepreload" crossorigin href="/assets/job-scoring-t91_muSC.js">
+  <link rel="modulepreload" crossorigin href="/assets/job-constants-CiU4xxo3.js">
 </head>
 <body>
 
@@ -109,6 +122,8 @@
       <div class="kpi"><div class="kpi-label">Avg Fit Score</div><div class="kpi-val" id="kpi-fit">—</div></div>
     </div>
 
+    <div class="best-move-box" id="best-move-box"></div>
+
     <div class="section-title">Today's Priorities</div>
     <div class="card"><div id="priorities-list"></div></div>
 
@@ -122,6 +137,9 @@
         <div class="card"><canvas id="apps-chart"></canvas></div>
       </div>
     </div>
+
+    <div class="section-title">Priority Opportunities</div>
+    <div class="card"><div id="top-fit-list"></div></div>
   </div>
 
   <!-- Quick Log Activity modal -->
