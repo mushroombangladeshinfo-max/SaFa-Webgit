@@ -39,21 +39,56 @@
     .chat-input-row textarea:focus{border-color:rgba(196,154,60,.4);}
     .chat-send{background:var(--al);color:var(--bg);border:none;width:38px;height:38px;border-radius:8px;cursor:pointer;flex-shrink:0;font-size:16px;font-family:'Syne',sans-serif;font-weight:700;}
     .chat-send:disabled{opacity:.5;cursor:not-allowed;}
+    .header-row{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;}
+    .btn{font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:9px 16px;border-radius:6px;border:1px solid var(--border);background:rgba(255,255,255,.04);color:var(--cl);cursor:pointer;}
+    .btn:hover{color:var(--c);background:rgba(255,255,255,.08);}
+    .btn.primary{background:rgba(196,154,60,.12);border-color:rgba(196,154,60,.3);color:var(--al);}
+    .btn.primary:hover{background:rgba(196,154,60,.2);}
+    .btn.sm{padding:6px 10px;font-size:8px;}
+
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:500;padding:20px;}
+    .modal-overlay.open{display:flex;}
+    .modal{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:24px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;}
+    .modal-title{font-family:'Syne','Hind Siliguri',sans-serif;font-size:15px;font-weight:700;margin-bottom:16px;}
+    .form-group{margin-bottom:14px;}
+    .form-group label{display:block;font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--cl);margin-bottom:6px;}
+    .form-group textarea{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--c);font-family:'DM Sans','Hind Siliguri',sans-serif;font-size:13.5px;padding:9px 12px;outline:none;resize:vertical;}
+    .form-group textarea:focus{border-color:rgba(196,154,60,.5);}
+    .modal-actions{display:flex;gap:10px;margin-top:16px;justify-content:flex-end;}
+    .interpret-spinner{display:inline-block;width:11px;height:11px;border:2px solid rgba(196,154,60,.25);border-top-color:var(--al);border-radius:50%;animation:iSpin .7s linear infinite;vertical-align:-1px;margin-right:6px;}
+    @keyframes iSpin{to{transform:rotate(360deg);}}
+    .update-review{background:rgba(196,154,60,.06);border:1px solid rgba(196,154,60,.2);border-radius:8px;padding:14px;margin-top:14px;}
+    .update-review-title{font-family:'Syne','Hind Siliguri',sans-serif;font-size:13px;font-weight:700;color:var(--c);margin-bottom:2px;}
+    .update-review-sub{font-size:11.5px;color:var(--cl);margin-bottom:10px;}
+    .diff-row{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:13px;}
+    .diff-row:last-child{border-bottom:none;}
+    .diff-label{color:var(--cl);}
+    .diff-val{color:var(--c);font-weight:500;text-align:right;}
+    .unclear-note{font-size:11.5px;color:var(--cl);font-style:italic;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.06);}
+    .no-match-note{font-size:13px;color:var(--cl);margin-top:14px;}
+    .toast-wrap{position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;gap:8px;}
+    .toast{padding:12px 18px;border-radius:8px;font-family:'Syne','Hind Siliguri',sans-serif;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;}
+    .toast.ok{background:#1a3322;border:1px solid rgba(95,207,128,.3);color:var(--green);}
+    .toast.err{background:#2a1510;border:1px solid rgba(224,90,43,.3);color:var(--red);}
   </style>
-  <script type="module" crossorigin src="/assets/jobCopilot-DiLguwuY.js"></script>
+  <script type="module" crossorigin src="/assets/jobCopilot-CtGJyRVf.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
   <link rel="modulepreload" crossorigin href="/assets/admin-auth-4ZiUUGs_.js">
   <link rel="modulepreload" crossorigin href="/assets/admin-nav-Bdcu9bMl.js">
   <link rel="modulepreload" crossorigin href="/assets/ai-client-Ym7whptS.js">
   <link rel="modulepreload" crossorigin href="/assets/date-utils-D3sh9T8I.js">
   <link rel="modulepreload" crossorigin href="/assets/job-scoring-t91_muSC.js">
+  <link rel="modulepreload" crossorigin href="/assets/job-constants-CgQ_aIyb.js">
 </head>
 <body>
 
   <div class="page">
-    <div class="page-header">
-      <div class="page-title">AI <span style="color:var(--al)">Copilot</span></div>
-      <div class="page-sub">Ask about your pipeline, priorities, or any opportunity — grounded in your actual tracker data.</div>
+    <div class="page-header header-row">
+      <div>
+        <div class="page-title">AI <span style="color:var(--al)">Copilot</span></div>
+        <div class="page-sub">Ask about your pipeline, priorities, or any opportunity — grounded in your actual tracker data.</div>
+      </div>
+      <button class="btn primary" id="log-update-btn">📝 Log an Update</button>
     </div>
     <div class="quick-row">
       <button class="quick-btn" data-q="What should I do today?">What should I do today?</button>
@@ -69,6 +104,29 @@
       </div>
     </div>
   </div>
+
+  <!-- Log an Update modal: natural-language tracker update. Two steps —
+       interpret (AI proposes changes to an EXISTING opportunity/interview,
+       never creates a new one) then a review card the user must confirm
+       before anything is written. -->
+  <div class="modal-overlay" id="update-modal">
+    <div class="modal">
+      <div class="modal-title">Log an Update</div>
+      <div class="form-group">
+        <label>What happened?</label>
+        <textarea id="update-input" rows="4" placeholder="e.g. I applied to Bosch today using CV Analytics v2.1"></textarea>
+      </div>
+      <div id="update-status" style="font-size:12px;color:var(--cl);min-height:16px;"></div>
+      <div id="update-review" style="display:none;"></div>
+      <div class="modal-actions">
+        <button class="btn" id="update-modal-cancel">Cancel</button>
+        <button class="btn primary" id="interpret-btn">Interpret</button>
+        <button class="btn primary" id="confirm-update-btn" style="display:none;">Confirm &amp; Update</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-wrap" id="toast-wrap"></div>
 
 </body>
 </html>
