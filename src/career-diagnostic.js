@@ -93,12 +93,74 @@ export function buildCorrectionMessages({ initialIntent, previousResult, answers
   ];
 }
 
+function asArray(v) { return Array.isArray(v) ? v : []; }
+function asObject(v) { return (v && typeof v === 'object' && !Array.isArray(v)) ? v : {}; }
+function asNumber(v, fallback, min, max) {
+  const n = Number(v);
+  if (!Number.isFinite(n)) return fallback;
+  return Math.min(max, Math.max(min, n));
+}
+
+// chatComplete's json:true only asks Groq for "a JSON object" — unlike a
+// real structured-outputs API, nothing stops a small/cheap model from
+// dropping a field or returning the wrong type for one (e.g. a string
+// where an array was expected). Without this, something like
+// `(d.weaknesses||[]).map(...)` still crashes on a truthy non-array
+// value, since `||[]` only catches null/undefined/empty-string, not "the
+// model returned a string instead of an array." Every field the render
+// code iterates or reads a specific type from gets coerced to a safe
+// shape here — this is NOT a claim that the *content* is correct, only
+// that it won't crash or silently misrender.
+export function normaliseDiagnosticResult(data) {
+  data = asObject(data);
+
+  data.diagnostic = asObject(data.diagnostic);
+  data.diagnostic.strongestAssets = asArray(data.diagnostic.strongestAssets);
+  data.diagnostic.weaknesses = asArray(data.diagnostic.weaknesses).map(asObject);
+  data.diagnostic.contradictions = asArray(data.diagnostic.contradictions);
+  data.diagnostic.missingEvidence = asArray(data.diagnostic.missingEvidence);
+  data.diagnostic.targetAlignment = asArray(data.diagnostic.targetAlignment).map(asObject);
+
+  data.profileDraft = asObject(data.profileDraft);
+  ['secondaryTargetRoles','employmentTypes','targetLocations','workModePreferences',
+   'careerPriorities','constraints','education','verifiedFacts','inferredInsights','unknowns']
+    .forEach(k => { data.profileDraft[k] = asArray(data.profileDraft[k]); });
+  ['experienceEvidence','projects','skills','languages']
+    .forEach(k => { data.profileDraft[k] = asArray(data.profileDraft[k]).map(asObject); });
+
+  data.strategyDraft = asObject(data.strategyDraft);
+  ['roleSearchAllocation','immediatePriorities','avoidForNow']
+    .forEach(k => { data.strategyDraft[k] = asArray(data.strategyDraft[k]); });
+
+  data.profileCompleteness = asNumber(data.profileCompleteness, 0, 0, 100);
+  if (!['low','medium','high'].includes(data.careerIntentConfidence)) data.careerIntentConfidence = 'low';
+
+  if (data.nextQuestion && typeof data.nextQuestion === 'object' && !Array.isArray(data.nextQuestion)) {
+    const q = data.nextQuestion;
+    q.category = typeof q.category === 'string' ? q.category : 'other';
+    q.question = typeof q.question === 'string' ? q.question : '';
+    q.whyItMatters = typeof q.whyItMatters === 'string' ? q.whyItMatters : '';
+    q.importance = asNumber(q.importance, 3, 1, 5);
+    q.answerType = ['free_text','single_choice','multi_choice','yes_no'].includes(q.answerType) ? q.answerType : 'free_text';
+    q.options = asArray(q.options);
+  } else {
+    data.nextQuestion = null;
+  }
+
+  if (!['ask_more','ready_for_confirmation'].includes(data.status)) {
+    data.status = data.nextQuestion ? 'ask_more' : 'ready_for_confirmation';
+  }
+
+  return data;
+}
+
 // Never trust the model's own internal consistency — force the shape to
 // make sense regardless of what it actually returned. This is the single
 // most important safeguard in this module: without it, a model that says
 // status="ask_more" but forgets nextQuestion (or vice versa) would leave
 // the UI stuck with no way to progress.
 export function enforceDiagnosticConsistency(data, { forceReady = false } = {}) {
+  data = normaliseDiagnosticResult(data);
   if (forceReady) {
     data.status = 'ready_for_confirmation';
   } else if (data.status === 'ask_more' && !data.nextQuestion) {

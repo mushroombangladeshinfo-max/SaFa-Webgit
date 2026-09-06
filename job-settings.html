@@ -252,7 +252,17 @@
       const session = diagProfile.diagnostic_session;
       if (!session) { results.style.display = 'none'; results.innerHTML = ''; return; }
       results.style.display = '';
-      results.innerHTML = renderDiagnosticHtml(session);
+      // A re-run after confirmation produces a fresh, unconfirmed draft —
+      // the badge above still (correctly) shows the OLD confirmed version,
+      // since nothing downstream switches over until this one is also
+      // confirmed. Without this note, that split could easily read as
+      // "did my re-run even do anything?" rather than the deliberate
+      // safety property it actually is.
+      const isUnconfirmedDraft = confirmed && JSON.stringify(session.profileDraft) !== JSON.stringify(diagProfile.structured_profile);
+      const draftNotice = isUnconfirmedDraft
+        ? `<div style="background:rgba(196,154,60,.08);border:1px solid rgba(196,154,60,.25);border-radius:8px;padding:10px 14px;font-size:12.5px;color:var(--cl);margin-bottom:14px;">This is a new, unconfirmed draft — your confirmed profile (v${diagProfile.profile_version}) stays active everywhere else in Job Search until you confirm this one.</div>`
+        : '';
+      results.innerHTML = draftNotice + renderDiagnosticHtml(session);
       wireDiagnosticActions(session);
     }
 
