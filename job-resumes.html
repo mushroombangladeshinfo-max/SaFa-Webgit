@@ -114,8 +114,8 @@
     <div class="table-card">
       <div class="scroll-x">
         <table>
-          <thead><tr><th>Name</th><th>Based On</th><th>ATS Match</th><th>Recommendation</th><th>Created</th><th></th></tr></thead>
-          <tbody id="tailored-tbody"><tr><td colspan="6"><div class="empty-state">Loading...</div></td></tr></tbody>
+          <thead><tr><th>Name</th><th>Opportunity</th><th>Based On</th><th>ATS Match</th><th>Recommendation</th><th>Created</th><th></th></tr></thead>
+          <tbody id="tailored-tbody"><tr><td colspan="7"><div class="empty-state">Loading...</div></td></tr></tbody>
         </table>
       </div>
     </div>
@@ -231,6 +231,20 @@
       _opps = opps || [];
 
       renderTables();
+      openVersionFromUrl();
+    }
+
+    // Lets another page (e.g. the Application tab's "View tailored CV"
+    // link) deep-link straight to one CV's view modal, matching the ?id=
+    // convention already used by job-opportunity.html / job-interviews.html
+    // / job-contacts.html.
+    let _openedFromUrl = false;
+    function openVersionFromUrl() {
+      if (_openedFromUrl) return;
+      const id = new URLSearchParams(location.search).get('id');
+      if (!id) return;
+      const version = _versions.find(v => v.id === id);
+      if (version) { _openedFromUrl = true; openViewModal(id); }
     }
 
     function renderTables() {
@@ -259,6 +273,7 @@
         const ats = v.ats || {};
         return `<tr>
           <td><strong>${escapeHtml(v.name)}</strong></td>
+          <td style="font-size:13px;">${v.opportunity_id ? `<a href="job-opportunity.html?id=${v.opportunity_id}" style="color:var(--al);">${escapeHtml(v.job_opportunities?.company)||'View'}</a>` : '<span style="color:var(--cl);">—</span>'}</td>
           <td style="color:var(--cl);font-size:13px;">${escapeHtml(parent?.name)||'—'}</td>
           <td style="font-family:'DM Mono',monospace;">${ats.overallMatch ?? '—'}${ats.overallMatch!=null?'%':''}</td>
           <td class="rec-pill">${escapeHtml(v.content?._recommendation || '')}</td>
@@ -270,7 +285,7 @@
             </div>
           </td>
         </tr>`;
-      }).join('') : '<tr><td colspan="6"><div class="empty-state">No tailored CVs yet — tailor a base CV for a specific job.</div></td></tr>';
+      }).join('') : '<tr><td colspan="7"><div class="empty-state">No tailored CVs yet — tailor a base CV for a specific job.</div></td></tr>';
 
       document.querySelectorAll('[data-view]').forEach(b => b.addEventListener('click', () => openViewModal(b.dataset.view)));
       document.querySelectorAll('[data-tailor]').forEach(b => b.addEventListener('click', () => openTailorModal(b.dataset.tailor)));
@@ -384,14 +399,22 @@
         const reply = await chatComplete(cfg, messages, { json: true });
         const result = normaliseTailoredResult(JSON.parse(reply));
         const content = { ...result.resume, _recommendation: result.applicationRecommendation, _recommendationReason: result.recommendationReason, _tailoringSummary: result.tailoringSummary };
+        const versionName = `${company||'Job'} — ${jobTitle||base.target_role}`;
         const { error } = await sb.from('job_resume_versions').insert([{
           profile_id: profileId, kind: 'tailored', parent_version_id: base.id,
           opportunity_id: opportunityId,
-          name: `${company||'Job'} — ${jobTitle||base.target_role}`,
+          name: versionName,
           target_role: base.target_role, profile_version: _profile.profile_version,
           content, ats: result.atsAnalysis,
         }]);
         if (error) { toast(error.message, 'err'); return; }
+        // Keeps job-analytics.html's CV Version Performance table meaningful
+        // — without this, tailoring a real CV here and the free-text
+        // cv_version field opportunities already track would silently drift
+        // apart from each other.
+        if (opportunityId) {
+          await sb.from('job_opportunities').update({ cv_version: versionName }).eq('id', opportunityId);
+        }
         toast('CV tailored');
         document.getElementById('tailor-modal').classList.remove('open');
         load();

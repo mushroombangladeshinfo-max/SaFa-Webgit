@@ -214,6 +214,10 @@
         <div style="margin-top:14px;"><button class="btn sm primary" id="save-application-btn">Save</button></div>
       </div>
       <div class="card">
+        <div class="card-title">Tailored CV</div>
+        <div id="tailored-cv-status" style="font-size:13px;color:var(--cl);"></div>
+      </div>
+      <div class="card">
         <div class="card-title">Cover Letter</div>
         <div style="margin-bottom:10px;"><button class="btn sm primary" id="draft-cover-letter-btn">✦ Draft with AI</button></div>
         <div class="form-group"><textarea id="f-cover-letter" rows="10" placeholder="Draft with AI, or write your own — this is saved either way."></textarea></div>
@@ -440,6 +444,19 @@
       loadActivities();
       loadStageHistory();
       loadOffers();
+      loadTailoredCv();
+    }
+
+    // Cover Letter and Application Questions are both drafted right here,
+    // inline — CV tailoring is the one prep task that lives on a separate
+    // page (CV Studio), so without this, there'd be no way to tell from
+    // this page whether one already exists for this job.
+    async function loadTailoredCv() {
+      const { data } = await sb.from('job_resume_versions').select('id,name,created_at').eq('opportunity_id', oppId).eq('kind', 'tailored').order('created_at', { ascending: false }).limit(1).maybeSingle();
+      const box = document.getElementById('tailored-cv-status');
+      box.innerHTML = data
+        ? `<a href="job-resumes.html?id=${data.id}" style="color:var(--al);">${escapeHtml(data.name)}</a> — tailored ${new Date(data.created_at).toLocaleDateString()}`
+        : `No tailored CV yet — <a href="job-resumes.html" style="color:var(--al);">tailor one in CV Studio →</a>`;
     }
 
     async function loadOffers() {

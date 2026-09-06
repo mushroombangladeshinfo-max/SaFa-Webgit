@@ -163,20 +163,33 @@
     /* Small, current snapshot of the tracker — same context-stuffing pattern
        as home.html's SaFa Assistant, scoped to job-search data. */
     async function buildSnapshot() {
-      const [{ data: opps }, { data: interviews }, { data: profile }, { data: offers }] = await Promise.all([
+      const [{ data: opps }, { data: interviews }, { data: profile }, { data: offers }, { data: tailoredCvs }] = await Promise.all([
         sb.from('job_opportunities').select('*').eq('profile_id', profileId).eq('closed', false),
         sb.from('job_interviews').select('*, job_opportunities(company,job_title)').eq('profile_id', profileId).eq('status', 'scheduled'),
         sb.from('job_profiles').select('status,target_roles,target_locations,career_preferences,structured_profile,strategy_json').eq('id', profileId).maybeSingle(),
         sb.from('job_offers').select('*, job_opportunities(company,job_title)').eq('profile_id', profileId).in('status', ['pending','negotiating']),
+        sb.from('job_resume_versions').select('opportunity_id').eq('profile_id', profileId).eq('kind', 'tailored').not('opportunity_id', 'is', null),
       ]);
       const today = localDateStr();
-      const opportunities = (opps||[]).map(o => ({
-        company: o.company, title: o.job_title, stage: o.stage,
-        fit: computeFitScore(o.fit_manual, o.fit_ai), priority: computePriority(o).label,
-        applied: o.applied, deadline: o.application_deadline,
-        next_action: o.next_action, next_action_date: o.next_action_date,
-        follow_up_status: followUpStatus(o.next_action_date),
-      }));
+      const tailoredCvOppIds = new Set((tailoredCvs||[]).map(v => v.opportunity_id));
+      // Cover letter, application answers, and a tailored CV are the three
+      // prep tasks CV Studio / the Application tab support — without these,
+      // "what should I do next" could never account for prep work still
+      // outstanding on an already-applied-or-applying opportunity.
+      const opportunities = (opps||[]).map(o => {
+        const answers = Array.isArray(o.application_answers) ? o.application_answers : [];
+        return {
+          company: o.company, title: o.job_title, stage: o.stage,
+          fit: computeFitScore(o.fit_manual, o.fit_ai), priority: computePriority(o).label,
+          applied: o.applied, deadline: o.application_deadline,
+          next_action: o.next_action, next_action_date: o.next_action_date,
+          follow_up_status: followUpStatus(o.next_action_date),
+          has_tailored_cv: tailoredCvOppIds.has(o.id),
+          has_cover_letter: !!o.cover_letter?.content,
+          application_questions_total: answers.length,
+          application_questions_unanswered: answers.filter(a => !a.answer || !a.answer.trim()).length,
+        };
+      });
       const upcomingInterviews = (interviews||[]).map(iv => ({
         company: iv.job_opportunities?.company, title: iv.job_opportunities?.job_title,
         round: iv.round, type: iv.interview_type, date: iv.interview_date,
@@ -219,7 +232,7 @@
 Live snapshot (JSON) of their current tracker data:
 ${JSON.stringify(snap)}
 
-Rules: use ONLY the data given above — never invent a job, contact, deadline, or fact not present in the snapshot. If something isn't in the snapshot, say so plainly rather than guessing. Distinguish facts (directly in the data) from your own recommendations. Keep answers concrete and specific — name real companies/jobs from the snapshot when relevant. Be direct and conversational, not a formal report.`;
+Rules: use ONLY the data given above — never invent a job, contact, deadline, or fact not present in the snapshot. If something isn't in the snapshot, say so plainly rather than guessing. Distinguish facts (directly in the data) from your own recommendations. Keep answers concrete and specific — name real companies/jobs from the snapshot when relevant. Each active opportunity carries has_tailored_cv/has_cover_letter/application_questions_unanswered — treat a job that's applied or about to be applied to with no tailored CV, no cover letter, or unanswered questions as genuinely unfinished prep work worth flagging, not just pipeline status. Be direct and conversational, not a formal report.`;
     }
 
     async function send(text) {
