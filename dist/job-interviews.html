@@ -41,6 +41,15 @@
     .pill-scheduled{background:rgba(80,200,255,.1);color:var(--blue);}
     .pill-completed{background:rgba(95,207,128,.12);color:var(--green);}
     .pill-cancelled{background:rgba(255,255,255,.05);color:var(--cl);}
+    #f-preparation_status{border-radius:20px;font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:6px 12px;border:1px solid var(--border);background:var(--bg2);color:var(--cl);cursor:pointer;}
+    #f-preparation_status.prep-in_progress{background:rgba(196,154,60,.12);color:var(--al);border-color:rgba(196,154,60,.3);}
+    #f-preparation_status.prep-ready{background:rgba(95,207,128,.12);color:var(--green);border-color:rgba(95,207,128,.3);}
+    .accordion{border:1px solid var(--border);border-radius:8px;margin-bottom:8px;overflow:hidden;}
+    .accordion summary{padding:10px 12px;cursor:pointer;font-size:13px;list-style:none;display:flex;gap:10px;align-items:center;}
+    .accordion summary::-webkit-details-marker{display:none;}
+    .accordion summary .q-cat{font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--al);background:rgba(196,154,60,.1);padding:2px 7px;border-radius:4px;flex-shrink:0;}
+    .accordion-body{padding:0 12px 12px;font-size:12.5px;color:var(--cm);line-height:1.6;}
+    .accordion-body p{margin:4px 0;}
     .row-link{color:inherit;text-decoration:none;}
     .row-link:hover .iv-company{color:var(--al);}
 
@@ -74,14 +83,14 @@
     .toast.ok{background:#1a3322;border:1px solid rgba(95,207,128,.3);color:var(--green);}
     .toast.err{background:#2a1510;border:1px solid rgba(224,90,43,.3);color:var(--red);}
   </style>
-  <script type="module" crossorigin src="/assets/jobInterviews-DfhSn8RZ.js"></script>
+  <script type="module" crossorigin src="/assets/jobInterviews-Dk516hfj.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
   <link rel="modulepreload" crossorigin href="/assets/admin-auth-4ZiUUGs_.js">
   <link rel="modulepreload" crossorigin href="/assets/admin-nav-Bdcu9bMl.js">
   <link rel="modulepreload" crossorigin href="/assets/ai-client-Ym7whptS.js">
   <link rel="modulepreload" crossorigin href="/assets/date-utils-D3sh9T8I.js">
   <link rel="modulepreload" crossorigin href="/assets/realtime-D7K--cdb.js">
-  <link rel="modulepreload" crossorigin href="/assets/job-constants-CiU4xxo3.js">
+  <link rel="modulepreload" crossorigin href="/assets/job-constants-CgQ_aIyb.js">
 </head>
 <body>
 
@@ -115,7 +124,10 @@
           <div class="page-title" id="dv-title">—</div>
           <div class="page-sub" id="dv-sub"></div>
         </div>
-        <button class="btn primary" id="ai-prep-btn">✦ Prepare Interview with AI</button>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <select id="f-preparation_status" aria-label="Preparation status"></select>
+          <button class="btn primary" id="ai-prep-btn">✦ Prepare Interview with AI</button>
+        </div>
       </div>
 
       <div class="card">

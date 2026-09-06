@@ -52,6 +52,7 @@
     .st-contacted,.st-responded,.st-conversation{background:rgba(80,200,255,.1);color:var(--blue);}
     .st-warm,.st-referral-requested,.st-referral-offered{background:rgba(196,154,60,.12);color:var(--al);}
     .st-referral-submitted,.st-long-term-relationship{background:rgba(95,207,128,.12);color:var(--green);}
+    .job-chip{display:inline-block;font-size:11px;color:var(--cl);background:rgba(255,255,255,.05);border-radius:4px;padding:2px 7px;margin:1px 3px 1px 0;white-space:nowrap;}
 
     .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:500;padding:20px;}
     .modal-overlay.open{display:flex;animation:fadeUp .2s ease;}
@@ -74,14 +75,14 @@
     .toast.ok{background:#1a3322;border:1px solid rgba(95,207,128,.3);color:var(--green);}
     .toast.err{background:#2a1510;border:1px solid rgba(224,90,43,.3);color:var(--red);}
   </style>
-  <script type="module" crossorigin src="/assets/jobContacts-CeS2uzGs.js"></script>
+  <script type="module" crossorigin src="/assets/jobContacts-n9OlVSoH.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
   <link rel="modulepreload" crossorigin href="/assets/admin-auth-4ZiUUGs_.js">
   <link rel="modulepreload" crossorigin href="/assets/admin-nav-Bdcu9bMl.js">
   <link rel="modulepreload" crossorigin href="/assets/ai-client-Ym7whptS.js">
   <link rel="modulepreload" crossorigin href="/assets/date-utils-D3sh9T8I.js">
   <link rel="modulepreload" crossorigin href="/assets/realtime-D7K--cdb.js">
-  <link rel="modulepreload" crossorigin href="/assets/job-constants-CiU4xxo3.js">
+  <link rel="modulepreload" crossorigin href="/assets/job-constants-CgQ_aIyb.js">
 </head>
 <body>
 
@@ -98,7 +99,7 @@
     <div class="kpi-grid">
       <div class="kpi"><div class="kpi-label">Messages Sent</div><div class="kpi-val" id="kpi-sent">—</div></div>
       <div class="kpi"><div class="kpi-label">Response Rate</div><div class="kpi-val" id="kpi-rate">—</div></div>
-      <div class="kpi"><div class="kpi-label">Conversations</div><div class="kpi-val" id="kpi-conv">—</div></div>
+      <div class="kpi"><div class="kpi-label">Responded</div><div class="kpi-val" id="kpi-conv">—</div></div>
       <div class="kpi"><div class="kpi-label">Referrals</div><div class="kpi-val" id="kpi-referrals">—</div></div>
       <div class="kpi"><div class="kpi-label">Follow-ups Due</div><div class="kpi-val" id="kpi-followups" style="color:var(--al);">—</div></div>
     </div>
@@ -116,8 +117,8 @@
       </div>
       <div class="scroll-x">
         <table>
-          <thead><tr><th>Name</th><th>Company</th><th>Type</th><th>Stage</th><th>Last Interaction</th><th>Next Follow-up</th><th></th></tr></thead>
-          <tbody id="tbody"><tr><td colspan="7"><div class="empty-state"><div class="empty-icon">⏳</div>Loading...</div></td></tr></tbody>
+          <thead><tr><th>Name</th><th>Company</th><th>Type</th><th>Stage</th><th>Related Jobs</th><th>Last Interaction</th><th>Next Follow-up</th><th></th></tr></thead>
+          <tbody id="tbody"><tr><td colspan="8"><div class="empty-state"><div class="empty-icon">⏳</div>Loading...</div></td></tr></tbody>
         </table>
       </div>
     </div>
