@@ -39,14 +39,48 @@
     .chat-input-row textarea:focus{border-color:rgba(196,154,60,.4);}
     .chat-send{background:var(--al);color:var(--bg);border:none;width:38px;height:38px;border-radius:8px;cursor:pointer;flex-shrink:0;font-size:16px;font-family:'Syne',sans-serif;font-weight:700;}
     .chat-send:disabled{opacity:.5;cursor:not-allowed;}
+    .header-row{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;}
+    .btn{font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:9px 16px;border-radius:6px;border:1px solid var(--border);background:rgba(255,255,255,.04);color:var(--cl);cursor:pointer;}
+    .btn:hover{color:var(--c);background:rgba(255,255,255,.08);}
+    .btn.primary{background:rgba(196,154,60,.12);border-color:rgba(196,154,60,.3);color:var(--al);}
+    .btn.primary:hover{background:rgba(196,154,60,.2);}
+    .btn.sm{padding:6px 10px;font-size:8px;}
+
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:500;padding:20px;}
+    .modal-overlay.open{display:flex;}
+    .modal{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:24px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;}
+    .modal-title{font-family:'Syne','Hind Siliguri',sans-serif;font-size:15px;font-weight:700;margin-bottom:16px;}
+    .form-group{margin-bottom:14px;}
+    .form-group label{display:block;font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--cl);margin-bottom:6px;}
+    .form-group textarea{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--c);font-family:'DM Sans','Hind Siliguri',sans-serif;font-size:13.5px;padding:9px 12px;outline:none;resize:vertical;}
+    .form-group textarea:focus{border-color:rgba(196,154,60,.5);}
+    .modal-actions{display:flex;gap:10px;margin-top:16px;justify-content:flex-end;}
+    .interpret-spinner{display:inline-block;width:11px;height:11px;border:2px solid rgba(196,154,60,.25);border-top-color:var(--al);border-radius:50%;animation:iSpin .7s linear infinite;vertical-align:-1px;margin-right:6px;}
+    @keyframes iSpin{to{transform:rotate(360deg);}}
+    .update-review{background:rgba(196,154,60,.06);border:1px solid rgba(196,154,60,.2);border-radius:8px;padding:14px;margin-top:14px;}
+    .update-review-title{font-family:'Syne','Hind Siliguri',sans-serif;font-size:13px;font-weight:700;color:var(--c);margin-bottom:2px;}
+    .update-review-sub{font-size:11.5px;color:var(--cl);margin-bottom:10px;}
+    .diff-row{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:13px;}
+    .diff-row:last-child{border-bottom:none;}
+    .diff-label{color:var(--cl);}
+    .diff-val{color:var(--c);font-weight:500;text-align:right;}
+    .unclear-note{font-size:11.5px;color:var(--cl);font-style:italic;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.06);}
+    .no-match-note{font-size:13px;color:var(--cl);margin-top:14px;}
+    .toast-wrap{position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;gap:8px;}
+    .toast{padding:12px 18px;border-radius:8px;font-family:'Syne','Hind Siliguri',sans-serif;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;}
+    .toast.ok{background:#1a3322;border:1px solid rgba(95,207,128,.3);color:var(--green);}
+    .toast.err{background:#2a1510;border:1px solid rgba(224,90,43,.3);color:var(--red);}
   </style>
 </head>
 <body>
 
   <div class="page">
-    <div class="page-header">
-      <div class="page-title">AI <span style="color:var(--al)">Copilot</span></div>
-      <div class="page-sub">Ask about your pipeline, priorities, or any opportunity — grounded in your actual tracker data.</div>
+    <div class="page-header header-row">
+      <div>
+        <div class="page-title">AI <span style="color:var(--al)">Copilot</span></div>
+        <div class="page-sub">Ask about your pipeline, priorities, or any opportunity — grounded in your actual tracker data.</div>
+      </div>
+      <button class="btn primary" id="log-update-btn">📝 Log an Update</button>
     </div>
     <div class="quick-row">
       <button class="quick-btn" data-q="What should I do today?">What should I do today?</button>
@@ -63,6 +97,29 @@
     </div>
   </div>
 
+  <!-- Log an Update modal: natural-language tracker update. Two steps —
+       interpret (AI proposes changes to an EXISTING opportunity/interview,
+       never creates a new one) then a review card the user must confirm
+       before anything is written. -->
+  <div class="modal-overlay" id="update-modal">
+    <div class="modal">
+      <div class="modal-title">Log an Update</div>
+      <div class="form-group">
+        <label>What happened?</label>
+        <textarea id="update-input" rows="4" placeholder="e.g. I applied to Bosch today using CV Analytics v2.1"></textarea>
+      </div>
+      <div id="update-status" style="font-size:12px;color:var(--cl);min-height:16px;"></div>
+      <div id="update-review" style="display:none;"></div>
+      <div class="modal-actions">
+        <button class="btn" id="update-modal-cancel">Cancel</button>
+        <button class="btn primary" id="interpret-btn">Interpret</button>
+        <button class="btn primary" id="confirm-update-btn" style="display:none;">Confirm &amp; Update</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-wrap" id="toast-wrap"></div>
+
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
     import { requireAdmin }  from '/src/admin-auth.js';
@@ -70,6 +127,8 @@
     import { loadAiCfg, chatComplete, formatAiError, renderAiText } from '/src/ai-client.js';
     import { localDateStr } from '/src/date-utils.js';
     import { computeFitScore, computePriority, followUpStatus } from '/src/job-scoring.js';
+    import { escapeHtml } from '/src/html-utils.js';
+    import { STAGE_LABEL, STAGE_ORDER, ACTIVITY_TYPES, QUESTION_TAGS } from '/src/job-constants.js';
 
     document.documentElement.classList.add('auth-checking');
     const sb = createClient(
@@ -171,6 +230,180 @@ Rules: use ONLY the data given above — never invent a job, contact, deadline, 
       }
     });
     document.querySelectorAll('.quick-btn').forEach(b => b.addEventListener('click', () => send(b.dataset.q)));
+
+    /* ── Log an Update: natural-language tracker update ──
+       Two steps — interpret (AI proposes changes to an EXISTING
+       opportunity/interview, grounded only in ids we actually hand it, and
+       never creates a new opportunity — that's what AI Import is for) then
+       a review card the user must confirm before anything is written. */
+    let _pendingUpdate = null;
+
+    function openUpdateModal() {
+      document.getElementById('update-input').value = '';
+      document.getElementById('update-status').textContent = '';
+      document.getElementById('update-review').style.display = 'none';
+      document.getElementById('confirm-update-btn').style.display = 'none';
+      document.getElementById('interpret-btn').style.display = '';
+      _pendingUpdate = null;
+      document.getElementById('update-modal').classList.add('open');
+    }
+    function closeUpdateModal() { document.getElementById('update-modal').classList.remove('open'); }
+    document.getElementById('log-update-btn').addEventListener('click', openUpdateModal);
+    document.getElementById('update-modal-cancel').addEventListener('click', closeUpdateModal);
+    document.getElementById('update-modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeUpdateModal(); });
+
+    document.getElementById('interpret-btn').addEventListener('click', async () => {
+      const text = document.getElementById('update-input').value.trim();
+      if (!text) { toast('Describe what happened first', 'err'); return; }
+      const statusEl = document.getElementById('update-status');
+      const btn = document.getElementById('interpret-btn');
+      statusEl.innerHTML = '<span class="interpret-spinner"></span>Interpreting — matching against your tracker...';
+      btn.disabled = true;
+      document.getElementById('update-review').style.display = 'none';
+      document.getElementById('confirm-update-btn').style.display = 'none';
+
+      try {
+        const cfg = await loadAiCfg(sb);
+        if (cfg.provider === 'openai' && !cfg.key) { statusEl.textContent = 'Configure a Groq key on the Home page first.'; return; }
+
+        const [{ data: opps }, { data: interviews }] = await Promise.all([
+          sb.from('job_opportunities').select('id,company,job_title,stage').eq('closed', false),
+          sb.from('job_interviews').select('id,opportunity_id,round,interview_date,status,job_opportunities(company,job_title)')
+            .or(`status.eq.scheduled,and(status.eq.completed,post_interview_reflection.is.null)`),
+        ]);
+        const oppList = (opps||[]).map(o => ({ id: o.id, company: o.company, job_title: o.job_title, stage: o.stage }));
+        const ivList = (interviews||[]).map(iv => ({ id: iv.id, opportunity_id: iv.opportunity_id, company: iv.job_opportunities?.company, job_title: iv.job_opportunities?.job_title, round: iv.round, interview_date: iv.interview_date, status: iv.status }));
+        const validOppIds = new Set(oppList.map(o=>o.id));
+        const validIvIds = new Set(ivList.map(iv=>iv.id));
+
+        const shape = `{"matched_opportunity_id":"uuid|null","matched_interview_id":"uuid|null","summary":string,"opportunity_updates":{"stage":${JSON.stringify(STAGE_ORDER)}[number]|null,"applied":boolean|null,"applied_date":"YYYY-MM-DD"|null,"cv_version":string|null,"next_action":string|null,"next_action_date":"YYYY-MM-DD"|null},"interview_updates":{"status":"completed"|"cancelled"|null,"outcome":string|null,"post_interview_reflection":string|null},"new_interview_questions":[{"question":string,"tag":${JSON.stringify(QUESTION_TAGS)}[number]|null}],"activity_type":${JSON.stringify(ACTIVITY_TYPES)}[number],"activity_date":"YYYY-MM-DD","unclear_notes":"string|null"}`;
+        const messages = [
+          { role: 'system', content: `You interpret a short free-text update from a job seeker about something that happened in their job search, and turn it into structured updates to their EXISTING tracker records. Return ONLY a single JSON object matching exactly this shape (no markdown, no commentary): ${shape}.
+
+Rules: matched_opportunity_id and matched_interview_id must be one of the exact ids given below, or null — never invent an id, never guess if genuinely unsure which record is meant. Only fill in a field under opportunity_updates/interview_updates if the message actually implies that change; leave everything else null. For a vague or relative date ("next week", "soon"), leave the date field null and mention it in unclear_notes instead of guessing a specific date — today's date is given below. new_interview_questions should only contain questions the message says were actually asked. This flow only updates existing records — it never creates a new opportunity.` },
+          { role: 'user', content: `TODAY: ${localDateStr()}\n\nACTIVE OPPORTUNITIES:\n${JSON.stringify(oppList)}\n\nOPEN INTERVIEWS:\n${JSON.stringify(ivList)}\n\nUSER'S UPDATE:\n${text}` },
+        ];
+        const reply = await chatComplete(cfg, messages, { json: true });
+        const parsed = JSON.parse(reply);
+
+        // Defense in depth: never trust an id or enum value the model
+        // returns without checking it against what was actually offered —
+        // a CHECK constraint would catch a bad enum at save time anyway,
+        // but this gives a cleaner message instead of a raw Postgres error.
+        if (parsed.matched_opportunity_id && !validOppIds.has(parsed.matched_opportunity_id)) parsed.matched_opportunity_id = null;
+        if (parsed.matched_interview_id && !validIvIds.has(parsed.matched_interview_id)) parsed.matched_interview_id = null;
+        if (parsed.opportunity_updates?.stage && !STAGE_ORDER.includes(parsed.opportunity_updates.stage)) parsed.opportunity_updates.stage = null;
+        if (parsed.activity_type && !ACTIVITY_TYPES.includes(parsed.activity_type)) parsed.activity_type = null;
+        (parsed.new_interview_questions||[]).forEach(q => { if (q.tag && !QUESTION_TAGS.includes(q.tag)) q.tag = null; });
+
+        if (!parsed.matched_opportunity_id && !parsed.matched_interview_id) {
+          statusEl.textContent = '';
+          const review = document.getElementById('update-review');
+          review.style.display = '';
+          review.innerHTML = `<div class="no-match-note">Couldn't confidently match this to an existing opportunity or interview — nothing has been changed. Try naming the company more explicitly, or log it manually on the Opportunities/Interviews page.${parsed.unclear_notes ? '<div class="unclear-note">'+escapeHtml(parsed.unclear_notes)+'</div>' : ''}</div>`;
+          _pendingUpdate = null;
+          return;
+        }
+
+        // An interview-only match still belongs to an opportunity — without
+        // this, the logged activity would carry no opportunity_id and
+        // silently never show up on that opportunity's Activity timeline.
+        const matchedIv = parsed.matched_interview_id ? ivList.find(i=>i.id===parsed.matched_interview_id) : null;
+        parsed._effective_opportunity_id = parsed.matched_opportunity_id || matchedIv?.opportunity_id || null;
+
+        _pendingUpdate = parsed;
+        await renderUpdateReview(parsed, oppList, ivList);
+        statusEl.textContent = '';
+        document.getElementById('confirm-update-btn').style.display = '';
+        btn.style.display = 'none';
+      } catch (e) {
+        statusEl.textContent = 'Interpretation failed: ' + e.message;
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    async function renderUpdateReview(parsed, oppList, ivList) {
+      const opp = parsed.matched_opportunity_id ? oppList.find(o=>o.id===parsed.matched_opportunity_id) : null;
+      const iv = parsed.matched_interview_id ? ivList.find(i=>i.id===parsed.matched_interview_id) : null;
+      const title = opp ? `${opp.company} — ${opp.job_title}` : iv ? `${iv.company} — ${iv.round||'Interview'}` : 'Unmatched';
+
+      const rows = [];
+      const ou = parsed.opportunity_updates || {};
+      if (ou.stage) rows.push(['Stage', STAGE_LABEL[ou.stage] || ou.stage]);
+      if (ou.applied) rows.push(['Applied', 'Yes' + (ou.applied_date ? ' ('+ou.applied_date+')' : '')]);
+      if (ou.cv_version) rows.push(['CV Version', ou.cv_version]);
+      if (ou.next_action) rows.push(['Next Action', ou.next_action + (ou.next_action_date ? ' — '+ou.next_action_date : '')]);
+      const iu = parsed.interview_updates || {};
+      if (iu.status) rows.push(['Interview Status', iu.status]);
+      if (iu.outcome) rows.push(['Outcome', iu.outcome]);
+      if (iu.post_interview_reflection) rows.push(['Reflection', iu.post_interview_reflection]);
+      if (parsed.new_interview_questions?.length) rows.push(['Questions Logged', String(parsed.new_interview_questions.length)]);
+      rows.push(['New Activity', parsed.summary || '—']);
+
+      const review = document.getElementById('update-review');
+      review.style.display = '';
+      review.innerHTML = `<div class="update-review">
+        <div class="update-review-title">${escapeHtml(title)}</div>
+        <div class="update-review-sub">Proposed changes — review before confirming</div>
+        ${rows.map(([l,v]) => `<div class="diff-row"><span class="diff-label">${escapeHtml(l)}</span><span class="diff-val">${escapeHtml(v)}</span></div>`).join('')}
+        ${parsed.unclear_notes ? `<div class="unclear-note">${escapeHtml(parsed.unclear_notes)}</div>` : ''}
+      </div>`;
+    }
+
+    document.getElementById('confirm-update-btn').addEventListener('click', async () => {
+      if (!_pendingUpdate) return;
+      const p = _pendingUpdate;
+      const btn = document.getElementById('confirm-update-btn');
+      btn.disabled = true;
+      try {
+        if (p.matched_opportunity_id && p.opportunity_updates) {
+          const payload = {};
+          Object.entries(p.opportunity_updates).forEach(([k,v]) => { if (v !== null && v !== undefined) payload[k] = v; });
+          if (Object.keys(payload).length) {
+            const { error } = await sb.from('job_opportunities').update(payload).eq('id', p.matched_opportunity_id);
+            if (error) throw error;
+          }
+        }
+        if (p.matched_interview_id && p.interview_updates) {
+          const payload = {};
+          Object.entries(p.interview_updates).forEach(([k,v]) => { if (v !== null && v !== undefined) payload[k] = v; });
+          if (Object.keys(payload).length) {
+            const { error } = await sb.from('job_interviews').update(payload).eq('id', p.matched_interview_id);
+            if (error) throw error;
+          }
+        }
+        if (p.matched_interview_id && p.new_interview_questions?.length) {
+          const rows = p.new_interview_questions.filter(q=>q.question).map(q => ({ interview_id: p.matched_interview_id, question: q.question, tag: q.tag || null }));
+          if (rows.length) {
+            const { error } = await sb.from('job_interview_questions').insert(rows);
+            if (error) throw error;
+          }
+        }
+        const { error: actErr } = await sb.from('job_activities').insert([{
+          opportunity_id: p._effective_opportunity_id || null,
+          activity_type: p.activity_type || 'Other',
+          activity_date: p.activity_date || localDateStr(),
+          summary: p.summary || null,
+        }]);
+        if (actErr) throw actErr;
+
+        toast('Tracker updated');
+        closeUpdateModal();
+      } catch (e) {
+        toast('Update failed: ' + e.message, 'err');
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    function toast(msg, type='ok') {
+      const el = document.createElement('div');
+      el.className = `toast ${type}`;
+      el.textContent = msg;
+      document.getElementById('toast-wrap').appendChild(el);
+      setTimeout(()=>el.remove(), 3500);
+    }
 
     renderMessages();
   </script>
