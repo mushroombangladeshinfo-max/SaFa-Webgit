@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Job Discovery — SaFa Naturals</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>html.auth-checking *:not(style){visibility:hidden!important;}</style>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;}
+    html{font-size:15px;}
+    :root{--bg:#060d09;--bg2:#0d1f12;--bg3:#122018;--border:rgba(255,255,255,.07);--c:#f5efe6;--cm:rgba(245,239,230,.6);--cl:rgba(245,239,230,.35);--al:#c49a3c;--green:#5fcf80;--red:#e05a2b;}
+    body{font-family:'DM Sans','Hind Siliguri',sans-serif;background:var(--bg);color:var(--c);min-height:100vh;margin:0;-webkit-font-smoothing:antialiased;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+    .page{max-width:1100px;margin:0 auto;padding:28px 24px 64px;}
+    .page-header{margin-bottom:8px;}
+    .page-title{font-family:'Syne','Hind Siliguri',sans-serif;font-size:22px;font-weight:700;color:var(--c);margin:0 0 4px;}
+    .page-sub{font-size:13px;color:var(--cl);}
+    .unofficial-note{font-size:11.5px;color:var(--cl);font-style:italic;margin:6px 0 18px;}
+    .btn{font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:9px 16px;border-radius:6px;border:1px solid var(--border);background:rgba(255,255,255,.04);color:var(--cl);cursor:pointer;}
+    .btn:hover{color:var(--c);background:rgba(255,255,255,.08);}
+    .btn.primary{background:rgba(196,154,60,.12);border-color:rgba(196,154,60,.3);color:var(--al);}
+    .btn.primary:hover{background:rgba(196,154,60,.2);}
+    .btn.sm{padding:6px 10px;font-size:8px;}
+    .search-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:18px;margin-bottom:20px;}
+    .search-grid{display:grid;grid-template-columns:2fr 1.5fr 1fr 1fr 1fr;gap:12px;align-items:end;}
+    @media(max-width:900px){.search-grid{grid-template-columns:1fr 1fr;}}
+    .form-group{display:flex;flex-direction:column;gap:6px;}
+    label{font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--cl);}
+    input,select{background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--c);font-family:'DM Sans','Hind Siliguri',sans-serif;font-size:14px;padding:9px 12px;outline:none;width:100%;}
+    input:focus,select:focus{border-color:rgba(196,154,60,.5);}
+    .results-status{font-size:13px;color:var(--cl);margin-bottom:14px;}
+    .result-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap;}
+    .result-title{font-family:'Syne','Hind Siliguri',sans-serif;font-size:15px;font-weight:700;color:var(--c);}
+    .result-company{font-size:13px;color:var(--cm);margin-top:2px;}
+    .result-meta{font-size:12px;color:var(--cl);margin-top:6px;display:flex;gap:10px;flex-wrap:wrap;}
+    .pill{display:inline-flex;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;background:rgba(255,255,255,.06);color:var(--cl);}
+    .empty-state{text-align:center;padding:48px 20px;color:var(--cl);font-size:13px;}
+    .toast-wrap{position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;gap:8px;}
+    .toast{padding:12px 18px;border-radius:8px;font-family:'Syne','Hind Siliguri',sans-serif;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;animation:fadeUp .3s ease;}
+    .toast.ok{background:#1a3322;border:1px solid rgba(95,207,128,.3);color:var(--green);}
+    .toast.err{background:#2a1510;border:1px solid rgba(224,90,43,.3);color:var(--red);}
+  </style>
+  <script type="module" crossorigin src="/assets/jobDiscover-Chui8bmt.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="/assets/admin-auth-4ZiUUGs_.js">
+  <link rel="modulepreload" crossorigin href="/assets/admin-nav-KbGg4lyJ.js">
+  <link rel="modulepreload" crossorigin href="/assets/html-utils-B4ngS3jJ.js">
+</head>
+<body>
+
+  <div class="page">
+    <div class="page-header">
+      <div class="page-title">Job <span style="color:var(--al)">Discovery</span></div>
+      <div class="page-sub">Search live openings from the Bundesagentur für Arbeit job board and import any of them straight into your tracker.</div>
+    </div>
+    <div class="unofficial-note">Uses an unofficial, community-maintained integration to the BA job board (no official public API exists) — results are real and live, but this could stop working if that integration breaks.</div>
+
+    <div class="search-card">
+      <div class="search-grid">
+        <div class="form-group"><label for="s-was">Keyword</label><input type="text" id="s-was" placeholder="e.g. Business Analyst Werkstudent"></div>
+        <div class="form-group"><label for="s-wo">Location</label><input type="text" id="s-wo" placeholder="e.g. Berlin"></div>
+        <div class="form-group"><label for="s-umkreis">Radius (km)</label><input type="number" id="s-umkreis" placeholder="25"></div>
+        <div class="form-group"><label for="s-angebotsart">Type</label>
+          <select id="s-angebotsart">
+            <option value="">Any</option>
+            <option value="1">Regular job</option>
+            <option value="4">Ausbildung / Duales Studium</option>
+            <option value="34">Praktikum / Trainee</option>
+            <option value="2">Selbstständigkeit</option>
+          </select>
+        </div>
+        <div class="form-group"><label for="s-arbeitszeit">Work Time</label>
+          <select id="s-arbeitszeit">
+            <option value="">Any</option>
+            <option value="vz">Full-time</option>
+            <option value="tz">Part-time</option>
+            <option value="ho">Home/Remote</option>
+          </select>
+        </div>
+      </div>
+      <div style="margin-top:14px;"><button class="btn primary" id="search-btn">Search</button></div>
+    </div>
+
+    <div class="results-status" id="results-status"></div>
+    <div id="results-list"></div>
+  </div>
+
+  <div class="toast-wrap" id="toast-wrap"></div>
+
+</body>
+</html>
