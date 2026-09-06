@@ -38,6 +38,7 @@ const JOB_LINKS = [
   { href: 'job-settings.html',     label: '⚙ Career Profile' },
   { href: 'job-resumes.html',      label: '📄 CV Studio'    },
   { href: 'job-opportunities.html', label: '💼 Opportunities' },
+  { href: 'job-discover.html',     label: '🔎 Discover Jobs' },
   { href: 'job-contacts.html',     label: '🗂 Contacts'      },
   { href: 'job-interviews.html',   label: '🎤 Interviews'    },
   { href: 'job-activities.html',   label: '≡ Activities'    },
@@ -74,6 +75,7 @@ const SEARCH_INDEX = [
   { href: 'job-settings.html',      label: 'Career Profile',  icon: '⚙', hint: 'Background used by AI',    keywords: 'job career profile settings resume cv' },
   { href: 'job-resumes.html',       label: 'CV Studio',       icon: '📄', hint: 'Generate & tailor CVs', keywords: 'job cv studio resume tailor ats base' },
   { href: 'job-quick-log.html',     label: 'Quick Log',       icon: '📝', hint: 'Fast mobile-friendly update logging', keywords: 'job quick log update mobile fast' },
+  { href: 'job-discover.html',      label: 'Discover Jobs',   icon: '🔎', hint: 'Search live BA job board postings', keywords: 'job discover search bundesagentur arbeit sourcing' },
 ];
 
 function injectStyles() {

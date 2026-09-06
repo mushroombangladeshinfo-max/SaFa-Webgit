@@ -725,6 +725,20 @@ Fit-analysis rules: base every rating and claim ONLY on what's explicitly in the
     profileId = await ensureActiveProfileId(sb);
     renderProfileSwitcher(sb, document.getElementById('profile-bar'), async () => { profileId = await ensureActiveProfileId(sb); load(); });
     if (new URLSearchParams(location.search).get('new') === '1') openModal();
+    if (new URLSearchParams(location.search).get('importFromDiscovery') === '1') {
+      const raw = sessionStorage.getItem('jobDiscoveryImport');
+      sessionStorage.removeItem('jobDiscoveryImport');
+      if (raw) {
+        const job = JSON.parse(raw);
+        openModal();
+        document.getElementById('ai-paste').value = job.job_description || '';
+        document.getElementById('ai-url').value = job.job_url || '';
+        document.getElementById('f-company').value = job.company || '';
+        document.getElementById('f-job_title').value = job.job_title || '';
+        document.getElementById('f-source').value = 'Bundesagentur fur Arbeit';
+        toast('Job loaded from Discovery — review, then click Analyse Job');
+      }
+    }
     load();
     injectRealtimeStyles();
     subscribeRealtime(sb, 'job-opportunities-live', ['job_opportunities'], load, { indicatorId: 'rt-indicator' });

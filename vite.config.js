@@ -36,6 +36,7 @@ export default defineConfig({
         jobAnalytics:     './job-analytics.html',
         jobResumes:       './job-resumes.html',
         jobQuickLog:      './job-quick-log.html',
+        jobDiscover:      './job-discover.html',
       }
     }
   }
