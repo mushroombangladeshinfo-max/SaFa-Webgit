@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CV Studio — SaFa Naturals</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>html.auth-checking *:not(style){visibility:hidden!important;}</style>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;}
+    html{font-size:15px;}
+    :root{--bg:#060d09;--bg2:#0d1f12;--bg3:#122018;--border:rgba(255,255,255,.07);--c:#f5efe6;--cm:rgba(245,239,230,.6);--cl:rgba(245,239,230,.35);--al:#c49a3c;--green:#5fcf80;--red:#e05a2b;--blue:#50c8ff;}
+    body{font-family:'DM Sans','Hind Siliguri',sans-serif;background:var(--bg);color:var(--c);min-height:100vh;margin:0;-webkit-font-smoothing:antialiased;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+    .page{max-width:1200px;margin:0 auto;padding:28px 24px 64px;}
+    .page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;}
+    .page-title{font-family:'Syne','Hind Siliguri',sans-serif;font-size:22px;font-weight:700;color:var(--c);margin:0 0 4px;}
+    .page-sub{font-size:13px;color:var(--cl);}
+    .btn{font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:9px 16px;border-radius:6px;border:1px solid var(--border);background:rgba(255,255,255,.04);color:var(--cl);cursor:pointer;}
+    .btn:hover{color:var(--c);background:rgba(255,255,255,.08);}
+    .btn.primary{background:rgba(196,154,60,.12);border-color:rgba(196,154,60,.3);color:var(--al);}
+    .btn.primary:hover{background:rgba(196,154,60,.2);}
+    .btn.sm{padding:6px 10px;font-size:8px;}
+    .section-title{font-family:'Syne','Hind Siliguri',sans-serif;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--al);margin:26px 0 10px;}
+    .section-title:first-of-type{margin-top:0;}
+    .table-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:8px;}
+    .scroll-x{overflow-x:auto;}
+    table{width:100%;border-collapse:collapse;}
+    th{font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--cl);padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap;}
+    td{padding:12px 14px;font-size:14px;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:middle;}
+    tr:last-child td{border-bottom:none;}
+    tr:hover td{background:rgba(255,255,255,.02);}
+    .empty-state{text-align:center;padding:40px 20px;color:var(--cl);font-size:13px;}
+    .pill{display:inline-flex;padding:3px 9px;border-radius:20px;font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;}
+    .pill-stale{background:rgba(224,90,43,.12);color:var(--red);}
+    .pill-current{background:rgba(95,207,128,.12);color:var(--green);}
+    .rec-pill{font-family:'DM Mono',monospace;font-size:12px;}
+
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:500;padding:20px;}
+    .modal-overlay.open{display:flex;animation:fadeUp .2s ease;}
+    .modal{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:28px;width:100%;max-width:600px;max-height:90vh;overflow-y:auto;}
+    .modal.wide{max-width:820px;}
+    .modal-title{font-family:'Syne','Hind Siliguri',sans-serif;font-size:15px;font-weight:700;color:var(--c);margin-bottom:20px;}
+    .form-group{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;}
+    label{font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--cl);}
+    input,select,textarea{background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--c);font-family:'DM Sans','Hind Siliguri',sans-serif;font-size:14px;padding:9px 12px;outline:none;width:100%;resize:vertical;}
+    input:focus,select:focus,textarea:focus{border-color:rgba(196,154,60,.5);}
+    .modal-actions{display:flex;gap:10px;margin-top:20px;justify-content:flex-end;flex-wrap:wrap;}
+    .source-toggle{display:flex;gap:8px;margin-bottom:14px;}
+    .source-toggle button{flex:1;}
+    .source-toggle button.active{background:rgba(196,154,60,.14);color:var(--al);border-color:rgba(196,154,60,.3);}
+
+    .cv-doc{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:22px;font-size:13.5px;line-height:1.6;color:var(--cm);}
+    .cv-doc-headline{font-family:'Syne','Hind Siliguri',sans-serif;font-size:17px;color:var(--c);margin:0 0 10px;}
+    .cv-doc-section{font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--al);margin:16px 0 6px;}
+    .cv-doc .cv-item{margin-bottom:10px;}
+    .cv-doc .cv-item-head{display:flex;justify-content:space-between;gap:12px;}
+    .cv-doc .cv-item-head strong,.cv-doc .cv-item-head span{display:block;color:var(--c);}
+    .cv-doc .cv-subtle{color:var(--cl);font-size:12px;}
+    .cv-doc ul{margin:4px 0 0;padding-left:18px;}
+    .cv-notes{background:rgba(196,154,60,.06);border:1px solid rgba(196,154,60,.2);border-radius:8px;padding:14px;margin-top:14px;font-size:12.5px;}
+    .cv-notes h4{font-family:'Syne',sans-serif;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--al);margin:10px 0 4px;}
+    .cv-notes h4:first-child{margin-top:0;}
+    .cv-notes ul{margin:2px 0;padding-left:18px;}
+    .ats-stat-row{display:flex;gap:14px;margin-bottom:14px;flex-wrap:wrap;}
+    .ats-stat{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--cm);}
+    .ats-stat strong{color:var(--c);}
+    .kw-item{font-size:12.5px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.04);}
+    .kw-tag{display:inline-block;font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:2px 6px;border-radius:4px;margin-right:6px;}
+    .kw-tag.covered{background:rgba(95,207,128,.15);color:var(--green);}
+    .kw-tag.supported_but_missing{background:rgba(196,154,60,.15);color:var(--al);}
+    .kw-tag.unsupported{background:rgba(224,90,43,.15);color:var(--red);}
+    .kw-tag.unclear{background:rgba(255,255,255,.06);color:var(--cl);}
+    @media print {
+      body *{visibility:hidden;}
+      #print-area{display:block!important;position:absolute;left:0;top:0;width:100%;}
+      #print-area *{visibility:visible;}
+    }
+    .toast-wrap{position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;gap:8px;}
+    .toast{padding:12px 18px;border-radius:8px;font-family:'Syne','Hind Siliguri',sans-serif;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;animation:fadeUp .3s ease;}
+    .toast.ok{background:#1a3322;border:1px solid rgba(95,207,128,.3);color:var(--green);}
+    .toast.err{background:#2a1510;border:1px solid rgba(224,90,43,.3);color:var(--red);}
+  </style>
+  <script type="module" crossorigin src="/assets/jobResumes-CharFdYt.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="/assets/admin-auth-4ZiUUGs_.js">
+  <link rel="modulepreload" crossorigin href="/assets/admin-nav-DWS8XQYO.js">
+  <link rel="modulepreload" crossorigin href="/assets/ai-client-Ym7whptS.js">
+  <link rel="modulepreload" crossorigin href="/assets/html-utils-B4ngS3jJ.js">
+  <link rel="modulepreload" crossorigin href="/assets/realtime-D7K--cdb.js">
+  <link rel="modulepreload" crossorigin href="/assets/job-profile-CtSRDUuh.js">
+  <link rel="modulepreload" crossorigin href="/assets/career-diagnostic-BcLyxxc0.js">
+</head>
+<body>
+
+  <div class="page">
+    <div class="page-header">
+      <div>
+        <div class="page-title">CV <span style="color:var(--al)">Studio</span></div>
+        <div class="page-sub">Generate a base CV per target role from your confirmed Career Profile, then tailor it for a specific job — every claim stays evidence-constrained.</div>
+      </div>
+      <span class="rt-indicator" id="rt-indicator"><span class="rt-dot"></span>Live</span>
+      <button class="btn primary" id="generate-base-btn">+ Generate Base CV</button>
+    </div>
+
+    <div id="profile-bar"></div>
+    <div id="gate-notice" style="display:none;background:rgba(196,154,60,.08);border:1px solid rgba(196,154,60,.25);border-radius:8px;padding:12px 16px;font-size:13px;color:var(--cl);margin-bottom:18px;"></div>
+
+    <div class="section-title">Base CVs</div>
+    <div class="table-card">
+      <div class="scroll-x">
+        <table>
+          <thead><tr><th>Name</th><th>Target Role</th><th>Created</th><th>Profile</th><th></th></tr></thead>
+          <tbody id="base-tbody"><tr><td colspan="5"><div class="empty-state">Loading...</div></td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="section-title">Tailored CVs</div>
+    <div class="table-card">
+      <div class="scroll-x">
+        <table>
+          <thead><tr><th>Name</th><th>Based On</th><th>ATS Match</th><th>Recommendation</th><th>Created</th><th></th></tr></thead>
+          <tbody id="tailored-tbody"><tr><td colspan="6"><div class="empty-state">Loading...</div></td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Generate Base CV modal -->
+  <div class="modal-overlay" id="generate-modal">
+    <div class="modal">
+      <div class="modal-title">Generate Base CV</div>
+      <div class="form-group"><label for="gm-target-role">Target Role</label><input type="text" id="gm-target-role" placeholder="e.g. Business Analyst"></div>
+      <div class="form-group"><label for="gm-emphasis">Optional Emphasis</label><textarea id="gm-emphasis" rows="3" placeholder="Anything specific to lead with or emphasise for this version..."></textarea></div>
+      <div class="modal-actions">
+        <button class="btn" id="generate-modal-cancel">Cancel</button>
+        <button class="btn primary" id="generate-modal-save">Generate</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tailor for a Job modal -->
+  <div class="modal-overlay" id="tailor-modal">
+    <div class="modal">
+      <div class="modal-title">Tailor for a Job</div>
+      <div class="source-toggle">
+        <button class="btn active" id="tailor-source-opp" type="button">Pick Saved Opportunity</button>
+        <button class="btn" id="tailor-source-paste" type="button">Paste Job Description</button>
+      </div>
+      <div id="tailor-opp-fields">
+        <div class="form-group"><label for="tm-opportunity">Opportunity</label><select id="tm-opportunity"></select></div>
+      </div>
+      <div id="tailor-paste-fields" style="display:none;">
+        <div class="form-group"><label for="tm-company">Company</label><input type="text" id="tm-company"></div>
+        <div class="form-group"><label for="tm-title">Job Title</label><input type="text" id="tm-title"></div>
+        <div class="form-group"><label for="tm-jd">Job Description</label><textarea id="tm-jd" rows="6"></textarea></div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn" id="tailor-modal-cancel">Cancel</button>
+        <button class="btn primary" id="tailor-modal-save">Tailor CV</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- View CV modal -->
+  <div class="modal-overlay" id="view-modal">
+    <div class="modal wide">
+      <div class="modal-title" id="view-modal-title">CV</div>
+      <div id="view-ats-box"></div>
+      <div class="cv-doc" id="view-doc" data-print-target></div>
+      <div id="view-notes"></div>
+      <div class="modal-actions">
+        <button class="btn" id="view-modal-close">Close</button>
+        <button class="btn" id="view-copy-btn">Copy as Plain Text</button>
+        <button class="btn" id="view-print-btn">Print / Save as PDF</button>
+        <button class="btn primary" id="view-tailor-btn" style="display:none;">Tailor for a Job</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="print-area" style="display:none;"></div>
+  <div class="toast-wrap" id="toast-wrap"></div>
+
+</body>
+</html>
