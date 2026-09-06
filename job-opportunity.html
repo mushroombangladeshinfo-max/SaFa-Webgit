@@ -622,7 +622,12 @@
         const cfg = await loadAiCfg(sb);
         if (cfg.provider === 'openai' && !cfg.key) { toast('Configure a Groq key on the Home page first', 'err'); return; }
         const { data: profile } = await sb.from('job_profiles').select('*').eq('id', opp.profile_id).maybeSingle();
-        if (profile?.status !== 'confirmed') { toast('Complete and confirm your Career Profile diagnostic first — go to Career Profile page', 'err'); return; }
+        if (profile?.status !== 'confirmed') {
+          const box = document.getElementById('ai-output');
+          box.style.display = '';
+          box.innerHTML = `<div>Complete and confirm your <a href="job-settings.html" style="color:var(--al);">Career Profile diagnostic</a> first — AI Fit Analysis needs a confirmed profile to compare against.</div>`;
+          return;
+        }
         const profileText = structuredProfileToText(profile.structured_profile)
           || ['education','work_experience','projects','skills','languages','certifications','career_preferences','work_authorization','target_locations','target_roles','salary_preferences','availability','career_narrative']
             .map(k => profile?.[k] ? `${k}: ${profile[k]}` : null).filter(Boolean).join('\n')

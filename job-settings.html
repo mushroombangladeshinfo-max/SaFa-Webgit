@@ -96,6 +96,7 @@
 
     <div class="card">
       <div class="card-title">Manual Fields <span style="color:var(--cl);font-weight:400;text-transform:none;letter-spacing:0;">(optional — the Career Diagnostic above is the primary way AI understands your background)</span></div>
+      <div id="manual-fields-notice" style="display:none;background:rgba(196,154,60,.08);border:1px solid rgba(196,154,60,.25);border-radius:8px;padding:10px 14px;font-size:12.5px;color:var(--cl);margin-top:8px;"></div>
     </div>
 
     <div class="card">
@@ -166,7 +167,7 @@
     import { getActiveProfileId, setActiveProfileId, loadProfiles, ensureActiveProfileId, renderProfileSwitcher } from '/src/job-profile.js';
     import { loadAiCfg, chatComplete } from '/src/ai-client.js';
     import {
-      MAX_DIAGNOSTIC_QUESTIONS, buildInitialMessages, buildContinuationMessages,
+      MAX_DIAGNOSTIC_QUESTIONS, MAX_CV_TEXT_CHARS, buildInitialMessages, buildContinuationMessages,
       buildCorrectionMessages, enforceDiagnosticConsistency, minimiseCvPiiForAi,
     } from '/src/career-diagnostic.js';
 
@@ -239,6 +240,14 @@
         : 'Draft — not yet confirmed';
       document.getElementById('run-diagnostic-btn').textContent = diagProfile.diagnostic_session ? 'Re-run Career Diagnostic' : 'Run Career Diagnostic';
 
+      const notice = document.getElementById('manual-fields-notice');
+      if (confirmed) {
+        notice.style.display = '';
+        notice.textContent = "These fields are no longer read by AI — your confirmed Career Diagnostic profile above is used instead. Editing them here has no effect until you re-run and re-confirm the diagnostic.";
+      } else {
+        notice.style.display = 'none';
+      }
+
       const results = document.getElementById('diagnostic-results');
       const session = diagProfile.diagnostic_session;
       if (!session) { results.style.display = 'none'; results.innerHTML = ''; return; }
@@ -277,8 +286,12 @@
             <div class="q-text">${escapeHtml(q.question)}</div>
             <div class="q-why">Why this matters: ${escapeHtml(q.whyItMatters)}</div>
             ${choiceButtons}
-            <textarea id="answer-free-text" rows="2" placeholder="${choiceButtons ? 'Or type your own answer...' : 'Your answer...'}" style="margin-top:8px;"></textarea>
-            <button class="btn primary" id="submit-free-answer-btn" style="margin-top:8px;">Submit</button>
+            <label for="answer-free-text" style="margin-top:8px;">${choiceButtons ? 'Or type your own answer' : 'Your answer'}</label>
+            <textarea id="answer-free-text" rows="2"></textarea>
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:8px;">
+              <button class="btn primary" id="submit-free-answer-btn">Submit</button>
+              <button class="btn sm" id="force-confirm-btn">Skip remaining questions — confirm what we have</button>
+            </div>
           </div>`;
       } else {
         actionHtml = `
@@ -333,8 +346,11 @@
           if (!val) { toast('Type an answer first', 'err'); return; }
           submitAnswer(q, val);
         });
+        document.getElementById('force-confirm-btn')?.addEventListener('click', () => {
+          if (confirm("Confirm the profile as-is? The remaining question won't be asked, and whatever's still unknown will just stay unknown — you can always re-run the diagnostic later.")) confirmProfile(true);
+        });
       } else {
-        document.getElementById('confirm-profile-btn')?.addEventListener('click', confirmProfile);
+        document.getElementById('confirm-profile-btn')?.addEventListener('click', () => confirmProfile(false));
         document.getElementById('show-correct-btn')?.addEventListener('click', () => { document.getElementById('correct-box').style.display = ''; });
         document.getElementById('submit-correction-btn')?.addEventListener('click', submitCorrection);
       }
@@ -343,6 +359,7 @@
     document.getElementById('run-diagnostic-btn').addEventListener('click', async () => {
       const cvText = document.getElementById('f-master_cv_text').value.trim();
       if (cvText.length < 80) { toast('Paste a fuller CV/background first', 'err'); return; }
+      if (cvText.length > MAX_CV_TEXT_CHARS) { toast(`That's too long for the AI to process reliably (${cvText.length.toLocaleString()} chars, max ${MAX_CV_TEXT_CHARS.toLocaleString()}) — trim it down to the most relevant parts`, 'err'); return; }
       if (diagBusy) return;
       diagBusy = true;
       const btn = document.getElementById('run-diagnostic-btn');
@@ -414,9 +431,10 @@
       }
     }
 
-    async function confirmProfile() {
+    async function confirmProfile(force = false) {
       const session = diagProfile.diagnostic_session;
-      if (!session || session.status !== 'ready_for_confirmation') { toast('Not ready to confirm yet', 'err'); return; }
+      if (!session) { toast('Nothing to confirm yet', 'err'); return; }
+      if (!force && session.status !== 'ready_for_confirmation') { toast('Not ready to confirm yet', 'err'); return; }
       if (diagBusy) return;
       diagBusy = true;
       try {
@@ -489,6 +507,7 @@
       if (error) { toast(error.message, 'err'); return; }
       setActiveProfileId(data.id);
       await refreshProfileUi();
+      toast('New profile created — paste a CV above to build its Career Profile');
     });
 
     refreshProfileUi();

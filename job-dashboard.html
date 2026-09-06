@@ -113,6 +113,7 @@
       <a class="btn" href="job-contacts.html?new=1">+ Add Contact</a>
       <button class="btn" id="log-activity-btn">+ Log Activity</button>
       <a class="btn" href="job-interviews.html">+ Add Interview</a>
+      <a class="btn" href="job-copilot.html?logUpdate=1">📝 Log an Update</a>
       <a class="btn" href="job-copilot.html">✦ Ask AI</a>
     </div>
 
@@ -202,18 +203,20 @@
       setTimeout(()=>el.remove(), 3500);
     }
 
-    let _opps = [], _interviews = [], _offers = [], profileId = null;
+    let _opps = [], _interviews = [], _offers = [], _profileConfirmed = true, profileId = null;
 
     async function load() {
-      const [{ data: opps, error: e1 }, { data: interviews, error: e2 }, { data: offers, error: e3 }] = await Promise.all([
+      const [{ data: opps, error: e1 }, { data: interviews, error: e2 }, { data: offers, error: e3 }, { data: profile, error: e4 }] = await Promise.all([
         sb.from('job_opportunities').select('*').eq('profile_id', profileId),
         sb.from('job_interviews').select('*, job_opportunities(company,job_title)').eq('profile_id', profileId),
         sb.from('job_offers').select('id,status').eq('profile_id', profileId).in('status', ['pending','negotiating','accepted']),
+        sb.from('job_profiles').select('status').eq('id', profileId).maybeSingle(),
       ]);
-      if (e1 || e2 || e3) { toast((e1||e2||e3).message, 'err'); return; }
+      if (e1 || e2 || e3 || e4) { toast((e1||e2||e3||e4).message, 'err'); return; }
       _opps = opps || [];
       _interviews = interviews || [];
       _offers = offers || [];
+      _profileConfirmed = profile?.status === 'confirmed';
       renderKpis();
       renderBestMove();
       renderPriorities();
@@ -246,6 +249,10 @@
     function renderBestMove() {
       const box = document.getElementById('best-move-box');
       const active = _opps.filter(o => !o.closed);
+      if (!_profileConfirmed) {
+        box.innerHTML = `<div class="best-move-icon">✦</div><div><div class="best-move-label">Start Here</div><div class="best-move-text"><a href="job-settings.html" style="color:inherit;">Confirm your Career Profile</a> first — AI Import, Fit Analysis, and Interview Prep all need it before they'll run.</div></div>`;
+        return;
+      }
       if (!active.length) {
         box.innerHTML = `<div class="best-move-icon">✦</div><div><div class="best-move-label">Best Next Move</div><div class="best-move-text">Add your first opportunity so priorities can start surfacing here.</div></div>`;
         return;

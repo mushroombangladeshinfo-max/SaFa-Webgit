@@ -82,8 +82,11 @@ export async function renderProfileSwitcher(supabase, containerEl, onSwitch) {
     const { data, error } = await supabase.from('job_profiles').insert([{ profile_name: name.trim() }]).select().single();
     if (error) { alert(error.message); return; }
     setActiveProfileId(data.id);
-    onSwitch();
-    renderProfileSwitcher(supabase, containerEl, onSwitch);
+    // A brand-new profile has no confirmed Career Diagnostic yet — every
+    // AI feature on every other page will just refuse to run until one
+    // exists, so send the user straight to where that gets built instead
+    // of leaving them to discover the gate error page by page.
+    window.location.href = 'job-settings.html';
   });
 }
 

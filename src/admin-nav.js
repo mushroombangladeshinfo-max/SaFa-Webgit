@@ -28,8 +28,13 @@ const FARM_LINKS = [
   { href: 'dashboard.html',      label: '📡 IoT Dashboard'  },
 ];
 
+// Career Profile listed right after Dashboard, not last — every AI feature
+// below it (Import, Fit Analysis, Interview Prep) refuses to run until its
+// diagnostic is confirmed, so it needs to read as "step 2," not "the
+// settings page nobody urgently needs."
 const JOB_LINKS = [
   { href: 'job-dashboard.html',    label: '🎯 Dashboard'    },
+  { href: 'job-settings.html',     label: '⚙ Career Profile' },
   { href: 'job-opportunities.html', label: '💼 Opportunities' },
   { href: 'job-contacts.html',     label: '🗂 Contacts'      },
   { href: 'job-interviews.html',   label: '🎤 Interviews'    },
@@ -38,7 +43,6 @@ const JOB_LINKS = [
   { href: 'job-skills.html',       label: '✦ Skills Intelligence' },
   { href: 'job-analytics.html',    label: '▥ Analytics'     },
   { href: 'job-copilot.html',      label: '✦ AI Copilot'    },
-  { href: 'job-settings.html',     label: '⚙ Career Profile' },
 ];
 
 /* Searchable via Cmd+K palette — every backend destination in one place,

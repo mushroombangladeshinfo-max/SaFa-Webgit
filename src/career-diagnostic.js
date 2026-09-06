@@ -14,6 +14,13 @@
 
 export const MAX_DIAGNOSTIC_QUESTIONS = 8;
 
+// A long paste going to a small/cheap model (this app's default is Groq's
+// llama-3.1-8b-instant) risks silent truncation or an opaque provider
+// error with no explanation — reject client-side with a clear message
+// instead. Generous enough for a real multi-page CV, well short of
+// anything that would meaningfully strain a small model's context window.
+export const MAX_CV_TEXT_CHARS = 60_000;
+
 // Prompt-embedded shape string, matching this codebase's existing pattern
 // (see job-opportunities.html's AI Import) rather than a formal JSON-schema
 // object — chatComplete's `json:true` only requests a JSON object back,

@@ -656,7 +656,7 @@
       try {
         const { data: profile } = await sb.from('job_profiles').select('*').eq('id', profileId).maybeSingle();
         if (profile?.status !== 'confirmed') {
-          statusEl.textContent = 'Complete and confirm your Career Profile diagnostic first — go to Career Profile page.';
+          statusEl.innerHTML = `Complete and confirm your <a href="job-settings.html" style="color:var(--al);">Career Profile diagnostic</a> first — AI Import needs a confirmed profile to judge fit against.`;
           btn.disabled = false;
           return;
         }
