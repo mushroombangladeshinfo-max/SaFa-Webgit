@@ -34,6 +34,7 @@ export default defineConfig({
         jobOffers:        './job-offers.html',
         jobSkills:        './job-skills.html',
         jobAnalytics:     './job-analytics.html',
+        jobResumes:       './job-resumes.html',
       }
     }
   }

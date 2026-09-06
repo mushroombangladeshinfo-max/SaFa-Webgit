@@ -590,7 +590,7 @@
         ${ai.missing_evidence?.length ? `<h4>Missing Evidence</h4>${listOrDash(ai.missing_evidence)}` : ''}
         ${ai.application_strategy ? `<h4>Application Strategy</h4><div>${escapeHtml(ai.application_strategy)}</div>` : ''}
         ${ai.networking_recommendation ? `<h4>Networking Recommendation</h4><div>${escapeHtml(ai.networking_recommendation)}</div>` : ''}
-        ${ai.best_cv ? `<h4>Best CV</h4><div>${escapeHtml(ai.best_cv)}</div>` : ''}
+        ${ai.best_cv ? `<h4>Best CV</h4><div>${escapeHtml(ai.best_cv)} — <a href="job-resumes.html" style="color:var(--al);">tailor one in CV Studio →</a></div>` : ''}
         ${ai.best_next_action ? `<h4>Best Next Action</h4><div>${escapeHtml(ai.best_next_action)}</div>` : ''}
         ${ai.confidence_note ? `<h4>Confidence Note</h4><div style="color:var(--cl);font-style:italic;">${escapeHtml(ai.confidence_note)}</div>` : ''}
       `;

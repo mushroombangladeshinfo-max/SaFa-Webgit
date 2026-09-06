@@ -35,6 +35,7 @@ const FARM_LINKS = [
 const JOB_LINKS = [
   { href: 'job-dashboard.html',    label: '🎯 Dashboard'    },
   { href: 'job-settings.html',     label: '⚙ Career Profile' },
+  { href: 'job-resumes.html',      label: '📄 CV Studio'    },
   { href: 'job-opportunities.html', label: '💼 Opportunities' },
   { href: 'job-contacts.html',     label: '🗂 Contacts'      },
   { href: 'job-interviews.html',   label: '🎤 Interviews'    },
@@ -70,6 +71,7 @@ const SEARCH_INDEX = [
   { href: 'job-analytics.html',     label: 'Job Analytics',   icon: '▥', hint: 'Funnel, conversion, CV performance', keywords: 'job analytics funnel conversion rejection cv performance' },
   { href: 'job-copilot.html',       label: 'AI Copilot',      icon: '✦', hint: 'Job search AI assistant',  keywords: 'job ai copilot assistant chat' },
   { href: 'job-settings.html',      label: 'Career Profile',  icon: '⚙', hint: 'Background used by AI',    keywords: 'job career profile settings resume cv' },
+  { href: 'job-resumes.html',       label: 'CV Studio',       icon: '📄', hint: 'Generate & tailor CVs', keywords: 'job cv studio resume tailor ats base' },
 ];
 
 function injectStyles() {
