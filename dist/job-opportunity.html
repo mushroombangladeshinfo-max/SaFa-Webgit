@@ -104,7 +104,7 @@
     .toast.ok{background:#1a3322;border:1px solid rgba(95,207,128,.3);color:var(--green);}
     .toast.err{background:#2a1510;border:1px solid rgba(224,90,43,.3);color:var(--red);}
   </style>
-  <script type="module" crossorigin src="/assets/jobOpportunity-B7dKyfB-.js"></script>
+  <script type="module" crossorigin src="/assets/jobOpportunity-DjnTFyA9.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
   <link rel="modulepreload" crossorigin href="/assets/admin-auth-4ZiUUGs_.js">
   <link rel="modulepreload" crossorigin href="/assets/admin-nav-DWS8XQYO.js">
@@ -223,6 +223,19 @@
           <div class="form-group"><label class="f" for="f-next_action_date">Next Action Date</label><input type="date" id="f-next_action_date"></div>
         </div>
         <div style="margin-top:14px;"><button class="btn sm primary" id="save-application-btn">Save</button></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Cover Letter</div>
+        <div style="margin-bottom:10px;"><button class="btn sm primary" id="draft-cover-letter-btn">✦ Draft with AI</button></div>
+        <div class="form-group"><textarea id="f-cover-letter" rows="10" placeholder="Draft with AI, or write your own — this is saved either way."></textarea></div>
+        <div id="cover-letter-notes"></div>
+        <div style="margin-top:10px;display:flex;gap:8px;"><button class="btn sm primary" id="save-cover-letter-btn">Save</button><button class="btn sm" id="copy-cover-letter-btn">Copy</button></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Application Questions</div>
+        <div class="card-hint" style="font-size:12px;color:var(--cl);margin-bottom:10px;">Paste each question the application form actually asks, then draft an evidence-based answer per question.</div>
+        <div id="answers-list"></div>
+        <div style="margin-top:10px;display:flex;gap:8px;"><button class="btn sm" id="add-question-btn">+ Add Question</button><button class="btn sm primary" id="save-answers-btn">Save All</button></div>
       </div>
       <div class="card">
         <div class="card-title">Offers</div>
