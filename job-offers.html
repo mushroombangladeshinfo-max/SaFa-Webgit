@@ -169,7 +169,10 @@
       document.getElementById('toast-wrap').appendChild(el);
       setTimeout(()=>el.remove(), 3500);
     }
-    const fmtMoney = n => n === null || n === undefined ? '—' : '৳' + Number(n).toLocaleString('en');
+    // This tracker targets the German job market (Werkstudent roles,
+    // Bundesagentur für Arbeit as a source, German-language requirements
+    // throughout) — offers are in EUR, not the farm business's BDT.
+    const fmtMoney = n => n === null || n === undefined ? '—' : '€' + Number(n).toLocaleString('en');
 
     let _all = [], _editId = null, _view = 'table';
 
@@ -302,6 +305,11 @@
         opportunity_id: opportunityId, activity_type: 'Offer Discussion', activity_date: localDateStr(),
         summary: `Offer accepted${opp?.stage ? ' (was: '+opp.stage+')' : ''}`,
       }]);
+      // Any other still-open offer for the SAME opportunity is now moot —
+      // without this, a second pending offer row for a role you've already
+      // accepted would linger indefinitely and confuse the Compare view.
+      await sb.from('job_offers').update({ status: 'declined' })
+        .eq('opportunity_id', opportunityId).neq('id', offerId).in('status', ['pending','negotiating']);
     }
 
     window.editOffer = (id) => openModal(_all.find(o => o.id === id));

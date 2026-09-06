@@ -199,16 +199,18 @@
       setTimeout(()=>el.remove(), 3500);
     }
 
-    let _opps = [], _interviews = [];
+    let _opps = [], _interviews = [], _offers = [];
 
     async function load() {
-      const [{ data: opps, error: e1 }, { data: interviews, error: e2 }] = await Promise.all([
+      const [{ data: opps, error: e1 }, { data: interviews, error: e2 }, { data: offers, error: e3 }] = await Promise.all([
         sb.from('job_opportunities').select('*'),
         sb.from('job_interviews').select('*, job_opportunities(company,job_title)'),
+        sb.from('job_offers').select('id,status').in('status', ['pending','negotiating','accepted']),
       ]);
-      if (e1 || e2) { toast((e1||e2).message, 'err'); return; }
+      if (e1 || e2 || e3) { toast((e1||e2||e3).message, 'err'); return; }
       _opps = opps || [];
       _interviews = interviews || [];
+      _offers = offers || [];
       renderKpis();
       renderBestMove();
       renderPriorities();
@@ -289,7 +291,11 @@
       const completed = _interviews.filter(iv => iv.status === 'completed').length;
       document.getElementById('kpi-interviews').textContent = `${upcoming} up · ${completed} done`;
 
-      document.getElementById('kpi-offers').textContent = active.filter(o => ['offer','negotiation','accepted'].includes(o.stage)).length;
+      // Real logged offers (job_offers), not just opportunities sitting at
+      // the Offer stage — those can drift apart (an offer verbally
+      // mentioned but not yet formalized, or logged before the stage was
+      // manually advanced), and job-offers.html is the source of truth.
+      document.getElementById('kpi-offers').textContent = _offers.length;
 
       const followups = active.filter(o => ['Overdue','Due Today'].includes(followUpStatus(o.next_action_date))).length;
       document.getElementById('kpi-followups').textContent = followups;
@@ -382,7 +388,7 @@
 
     load();
     injectRealtimeStyles();
-    subscribeRealtime(sb, 'job-dashboard-live', ['job_opportunities','job_interviews'], load, { indicatorId: 'rt-indicator' });
+    subscribeRealtime(sb, 'job-dashboard-live', ['job_opportunities','job_interviews','job_offers'], load, { indicatorId: 'rt-indicator' });
   </script>
 </body>
 </html>

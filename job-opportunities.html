@@ -427,7 +427,7 @@
             ${cards.map(r => {
               const fit = computeFitScore(r.fit_manual, r.fit_ai);
               const prio = computePriority(r);
-              return `<div class="kanban-card" draggable="true" data-id="${r.id}" onclick="window.editOpp('${r.id}')">
+              return `<div class="kanban-card" draggable="true" data-id="${r.id}" onclick="window.location.href='job-opportunity.html?id=${r.id}'">
                 <div class="kc-company">${escapeHtml(r.company)}</div>
                 <div class="kc-title">${escapeHtml(r.job_title)}</div>
                 <div class="kc-meta">

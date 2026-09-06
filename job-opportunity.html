@@ -213,6 +213,12 @@
         </div>
         <div style="margin-top:14px;"><button class="btn sm primary" id="save-application-btn">Save</button></div>
       </div>
+      <div class="card">
+        <div class="card-title">Offers</div>
+        <table class="linked" id="offers-table"><thead><tr><th>Base Salary</th><th>Status</th><th>Start Date</th><th>Response Deadline</th></tr></thead><tbody></tbody></table>
+        <div class="empty-mini" id="offers-empty" style="display:none;">No offers yet for this opportunity.</div>
+        <div style="margin-top:10px;"><a href="job-offers.html" class="btn sm" style="text-decoration:none;">Manage Offers →</a></div>
+      </div>
     </div>
 
     <!-- Contacts -->
@@ -418,6 +424,17 @@
       loadInterviews();
       loadActivities();
       loadStageHistory();
+      loadOffers();
+    }
+
+    async function loadOffers() {
+      const { data } = await sb.from('job_offers').select('*').eq('opportunity_id', oppId).order('received_date', { ascending: false });
+      const rows = data || [];
+      document.getElementById('offers-empty').style.display = rows.length ? 'none' : '';
+      document.querySelector('#offers-table tbody').innerHTML = rows.map(o => `<tr>
+        <td>${o.base_salary !== null ? '€'+Number(o.base_salary).toLocaleString('en') : '—'}</td>
+        <td>${escapeHtml(o.status)}</td><td>${o.start_date||'—'}</td><td>${o.response_deadline||'—'}</td>
+      </tr>`).join('');
     }
 
     // No separate stage-history table needed — every stage change already
@@ -860,6 +877,13 @@
       const { error } = await sb.from('job_opportunities').update(payload).eq('id', oppId);
       if (error) { toast(error.message, 'err'); return; }
       await sb.from('job_activities').insert([{ opportunity_id: oppId, activity_type: 'Rejection Feedback', activity_date: payload.closed_date, summary: `Opportunity closed${payload.known_reason?': '+payload.known_reason:''}` }]);
+      // Mirrors job-offers.html's accept cascade in reverse: closing with
+      // any non-accepted outcome means no offer for this role is still
+      // live, so any dangling pending/negotiating offer would otherwise
+      // sit there looking actionable forever.
+      if (closedOutcome !== 'Accepted') {
+        await sb.from('job_offers').update({ status: 'declined' }).eq('opportunity_id', oppId).in('status', ['pending','negotiating']);
+      }
       toast('Marked closed');
       document.getElementById('close-modal').classList.remove('open');
       load();
@@ -879,7 +903,7 @@
 
     load();
     injectRealtimeStyles();
-    subscribeRealtime(sb, 'job-opportunity-live', ['job_opportunities','job_activities','job_interviews','job_interview_questions'], load, { indicatorId: 'rt-indicator' });
+    subscribeRealtime(sb, 'job-opportunity-live', ['job_opportunities','job_activities','job_interviews','job_interview_questions','job_offers'], load, { indicatorId: 'rt-indicator' });
   </script>
 </body>
 </html>

@@ -159,10 +159,11 @@
     /* Small, current snapshot of the tracker — same context-stuffing pattern
        as home.html's SaFa Assistant, scoped to job-search data. */
     async function buildSnapshot() {
-      const [{ data: opps }, { data: interviews }, { data: profile }] = await Promise.all([
+      const [{ data: opps }, { data: interviews }, { data: profile }, { data: offers }] = await Promise.all([
         sb.from('job_opportunities').select('*').eq('closed', false),
         sb.from('job_interviews').select('*, job_opportunities(company,job_title)').eq('status', 'scheduled'),
         sb.from('job_career_profile').select('target_roles,target_locations,career_preferences').eq('id', true).maybeSingle(),
+        sb.from('job_offers').select('*, job_opportunities(company,job_title)').in('status', ['pending','negotiating']),
       ]);
       const today = localDateStr();
       const opportunities = (opps||[]).map(o => ({
@@ -176,7 +177,11 @@
         company: iv.job_opportunities?.company, title: iv.job_opportunities?.job_title,
         round: iv.round, type: iv.interview_type, date: iv.interview_date,
       }));
-      return { today, career_preferences: profile || null, active_opportunities: opportunities, upcoming_interviews: upcomingInterviews };
+      const pendingOffers = (offers||[]).map(o => ({
+        company: o.job_opportunities?.company, title: o.job_opportunities?.job_title,
+        base_salary_eur: o.base_salary, status: o.status, response_deadline: o.response_deadline,
+      }));
+      return { today, career_preferences: profile || null, active_opportunities: opportunities, upcoming_interviews: upcomingInterviews, pending_offers: pendingOffers };
     }
 
     function systemPrompt(snap) {
@@ -394,7 +399,18 @@ Rules: matched_opportunity_id and matched_interview_id must be one of the exact 
         if (actErr) throw actErr;
 
         toast('Tracker updated');
-        closeUpdateModal();
+        // Land on a link to what just changed instead of just closing —
+        // "updated" isn't very actionable without a way to go see it.
+        const link = p.matched_interview_id
+          ? `job-interviews.html?id=${p.matched_interview_id}`
+          : p._effective_opportunity_id ? `job-opportunity.html?id=${p._effective_opportunity_id}` : null;
+        document.getElementById('update-review').innerHTML = `<div class="update-review">
+          <div class="update-review-title">✓ Updated</div>
+          <div class="update-review-sub">${escapeHtml(p.summary || '')}</div>
+          ${link ? `<a href="${link}" class="btn primary sm" style="text-decoration:none;display:inline-block;margin-top:8px;">View ${p.matched_interview_id ? 'Interview' : 'Opportunity'} →</a>` : ''}
+        </div>`;
+        document.getElementById('confirm-update-btn').style.display = 'none';
+        _pendingUpdate = null;
       } catch (e) {
         toast('Update failed: ' + e.message, 'err');
       } finally {
