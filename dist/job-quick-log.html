@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Quick Log — SaFa Naturals</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>html.auth-checking *:not(style){visibility:hidden!important;}</style>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;}
+    html{font-size:16px;}
+    :root{--bg:#060d09;--bg2:#0d1f12;--bg3:#122018;--border:rgba(255,255,255,.08);--c:#f5efe6;--cm:rgba(245,239,230,.6);--cl:rgba(245,239,230,.35);--al:#c49a3c;--green:#5fcf80;--red:#e05a2b;}
+    body{font-family:'DM Sans','Hind Siliguri',sans-serif;background:var(--bg);color:var(--c);min-height:100vh;margin:0;-webkit-font-smoothing:antialiased;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+    .page{max-width:520px;margin:0 auto;padding:16px 16px 40px;}
+    .hdr{display:flex;align-items:center;gap:12px;margin-bottom:18px;}
+    .hdr-back{color:var(--cl);text-decoration:none;font-size:22px;line-height:1;padding:4px 6px;flex-shrink:0;}
+    .hdr-title{font-family:'Syne','Hind Siliguri',sans-serif;font-size:19px;font-weight:700;color:var(--c);}
+    .hdr-sub{font-size:12.5px;color:var(--cl);margin-top:2px;}
+    textarea{background:var(--bg2);border:1px solid var(--border);border-radius:10px;color:var(--c);font-family:'DM Sans','Hind Siliguri',sans-serif;font-size:16px;padding:14px;outline:none;width:100%;resize:vertical;min-height:120px;}
+    textarea:focus{border-color:rgba(196,154,60,.5);}
+    .btn{font-family:'Syne','Hind Siliguri',sans-serif;font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:16px 20px;border-radius:10px;border:1px solid var(--border);background:rgba(255,255,255,.05);color:var(--cl);cursor:pointer;width:100%;margin-top:12px;-webkit-tap-highlight-color:transparent;}
+    .btn.primary{background:rgba(196,154,60,.16);border-color:rgba(196,154,60,.35);color:var(--al);}
+    .btn.sm{width:auto;padding:9px 16px;font-size:11px;margin-top:0;}
+    .btn:disabled{opacity:.5;}
+    .status-line{font-size:13px;color:var(--cl);min-height:20px;margin-top:10px;text-align:center;}
+    .interpret-spinner{display:inline-block;width:12px;height:12px;border:2px solid rgba(196,154,60,.25);border-top-color:var(--al);border-radius:50%;animation:iSpin .7s linear infinite;vertical-align:-1px;margin-right:6px;}
+    @keyframes iSpin{to{transform:rotate(360deg);}}
+    .review{background:rgba(196,154,60,.07);border:1px solid rgba(196,154,60,.22);border-radius:10px;padding:16px;margin-top:16px;animation:fadeUp .25s ease;}
+    .review-title{font-family:'Syne','Hind Siliguri',sans-serif;font-size:15px;font-weight:700;color:var(--c);}
+    .review-sub{font-size:12px;color:var(--cl);margin:2px 0 10px;}
+    .diff-row{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:13.5px;}
+    .diff-row:last-child{border-bottom:none;}
+    .diff-label{color:var(--cl);flex-shrink:0;}
+    .diff-val{color:var(--c);font-weight:500;text-align:right;}
+    .unclear-note{font-size:12px;color:var(--cl);font-style:italic;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.06);}
+    .no-match-note{font-size:13.5px;color:var(--cl);}
+    .toast-wrap{position:fixed;bottom:20px;left:16px;right:16px;z-index:999;display:flex;flex-direction:column;gap:8px;max-width:520px;margin:0 auto;}
+    .toast{padding:12px 18px;border-radius:8px;font-family:'Syne','Hind Siliguri',sans-serif;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;animation:fadeUp .3s ease;text-align:center;}
+    .toast.ok{background:#1a3322;border:1px solid rgba(95,207,128,.3);color:var(--green);}
+    .toast.err{background:#2a1510;border:1px solid rgba(224,90,43,.3);color:var(--red);}
+  </style>
+  <script type="module" crossorigin src="/assets/jobQuickLog-BfwflE-c.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="/assets/admin-auth-4ZiUUGs_.js">
+  <link rel="modulepreload" crossorigin href="/assets/ai-client-Ym7whptS.js">
+  <link rel="modulepreload" crossorigin href="/assets/html-utils-B4ngS3jJ.js">
+  <link rel="modulepreload" crossorigin href="/assets/job-constants-BUKhMFmW.js">
+  <link rel="modulepreload" crossorigin href="/assets/job-profile-CtSRDUuh.js">
+  <link rel="modulepreload" crossorigin href="/assets/date-utils-D3sh9T8I.js">
+  <link rel="modulepreload" crossorigin href="/assets/job-scoring-C9GjBEz8.js">
+  <link rel="modulepreload" crossorigin href="/assets/log-update-BHSVsZcR.js">
+</head>
+<body>
+
+  <div class="page">
+    <div class="hdr">
+      <a href="job-dashboard.html" class="hdr-back" aria-label="Back to Dashboard">←</a>
+      <div>
+        <div class="hdr-title">📝 Quick Log</div>
+        <div class="hdr-sub">Describe what just happened — AI matches it to your tracker.</div>
+      </div>
+    </div>
+
+    <div id="profile-bar"></div>
+
+    <label for="update-input" style="display:none;">What happened?</label>
+    <textarea id="update-input" rows="5" placeholder="e.g. Had a call with the recruiter at Bosch, they want a 2nd interview next Tuesday"></textarea>
+    <button class="btn primary" id="interpret-btn">Interpret</button>
+    <div class="status-line" id="update-status"></div>
+    <div id="update-review" style="display:none;"></div>
+    <button class="btn primary" id="confirm-update-btn" style="display:none;">Confirm &amp; Update</button>
+    <button class="btn" id="log-another-btn" style="display:none;">Log Another</button>
+  </div>
+
+  <div class="toast-wrap" id="toast-wrap"></div>
+
+</body>
+</html>
