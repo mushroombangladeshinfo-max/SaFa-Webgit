@@ -9,6 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>html.auth-checking *:not(style){visibility:hidden!important;}</style>
+  <script src="https://cdn.jsdelivr.net/npm/mammoth@1.11.0/mammoth.browser.min.js"></script>
   <style>
     *,*::before,*::after{box-sizing:border-box;}
     html{font-size:15px;}
@@ -89,6 +90,11 @@
       <div class="card-title">Career Diagnostic</div>
       <div class="card-hint">Paste your CV/background once — AI critically reviews it, asks only the questions that actually change your job-search strategy, then you confirm a structured profile. AI Fit Analysis and Interview Prep won't run against an unconfirmed profile.</div>
       <div id="diagnostic-status" class="diagnostic-status draft">Draft — not yet confirmed</div>
+      <div class="field">
+        <label for="cv-file-input">Upload a CV file (PDF, DOCX, or TXT) — or paste below</label>
+        <input type="file" id="cv-file-input" accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain">
+        <div id="cv-file-status" style="font-size:12px;color:var(--cl);margin-top:6px;min-height:16px;"></div>
+      </div>
       <div class="field"><label for="f-master_cv_text">Paste your CV / background</label><textarea id="f-master_cv_text" rows="8" placeholder="Paste your CV text, LinkedIn summary, or a plain description of your education, experience, skills, and what you're looking for."></textarea></div>
       <button class="btn primary" id="run-diagnostic-btn">Run Career Diagnostic</button>
       <div id="diagnostic-results" style="display:none;margin-top:18px;"></div>
@@ -161,6 +167,8 @@
 
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+    import * as pdfjsLib from 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.min.mjs';
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.worker.min.mjs';
     import { requireAdmin }  from '/src/admin-auth.js';
     import { mountAdminNav } from '/src/admin-nav.js';
     import { escapeHtml } from '/src/html-utils.js';
@@ -213,6 +221,64 @@
       const { error } = await sb.from('job_profiles').update(payload).eq('id', profileId);
       if (error) { toast(error.message, 'err'); return; }
       toast('Profile saved');
+    });
+
+    /* ── CV file upload — extracted text lands in the same textarea a
+       paste would, so every downstream step (length guard, diagnostic
+       prompt) is identical either way. Extraction happens entirely in the
+       browser (pdf.js / mammoth), matching this app's no-backend-server
+       architecture — nothing is uploaded anywhere. */
+    function normalizeExtractedText(value) {
+      return String(value || '')
+        .replace(/\r\n/g, '\n')
+        .replace(/[ \t]+/g, ' ')
+        .replace(/\n{3,}/g, '\n\n')
+        .trim();
+    }
+    async function extractPdfText(arrayBuffer) {
+      const doc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      const pages = [];
+      for (let i = 1; i <= doc.numPages; i++) {
+        const page = await doc.getPage(i);
+        const content = await page.getTextContent();
+        pages.push(content.items.map(item => item.str).join(' '));
+      }
+      return pages.join('\n\n');
+    }
+    async function extractDocxText(arrayBuffer) {
+      const result = await window.mammoth.extractRawText({ arrayBuffer });
+      return result.value;
+    }
+    document.getElementById('cv-file-input').addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const statusEl = document.getElementById('cv-file-status');
+      statusEl.textContent = 'Extracting text...';
+      try {
+        const ext = file.name.toLowerCase().split('.').pop();
+        let text;
+        if (ext === 'pdf' || file.type === 'application/pdf') {
+          text = await extractPdfText(await file.arrayBuffer());
+        } else if (ext === 'docx' || file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+          text = await extractDocxText(await file.arrayBuffer());
+        } else if (ext === 'txt' || file.type === 'text/plain') {
+          text = await file.text();
+        } else {
+          statusEl.textContent = 'Unsupported file type — use PDF, DOCX, or TXT, or paste the text below instead.';
+          return;
+        }
+        text = normalizeExtractedText(text);
+        if (text.length < 120) {
+          statusEl.textContent = `Only ${text.length} characters of text could be extracted — if this is a scanned/image PDF, try a text-based file or paste the CV text manually below.`;
+          return;
+        }
+        document.getElementById('f-master_cv_text').value = text;
+        statusEl.textContent = `✓ Extracted ${text.length.toLocaleString()} characters from ${file.name} — review below, then run the diagnostic.`;
+      } catch (err) {
+        statusEl.textContent = 'Extraction failed: ' + err.message + ' — try a different file, or paste the text below instead.';
+      } finally {
+        e.target.value = '';
+      }
     });
 
     /* ── Career Diagnostic ── */
