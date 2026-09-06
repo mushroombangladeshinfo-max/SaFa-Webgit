@@ -75,10 +75,10 @@
     .toast.ok{background:#1a3322;border:1px solid rgba(95,207,128,.3);color:var(--green);}
     .toast.err{background:#2a1510;border:1px solid rgba(224,90,43,.3);color:var(--red);}
   </style>
-  <script type="module" crossorigin src="/assets/jobContacts-nijXHzAB.js"></script>
+  <script type="module" crossorigin src="/assets/jobContacts-C8gHZIJ3.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
   <link rel="modulepreload" crossorigin href="/assets/admin-auth-4ZiUUGs_.js">
-  <link rel="modulepreload" crossorigin href="/assets/admin-nav-DwveRXqR.js">
+  <link rel="modulepreload" crossorigin href="/assets/admin-nav-XMl22aYY.js">
   <link rel="modulepreload" crossorigin href="/assets/ai-client-Ym7whptS.js">
   <link rel="modulepreload" crossorigin href="/assets/date-utils-D3sh9T8I.js">
   <link rel="modulepreload" crossorigin href="/assets/realtime-D7K--cdb.js">
@@ -129,29 +129,33 @@
     <div class="modal">
       <div class="modal-title" id="modal-title">Add Contact</div>
       <div class="form-grid">
-        <div class="form-group span2"><label>Full Name *</label><input type="text" id="f-full_name"></div>
-        <div class="form-group"><label>Company</label><input type="text" id="f-company"></div>
-        <div class="form-group"><label>Role / Position</label><input type="text" id="f-role_position"></div>
-        <div class="form-group"><label>Department</label><input type="text" id="f-department"></div>
-        <div class="form-group"><label>Contact Type</label>
+        <div class="form-group span2"><label for="f-full_name">Full Name *</label><input type="text" id="f-full_name"></div>
+        <div class="form-group"><label for="f-company">Company</label><input type="text" id="f-company"></div>
+        <div class="form-group"><label for="f-role_position">Role / Position</label><input type="text" id="f-role_position"></div>
+        <div class="form-group"><label for="f-department">Department</label><input type="text" id="f-department"></div>
+        <div class="form-group"><label for="f-contact_type">Contact Type</label>
           <select id="f-contact_type"><option value="">Select...</option></select>
         </div>
-        <div class="form-group"><label>LinkedIn URL</label><input type="url" id="f-linkedin_url"></div>
-        <div class="form-group"><label>Email</label><input type="email" id="f-email"></div>
-        <div class="form-group"><label>How Found</label><input type="text" id="f-how_found"></div>
-        <div class="form-group"><label>Shared Institution</label><input type="text" id="f-shared_institution"></div>
-        <div class="form-group"><label>Relationship Stage</label>
+        <div class="form-group"><label for="f-linkedin_url">LinkedIn URL</label><input type="url" id="f-linkedin_url"></div>
+        <div class="form-group"><label for="f-email">Email</label><input type="email" id="f-email"></div>
+        <div class="form-group"><label for="f-how_found">How Found</label><input type="text" id="f-how_found"></div>
+        <div class="form-group"><label for="f-shared_institution">Shared Institution</label><input type="text" id="f-shared_institution"></div>
+        <div class="form-group"><label for="f-relationship_stage">Relationship Stage</label>
           <select id="f-relationship_stage"></select>
         </div>
-        <div class="form-group"><label>First Contact Date</label><input type="date" id="f-first_contact_date"></div>
-        <div class="form-group"><label>Last Interaction</label><input type="date" id="f-last_interaction"></div>
-        <div class="form-group"><label>Next Follow-up Date</label><input type="date" id="f-next_followup_date"></div>
+        <div class="form-group"><label for="f-relationship_strength">Relationship Strength (1–5)</label>
+          <select id="f-relationship_strength"><option value="">Not rated</option><option value="1">1 — Weak</option><option value="2">2</option><option value="3">3 — Moderate</option><option value="4">4</option><option value="5">5 — Strong</option></select>
+        </div>
+        <div class="form-group"><label for="f-response_status">Response Status</label><input type="text" id="f-response_status" placeholder="e.g. Positive, Declined, Away"></div>
+        <div class="form-group"><label for="f-first_contact_date">First Contact Date</label><input type="date" id="f-first_contact_date"></div>
+        <div class="form-group"><label for="f-last_interaction">Last Interaction</label><input type="date" id="f-last_interaction"></div>
+        <div class="form-group"><label for="f-next_followup_date">Next Follow-up Date</label><input type="date" id="f-next_followup_date"></div>
         <div class="form-group span2" style="flex-direction:row;gap:24px;">
           <div class="check-row"><input type="checkbox" id="f-alumni_connection"><label for="f-alumni_connection">Alumni connection</label></div>
           <div class="check-row"><input type="checkbox" id="f-referral_requested"><label for="f-referral_requested">Referral requested</label></div>
           <div class="check-row"><input type="checkbox" id="f-referral_received"><label for="f-referral_received">Referral received</label></div>
         </div>
-        <div class="form-group span2"><label>Notes</label><textarea id="f-notes" rows="3"></textarea></div>
+        <div class="form-group span2"><label for="f-notes">Notes</label><textarea id="f-notes" rows="3"></textarea></div>
       </div>
       <div class="modal-actions">
         <button class="btn" id="modal-cancel">Cancel</button>
@@ -165,13 +169,13 @@
     <div class="modal">
       <div class="modal-title">✦ Draft Outreach — <span id="outreach-name"></span></div>
       <div class="form-group" style="margin-bottom:12px;">
-        <label>Mode</label>
+        <label for="outreach-mode">Mode</label>
         <select id="outreach-mode">
           <option>Initial outreach</option><option>Alumni outreach</option><option>Recruiter outreach</option>
           <option>Hiring manager outreach</option><option>Referral request</option><option>Follow-up</option><option>Thank-you</option>
         </select>
       </div>
-      <div class="form-group"><label>Message (edit before sending)</label><textarea id="outreach-text" rows="7" placeholder="Drafting..."></textarea></div>
+      <div class="form-group"><label for="outreach-text">Message (edit before sending)</label><textarea id="outreach-text" rows="7" placeholder="Drafting..."></textarea></div>
       <div class="modal-actions">
         <button class="btn" id="outreach-close">Close</button>
         <button class="btn" id="outreach-regenerate">↻ Regenerate</button>
