@@ -15,8 +15,17 @@
 // support channel and no guarantee it keeps working; if it starts
 // failing, that's the first thing to check, not a bug in this file.
 //
-// Verifies the caller is a logged-in admin before proxying anything,
-// same convention as steadfast-create-shipment.
+// Verifies the caller is a logged-in admin before proxying anything.
+//
+// CORS: this function IS called cross-origin (the app is served from
+// Cloudflare Pages, this from *.supabase.co), so — unlike a same-request
+// gateway assumption — Supabase does NOT auto-answer the browser's OPTIONS
+// preflight for us; it forwards it straight into this function like any
+// other request. The first version of this file only accepted POST and
+// returned a bare 405 with no CORS headers for anything else, which
+// silently failed the preflight and broke every real browser call (curl
+// doesn't enforce CORS, which is why that bug wasn't caught before
+// deploy). Every response below — including errors — carries CORS_HEADERS.
 
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 
@@ -27,6 +36,19 @@ const BA_API_KEY   = 'jobboerse-jobsuche';
 const BA_BASE      = 'https://rest.arbeitsagentur.de/jobboerse/jobsuche-service';
 const SEARCH_URL   = `${BA_BASE}/pc/v6/jobs`;
 const DETAIL_URL   = (encodedRefnr: string) => `${BA_BASE}/pc/v4/jobdetails/${encodedRefnr}`;
+
+const CORS_HEADERS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+};
+
+function text(body: string, status = 200) {
+  return new Response(body, { status, headers: { ...CORS_HEADERS, 'Content-Type': 'text/plain' } });
+}
+function json(body: unknown, status = 200) {
+  return new Response(JSON.stringify(body), { status, headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' } });
+}
 
 interface SearchBody {
   mode: 'search';
@@ -45,44 +67,39 @@ interface DetailBody {
 }
 
 Deno.serve(async (req) => {
-  if (req.method !== 'POST') {
-    return new Response('Method not allowed', { status: 405 });
-  }
+  if (req.method === 'OPTIONS') return new Response(null, { headers: CORS_HEADERS });
+  if (req.method !== 'POST') return text('Method not allowed', 405);
 
   const authHeader = req.headers.get('Authorization') || '';
   const callerClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
     global: { headers: { Authorization: authHeader } },
   });
   const { data: { user }, error: userErr } = await callerClient.auth.getUser();
-  if (userErr || !user) {
-    return new Response('Unauthorized', { status: 401 });
-  }
+  if (userErr || !user) return text('Unauthorized', 401);
   const { data: isAdmin, error: adminErr } = await callerClient.rpc('is_admin');
-  if (adminErr || !isAdmin) {
-    return new Response('Forbidden — admin only', { status: 403 });
-  }
+  if (adminErr || !isAdmin) return text('Forbidden — admin only', 403);
 
   let body: SearchBody | DetailBody;
   try {
     body = await req.json();
   } catch {
-    return new Response('Invalid JSON', { status: 400 });
+    return text('Invalid JSON', 400);
   }
 
   try {
     if (body.mode === 'detail') {
-      if (!body.refnr) return new Response('Missing refnr', { status: 400 });
+      if (!body.refnr) return text('Missing refnr', 400);
       const encoded = btoa(body.refnr);
       const r = await fetch(DETAIL_URL(encoded), { headers: { 'X-API-Key': BA_API_KEY } });
-      if (!r.ok) return new Response(JSON.stringify({ error: `BA API replied ${r.status}` }), { status: 502, headers: { 'Content-Type': 'application/json' } });
+      if (!r.ok) return json({ error: `BA API replied ${r.status}` }, 502);
       const detail = await r.json();
-      return new Response(JSON.stringify({
+      return json({
         title: detail.stellenangebotsTitel ?? null,
         company: detail.firma ?? null,
         description: detail.stellenangebotsBeschreibung ?? null,
         location: detail.stellenlokationen?.[0]?.adresse?.ort ?? null,
         external_url: detail.externeUrl ?? null,
-      }), { headers: { 'Content-Type': 'application/json' } });
+      });
     }
 
     if (body.mode === 'search') {
@@ -97,7 +114,7 @@ Deno.serve(async (req) => {
       params.set('size', String(body.size || 25));
 
       const r = await fetch(`${SEARCH_URL}?${params.toString()}`, { headers: { 'X-API-Key': BA_API_KEY } });
-      if (!r.ok) return new Response(JSON.stringify({ error: `BA API replied ${r.status}` }), { status: 502, headers: { 'Content-Type': 'application/json' } });
+      if (!r.ok) return json({ error: `BA API replied ${r.status}` }, 502);
       const data = await r.json();
       const results = (data.ergebnisliste || []).map((j: Record<string, unknown>) => ({
         refnr: j.referenznummer,
@@ -110,12 +127,12 @@ Deno.serve(async (req) => {
         full_time: !!j.arbeitszeitVollzeit,
         distance_km: j.entfernung ?? null,
       }));
-      return new Response(JSON.stringify({ results, page: body.page || 1 }), { headers: { 'Content-Type': 'application/json' } });
+      return json({ results, page: body.page || 1 });
     }
 
-    return new Response('Missing or invalid mode', { status: 400 });
+    return text('Missing or invalid mode', 400);
   } catch (e) {
     console.error('[job-discover]', e);
-    return new Response(JSON.stringify({ error: 'Job search failed — the BA API may be unavailable right now' }), { status: 502, headers: { 'Content-Type': 'application/json' } });
+    return json({ error: 'Job search failed — the BA API may be unavailable right now' }, 502);
   }
 });
