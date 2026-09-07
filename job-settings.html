@@ -63,6 +63,21 @@
     .question-card .q-meta{font-size:11px;color:var(--cl);margin-bottom:8px;}
     .question-card .q-text{font-size:15px;color:var(--c);margin-bottom:6px;}
     .question-card .q-why{font-size:12px;color:var(--cl);margin-bottom:12px;font-style:italic;}
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:500;padding:20px;}
+    .modal-overlay.open{display:flex;animation:fadeUp .2s ease;}
+    .modal{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:28px;width:100%;max-width:820px;max-height:90vh;overflow-y:auto;}
+    .modal-title{font-family:'Syne','Hind Siliguri',sans-serif;font-size:15px;font-weight:700;color:var(--c);margin-bottom:6px;}
+    .modal-hint{font-size:12px;color:var(--cl);margin-bottom:18px;}
+    .modal-section-title{font-family:'Syne','Hind Siliguri',sans-serif;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--al);margin:20px 0 10px;}
+    .modal-section-title:first-of-type{margin-top:0;}
+    .modal-actions{display:flex;gap:10px;margin-top:20px;justify-content:flex-end;position:sticky;bottom:-28px;background:var(--bg2);padding:14px 0 0;}
+    .row-editor{border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:8px;background:var(--bg3);}
+    .row-editor-grid{display:grid;grid-template-columns:1fr 1fr auto auto;gap:8px;align-items:end;}
+    .row-editor-grid.with-strength{grid-template-columns:1fr 1fr 1fr 1fr auto;}
+    @media(max-width:760px){.row-editor-grid,.row-editor-grid.with-strength{grid-template-columns:1fr;}}
+    .row-editor label{margin-bottom:3px;font-size:9px;}
+    .row-editor select{background:var(--bg2);}
+    .remove-row-btn{background:rgba(224,90,43,.1);border:1px solid rgba(224,90,43,.25);color:var(--red);border-radius:6px;padding:9px 10px;cursor:pointer;font-size:11px;height:fit-content;}
     .toast-wrap{position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;gap:8px;}
     .toast{padding:12px 18px;border-radius:8px;font-family:'Syne','Hind Siliguri',sans-serif;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;animation:fadeUp .3s ease;}
     .toast.ok{background:#1a3322;border:1px solid rgba(95,207,128,.3);color:var(--green);}
@@ -89,7 +104,10 @@
     <div class="card" id="diagnostic-card">
       <div class="card-title">Career Diagnostic</div>
       <div class="card-hint">Paste your CV/background once — AI critically reviews it, asks only the questions that actually change your job-search strategy, then you confirm a structured profile. AI Fit Analysis and Interview Prep won't run against an unconfirmed profile.</div>
-      <div id="diagnostic-status" class="diagnostic-status draft">Draft — not yet confirmed</div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px;">
+        <div id="diagnostic-status" class="diagnostic-status draft" style="margin-bottom:0;">Draft — not yet confirmed</div>
+        <button class="btn sm" id="edit-profile-btn" style="display:none;">✎ Edit Profile Manually</button>
+      </div>
       <div class="field">
         <label for="cv-file-input">Upload a CV file (PDF, DOCX, or TXT) — or paste below</label>
         <input type="file" id="cv-file-input" accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain">
@@ -160,6 +178,62 @@
 
     <div class="save-bar">
       <button class="btn primary" id="save-btn">Save Profile</button>
+    </div>
+  </div>
+
+  <!-- Edit Profile modal: direct manual editing of the CONFIRMED structured
+       profile — no AI round-trip. For fixing something mid-diagnostic
+       (before confirming), use "Something's Wrong — Correct It" instead,
+       which re-runs the AI with your correction as verified evidence. -->
+  <div class="modal-overlay" id="edit-profile-modal">
+    <div class="modal">
+      <div class="modal-title">Edit Profile Manually</div>
+      <div class="modal-hint">Direct edits to your confirmed profile — no AI involved. Every AI feature reads this the moment you save.</div>
+
+      <div class="modal-section-title">Positioning</div>
+      <div class="grid2">
+        <div class="field"><label for="ep-headline">Professional Headline</label><input type="text" id="ep-headline"></div>
+        <div class="field"><label for="ep-primary-role">Primary Target Role</label><input type="text" id="ep-primary-role"></div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label for="ep-secondary-roles">Secondary Target Roles (comma-separated)</label><input type="text" id="ep-secondary-roles"></div>
+        <div class="field"><label for="ep-employment-types">Employment Types (comma-separated)</label><input type="text" id="ep-employment-types"></div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label for="ep-target-locations">Target Locations (comma-separated)</label><input type="text" id="ep-target-locations"></div>
+        <div class="field"><label for="ep-work-modes">Work Mode Preferences (comma-separated)</label><input type="text" id="ep-work-modes"></div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label for="ep-priorities">Career Priorities (comma-separated)</label><input type="text" id="ep-priorities"></div>
+        <div class="field"><label for="ep-constraints">Constraints (comma-separated)</label><input type="text" id="ep-constraints"></div>
+      </div>
+      <div class="field"><label for="ep-education">Education (comma-separated)</label><input type="text" id="ep-education"></div>
+
+      <div class="modal-section-title">Skills</div>
+      <div id="ep-skills-list"></div>
+      <button class="btn sm" id="ep-add-skill-btn" type="button">+ Add Skill</button>
+
+      <div class="modal-section-title">Languages</div>
+      <div id="ep-languages-list"></div>
+      <button class="btn sm" id="ep-add-language-btn" type="button">+ Add Language</button>
+
+      <div class="modal-section-title">Experience Evidence</div>
+      <div id="ep-experience-list"></div>
+      <button class="btn sm" id="ep-add-experience-btn" type="button">+ Add Experience Item</button>
+
+      <div class="modal-section-title">Projects</div>
+      <div id="ep-projects-list"></div>
+      <button class="btn sm" id="ep-add-project-btn" type="button">+ Add Project</button>
+
+      <div class="modal-section-title">Other</div>
+      <div class="field"><label for="ep-verified-facts">Other Verified Facts (comma-separated)</label><input type="text" id="ep-verified-facts"></div>
+      <div class="field"><label for="ep-inferred-insights">AI-Inferred Insights (comma-separated)</label><input type="text" id="ep-inferred-insights"></div>
+      <div class="field"><label for="ep-unknowns">Known Unknowns (comma-separated)</label><input type="text" id="ep-unknowns"></div>
+
+      <div class="modal-actions">
+        <button class="btn" id="edit-profile-cancel">Cancel</button>
+        <button class="btn primary" id="edit-profile-save">Save Changes</button>
+      </div>
     </div>
   </div>
 
@@ -305,11 +379,12 @@
         ? `Confirmed ✓ — v${diagProfile.profile_version}${diagProfile.confirmed_at ? ' · ' + new Date(diagProfile.confirmed_at).toLocaleDateString() : ''}`
         : 'Draft — not yet confirmed';
       document.getElementById('run-diagnostic-btn').textContent = diagProfile.diagnostic_session ? 'Re-run Career Diagnostic' : 'Run Career Diagnostic';
+      document.getElementById('edit-profile-btn').style.display = confirmed ? '' : 'none';
 
       const notice = document.getElementById('manual-fields-notice');
       if (confirmed) {
         notice.style.display = '';
-        notice.textContent = "These fields are no longer read by AI — your confirmed Career Diagnostic profile above is used instead. Editing them here has no effect until you re-run and re-confirm the diagnostic.";
+        notice.textContent = "These fields are no longer read by AI — your confirmed Career Diagnostic profile above is used instead. Use “✎ Edit Profile Manually” above to update what AI actually reads, or re-run the diagnostic.";
       } else {
         notice.style.display = 'none';
       }
@@ -531,6 +606,124 @@
         diagBusy = false;
       }
     }
+
+    /* ── Edit Profile Manually — direct edits to the CONFIRMED structured
+       profile, no AI call. Row-editors (skills/languages/experience/
+       projects) don't keep live JS state in sync with the DOM as you
+       type — values are only read back from the DOM at save time, which
+       is simpler and can't drift. */
+    const EP_ROW_FIELDS = {
+      skills: [
+        { key: 'name', label: 'Skill' }, { key: 'evidence', label: 'Evidence' },
+        { key: 'strength', label: 'Strength', type: 'select', options: ['strong','moderate','limited','unknown'] },
+        { key: 'status', label: 'Status', type: 'select', options: ['verified','inferred','unknown'] },
+      ],
+      languages: [
+        { key: 'language', label: 'Language' }, { key: 'level', label: 'Level' },
+        { key: 'practicalUse', label: 'Practical Use' },
+        { key: 'status', label: 'Status', type: 'select', options: ['verified','inferred','unknown'] },
+      ],
+      experience: [
+        { key: 'claim', label: 'Claim' }, { key: 'evidence', label: 'Evidence' },
+        { key: 'status', label: 'Status', type: 'select', options: ['verified','inferred','unknown'] },
+      ],
+      projects: [
+        { key: 'claim', label: 'Claim' }, { key: 'evidence', label: 'Evidence' },
+        { key: 'status', label: 'Status', type: 'select', options: ['verified','inferred','unknown'] },
+      ],
+    };
+
+    function renderEpRow(fields, row) {
+      row = row || {};
+      const wide = fields.length >= 4 ? ' with-strength' : '';
+      return `<div class="row-editor"><div class="row-editor-grid${wide}">
+        ${fields.map(f => f.type === 'select'
+          ? `<div><label>${escapeHtml(f.label)}</label><select data-field="${f.key}">${f.options.map(o=>`<option value="${o}" ${row[f.key]===o?'selected':''}>${o}</option>`).join('')}</select></div>`
+          : `<div><label>${escapeHtml(f.label)}</label><input type="text" data-field="${f.key}" value="${escapeHtml(row[f.key]||'')}"></div>`
+        ).join('')}
+        <button type="button" class="remove-row-btn" data-remove-row>✕</button>
+      </div></div>`;
+    }
+    function renderEpList(listId, key, rows) {
+      const container = document.getElementById(listId);
+      const fields = EP_ROW_FIELDS[key];
+      container.innerHTML = (rows||[]).map(row => renderEpRow(fields, row)).join('');
+      container.querySelectorAll('[data-remove-row]').forEach(b => b.addEventListener('click', () => b.closest('.row-editor').remove()));
+    }
+    function addEpRow(listId, key) {
+      const container = document.getElementById(listId);
+      container.insertAdjacentHTML('beforeend', renderEpRow(EP_ROW_FIELDS[key], {}));
+      container.lastElementChild.querySelector('[data-remove-row]').addEventListener('click', function () { this.closest('.row-editor').remove(); });
+    }
+    function collectEpList(listId) {
+      return Array.from(document.querySelectorAll(`#${listId} .row-editor`)).map(rowEl => {
+        const obj = {};
+        rowEl.querySelectorAll('[data-field]').forEach(el => { obj[el.dataset.field] = el.value.trim(); });
+        return obj;
+      }).filter(row => Object.values(row).some(v => v));
+    }
+    function csvToArray(value) { return value.split(',').map(s => s.trim()).filter(Boolean); }
+    function arrayToCsv(arr) { return (arr||[]).join(', '); }
+
+    document.getElementById('edit-profile-btn').addEventListener('click', () => {
+      const p = diagProfile.structured_profile || {};
+      document.getElementById('ep-headline').value = p.professionalHeadline || '';
+      document.getElementById('ep-primary-role').value = p.primaryTargetRole || '';
+      document.getElementById('ep-secondary-roles').value = arrayToCsv(p.secondaryTargetRoles);
+      document.getElementById('ep-employment-types').value = arrayToCsv(p.employmentTypes);
+      document.getElementById('ep-target-locations').value = arrayToCsv(p.targetLocations);
+      document.getElementById('ep-work-modes').value = arrayToCsv(p.workModePreferences);
+      document.getElementById('ep-priorities').value = arrayToCsv(p.careerPriorities);
+      document.getElementById('ep-constraints').value = arrayToCsv(p.constraints);
+      document.getElementById('ep-education').value = arrayToCsv(p.education);
+      document.getElementById('ep-verified-facts').value = arrayToCsv(p.verifiedFacts);
+      document.getElementById('ep-inferred-insights').value = arrayToCsv(p.inferredInsights);
+      document.getElementById('ep-unknowns').value = arrayToCsv(p.unknowns);
+      renderEpList('ep-skills-list', 'skills', p.skills);
+      renderEpList('ep-languages-list', 'languages', p.languages);
+      renderEpList('ep-experience-list', 'experience', p.experienceEvidence);
+      renderEpList('ep-projects-list', 'projects', p.projects);
+      document.getElementById('edit-profile-modal').classList.add('open');
+    });
+    document.getElementById('edit-profile-cancel').addEventListener('click', () => document.getElementById('edit-profile-modal').classList.remove('open'));
+    document.getElementById('edit-profile-modal').addEventListener('click', e => { if (e.target === e.currentTarget) e.currentTarget.classList.remove('open'); });
+    document.getElementById('ep-add-skill-btn').addEventListener('click', () => addEpRow('ep-skills-list', 'skills'));
+    document.getElementById('ep-add-language-btn').addEventListener('click', () => addEpRow('ep-languages-list', 'languages'));
+    document.getElementById('ep-add-experience-btn').addEventListener('click', () => addEpRow('ep-experience-list', 'experience'));
+    document.getElementById('ep-add-project-btn').addEventListener('click', () => addEpRow('ep-projects-list', 'projects'));
+
+    document.getElementById('edit-profile-save').addEventListener('click', async () => {
+      const btn = document.getElementById('edit-profile-save');
+      btn.disabled = true;
+      try {
+        const updatedProfile = {
+          ...(diagProfile.structured_profile || {}),
+          professionalHeadline: document.getElementById('ep-headline').value.trim(),
+          primaryTargetRole: document.getElementById('ep-primary-role').value.trim(),
+          secondaryTargetRoles: csvToArray(document.getElementById('ep-secondary-roles').value),
+          employmentTypes: csvToArray(document.getElementById('ep-employment-types').value),
+          targetLocations: csvToArray(document.getElementById('ep-target-locations').value),
+          workModePreferences: csvToArray(document.getElementById('ep-work-modes').value),
+          careerPriorities: csvToArray(document.getElementById('ep-priorities').value),
+          constraints: csvToArray(document.getElementById('ep-constraints').value),
+          education: csvToArray(document.getElementById('ep-education').value),
+          verifiedFacts: csvToArray(document.getElementById('ep-verified-facts').value),
+          inferredInsights: csvToArray(document.getElementById('ep-inferred-insights').value),
+          unknowns: csvToArray(document.getElementById('ep-unknowns').value),
+          skills: collectEpList('ep-skills-list'),
+          languages: collectEpList('ep-languages-list'),
+          experienceEvidence: collectEpList('ep-experience-list'),
+          projects: collectEpList('ep-projects-list'),
+        };
+        const { error } = await sb.from('job_profiles').update({ structured_profile: updatedProfile }).eq('id', profileId);
+        if (error) { toast(error.message, 'err'); return; }
+        toast('Profile updated');
+        document.getElementById('edit-profile-modal').classList.remove('open');
+        await load();
+      } finally {
+        btn.disabled = false;
+      }
+    });
 
     /* ── Profiles management ── */
     async function renderProfilesList() {
