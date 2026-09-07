@@ -244,7 +244,7 @@
       .modal-content { max-height:90vh; max-height:90dvh; }
     }
   </style>
-  <script type="module" crossorigin src="/assets/account-zviP3nd7.js"></script>
+  <script type="module" crossorigin src="/assets/account-QrnLnxb4.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
   <link rel="modulepreload" crossorigin href="/assets/index-B-jIxwbw.js">
   <link rel="modulepreload" crossorigin href="/assets/supabase-CJRHJsqP.js">
@@ -343,6 +343,7 @@
             </div>
             <a class="forgot-link" onclick="showForgot()">Forgot password?</a>
             <button type="submit" class="auth-btn" id="login-btn">Log In</button>
+            <p class="auth-divider"><a onclick="showMagicLink()">Email me a login link instead</a></p>
             <p class="auth-divider">No account? <a onclick="switchTab('signup')">Sign up free</a></p>
           </form>
 
@@ -370,6 +371,7 @@
               </div>
             </div>
             <button type="submit" class="auth-btn" id="signup-btn">Create Account</button>
+            <p class="auth-divider"><a onclick="showMagicLink()">Sign up with an email link instead</a></p>
             <p class="auth-divider">Have an account? <a onclick="switchTab('login')">Log in</a></p>
           </form>
 
@@ -384,6 +386,21 @@
               <div class="field-wrap"><input type="email" id="reset-email" placeholder="you@example.com" autocomplete="email"></div>
             </div>
             <button type="button" class="auth-btn" id="reset-btn" onclick="handleForgot()">Send Reset Link</button>
+          </div>
+
+          <!-- Magic link form — works for both a brand-new customer and a
+               returning one; Supabase creates the account automatically on
+               first use, same as Google sign-in. -->
+          <div id="magic-link-form" class="forgot-form">
+            <a class="back-link" onclick="showLogin()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+              Back to login
+            </a>
+            <div class="form-group">
+              <label for="magic-link-email">Your Email Address</label>
+              <div class="field-wrap"><input type="email" id="magic-link-email" placeholder="you@example.com" autocomplete="email"></div>
+            </div>
+            <button type="button" class="auth-btn" id="magic-link-btn" onclick="handleMagicLink()">Email Me a Login Link</button>
           </div>
         </div>
       </div>
