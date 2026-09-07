@@ -12,7 +12,12 @@
 
 export const AI_DEFAULTS = {
   ollama: { url: 'http://localhost:11434', model: 'llama3.2' },
-  openai: { url: 'https://api.groq.com/openai', model: 'llama-3.1-8b-instant' },
+  // openai/gpt-oss-120b is Groq's free-tier flagship — benchmarks ahead of
+  // the other free-tier options (GLM-4.7-Flash, Llama 3.3 70B) on general
+  // reasoning/instruction-following, which is what this app's structured
+  // AI features (career diagnostics, fit analysis, CV evidence-constraint)
+  // actually lean on, as opposed to raw math throughput.
+  openai: { url: 'https://api.groq.com/openai', model: 'openai/gpt-oss-120b' },
 };
 
 export async function loadAiCfg(supabase) {
