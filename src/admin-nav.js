@@ -28,24 +28,38 @@ const FARM_LINKS = [
   { href: 'dashboard.html',      label: '📡 IoT Dashboard'  },
 ];
 
-// Career Profile listed right after Dashboard, not last — every AI feature
-// below it (Import, Fit Analysis, Interview Prep) refuses to run until its
-// diagnostic is confirmed, so it needs to read as "step 2," not "the
-// settings page nobody urgently needs."
+// Grouped by workflow stage instead of one flat 13-item list — the old flat
+// list gave every destination equal visual weight whether it's used daily
+// (Dashboard, Opportunities) or almost never (Skills Intelligence). "Start
+// Here" comes first and includes Career Profile alongside Dashboard (not
+// buried under Tools): every AI feature further down (Import, Fit Analysis,
+// Interview Prep, CV Studio) refuses to run until its diagnostic is
+// confirmed, so it needs to read as "step 2," not "the settings page nobody
+// urgently needs."
 const JOB_LINKS = [
-  { href: 'job-dashboard.html',    label: '🎯 Dashboard'    },
-  { href: 'job-quick-log.html',    label: '📝 Quick Log'    },
-  { href: 'job-settings.html',     label: '⚙ Career Profile' },
-  { href: 'job-resumes.html',      label: '📄 CV Studio'    },
-  { href: 'job-opportunities.html', label: '💼 Opportunities' },
-  { href: 'job-discover.html',     label: '🔎 Discover Jobs' },
-  { href: 'job-contacts.html',     label: '🗂 Contacts'      },
-  { href: 'job-interviews.html',   label: '🎤 Interviews'    },
-  { href: 'job-activities.html',   label: '≡ Activities'    },
-  { href: 'job-offers.html',       label: '◆ Offers'        },
-  { href: 'job-skills.html',       label: '✦ Skills Intelligence' },
-  { href: 'job-analytics.html',    label: '▥ Analytics'     },
-  { href: 'job-copilot.html',      label: '✦ AI Copilot'    },
+  { group: 'Start Here', links: [
+    { href: 'job-dashboard.html',    label: '🎯 Dashboard'    },
+    { href: 'job-settings.html',     label: '⚙ Career Profile' },
+  ]},
+  { group: 'Search & Track', links: [
+    { href: 'job-opportunities.html', label: '💼 Opportunities' },
+    { href: 'job-discover.html',      label: '🔎 Discover Jobs' },
+  ]},
+  { group: 'Engage', links: [
+    { href: 'job-contacts.html',   label: '🗂 Contacts'   },
+    { href: 'job-interviews.html', label: '🎤 Interviews' },
+    { href: 'job-activities.html', label: '≡ Activities'  },
+    { href: 'job-offers.html',     label: '◆ Offers'      },
+  ]},
+  { group: 'Review', links: [
+    { href: 'job-analytics.html', label: '▥ Analytics'          },
+    { href: 'job-skills.html',    label: '✦ Skills Intelligence' },
+  ]},
+  { group: 'Tools', links: [
+    { href: 'job-resumes.html',   label: '📄 CV Studio'  },
+    { href: 'job-quick-log.html', label: '📝 Quick Log'  },
+    { href: 'job-copilot.html',   label: '✦ AI Copilot'  },
+  ]},
 ];
 
 /* Searchable via Cmd+K palette — every backend destination in one place,
@@ -105,6 +119,8 @@ function injectStyles() {
     .an-drop-menu.open{display:flex;}
     .an-drop-menu a{display:block;padding:8px 12px;border-radius:5px;font-family:'DM Sans',sans-serif;font-size:13px;color:rgba(245,239,230,.7);text-decoration:none;transition:background .15s,color .15s;}
     .an-drop-menu a:hover{background:rgba(255,255,255,.07);color:#f5efe6;}
+    .an-drop-group-label{font-family:'Syne',sans-serif;font-size:8px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(245,239,230,.28);padding:8px 12px 3px;}
+    .an-drop-group-label:first-child{padding-top:2px;}
     /* Search / command palette */
     .an-search-btn{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:7px;padding:6px 8px 6px 10px;cursor:pointer;color:rgba(245,239,230,.35);font-family:'DM Sans',sans-serif;font-size:12px;transition:background .18s,border-color .18s,color .18s;flex-shrink:0;}
     .an-search-btn:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.14);color:rgba(245,239,230,.6);}
@@ -182,9 +198,10 @@ export function mountAdminNav({ page, supabase, email, lastLogin }) {
     `<a href="${l.href}">${l.label}</a>`
   ).join('');
 
-  const jobLinksHTML = JOB_LINKS.map(l =>
-    `<a href="${l.href}">${l.label}</a>`
-  ).join('');
+  const jobLinksHTML = JOB_LINKS.map(g => `
+    <div class="an-drop-group-label">${g.group}</div>
+    ${g.links.map(l => `<a href="${l.href}">${l.label}</a>`).join('')}
+  `).join('');
 
   const html = `
     <header class="an" role="banner">
@@ -249,7 +266,10 @@ export function mountAdminNav({ page, supabase, email, lastLogin }) {
       ${FARM_LINKS.map(l => `<a href="${l.href}" class="an-link" style="letter-spacing:0;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:400;text-transform:none;">${l.label}</a>`).join('')}
       <div style="height:1px;background:rgba(255,255,255,.06);margin:8px 0;"></div>
       <div style="font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(245,239,230,.2);padding:4px 16px;">Job Search</div>
-      ${JOB_LINKS.map(l => `<a href="${l.href}" class="an-link" style="letter-spacing:0;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:400;text-transform:none;">${l.label}</a>`).join('')}
+      ${JOB_LINKS.map(g => `
+        <div style="font-family:'Syne',sans-serif;font-size:8px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(245,239,230,.32);padding:6px 16px 2px;">${g.group}</div>
+        ${g.links.map(l => `<a href="${l.href}" class="an-link" style="letter-spacing:0;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:400;text-transform:none;">${l.label}</a>`).join('')}
+      `).join('')}
       <div style="height:1px;background:rgba(255,255,255,.06);margin:8px 0;"></div>
       <button type="button" class="an-link" id="an-logout-mobile" style="color:rgba(245,239,230,.4);">Log Out</button>
     </div>

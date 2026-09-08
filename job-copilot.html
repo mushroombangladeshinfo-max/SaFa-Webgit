@@ -46,26 +46,6 @@
     .btn.primary:hover{background:rgba(196,154,60,.2);}
     .btn.sm{padding:6px 10px;font-size:8px;}
 
-    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:500;padding:20px;}
-    .modal-overlay.open{display:flex;}
-    .modal{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:24px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;}
-    .modal-title{font-family:'Syne','Hind Siliguri',sans-serif;font-size:15px;font-weight:700;margin-bottom:16px;}
-    .form-group{margin-bottom:14px;}
-    .form-group label{display:block;font-family:'Syne','Hind Siliguri',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--cl);margin-bottom:6px;}
-    .form-group textarea{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--c);font-family:'DM Sans','Hind Siliguri',sans-serif;font-size:13.5px;padding:9px 12px;outline:none;resize:vertical;}
-    .form-group textarea:focus{border-color:rgba(196,154,60,.5);}
-    .modal-actions{display:flex;gap:10px;margin-top:16px;justify-content:flex-end;}
-    .interpret-spinner{display:inline-block;width:11px;height:11px;border:2px solid rgba(196,154,60,.25);border-top-color:var(--al);border-radius:50%;animation:iSpin .7s linear infinite;vertical-align:-1px;margin-right:6px;}
-    @keyframes iSpin{to{transform:rotate(360deg);}}
-    .update-review{background:rgba(196,154,60,.06);border:1px solid rgba(196,154,60,.2);border-radius:8px;padding:14px;margin-top:14px;}
-    .update-review-title{font-family:'Syne','Hind Siliguri',sans-serif;font-size:13px;font-weight:700;color:var(--c);margin-bottom:2px;}
-    .update-review-sub{font-size:11.5px;color:var(--cl);margin-bottom:10px;}
-    .diff-row{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:13px;}
-    .diff-row:last-child{border-bottom:none;}
-    .diff-label{color:var(--cl);}
-    .diff-val{color:var(--c);font-weight:500;text-align:right;}
-    .unclear-note{font-size:11.5px;color:var(--cl);font-style:italic;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.06);}
-    .no-match-note{font-size:13px;color:var(--cl);margin-top:14px;}
     .toast-wrap{position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;gap:8px;}
     .toast{padding:12px 18px;border-radius:8px;font-family:'Syne','Hind Siliguri',sans-serif;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;}
     .toast.ok{background:#1a3322;border:1px solid rgba(95,207,128,.3);color:var(--green);}
@@ -80,7 +60,6 @@
         <div class="page-title">AI <span style="color:var(--al)">Copilot</span></div>
         <div class="page-sub">Ask about your pipeline, priorities, or any opportunity — grounded in your actual tracker data.</div>
       </div>
-      <button class="btn primary" id="log-update-btn">📝 Log an Update</button>
     </div>
     <div id="profile-bar"></div>
     <div class="quick-row">
@@ -98,27 +77,6 @@
     </div>
   </div>
 
-  <!-- Log an Update modal: natural-language tracker update. Two steps —
-       interpret (AI proposes changes to an EXISTING opportunity/interview,
-       never creates a new one) then a review card the user must confirm
-       before anything is written. -->
-  <div class="modal-overlay" id="update-modal">
-    <div class="modal">
-      <div class="modal-title">Log an Update</div>
-      <div class="form-group">
-        <label for="update-input">What happened?</label>
-        <textarea id="update-input" rows="4" placeholder="e.g. I applied to Bosch today using CV Analytics v2.1"></textarea>
-      </div>
-      <div id="update-status" style="font-size:12px;color:var(--cl);min-height:16px;"></div>
-      <div id="update-review" style="display:none;"></div>
-      <div class="modal-actions">
-        <button class="btn" id="update-modal-cancel">Cancel</button>
-        <button class="btn primary" id="interpret-btn">Interpret</button>
-        <button class="btn primary" id="confirm-update-btn" style="display:none;">Confirm &amp; Update</button>
-      </div>
-    </div>
-  </div>
-
   <div class="toast-wrap" id="toast-wrap"></div>
 
   <script type="module">
@@ -128,10 +86,7 @@
     import { loadAiCfg, chatComplete, formatAiError, renderAiText } from '/src/ai-client.js';
     import { localDateStr } from '/src/date-utils.js';
     import { computeFitScore, computePriority, followUpStatus } from '/src/job-scoring.js';
-    import { escapeHtml } from '/src/html-utils.js';
-    import { STAGE_LABEL } from '/src/job-constants.js';
     import { ensureActiveProfileId, renderProfileSwitcher } from '/src/job-profile.js';
-    import { buildInterpretMessages, validateAndPrepareParsedUpdate, applyLogUpdate } from '/src/log-update.js';
 
     document.documentElement.classList.add('auth-checking');
     const sb = createClient(
@@ -278,125 +233,6 @@ Rules: use ONLY the data given above — never invent a job, contact, deadline, 
     });
     document.querySelectorAll('.quick-btn').forEach(b => b.addEventListener('click', () => send(b.dataset.q)));
 
-    /* ── Log an Update: natural-language tracker update ──
-       Two steps — interpret (AI proposes changes to an EXISTING
-       opportunity/interview, grounded only in ids we actually hand it, and
-       never creates a new opportunity — that's what AI Import is for) then
-       a review card the user must confirm before anything is written. */
-    let _pendingUpdate = null;
-
-    function openUpdateModal() {
-      document.getElementById('update-input').value = '';
-      document.getElementById('update-status').textContent = '';
-      document.getElementById('update-review').style.display = 'none';
-      document.getElementById('confirm-update-btn').style.display = 'none';
-      document.getElementById('interpret-btn').style.display = '';
-      _pendingUpdate = null;
-      document.getElementById('update-modal').classList.add('open');
-    }
-    function closeUpdateModal() { document.getElementById('update-modal').classList.remove('open'); }
-    document.getElementById('log-update-btn').addEventListener('click', openUpdateModal);
-    document.getElementById('update-modal-cancel').addEventListener('click', closeUpdateModal);
-    document.getElementById('update-modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeUpdateModal(); });
-
-    document.getElementById('interpret-btn').addEventListener('click', async () => {
-      const text = document.getElementById('update-input').value.trim();
-      if (!text) { toast('Describe what happened first', 'err'); return; }
-      const statusEl = document.getElementById('update-status');
-      const btn = document.getElementById('interpret-btn');
-      statusEl.innerHTML = '<span class="interpret-spinner"></span>Interpreting — matching against your tracker...';
-      btn.disabled = true;
-      document.getElementById('update-review').style.display = 'none';
-      document.getElementById('confirm-update-btn').style.display = 'none';
-
-      try {
-        const cfg = await loadAiCfg(sb);
-        if (cfg.provider === 'openai' && !cfg.key) { statusEl.textContent = 'Configure a Groq key on the Home page first.'; return; }
-
-        const [{ data: opps }, { data: interviews }] = await Promise.all([
-          sb.from('job_opportunities').select('id,company,job_title,stage').eq('profile_id', profileId).eq('closed', false),
-          sb.from('job_interviews').select('id,opportunity_id,round,interview_date,status,job_opportunities(company,job_title)')
-            .eq('profile_id', profileId)
-            .or(`status.eq.scheduled,and(status.eq.completed,post_interview_reflection.is.null)`),
-        ]);
-        const oppList = (opps||[]).map(o => ({ id: o.id, company: o.company, job_title: o.job_title, stage: o.stage }));
-        const ivList = (interviews||[]).map(iv => ({ id: iv.id, opportunity_id: iv.opportunity_id, company: iv.job_opportunities?.company, job_title: iv.job_opportunities?.job_title, round: iv.round, interview_date: iv.interview_date, status: iv.status }));
-
-        const messages = buildInterpretMessages({ oppList, ivList, text });
-        const reply = await chatComplete(cfg, messages, { json: true });
-        const parsed = validateAndPrepareParsedUpdate(JSON.parse(reply), { oppList, ivList });
-
-        if (!parsed.matched_opportunity_id && !parsed.matched_interview_id) {
-          statusEl.textContent = '';
-          const review = document.getElementById('update-review');
-          review.style.display = '';
-          review.innerHTML = `<div class="no-match-note">Couldn't confidently match this to an existing opportunity or interview — nothing has been changed. Try naming the company more explicitly, or log it manually on the Opportunities/Interviews page.${parsed.unclear_notes ? '<div class="unclear-note">'+escapeHtml(parsed.unclear_notes)+'</div>' : ''}</div>`;
-          _pendingUpdate = null;
-          return;
-        }
-
-        _pendingUpdate = parsed;
-        await renderUpdateReview(parsed, oppList, ivList);
-        statusEl.textContent = '';
-        document.getElementById('confirm-update-btn').style.display = '';
-        btn.style.display = 'none';
-      } catch (e) {
-        statusEl.textContent = 'Interpretation failed: ' + e.message;
-      } finally {
-        btn.disabled = false;
-      }
-    });
-
-    async function renderUpdateReview(parsed, oppList, ivList) {
-      const opp = parsed.matched_opportunity_id ? oppList.find(o=>o.id===parsed.matched_opportunity_id) : null;
-      const iv = parsed.matched_interview_id ? ivList.find(i=>i.id===parsed.matched_interview_id) : null;
-      const title = opp ? `${opp.company} — ${opp.job_title}` : iv ? `${iv.company} — ${iv.round||'Interview'}` : 'Unmatched';
-
-      const rows = [];
-      const ou = parsed.opportunity_updates || {};
-      if (ou.stage) rows.push(['Stage', STAGE_LABEL[ou.stage] || ou.stage]);
-      if (ou.applied) rows.push(['Applied', 'Yes' + (ou.applied_date ? ' ('+ou.applied_date+')' : '')]);
-      if (ou.cv_version) rows.push(['CV Version', ou.cv_version]);
-      if (ou.next_action) rows.push(['Next Action', ou.next_action + (ou.next_action_date ? ' — '+ou.next_action_date : '')]);
-      const iu = parsed.interview_updates || {};
-      if (iu.status) rows.push(['Interview Status', iu.status]);
-      if (iu.outcome) rows.push(['Outcome', iu.outcome]);
-      if (iu.post_interview_reflection) rows.push(['Reflection', iu.post_interview_reflection]);
-      if (parsed.new_interview_questions?.length) rows.push(['Questions Logged', String(parsed.new_interview_questions.length)]);
-      rows.push(['New Activity', parsed.summary || '—']);
-
-      const review = document.getElementById('update-review');
-      review.style.display = '';
-      review.innerHTML = `<div class="update-review">
-        <div class="update-review-title">${escapeHtml(title)}</div>
-        <div class="update-review-sub">Proposed changes — review before confirming</div>
-        ${rows.map(([l,v]) => `<div class="diff-row"><span class="diff-label">${escapeHtml(l)}</span><span class="diff-val">${escapeHtml(v)}</span></div>`).join('')}
-        ${parsed.unclear_notes ? `<div class="unclear-note">${escapeHtml(parsed.unclear_notes)}</div>` : ''}
-      </div>`;
-    }
-
-    document.getElementById('confirm-update-btn').addEventListener('click', async () => {
-      if (!_pendingUpdate) return;
-      const p = _pendingUpdate;
-      const btn = document.getElementById('confirm-update-btn');
-      btn.disabled = true;
-      try {
-        const { link, isInterview } = await applyLogUpdate(sb, p, profileId);
-        toast('Tracker updated');
-        document.getElementById('update-review').innerHTML = `<div class="update-review">
-          <div class="update-review-title">✓ Updated</div>
-          <div class="update-review-sub">${escapeHtml(p.summary || '')}</div>
-          ${link ? `<a href="${link}" class="btn primary sm" style="text-decoration:none;display:inline-block;margin-top:8px;">View ${isInterview ? 'Interview' : 'Opportunity'} →</a>` : ''}
-        </div>`;
-        document.getElementById('confirm-update-btn').style.display = 'none';
-        _pendingUpdate = null;
-      } catch (e) {
-        toast('Update failed: ' + e.message, 'err');
-      } finally {
-        btn.disabled = false;
-      }
-    });
-
     function toast(msg, type='ok') {
       const el = document.createElement('div');
       el.className = `toast ${type}`;
@@ -408,10 +244,6 @@ Rules: use ONLY the data given above — never invent a job, contact, deadline, 
     profileId = await ensureActiveProfileId(sb);
     renderProfileSwitcher(sb, document.getElementById('profile-bar'), async () => { profileId = await ensureActiveProfileId(sb); });
     renderMessages();
-    // Lets the Dashboard's "Log an Update" quick action jump straight into
-    // the modal instead of landing here and making the user find the
-    // button themselves.
-    if (new URLSearchParams(location.search).get('logUpdate') === '1') openUpdateModal();
   </script>
 </body>
 </html>
