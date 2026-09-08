@@ -970,10 +970,33 @@
       const { error } = await sb.from('job_interviews').insert([payload]);
       if (error) { toast(error.message, 'err'); return; }
       await sb.from('job_activities').insert([{ profile_id: opp.profile_id, opportunity_id: oppId, activity_type: 'Interview', activity_date: payload.interview_date || localDateStr(), summary: `Interview scheduled${payload.round?': '+payload.round:''}` }]);
+
+      // A company doesn't interview someone who hasn't applied — if this
+      // opportunity wasn't marked Applied yet (e.g. an inbound recruiter
+      // reach-out that skipped the Application tab) or its stage still
+      // sits before the interview stages, scheduling the first interview
+      // implicitly means both are now true. Forward-only, same guard the
+      // Application tab's own "Applied" checkbox uses — never regresses a
+      // later stage. Without this, the opportunity could show interview
+      // data (here, and on the Dashboard's Upcoming Interviews) while
+      // still reading "not yet applied" everywhere else.
+      const oppPayload = {};
+      if (!opp.applied) { oppPayload.applied = true; oppPayload.applied_date = opp.applied_date || localDateStr(); }
+      if (STAGE_ORDER.indexOf(opp.stage) < STAGE_ORDER.indexOf('recruiter_screen')) {
+        oppPayload.stage = 'recruiter_screen';
+        oppPayload.stage_entered_at = new Date().toISOString();
+      }
+      if (Object.keys(oppPayload).length) {
+        Object.assign(oppPayload, computeDerivedFields({ ...opp, ...oppPayload }));
+        await sb.from('job_opportunities').update(oppPayload).eq('id', oppId);
+        if (oppPayload.stage) {
+          await sb.from('job_activities').insert([{ profile_id: opp.profile_id, opportunity_id: oppId, activity_type: 'Other', activity_date: localDateStr(), summary: `Stage changed: ${STAGE_LABEL[opp.stage]} → ${STAGE_LABEL[oppPayload.stage]} (auto, interview scheduled)` }]);
+        }
+      }
+
       toast('Interview added');
       document.getElementById('interview-modal').classList.remove('open');
-      loadInterviews();
-      loadActivities();
+      load();
     });
 
     /* ── Activities ── */

@@ -208,7 +208,8 @@
     import { localDateStr } from '/src/date-utils.js';
     import { subscribeRealtime, injectRealtimeStyles } from '/src/realtime.js';
     import { escapeHtml } from '/src/html-utils.js';
-    import { INTERVIEW_TYPES, QUESTION_TAGS, PREPARATION_STATUSES, optionsHtml, valueLabelOptionsHtml } from '/src/job-constants.js';
+    import { INTERVIEW_TYPES, QUESTION_TAGS, PREPARATION_STATUSES, STAGE_ORDER, STAGE_LABEL, optionsHtml, valueLabelOptionsHtml } from '/src/job-constants.js';
+    import { computeDerivedFields } from '/src/job-scoring.js';
     import { ensureActiveProfileId, renderProfileSwitcher } from '/src/job-profile.js';
     import { structuredProfileToText } from '/src/career-diagnostic.js';
 
@@ -302,6 +303,30 @@
       const { data, error } = await sb.from('job_interviews').insert([payload]).select().single();
       if (error) { toast(error.message, 'err'); return; }
       await sb.from('job_activities').insert([{ profile_id: profileId, opportunity_id, activity_type: 'Interview', activity_date: payload.interview_date || localDateStr(), summary: `Interview scheduled${payload.round?': '+payload.round:''}` }]);
+
+      // Same forward-only correction as job-opportunity.html's own "Add
+      // Interview": a company doesn't interview someone who hasn't
+      // applied, so scheduling the first interview here (picked from any
+      // opportunity, not just the one you're currently viewing) needs the
+      // identical fix-up — otherwise this picker is the more likely place
+      // to create the exact "interview scheduled, not yet applied" gap.
+      const { data: targetOpp } = await sb.from('job_opportunities').select('applied,applied_date,stage').eq('id', opportunity_id).maybeSingle();
+      if (targetOpp) {
+        const oppPayload = {};
+        if (!targetOpp.applied) { oppPayload.applied = true; oppPayload.applied_date = targetOpp.applied_date || localDateStr(); }
+        if (STAGE_ORDER.indexOf(targetOpp.stage) < STAGE_ORDER.indexOf('recruiter_screen')) {
+          oppPayload.stage = 'recruiter_screen';
+          oppPayload.stage_entered_at = new Date().toISOString();
+        }
+        if (Object.keys(oppPayload).length) {
+          Object.assign(oppPayload, computeDerivedFields({ ...targetOpp, ...oppPayload }));
+          await sb.from('job_opportunities').update(oppPayload).eq('id', opportunity_id);
+          if (oppPayload.stage) {
+            await sb.from('job_activities').insert([{ profile_id: profileId, opportunity_id, activity_type: 'Other', activity_date: localDateStr(), summary: `Stage changed: ${STAGE_LABEL[targetOpp.stage]} → ${STAGE_LABEL[oppPayload.stage]} (auto, interview scheduled)` }]);
+          }
+        }
+      }
+
       toast('Interview scheduled');
       window.location.href = `job-interviews.html?id=${data.id}`;
     });
