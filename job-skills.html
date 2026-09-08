@@ -179,11 +179,19 @@
       renderTable();
     }
 
+    // Word-boundary match, not a plain substring — a skill named "R" or
+    // "Go" would otherwise "match" nearly every job description (via
+    // "for", "Google", "background", ...), silently inflating gap scores
+    // for exactly the short, common skill names most likely to appear here.
+    function skillRegex(skill) {
+      const escaped = skill.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      return new RegExp(`\\b${escaped}\\b`, 'i');
+    }
     function countMentions(skill) {
-      const needle = skill.toLowerCase();
+      const re = skillRegex(skill);
       let total = 0, highFit = 0;
       _opps.forEach(o => {
-        if (!o.job_description.toLowerCase().includes(needle)) return;
+        if (!re.test(o.job_description)) return;
         total++;
         const fit = computeFitScore(o.fit_manual, o.fit_ai);
         if (fit !== null && fit >= 65) highFit++;
