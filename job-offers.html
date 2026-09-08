@@ -258,7 +258,19 @@
       _editId = offer?.id || null;
       document.getElementById('modal-title').textContent = offer ? 'Edit Offer' : 'Add Offer';
       const { data: opps } = await sb.from('job_opportunities').select('id,company,job_title').eq('profile_id', profileId).eq('closed', false).order('company');
-      document.getElementById('f-opportunity_id').innerHTML = (opps||[]).map(o => `<option value="${o.id}" ${offer?.opportunity_id===o.id?'selected':''}>${escapeHtml(o.company)} — ${escapeHtml(o.job_title)}</option>`).join('');
+      let options = opps || [];
+      // Accepting an offer always closes its opportunity (see
+      // acceptOfferCascade below), so re-opening Edit on an already-accepted
+      // offer would otherwise find its own opportunity missing from this
+      // closed-filtered list — no option ends up selected, the picker
+      // silently defaults to some unrelated open opportunity, and a plain
+      // "Save" would reassign the offer to the wrong job. Always keep the
+      // offer's current opportunity selectable, even if it's since closed.
+      if (offer && !options.some(o => o.id === offer.opportunity_id)) {
+        const { data: currentOpp } = await sb.from('job_opportunities').select('id,company,job_title').eq('id', offer.opportunity_id).maybeSingle();
+        if (currentOpp) options = [currentOpp, ...options];
+      }
+      document.getElementById('f-opportunity_id').innerHTML = options.map(o => `<option value="${o.id}" ${offer?.opportunity_id===o.id?'selected':''}>${escapeHtml(o.company)} — ${escapeHtml(o.job_title)}</option>`).join('');
       FIELDS.forEach(f => { if (f==='opportunity_id') return; const el = document.getElementById('f-'+f); el.value = offer?.[f] ?? (f==='status' ? 'pending' : ''); });
       document.getElementById('modal').classList.add('open');
     }
