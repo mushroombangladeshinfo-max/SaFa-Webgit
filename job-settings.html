@@ -274,7 +274,7 @@
 
     const FIELDS = ['education','work_experience','projects','skills','languages','certifications',
       'career_preferences','work_authorization','target_locations','target_roles','salary_preferences',
-      'availability','career_narrative'];
+      'availability','career_narrative','master_cv_text'];
 
     let profileId = null;
     let diagProfile = null;
@@ -285,11 +285,15 @@
       if (error) { toast(error.message, 'err'); return; }
       FIELDS.forEach(f => { document.getElementById('f-'+f).value = data?.[f] || ''; });
       diagProfile = data || {};
-      document.getElementById('f-master_cv_text').value = diagProfile.master_cv_text || '';
       renderDiagnostic();
     }
 
     document.getElementById('save-btn').addEventListener('click', async () => {
+      // master_cv_text is in FIELDS specifically so this button also
+      // persists an uploaded/pasted CV even if the user saves here instead
+      // of clicking "Run Career Diagnostic" — it used to only be written by
+      // that button, so a paste followed by "Save Profile" silently lost
+      // the CV text with no warning.
       const payload = {};
       FIELDS.forEach(f => { payload[f] = document.getElementById('f-'+f).value.trim() || null; });
       const { error } = await sb.from('job_profiles').update(payload).eq('id', profileId);
