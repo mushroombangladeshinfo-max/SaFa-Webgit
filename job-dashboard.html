@@ -166,6 +166,7 @@
           <select id="am-activity_type"><option value="">Select...</option><option>Application</option><option>LinkedIn Message</option><option>Email</option><option>Phone Call</option><option>Recruiter Call</option><option>Networking Meeting</option><option>Interview</option><option>Follow-up</option><option>Thank-you</option><option>Assessment</option><option>Offer Discussion</option><option>Rejection Feedback</option><option>Other</option></select>
         </div>
         <div class="form-group"><label for="am-activity_date">Date</label><input type="date" id="am-activity_date"></div>
+        <div class="form-group span2"><label for="am-opportunity_id">Related Opportunity</label><select id="am-opportunity_id"><option value="">None</option></select></div>
         <div class="form-group span2"><label for="am-summary">Summary</label><textarea id="am-summary" rows="2"></textarea></div>
       </div>
       <div class="modal-actions">
@@ -379,7 +380,13 @@
     }
 
     /* ── Quick Log Activity ── */
-    document.getElementById('log-activity-btn').addEventListener('click', () => {
+    // Matches job-activities.html's own "Log Activity" picker — without an
+    // opportunity link, an activity logged here can never appear on that
+    // opportunity's own Activity Timeline tab or count toward its stage
+    // history, silently becoming an orphaned record with no context.
+    document.getElementById('log-activity-btn').addEventListener('click', async () => {
+      const { data: opps } = await sb.from('job_opportunities').select('id,company,job_title').eq('profile_id', profileId).order('company');
+      document.getElementById('am-opportunity_id').innerHTML = '<option value="">None</option>' + (opps||[]).map(o => `<option value="${o.id}">${escapeHtml(o.company)} — ${escapeHtml(o.job_title)}</option>`).join('');
       document.getElementById('am-activity_type').value = '';
       document.getElementById('am-activity_date').value = localDateStr();
       document.getElementById('am-summary').value = '';
@@ -392,6 +399,7 @@
         profile_id: profileId,
         activity_type: document.getElementById('am-activity_type').value || null,
         activity_date: document.getElementById('am-activity_date').value || localDateStr(),
+        opportunity_id: document.getElementById('am-opportunity_id').value || null,
         summary: document.getElementById('am-summary').value.trim() || null,
       };
       const { error } = await sb.from('job_activities').insert([payload]);
