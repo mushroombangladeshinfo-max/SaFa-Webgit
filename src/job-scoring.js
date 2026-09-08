@@ -7,6 +7,7 @@
 ============================================================ */
 
 import { localDateStr } from './date-utils.js';
+import { STAGE_ORDER } from './job-constants.js';
 
 export const FIT_DIMENSIONS = [
   { key: 'exp',             label: 'Experience Match',                weight: 20 },
@@ -135,6 +136,20 @@ export function followUpStatus(nextActionDate) {
 
 export function jobRef(seq) {
   return 'JOB-' + String(seq).padStart(4, '0');
+}
+
+/** Structural invariant: no opportunity should sit at a stage at or past
+ *  'applied' while applied=false — a company doesn't move you to Recruiter
+ *  Screen (or drag you straight to it, or schedule an interview) without
+ *  you having applied. Every stage-changing action (the Applied checkbox,
+ *  scheduling an interview, the stage-select dropdown, Kanban drag) needs
+ *  this exact same forward-only correction so they can never contradict
+ *  each other depending on which one a given opportunity happened to use.
+ *  Returns {} when nothing needs to change. Caller still needs to persist
+ *  the result and recompute computeDerivedFields with it merged in. */
+export function impliedAppliedFields(currentOpp, newStage) {
+  if (currentOpp.applied || STAGE_ORDER.indexOf(newStage) < STAGE_ORDER.indexOf('applied')) return {};
+  return { applied: true, applied_date: currentOpp.applied_date || localDateStr() };
 }
 
 /** Bundles the five derived read-model columns on job_opportunities

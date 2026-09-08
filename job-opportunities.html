@@ -282,7 +282,7 @@
     import { localDateStr } from '/src/date-utils.js';
     import { readFiltersFromURL, writeFiltersToURL } from '/src/filter-state.js';
     import { subscribeRealtime, injectRealtimeStyles } from '/src/realtime.js';
-    import { computeFitScore, computePriority, eligibilityStatus, followUpStatus, jobRef, fitClassification, recommendation, computeDerivedFields, ELIGIBILITY_FIELDS } from '/src/job-scoring.js';
+    import { computeFitScore, computePriority, eligibilityStatus, followUpStatus, jobRef, fitClassification, recommendation, computeDerivedFields, impliedAppliedFields, ELIGIBILITY_FIELDS } from '/src/job-scoring.js';
     import { escapeHtml } from '/src/html-utils.js';
     import { STAGES, STAGE_LABEL, CAREER_TRACKS, EMPLOYMENT_TYPES, SOURCES, GERMAN_REQUIREMENTS, YES_NO_UNCLEAR, valueLabelOptionsHtml, optionsHtml } from '/src/job-constants.js';
     import { ensureActiveProfileId, renderProfileSwitcher } from '/src/job-profile.js';
@@ -464,15 +464,16 @@
           const newStage = col.dataset.stage;
           const opp = _all.find(r => r.id === id);
           if (!opp || opp.stage === newStage) return;
-          const { error } = await sb.from('job_opportunities')
-            .update({ stage: newStage, stage_entered_at: new Date().toISOString() })
-            .eq('id', id);
+          const impliedApplied = impliedAppliedFields(opp, newStage);
+          const payload = { stage: newStage, stage_entered_at: new Date().toISOString(), ...impliedApplied };
+          Object.assign(payload, computeDerivedFields({ ...opp, ...payload }));
+          const { error } = await sb.from('job_opportunities').update(payload).eq('id', id);
           if (error) { toast(error.message, 'err'); return; }
           await sb.from('job_activities').insert([{
             profile_id: profileId, opportunity_id: id, activity_type: 'Other', activity_date: localDateStr(),
             summary: `Stage changed: ${STAGE_LABEL[opp.stage]} → ${STAGE_LABEL[newStage]}`,
           }]);
-          toast('Stage updated');
+          toast(impliedApplied.applied ? 'Stage updated — also marked Applied' : 'Stage updated');
           load();
         });
       });

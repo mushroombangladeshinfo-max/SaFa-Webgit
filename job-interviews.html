@@ -209,7 +209,7 @@
     import { subscribeRealtime, injectRealtimeStyles } from '/src/realtime.js';
     import { escapeHtml } from '/src/html-utils.js';
     import { INTERVIEW_TYPES, QUESTION_TAGS, PREPARATION_STATUSES, STAGE_ORDER, STAGE_LABEL, optionsHtml, valueLabelOptionsHtml } from '/src/job-constants.js';
-    import { computeDerivedFields } from '/src/job-scoring.js';
+    import { computeDerivedFields, impliedAppliedFields } from '/src/job-scoring.js';
     import { ensureActiveProfileId, renderProfileSwitcher } from '/src/job-profile.js';
     import { structuredProfileToText } from '/src/career-diagnostic.js';
 
@@ -311,9 +311,10 @@
       // identical fix-up — otherwise this picker is the more likely place
       // to create the exact "interview scheduled, not yet applied" gap.
       const { data: targetOpp } = await sb.from('job_opportunities').select('applied,applied_date,stage').eq('id', opportunity_id).maybeSingle();
+      let markedApplied = false;
       if (targetOpp) {
-        const oppPayload = {};
-        if (!targetOpp.applied) { oppPayload.applied = true; oppPayload.applied_date = targetOpp.applied_date || localDateStr(); }
+        const oppPayload = { ...impliedAppliedFields(targetOpp, 'recruiter_screen') };
+        markedApplied = !!oppPayload.applied;
         if (STAGE_ORDER.indexOf(targetOpp.stage) < STAGE_ORDER.indexOf('recruiter_screen')) {
           oppPayload.stage = 'recruiter_screen';
           oppPayload.stage_entered_at = new Date().toISOString();
@@ -327,7 +328,7 @@
         }
       }
 
-      toast('Interview scheduled');
+      toast(markedApplied ? 'Interview scheduled — also marked Applied' : 'Interview scheduled');
       window.location.href = `job-interviews.html?id=${data.id}`;
     });
 
