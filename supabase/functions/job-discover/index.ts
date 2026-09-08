@@ -127,7 +127,10 @@ Deno.serve(async (req) => {
         full_time: !!j.arbeitszeitVollzeit,
         distance_km: j.entfernung ?? null,
       }));
-      return json({ results, page: body.page || 1 });
+      // maxErgebnisse is the real total match count across all pages —
+      // without it the frontend has no way to know whether 25 results
+      // means "that's everything" or "there are 400 more."
+      return json({ results, page: body.page || 1, total: Number(data.maxErgebnisse) || results.length });
     }
 
     return text('Missing or invalid mode', 400);

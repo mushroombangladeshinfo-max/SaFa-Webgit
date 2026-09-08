@@ -513,7 +513,7 @@
       'application_deadline','next_action','job_description','role_family','country','work_mode','posting_date',
       'german_requirement','english_requirement','working_hours','international_candidate_friendly','visa_notes'];
 
-    let _lastFitAi = null, _lastElig = null;
+    let _lastFitAi = null, _lastElig = null, _pendingDiscoveryRef = null;
 
     function openModal(opp=null) {
       _editId = opp?.id || null;
@@ -527,6 +527,7 @@
       _lastAiExtracted = null;
       _lastFitAi = null;
       _lastElig = null;
+      _pendingDiscoveryRef = null;
       MODAL_FIELDS.forEach(f => { document.getElementById('f-'+f).value = opp?.[f] || ''; });
       // Booleans need explicit handling: `opp?.[f] || ''` collapses a real
       // `false` value to '' (Unknown) since false is falsy, silently
@@ -570,6 +571,7 @@
         if (_lastAiExtracted) payload.ai_extracted = _lastAiExtracted;
         if (_lastFitAi) payload.fit_ai = _lastFitAi;
         if (_lastElig) Object.assign(payload, _lastElig);
+        if (_pendingDiscoveryRef) payload.discovery_source_ref = _pendingDiscoveryRef;
         Object.assign(payload, computeDerivedFields(payload));
         payload.profile_id = profileId;
         const { data, error: insErr } = await sb.from('job_opportunities').insert([payload]).select().single();
@@ -736,6 +738,7 @@ Fit-analysis rules: base every rating and claim ONLY on what's explicitly in the
         document.getElementById('f-company').value = job.company || '';
         document.getElementById('f-job_title').value = job.job_title || '';
         document.getElementById('f-source').value = 'Bundesagentur fur Arbeit';
+        _pendingDiscoveryRef = job.refnr || null;
         toast('Job loaded from Discovery — review, then click Analyse Job');
       }
     }

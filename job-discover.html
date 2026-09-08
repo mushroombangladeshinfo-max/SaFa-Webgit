@@ -38,7 +38,11 @@
     .result-company{font-size:13px;color:var(--cm);margin-top:2px;}
     .result-meta{font-size:12px;color:var(--cl);margin-top:6px;display:flex;gap:10px;flex-wrap:wrap;}
     .pill{display:inline-flex;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;background:rgba(255,255,255,.06);color:var(--cl);}
+    .pill.dup{background:rgba(196,154,60,.14);color:var(--al);}
+    .pill.imported{background:rgba(95,207,128,.14);color:var(--green);}
     .empty-state{text-align:center;padding:48px 20px;color:var(--cl);font-size:13px;}
+    .quick-filters{display:flex;gap:8px;margin:10px 0 18px;flex-wrap:wrap;}
+    .load-more-wrap{text-align:center;margin-top:6px;}
     .toast-wrap{position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;gap:8px;}
     .toast{padding:12px 18px;border-radius:8px;font-family:'Syne','Hind Siliguri',sans-serif;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;animation:fadeUp .3s ease;}
     .toast.ok{background:#1a3322;border:1px solid rgba(95,207,128,.3);color:var(--green);}
@@ -80,8 +84,15 @@
       <div style="margin-top:14px;"><button class="btn primary" id="search-btn">Search</button></div>
     </div>
 
+    <div class="quick-filters">
+      <button class="btn sm" id="quick-werkstudent-btn" type="button">⚡ Werkstudent</button>
+    </div>
+
+    <div id="profile-bar"></div>
+
     <div class="results-status" id="results-status"></div>
     <div id="results-list"></div>
+    <div class="load-more-wrap"><button class="btn" id="load-more-btn" style="display:none;">Load More</button></div>
   </div>
 
   <div class="toast-wrap" id="toast-wrap"></div>
@@ -91,6 +102,7 @@
     import { requireAdmin } from '/src/admin-auth.js';
     import { mountAdminNav } from '/src/admin-nav.js';
     import { escapeHtml } from '/src/html-utils.js';
+    import { ensureActiveProfileId, renderProfileSwitcher } from '/src/job-profile.js';
 
     document.documentElement.classList.add('auth-checking');
     const sb = createClient(
@@ -110,45 +122,98 @@
       setTimeout(()=>el.remove(), 3500);
     }
 
-    let _results = [];
+    let profileId = null;
+    let _groups = [];           // rendered rows: one per unique company+title, each carrying all matching raw results
+    let _page = 1;
+    let _total = 0;
+    let _importedRefs = new Set();
+
+    async function loadImportedRefs() {
+      const { data } = await sb.from('job_opportunities').select('discovery_source_ref').eq('profile_id', profileId).not('discovery_source_ref', 'is', null);
+      _importedRefs = new Set((data||[]).map(o => o.discovery_source_ref));
+    }
+
+    function currentSearchBody(page) {
+      return {
+        mode: 'search',
+        was: document.getElementById('s-was').value.trim() || undefined,
+        wo: document.getElementById('s-wo').value.trim() || undefined,
+        umkreis: document.getElementById('s-umkreis').value ? +document.getElementById('s-umkreis').value : undefined,
+        angebotsart: document.getElementById('s-angebotsart').value ? +document.getElementById('s-angebotsart').value : undefined,
+        arbeitszeit: document.getElementById('s-arbeitszeit').value || undefined,
+        page,
+        size: 25,
+      };
+    }
+
+    // Same company + same title within one search is almost always the
+    // same posting re-published (a real, common BA data-quality issue,
+    // not a bug in this integration) — collapse into one card with a
+    // count badge instead of showing near-identical rows back to back.
+    // Re-groups from scratch across ALL raw results accumulated so far
+    // (needed because a duplicate could show up on page 2 of the same
+    // search after page 1 already rendered its own group).
+    let _allRawResults = [];
+    function regroup() {
+      const byKey = new Map();
+      for (const r of _allRawResults) {
+        const key = `${(r.company||'').toLowerCase().trim()}|${(r.title||'').toLowerCase().trim()}`;
+        if (!byKey.has(key)) byKey.set(key, []);
+        byKey.get(key).push(r);
+      }
+      _groups = Array.from(byKey.values());
+    }
 
     async function search() {
+      _page = 1;
+      _allRawResults = [];
+      await runSearch(true);
+    }
+    async function loadMore() {
+      _page += 1;
+      await runSearch(false);
+    }
+
+    async function runSearch(isNewSearch) {
       const statusEl = document.getElementById('results-status');
-      const btn = document.getElementById('search-btn');
+      const searchBtn = document.getElementById('search-btn');
+      const moreBtn = document.getElementById('load-more-btn');
       statusEl.textContent = 'Searching...';
-      document.getElementById('results-list').innerHTML = '';
-      btn.disabled = true;
+      if (isNewSearch) document.getElementById('results-list').innerHTML = '';
+      searchBtn.disabled = true;
+      moreBtn.disabled = true;
       try {
-        const body = {
-          mode: 'search',
-          was: document.getElementById('s-was').value.trim() || undefined,
-          wo: document.getElementById('s-wo').value.trim() || undefined,
-          umkreis: document.getElementById('s-umkreis').value ? +document.getElementById('s-umkreis').value : undefined,
-          angebotsart: document.getElementById('s-angebotsart').value ? +document.getElementById('s-angebotsart').value : undefined,
-          arbeitszeit: document.getElementById('s-arbeitszeit').value || undefined,
-          size: 25,
-        };
-        const { data, error } = await sb.functions.invoke('job-discover', { body });
+        const { data, error } = await sb.functions.invoke('job-discover', { body: currentSearchBody(_page) });
         if (error) throw error;
         if (data?.error) throw new Error(data.error);
-        _results = data.results || [];
+        _allRawResults = _allRawResults.concat(data.results || []);
+        _total = data.total ?? _allRawResults.length;
+        regroup();
         renderResults();
-        statusEl.textContent = `${_results.length} result${_results.length!==1?'s':''}`;
+        const shown = _allRawResults.length;
+        statusEl.textContent = _total > shown
+          ? `Showing ${shown} of ${_total.toLocaleString()} results`
+          : `${shown} result${shown!==1?'s':''}`;
+        moreBtn.style.display = shown < _total ? '' : 'none';
       } catch (e) {
         statusEl.textContent = '';
         toast('Search failed: ' + e.message, 'err');
       } finally {
-        btn.disabled = false;
+        searchBtn.disabled = false;
+        moreBtn.disabled = false;
       }
     }
 
     function renderResults() {
       const list = document.getElementById('results-list');
-      if (!_results.length) {
+      if (!_groups.length) {
         list.innerHTML = '<div class="empty-state">No results — try a broader keyword or location.</div>';
         return;
       }
-      list.innerHTML = _results.map((r, i) => `
+      list.innerHTML = _groups.map((group, i) => {
+        const r = group[0];
+        const imported = group.some(g => _importedRefs.has(g.refnr));
+        return `
         <div class="result-card">
           <div>
             <div class="result-title">${escapeHtml(r.title)||'Untitled'}</div>
@@ -158,16 +223,18 @@
               ${r.full_time ? `<span class="pill">Full-time</span>` : ''}
               ${r.home_office ? `<span class="pill">Home office</span>` : ''}
               ${r.distance_km != null ? `<span>${r.distance_km} km away</span>` : ''}
+              ${group.length > 1 ? `<span class="pill dup">×${group.length} postings</span>` : ''}
+              ${imported ? `<span class="pill imported">✓ Already imported</span>` : ''}
             </div>
           </div>
-          <button class="btn sm primary" data-import="${i}">Import This Job</button>
-        </div>
-      `).join('');
-      list.querySelectorAll('[data-import]').forEach(b => b.addEventListener('click', () => importJob(+b.dataset.import)));
+          <button class="btn sm primary" data-import="${i}" ${imported ? 'disabled' : ''}>${imported ? 'Imported' : 'Import This Job'}</button>
+        </div>`;
+      }).join('');
+      list.querySelectorAll('[data-import]:not([disabled])').forEach(b => b.addEventListener('click', () => importJob(+b.dataset.import)));
     }
 
     async function importJob(idx) {
-      const r = _results[idx];
+      const r = _groups[idx][0];
       const btn = document.querySelector(`[data-import="${idx}"]`);
       btn.textContent = 'Loading...'; btn.disabled = true;
       try {
@@ -179,6 +246,7 @@
           job_title: data.title || r.title,
           job_description: data.description || '',
           job_url: data.external_url || '',
+          refnr: r.refnr,
         }));
         window.location.href = 'job-opportunities.html?importFromDiscovery=1';
       } catch (e) {
@@ -188,7 +256,22 @@
     }
 
     document.getElementById('search-btn').addEventListener('click', search);
+    document.getElementById('load-more-btn').addEventListener('click', loadMore);
     ['s-was','s-wo'].forEach(id => document.getElementById(id).addEventListener('keydown', e => { if (e.key === 'Enter') search(); }));
+    // Selects re-search immediately on change — a stale results list
+    // sitting under a filter that no longer matches it is worse than the
+    // extra request.
+    ['s-angebotsart','s-arbeitszeit'].forEach(id => document.getElementById(id).addEventListener('change', search));
+
+    document.getElementById('quick-werkstudent-btn').addEventListener('click', () => {
+      const el = document.getElementById('s-was');
+      if (!/werkstudent/i.test(el.value)) el.value = (el.value.trim() ? el.value.trim() + ' ' : '') + 'Werkstudent';
+      search();
+    });
+
+    profileId = await ensureActiveProfileId(sb);
+    renderProfileSwitcher(sb, document.getElementById('profile-bar'), async () => { profileId = await ensureActiveProfileId(sb); await loadImportedRefs(); renderResults(); });
+    await loadImportedRefs();
   </script>
 </body>
 </html>
